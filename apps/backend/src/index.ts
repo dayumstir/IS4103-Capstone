@@ -1,4 +1,6 @@
-import { createServer } from "./server";
+// Entry point of application, where server is started
+
+import { createServer } from "./app";
 
 const port = process.env.PORT || 3001;
 const server = createServer();

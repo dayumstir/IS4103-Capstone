@@ -1,0 +1,1 @@
+// Defines the structure and methods related to user data
