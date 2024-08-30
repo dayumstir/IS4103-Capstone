@@ -1,0 +1,1 @@
+// Conbines all routes into a single export for easy inclusion in `app.ts`

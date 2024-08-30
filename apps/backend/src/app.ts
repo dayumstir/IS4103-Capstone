@@ -1,3 +1,5 @@
+// Main application file where Express is configured, middleware is applied, and routes are registered
+
 import { json, urlencoded } from "body-parser";
 import express, { type Express } from "express";
 import morgan from "morgan";
