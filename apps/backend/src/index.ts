@@ -1,10 +1,10 @@
 // Entry point of application, where server is started
+// Add code to connect to the database when starting server.
 
-import { createServer } from "./app";
+import app from "./app";
 
-const port = process.env.PORT || 3001;
-const server = createServer();
+const PORT = process.env.PORT || 3000;
 
-server.listen(port, () => {
-  console.log(`api running on ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
