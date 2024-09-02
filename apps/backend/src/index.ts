@@ -1,5 +1,5 @@
 // Entry point of application, where server is started
-// Add code to connect to the database when starting server.
+// TODO: Add code to connect to the database when starting server.
 
 import app from "./app";
 
