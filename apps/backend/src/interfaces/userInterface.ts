@@ -1,1 +1,0 @@
-// Defines the structure of a user object
