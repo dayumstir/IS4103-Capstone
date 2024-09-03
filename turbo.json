@@ -7,9 +7,7 @@
         ".env*"
       ],
       "outputs": [
-        "dist/**",
-        ".next/**",
-        "!.next/cache/**"
+        "dist/**"
       ],
       "dependsOn": [
         "^build",
@@ -17,7 +15,9 @@
       ]
     },
     "dev": {
-      "dependsOn": ["^db:generate"],
+      "dependsOn": [
+        "^db:generate"
+      ],
       "cache": false,
       "persistent": true
     },
