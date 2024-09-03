@@ -5,6 +5,7 @@
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
+    "jsx": "react",
     "sourceMap": true,
     "resolveJsonModule": true,
     "noEmit": true,
