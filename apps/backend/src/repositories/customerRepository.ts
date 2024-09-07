@@ -11,12 +11,21 @@ export const findCustomerByEmail = async (email: string) => {
 
 // Find customer by id (unique attribute) in db
 export const findCustomerById = async (customer_id: number) => {
-    return prisma.customer.findUnique({ where: { customer_id } });
+    return prisma.customer.findUnique({ where: { customer_id: customer_id } });
 };
 
 
 // Create a new customer in db
 export const createCustomer = async (customerData: ICustomer) => {
     return prisma.customer.create({ data: customerData });
+};
+
+
+// Update customer in db
+export const updateCustomer = async (customer_id: number, updateData: Partial<ICustomer>) => {
+    return prisma.customer.update({
+        where: { customer_id: customer_id },
+        data: updateData,
+    });
 };
   
