@@ -51,3 +51,14 @@ export const login = async (loginData: { email: string; password: string }) => {
 
     return token;
 };
+
+
+export const resetPassword = async (email: string, newPassword: string ) => {
+    const customer = await customerRepository.findCustomerByEmail(email);
+    if (!customer) {
+        throw new Error("Customer not found");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await customerRepository.updateCustomer(customer.customer_id, { password: hashedPassword });
+};
