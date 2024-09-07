@@ -2,11 +2,32 @@
 import { Request, Response } from "express";
 import * as authService from "../services/authService";
 
+
 export const register = async (req: Request, res: Response) => {
     try {
         const customer = await authService.register(req.body);
         res.status(201).json(customer);
     } catch (error: any) {
-        res.status(400).json({ error: error.message});
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+export const login = async (req: Request, res: Response) => {
+    try {
+        const token = await authService.login(req.body);
+        res.status(200).json({ token });
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+export const resetPassword = async(req: Request, res: Response) => {
+    try {
+        await authService.resetPassword(req.body.email, req.body.newPassword);
+        res.status(200).json({ message: "Password reset successful"});
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
     }
 };
