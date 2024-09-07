@@ -50,4 +50,4 @@ export const login = async (loginData: { email: string; password: string }) => {
     const token = jwt.sign({ customerId: customer.customer_id }, process.env.JWT_SECRET!, { expiresIn: "1h"});
 
     return token;
-}
+};
