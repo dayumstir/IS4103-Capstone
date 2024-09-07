@@ -11,7 +11,7 @@ export const findCustomerByEmail = async (email: string) => {
 
 // Find customer by id (unique attribute) in db
 export const findCustomerById = async (customer_id: number) => {
-    return prisma.customer.findUnique({ where: { customer_id: customer_id } });
+    return prisma.customer.findUnique({ where: { customer_id } });
 };
 
 

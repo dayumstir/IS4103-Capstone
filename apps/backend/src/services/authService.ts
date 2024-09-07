@@ -25,7 +25,7 @@ export const register = async (customerData: ICustomer) => {
 
     // Generate JWT
     // TODO: Create .env folder with JWT Secret
-    const token = jwt.sign({ customerId: newCustomer.customer_id }, process.env.JWT_SECRET!, { expiresIn: "1h"});
+    const token = jwt.sign({ customer_id: newCustomer.customer_id }, process.env.JWT_SECRET!, { expiresIn: "1h"});
 
     return { customer: newCustomer, token };
 };
@@ -47,7 +47,7 @@ export const login = async (loginData: { email: string; password: string }) => {
     }
 
     // Generate JWT
-    const token = jwt.sign({ customerId: customer.customer_id }, process.env.JWT_SECRET!, { expiresIn: "1h"});
+    const token = jwt.sign({ customer_id: customer.customer_id }, process.env.JWT_SECRET!, { expiresIn: "1h"});
 
     return token;
 };
