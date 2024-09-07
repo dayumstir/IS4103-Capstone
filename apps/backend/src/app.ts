@@ -4,8 +4,11 @@ import express from "express";
 import cors from "cors";
 import { json, urlencoded } from "body-parser";
 import morgan from "morgan";
+import dotenv from 'dotenv';
+
 
 import authRoutes from "./routes/authRoutes";
+import customerRoutes from "./routes/customerRoutes";
 
 const app = express();
 
@@ -15,8 +18,11 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
+dotenv.config(); // Load environment variables
+
 // Routes
 app.use("/auth", authRoutes);
+app.use("/customer", customerRoutes);
 
 // Dummy route for the root
 app.get('/', (req, res) => {
