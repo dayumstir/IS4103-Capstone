@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { store } from "./src/store";
 import { Provider } from "react-redux";
@@ -8,7 +8,7 @@ import HomeScreen from "./src/screens/homeScreen";
 export default function App() {
   return (
     <Provider store={store}>
-      <View className="">
+      <View className="pt-12">
         <HomeScreen />
         <StatusBar style="auto" />
       </View>
