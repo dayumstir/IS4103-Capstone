@@ -1,24 +1,26 @@
 // Main application file where Express is configured, middleware is applied, and routes are registered
 
-import { json, urlencoded } from "body-parser";
-import express, { type Express } from "express";
-import morgan from "morgan";
+import express from "express";
 import cors from "cors";
+import { json, urlencoded } from "body-parser";
+import morgan from "morgan";
 
-export const createServer = (): Express => {
-  const app = express();
-  app
-    .disable("x-powered-by")
-    .use(morgan("dev"))
-    .use(urlencoded({ extended: true }))
-    .use(json())
-    .use(cors())
-    .get("/message/:name", (req, res) => {
-      return res.json({ message: `hello ${req.params.name}` });
-    })
-    .get("/status", (_, res) => {
-      return res.json({ ok: true });
-    });
+import authRoutes from "./routes/authRoutes";
 
-  return app;
-};
+const app = express();
+
+// Middleware setup
+app.use(cors());
+app.use(json());
+app.use(urlencoded({ extended: true }));
+app.use(morgan("dev"));
+
+// Routes
+app.use("/auth", authRoutes);
+
+// Dummy route for the root
+app.get('/', (req, res) => {
+    res.status(200).json({ message: 'Backend server is running!' });
+});
+
+export default app;
