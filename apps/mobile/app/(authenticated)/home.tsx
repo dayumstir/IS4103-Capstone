@@ -1,4 +1,4 @@
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { Button } from "@ant-design/react-native";
 import { format } from "date-fns";
@@ -66,24 +66,12 @@ export default function HomePage() {
           </View>
 
           <View className="flex flex-row items-center gap-4">
-            <Button
-              style={{
-                borderRadius: 100,
-                padding: 4,
-                backgroundColor: "#1777ff",
-              }}
-            >
+            <TouchableOpacity className="rounded-full bg-[#1777ff] p-2">
               <AntDesign name="message1" size={16} />
-            </Button>
-            <Button
-              style={{
-                borderRadius: 100,
-                padding: 4,
-                backgroundColor: "#1777ff",
-              }}
-            >
+            </TouchableOpacity>
+            <TouchableOpacity className="rounded-full bg-[#1777ff] p-2">
               <AntDesign name="bells" size={16} />
-            </Button>
+            </TouchableOpacity>
           </View>
         </View>
 
