@@ -1,7 +1,17 @@
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
-export default function TabsLayout() {
+export default function AuthenticatedLayout() {
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated,
+  );
+
+  if (!isAuthenticated) {
+    return <Redirect href="/login" />;
+  }
+
   return (
     <Tabs
       screenOptions={
@@ -11,7 +21,7 @@ export default function TabsLayout() {
       }
     >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           headerTitle: "Home",
           title: "Home",
