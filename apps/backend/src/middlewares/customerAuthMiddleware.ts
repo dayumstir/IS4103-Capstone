@@ -5,7 +5,7 @@ import * as customerRepository from "../repositories/customerRepository";
 
 
 // Authenticate users using JWT
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const customerAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(" ")[1];
 
     // Check if JWT is present
