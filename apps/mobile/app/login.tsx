@@ -3,10 +3,11 @@ import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/features/authSlice";
 import { Link } from "expo-router";
-// import { Button } from "@ant-design/react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLoginMutation } from "../redux/services/auth";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 // Define your Zod schema
 const loginSchema = z.object({
@@ -18,27 +19,31 @@ const loginSchema = z.object({
 });
 
 // Define TypeScript types based on the schema
-type FormValues = z.infer<typeof loginSchema>;
+export type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const dispatch = useDispatch();
+  const [loginMutation, { isLoading, error }] = useLoginMutation();
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>({
+  } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
   });
 
   // Form submit handler
-  const onSubmit = (data: FormValues) => {
-    console.log(data);
-    dispatch(login());
+  const onSubmit = async (data: LoginFormValues) => {
+    const result = await loginMutation(data);
+    if (result.data) {
+      dispatch(login());
+    }
   };
 
   return (
     <View className="flex h-full px-8">
+      {/* ===== Logo & Title===== */}
       <View className="flex flex-col items-center justify-center gap-2 py-16">
         <Image
           source={require("../assets/pandapay_logo.png")}
@@ -48,6 +53,7 @@ export default function Login() {
         <Text className="">Your ultimate BNPL solution</Text>
       </View>
 
+      {/* ===== Email Field ===== */}
       <Controller
         control={control}
         name="email"
@@ -66,6 +72,8 @@ export default function Login() {
           </View>
         )}
       />
+
+      {/* ===== Password Field ===== */}
       <Controller
         control={control}
         name="password"
@@ -87,15 +95,34 @@ export default function Login() {
           </View>
         )}
       />
+
+      {/* ===== Error Message ===== */}
+      {error && (
+        <Text className="mb-4 text-red-500">
+          Your email or password is incorrect
+        </Text>
+      )}
+
+      {/* ===== Login Button ===== */}
       <TouchableOpacity
         onPress={handleSubmit(onSubmit)}
         className="rounded-md bg-blue-500 py-4"
       >
-        <Text className="text-center font-semibold uppercase text-white">
-          Login
-        </Text>
+        {isLoading ? (
+          <AntDesign
+            name="loading1"
+            size={17}
+            color="#fff"
+            className="mx-auto animate-spin"
+          />
+        ) : (
+          <Text className="text-center font-semibold uppercase text-white">
+            Login
+          </Text>
+        )}
       </TouchableOpacity>
 
+      {/* ===== Register Link ===== */}
       <View className="mt-4 flex flex-row items-center justify-center gap-2">
         <Text>Don't have an account?</Text>
         <Link href="/register" className="text-center text-blue-500">

@@ -66,10 +66,10 @@ export default function HomePage() {
           </View>
 
           <View className="flex flex-row items-center gap-4">
-            <TouchableOpacity className="rounded-full bg-[#1777ff] p-2">
+            <TouchableOpacity className="rounded-full bg-blue-500 p-2">
               <AntDesign name="message1" size={16} />
             </TouchableOpacity>
-            <TouchableOpacity className="rounded-full bg-[#1777ff] p-2">
+            <TouchableOpacity className="rounded-full bg-blue-500 p-2">
               <AntDesign name="bells" size={16} />
             </TouchableOpacity>
           </View>
