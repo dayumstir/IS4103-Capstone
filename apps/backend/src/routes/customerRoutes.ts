@@ -1,11 +1,11 @@
 // Defines routes related to customer actions
 import { Router } from "express";
 import { getProfile, editProfile } from "../controllers/customerController";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import { customerAuthMiddleware } from "../middlewares/customerAuthMiddleware";
 
 const router = Router();
 
-router.get("/profile", authMiddleware, getProfile);
-router.put("/profile", authMiddleware, editProfile);
+router.get("/profile", customerAuthMiddleware, getProfile);
+router.put("/profile", customerAuthMiddleware, editProfile);
 
 export default router;
