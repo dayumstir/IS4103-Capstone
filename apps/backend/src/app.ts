@@ -7,7 +7,7 @@ import morgan from "morgan";
 import dotenv from 'dotenv';
 
 
-import authRoutes from "./routes/authRoutes";
+import customerAuthRoutes from "./routes/customerAuthRoutes";
 import customerRoutes from "./routes/customerRoutes";
 
 const app = express();
@@ -21,7 +21,7 @@ app.use(morgan("dev"));
 dotenv.config(); // Load environment variables
 
 // Routes
-app.use("/auth", authRoutes);
+app.use("/customerAuth", customerAuthRoutes);
 app.use("/customer", customerRoutes);
 
 // Dummy route for the root
