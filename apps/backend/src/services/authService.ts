@@ -24,7 +24,6 @@ export const register = async (customerData: ICustomer) => {
     });
 
     // Generate JWT
-    // TODO: Create .env folder with JWT Secret
     const token = jwt.sign({ customer_id: newCustomer.customer_id }, process.env.JWT_SECRET!, { expiresIn: "1h"});
 
     return { customer: newCustomer, token };
@@ -50,6 +49,24 @@ export const login = async (loginData: { email: string; password: string }) => {
     const token = jwt.sign({ customer_id: customer.customer_id }, process.env.JWT_SECRET!, { expiresIn: "1h"});
 
     return token;
+};
+
+
+export const logout = async (token: string) => {
+    try {
+        // Decode the JWT token to extract its expiration time
+        const decoded = jwt.decode(token) as any;
+
+        if (!decoded || !decoded.exp) {
+            throw new Error("Invalid token");
+        }
+
+        const expiresAt = new Date(decoded.exp * 1000);  // Convert expiration time to Date object
+
+        await customerRepository.blacklistToken(token, expiresAt);
+    } catch (error: any) {
+        throw new Error(error.message || "Failed to log out");
+    }
 };
 
 

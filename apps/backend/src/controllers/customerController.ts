@@ -3,7 +3,8 @@ import { Request, Response } from "express";
 import * as customerService from "../services/customerService";
 
 
-export const getProfile = async(req: Request, res: Response) => {
+// Customer View Profile
+export const getProfile = async (req: Request, res: Response) => {
     try {
         const customer = await customerService.getCustomerById(req.body.customer_id);
         res.status(200).json(customer);
@@ -13,6 +14,7 @@ export const getProfile = async(req: Request, res: Response) => {
 };
 
 
+// Customer Edit Profile
 export const editProfile = async (req: Request, res: Response) => {
     try {
         const updatedCustomer = await customerService.updateCustomer(req.body.customer_id, req.body);
