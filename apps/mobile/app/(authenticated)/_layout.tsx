@@ -1,7 +1,8 @@
-import { Redirect, Tabs } from "expo-router";
+import { Redirect, router, Stack, Tabs } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import { setPaymentStage } from "../../redux/features/paymentSlice";
 
 export default function AuthenticatedLayout() {
   const isAuthenticated = useSelector(
@@ -12,54 +13,43 @@ export default function AuthenticatedLayout() {
     return <Redirect href="/login" />;
   }
 
+  const paymentStage = useSelector(
+    (state: RootState) => state.paymentStage.paymentStage,
+  );
+  const dispatch = useDispatch();
+
+  const handleScanModalClose = () => {
+    dispatch(setPaymentStage("Scan QR Code"));
+  };
+
   return (
-    <Tabs
-      screenOptions={
-        {
-          // headerShown: false,
-        }
-      }
-    >
-      <Tabs.Screen
-        name="home"
+    <Stack>
+      <Stack.Screen
+        name="scan"
         options={{
-          headerTitle: "Home",
-          title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <AntDesign name="home" size={size} color={color} />
+          headerTitle: paymentStage,
+          presentation: "modal",
+          headerLeft: () => (
+            <AntDesign
+              name="close"
+              size={24}
+              onPress={() => {
+                router.back();
+                handleScanModalClose();
+              }}
+              className="ml-2"
+            />
           ),
         }}
-      />
-      <Tabs.Screen
-        name="payments"
-        options={{
-          headerTitle: "Payments",
-          title: "Payments",
-          tabBarIcon: ({ color, size }) => (
-            <AntDesign name="creditcard" size={size} color={color} />
-          ),
+        listeners={{
+          transitionEnd: (e) => {
+            if (e.data.closing) {
+              handleScanModalClose();
+            }
+          },
         }}
       />
-      <Tabs.Screen
-        name="wallet"
-        options={{
-          headerTitle: "Wallet",
-          title: "Wallet",
-          tabBarIcon: ({ color, size }) => (
-            <AntDesign name="wallet" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="account"
-        options={{
-          headerTitle: "Account",
-          title: "Account",
-          tabBarIcon: ({ color, size }) => (
-            <AntDesign name="user" size={size} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
   );
 }

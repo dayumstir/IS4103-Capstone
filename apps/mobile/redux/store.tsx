@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./features/authSlice";
 import customerReducer from "./features/customerSlice";
+import paymentStageReducer from "./features/paymentSlice";
 import { authApi } from "./services/auth";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
@@ -13,6 +14,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     customer: customerReducer,
+    paymentStage: paymentStageReducer,
     [authApi.reducerPath]: authApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
