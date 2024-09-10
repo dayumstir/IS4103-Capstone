@@ -1,10 +1,17 @@
 // Entry point of application, where server is started
+// TODO: Add code to connect to the database when starting server.
 
-import { createServer } from "./app";
+import app from "./app";
+import { connectDatabase } from "./config/database.config";
 
-const port = process.env.PORT || 3001;
-const server = createServer();
+const PORT = process.env.PORT || 3000;
 
-server.listen(port, () => {
-  console.log(`api running on ${port}`);
-});
+connectDatabase()
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    })
+    .catch((err => {
+        console.error('Failed to connect to the database', err);
+    }))

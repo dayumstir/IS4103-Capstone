@@ -1,1 +1,0 @@
-// Checks if a user is authenticated before allowing access to certain routes

@@ -1,1 +1,0 @@
-// Contains authentication logic, like JWT generation, verification

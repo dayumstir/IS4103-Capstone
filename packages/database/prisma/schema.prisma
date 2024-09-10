@@ -12,3 +12,36 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Customer {
+  customer_id     Int      @id @default(autoincrement())
+  name            String
+  profile_picture String
+  email           String   @unique
+  password        String
+  contact_number  String
+  address         String
+  date_of_birth   DateTime 
+  status          String
+  credit_score    Int
+  credit_tier_id  Int
+}
+
+model TokenBlackList {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  admin_id        Int       @id @default(autoincrement())
+  name            String
+  profile_picture String
+  email           String    @unique
+  password        String
+  contact_number  String
+  address         String
+  date_of_birth   DateTime
+  admin_type      String
+}

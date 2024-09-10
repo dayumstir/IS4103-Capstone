@@ -1,1 +1,0 @@
-// Defines routes related to authentication (`/auth`)
