@@ -9,6 +9,8 @@ import dotenv from 'dotenv';
 
 import customerAuthRoutes from "./routes/customerAuthRoutes";
 import customerRoutes from "./routes/customerRoutes";
+import adminRoutes from "./routes/adminRoutes";
+import adminAuthRoutes from "./routes/adminAuthRoutes";
 
 const app = express();
 
@@ -23,6 +25,8 @@ dotenv.config(); // Load environment variables
 // Routes
 app.use("/customerAuth", customerAuthRoutes);
 app.use("/customer", customerRoutes);
+app.use("/admin", adminRoutes);
+app.use("/adminauth", adminAuthRoutes);
 
 // Dummy route for the root
 app.get('/', (req, res) => {
