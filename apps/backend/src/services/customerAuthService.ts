@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { ICustomer } from "../interfaces/customerInterface";
 import * as customerRepository from "../repositories/customerRepository";
+import * as tokenRepository from "../repositories/tokenRepository";
 
 
 export const register = async (customerData: ICustomer) => {
@@ -63,7 +64,7 @@ export const logout = async (token: string) => {
 
         const expiresAt = new Date(decoded.exp * 1000);  // Convert expiration time to Date object
 
-        await customerRepository.blacklistToken(token, expiresAt);
+        await tokenRepository.blacklistToken(token, expiresAt);
     } catch (error: any) {
         throw new Error(error.message || "Failed to log out");
     }
