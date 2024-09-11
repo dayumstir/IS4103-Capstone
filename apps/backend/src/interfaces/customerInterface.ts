@@ -8,7 +8,7 @@ export interface ICustomer {
     contact_number: string;
     address: string;
     date_of_birth: Date;
-    status: string;
+    status: string;     // TODO: Implement as enum
     credit_score: number;
     credit_tier_id: number;
 }
