@@ -1,5 +1,4 @@
 // Entry point of application, where server is started
-// TODO: Add code to connect to the database when starting server.
 
 import app from "./app";
 import { connectDatabase } from "./config/database.config";
@@ -15,3 +14,4 @@ connectDatabase()
     .catch((err => {
         console.error('Failed to connect to the database', err);
     }))
+    

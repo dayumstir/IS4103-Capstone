@@ -21,8 +21,8 @@ model Customer {
   password        String
   contact_number  String
   address         String
-  date_of_birth   DateTime
-  status          String
+  date_of_birth   DateTime 
+  status          String  // TODO: Implement as enum
   credit_score    Int
   credit_tier_id  Int
 }

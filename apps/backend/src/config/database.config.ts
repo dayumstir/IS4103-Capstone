@@ -5,12 +5,12 @@ const prisma = new PrismaClient();
 
 export const connectDatabase = async() => {
     try {
-        // Test the connectioin to the db by making a query
+        // Test the connection to the db by making a query
         await prisma.$connect();
         console.log("Connected to AWS RDS successfully");
-    } catch (err) {
-        console.log("Error connecting to the database: ", err);
-        throw err;  // Caught in index.ts
+    } catch (error) {
+        console.log("Error connecting to the database: ", error);
+        throw error;  // Caught in index.ts
     }
 }
 
