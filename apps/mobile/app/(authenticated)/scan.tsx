@@ -4,6 +4,7 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { useDispatch, useSelector } from "react-redux";
 import { setPaymentStage } from "../../redux/features/paymentSlice";
 import { RootState } from "../../redux/store";
+import { formatCurrency } from "../../utils/formatCurrency";
 
 export default function ScanScreen() {
   const [status, requestPermission] = useCameraPermissions();
@@ -87,7 +88,9 @@ export default function ScanScreen() {
         <Text className="text-xl">for a</Text>
         <Text className="text-2xl font-semibold">{product.name}</Text>
         <Text className="text-xl">which costs</Text>
-        <Text className="text-4xl font-bold">${product.price}</Text>
+        <Text className="text-4xl font-bold">
+          {formatCurrency(product.price)}
+        </Text>
 
         {/* ===== Cancel/Next Buttons ===== */}
         <View className="mt-12 flex flex-row gap-8">
@@ -114,6 +117,25 @@ export default function ScanScreen() {
 
   /* ===== Stage 3: Select Payment Plan ===== */
   const selectPaymentPlanScreen = () => {
+    const paymentPlans = [
+      {
+        name: "Pay in Full",
+        price: formatCurrency(product.price),
+      },
+      {
+        name: "3 Month Plan",
+        price: formatCurrency(product.price / 3),
+      },
+      {
+        name: "6 Month Plan",
+        price: formatCurrency(product.price / 6),
+      },
+      {
+        name: "12 Month Plan",
+        price: formatCurrency(product.price / 12),
+      },
+    ];
+
     return (
       <View className="flex-1 items-center justify-center gap-8">
         <Text className="text-center text-xl font-semibold">
@@ -122,65 +144,28 @@ export default function ScanScreen() {
 
         {/* ===== Payment Plans Radio Group ===== */}
         <View className="w-full px-8">
-          <TouchableOpacity
-            className="mb-4 flex-row items-center rounded-md border border-gray-300 p-4"
-            onPress={() => setSelectedPlan("Pay in Full")}
-          >
-            <View className="mr-4 h-6 w-6 items-center justify-center rounded-full border border-blue-500">
-              <View
-                className={`h-4 w-4 rounded-full ${selectedPlan === "Pay in Full" ? "bg-blue-500" : "bg-white"}`}
-              />
-            </View>
-            <View>
-              <Text className="text-lg font-semibold">Pay in Full</Text>
-              <Text className="text-sm text-gray-600">$100 now</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="mb-4 flex-row items-center rounded-md border border-gray-300 p-4"
-            onPress={() => setSelectedPlan("3 Month Plan")}
-          >
-            <View className="mr-4 h-6 w-6 items-center justify-center rounded-full border border-blue-500">
-              <View
-                className={`h-4 w-4 rounded-full ${selectedPlan === "3 Month Plan" ? "bg-blue-500" : "bg-white"}`}
-              />
-            </View>
-            <View>
-              <Text className="text-lg font-semibold">3 Month Plan</Text>
-              <Text className="text-sm text-gray-600">$33.33/month</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="mb-4 flex-row items-center rounded-md border border-gray-300 p-4"
-            onPress={() => setSelectedPlan("6 Month Plan")}
-          >
-            <View className="mr-4 h-6 w-6 items-center justify-center rounded-full border border-blue-500">
-              <View
-                className={`h-4 w-4 rounded-full ${selectedPlan === "6 Month Plan" ? "bg-blue-500" : "bg-white"}`}
-              />
-            </View>
-            <View>
-              <Text className="text-lg font-semibold">6 Month Plan</Text>
-              <Text className="text-sm text-gray-600">$16.67/month</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="mb-4 flex-row items-center rounded-md border border-gray-300 p-4"
-            onPress={() => setSelectedPlan("12 Month Plan")}
-          >
-            <View className="mr-4 h-6 w-6 items-center justify-center rounded-full border border-blue-500">
-              <View
-                className={`h-4 w-4 rounded-full ${selectedPlan === "12 Month Plan" ? "bg-blue-500" : "bg-white"}`}
-              />
-            </View>
-            <View>
-              <Text className="text-lg font-semibold">12 Month Plan</Text>
-              <Text className="text-sm text-gray-600">$8.33/month</Text>
-            </View>
-          </TouchableOpacity>
+          {paymentPlans.map((plan) => {
+            return (
+              <TouchableOpacity
+                className="mb-4 flex-row items-center rounded-md border border-gray-300 p-4"
+                onPress={() => setSelectedPlan(plan.name)}
+                key={plan.name}
+              >
+                <View className="mr-4 h-6 w-6 items-center justify-center rounded-full border border-blue-500">
+                  <View
+                    className={`h-4 w-4 rounded-full ${selectedPlan === plan.name ? "bg-blue-500" : "bg-white"}`}
+                  />
+                </View>
+                <View>
+                  <Text className="text-lg font-semibold">{plan.name}</Text>
+                  <Text className="text-sm text-gray-600">
+                    {plan.price}
+                    {plan.name === "Pay in Full" ? " now" : "/month"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* ===== Cancel/Next Buttons ===== */}

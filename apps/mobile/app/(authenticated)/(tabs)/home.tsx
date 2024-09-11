@@ -3,6 +3,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { Button } from "@ant-design/react-native";
 import { format } from "date-fns";
 import { router } from "expo-router";
+import { formatCurrency } from "../../../utils/formatCurrency";
 
 export default function HomePage() {
   const name = "John";
@@ -81,7 +82,7 @@ export default function HomePage() {
           <AntDesign name="user" size={24} />
           <Text className="font-medium">My Wallet Balance</Text>
           <Text className="text-3xl font-bold text-orange-500">
-            ${walletBalance}
+            {formatCurrency(walletBalance)}
           </Text>
           <Text className="">Outstanding Payments for the month</Text>
           <View className="flex w-full gap-2">
@@ -91,13 +92,13 @@ export default function HomePage() {
                 key={payment.id}
               >
                 <Text className="">{payment.name}</Text>
-                <Text className="">${payment.amount}</Text>
+                <Text className="">{formatCurrency(payment.amount)}</Text>
               </View>
             ))}
             <View className="flex w-full flex-row justify-between">
               <Text className="font-bold">Total</Text>
               <Text className="font-bold">
-                ${getTotalOutstandingPayments()}
+                {formatCurrency(getTotalOutstandingPayments())}
               </Text>
             </View>
           </View>
@@ -133,8 +134,8 @@ export default function HomePage() {
                   <Text
                     className={`${transaction.amount < 0 ? "text-red-500" : "text-green-500"} h-full font-bold`}
                   >
-                    {transaction.amount < 0 ? "-" : "+"}$
-                    {Math.abs(transaction.amount)}
+                    {transaction.amount > 0 && "+"}
+                    {formatCurrency(transaction.amount)}
                   </Text>
                 </View>
               </View>
