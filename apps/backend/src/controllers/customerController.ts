@@ -23,3 +23,13 @@ export const editProfile = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+// List All Customers
+export const listAllCustomers = async (req: Request, res: Response) => {
+    try {
+        const customers = await customerService.getAllCustomers();
+        res.status(200).json(customers);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};

@@ -29,6 +29,10 @@ export const updateCustomer = async (customer_id: number, updateData: Partial<IC
     });
 };
 
+// Find All Customers
+export const listAllCustomers = async () => {
+    return prisma.customer.findMany();
+};
 
 // Blacklist a token
 export const blacklistToken = async (token: string, expiresAt: Date) => {
