@@ -2,7 +2,7 @@ import { Redirect, router, Stack, Tabs } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-import { setPaymentStage } from "../../redux/features/paymentSlice";
+import { setPaymentStage } from "../../redux/features/paymentStageSlice";
 
 export default function AuthenticatedLayout() {
   const isAuthenticated = useSelector(

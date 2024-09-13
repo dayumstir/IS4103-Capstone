@@ -1,6 +1,5 @@
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-import { Button } from "@ant-design/react-native";
 import { format } from "date-fns";
 import { router } from "expo-router";
 import { formatCurrency } from "../../../utils/formatCurrency";

@@ -1,41 +1,41 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View, TouchableOpacity } from "react-native";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { useCameraPermissions } from "expo-camera";
 import { useDispatch, useSelector } from "react-redux";
-import { setPaymentStage } from "../../redux/features/paymentSlice";
+import { setPaymentStage } from "../../redux/features/paymentStageSlice";
 import { RootState } from "../../redux/store";
 import { formatCurrency } from "../../utils/formatCurrency";
+import { router } from "expo-router";
+import { useCreateTransactionMutation } from "../../redux/services/transaction";
+import { ITransaction } from "../../interfaces/transactionInterface";
+import ScanQrCodeScreen from "../../components/scan/scanQrCodeScreen";
+import VerifyPurchaseScreen from "../../components/scan/verifyPurchaseScreen";
+import SelectPaymentPlanScreen from "../../components/scan/selectPaymentPlanScreen";
+import PaymentCompleteScreen from "../../components/scan/paymentCompleteScreen";
 
 export default function ScanScreen() {
   const [status, requestPermission] = useCameraPermissions();
   const [product, setProduct] = useState({
-    name: "",
-    merchant: "",
+    merchantName: "",
     price: 0,
   });
   const [selectedPlan, setSelectedPlan] = useState("Pay in Full");
-
   const paymentStage = useSelector(
     (state: RootState) => state.paymentStage.paymentStage,
   );
   const dispatch = useDispatch();
+  const [createTransaction, { isLoading, isError, error }] =
+    useCreateTransactionMutation();
+  const [transaction, setTransaction] = useState<ITransaction | null>(null);
 
-  // TODO: Use actual QR Code data
-  const handleQrCodeScanned = ({
-    type,
-    data,
-  }: {
-    type: string;
-    data: string;
-  }) => {
-    dispatch(setPaymentStage("Verify Purchase"));
+  // TODO: Remove this
+  useEffect(() => {
     setProduct({
-      name: "Example Product",
-      merchant: data,
-      price: 100,
+      merchantName: "Merchant Name",
+      price: 888.88,
     });
-    // alert(`Barcode type ${type} with data ${data} has been scanned!`);
-  };
+    dispatch(setPaymentStage("Verify Purchase"));
+  }, []);
 
   if (!status) {
     // Camera permissions are still loading
@@ -59,134 +59,136 @@ export default function ScanScreen() {
     );
   }
 
-  const handlePaymentComplete = () => {
-    console.log("You have chosen the " + selectedPlan);
+  const handleQrCodeScanned = ({
+    type,
+    data,
+  }: {
+    type: string;
+    data: string;
+  }) => {
+    // TODO: Replace with actual QR Code validation
+    if (data.includes("|")) {
+      dispatch(setPaymentStage("Verify Purchase"));
+
+      // QR Code data is in the format "Merchant|Price"
+      const [rawMerchantName, rawPrice] = data.split("|");
+
+      // Sanitize the merchant name and price
+      const merchantName = rawMerchantName.trim();
+      const price = parseFloat(rawPrice.trim());
+      if (isNaN(price) || price <= 0 || merchantName === "") {
+        dispatch(setPaymentStage("Error"));
+        return;
+      }
+
+      // Set the product details
+      setProduct({
+        merchantName: merchantName,
+        price: price,
+      });
+    }
+  };
+
+  const handleCreateTransaction = async () => {
+    // TODO: Replace with actual id values
+    const newTransaction: Omit<ITransaction, "transaction_id"> = {
+      amount: product.price,
+      date: new Date(),
+      status: "In Progress",
+      customer_id: 1,
+      merchant_id: 2,
+      merchant_payment_id: 3,
+      installment_plan_id: 4,
+    };
+
+    try {
+      const transaction = await createTransaction(newTransaction).unwrap();
+      setTransaction(transaction);
+      dispatch(setPaymentStage("Payment Complete"));
+    } catch (err) {
+      console.error(err);
+      dispatch(setPaymentStage("Error"));
+    }
   };
 
   /* ===== Stage 1: Scan QR Code ===== */
   const scanQrCodeScreen = () => {
-    return (
-      <CameraView
-        // tailwind not supported
-        style={{ flex: 1 }}
-        barcodeScannerSettings={{
-          barcodeTypes: ["qr"],
-        }}
-        onBarcodeScanned={handleQrCodeScanned}
-      />
-    );
+    return <ScanQrCodeScreen onBarcodeScanned={handleQrCodeScanned} />;
   };
 
   /* ===== Stage 2: Verify Purchase ===== */
   const verifyPurchaseScreen = () => {
     return (
-      <View className="flex-1 items-center justify-center gap-4">
-        <Text className="text-center text-xl">
-          You are making a purchase from
-        </Text>
-        <Text className="text-2xl font-semibold">{product.merchant}</Text>
-        <Text className="text-xl">for a</Text>
-        <Text className="text-2xl font-semibold">{product.name}</Text>
-        <Text className="text-xl">which costs</Text>
-        <Text className="text-4xl font-bold">
-          {formatCurrency(product.price)}
-        </Text>
-
-        {/* ===== Cancel/Next Buttons ===== */}
-        <View className="mt-12 flex flex-row gap-8">
-          <TouchableOpacity
-            className="min-w-32 rounded-md bg-red-500 p-3"
-            onPress={() => dispatch(setPaymentStage("Scan QR Code"))}
-          >
-            <Text className="text-center text-lg font-semibold text-white">
-              Cancel
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="min-w-32 rounded-md bg-blue-500 p-3"
-            onPress={() => dispatch(setPaymentStage("Select Payment Plan"))}
-          >
-            <Text className="text-center text-lg font-semibold text-white">
-              Next
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <VerifyPurchaseScreen
+        merchantName={product.merchantName}
+        price={product.price}
+        onCancel={() => dispatch(setPaymentStage("Scan QR Code"))}
+        onNext={() => dispatch(setPaymentStage("Select Payment Plan"))}
+      />
     );
   };
 
+  // TODO: Replace with actual payment plans from admin
+  const paymentPlans = [
+    {
+      name: "Pay in Full",
+      price: formatCurrency(product.price),
+    },
+    {
+      name: "3 Month Plan",
+      price: formatCurrency(product.price / 3),
+    },
+    {
+      name: "6 Month Plan",
+      price: formatCurrency(product.price / 6),
+    },
+    {
+      name: "12 Month Plan",
+      price: formatCurrency(product.price / 12),
+    },
+  ];
   /* ===== Stage 3: Select Payment Plan ===== */
   const selectPaymentPlanScreen = () => {
-    const paymentPlans = [
-      {
-        name: "Pay in Full",
-        price: formatCurrency(product.price),
-      },
-      {
-        name: "3 Month Plan",
-        price: formatCurrency(product.price / 3),
-      },
-      {
-        name: "6 Month Plan",
-        price: formatCurrency(product.price / 6),
-      },
-      {
-        name: "12 Month Plan",
-        price: formatCurrency(product.price / 12),
-      },
-    ];
-
     return (
-      <View className="flex-1 items-center justify-center gap-8">
-        <Text className="text-center text-xl font-semibold">
-          Which payment plan would you like to use?
+      <SelectPaymentPlanScreen
+        paymentPlans={paymentPlans}
+        selectedPlan={selectedPlan}
+        setSelectedPlan={setSelectedPlan}
+        onCancel={() => dispatch(setPaymentStage("Scan QR Code"))}
+        onConfirm={handleCreateTransaction}
+      />
+    );
+  };
+
+  /* ===== Stage 4: Payment Complete ===== */
+  const paymentCompleteScreen = () => {
+    return (
+      transaction && (
+        <PaymentCompleteScreen
+          transaction={transaction}
+          merchantName={product.merchantName}
+          onViewPaymentHistory={() => {
+            router.back();
+            router.push("/payments");
+            dispatch(setPaymentStage("Scan QR Code"));
+          }}
+          onBackToHome={() => {
+            router.back();
+            router.push("/home");
+            dispatch(setPaymentStage("Scan QR Code"));
+          }}
+        />
+      )
+    );
+  };
+
+  /* ===== Stage 0: Error ===== */
+  const errorScreen = () => {
+    return (
+      <View className="flex-1 items-center justify-center p-16">
+        <Text className="text-center text-xl font-semibold text-red-500">
+          There has been an error. Please close this window and try again.
         </Text>
-
-        {/* ===== Payment Plans Radio Group ===== */}
-        <View className="w-full px-8">
-          {paymentPlans.map((plan) => {
-            return (
-              <TouchableOpacity
-                className="mb-4 flex-row items-center rounded-md border border-gray-300 p-4"
-                onPress={() => setSelectedPlan(plan.name)}
-                key={plan.name}
-              >
-                <View className="mr-4 h-6 w-6 items-center justify-center rounded-full border border-blue-500">
-                  <View
-                    className={`h-4 w-4 rounded-full ${selectedPlan === plan.name ? "bg-blue-500" : "bg-white"}`}
-                  />
-                </View>
-                <View>
-                  <Text className="text-lg font-semibold">{plan.name}</Text>
-                  <Text className="text-sm text-gray-600">
-                    {plan.price}
-                    {plan.name === "Pay in Full" ? " now" : "/month"}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {/* ===== Cancel/Next Buttons ===== */}
-        <View className="mt-12 flex flex-row gap-8">
-          <TouchableOpacity
-            className="min-w-32 rounded-md bg-red-500 p-3"
-            onPress={() => dispatch(setPaymentStage("Scan QR Code"))}
-          >
-            <Text className="text-center text-lg font-semibold text-white">
-              Cancel
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="min-w-32 rounded-md bg-blue-500 p-3"
-            onPress={() => handlePaymentComplete()}
-          >
-            <Text className="text-center text-lg font-semibold text-white">
-              Confirm
-            </Text>
-          </TouchableOpacity>
-        </View>
       </View>
     );
   };
@@ -199,12 +201,10 @@ export default function ScanScreen() {
         return verifyPurchaseScreen();
       case "Select Payment Plan":
         return selectPaymentPlanScreen();
+      case "Payment Complete":
+        return paymentCompleteScreen();
       default:
-        return (
-          <Text className="text-red-500">
-            There has been an error. Please close the app and try again.
-          </Text>
-        );
+        return errorScreen();
     }
   };
 
