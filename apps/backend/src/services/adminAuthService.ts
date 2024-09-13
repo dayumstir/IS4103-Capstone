@@ -6,12 +6,15 @@ import * as adminRepository from "../repositories/adminRepository";
 
 
 export const addAdmin = async (adminData: IAdmin) => {
-    const { email, password } = adminData;
+    const { username, email, password } = adminData;
 
     // Check for existing admin in db
-    const existingAdmin = await adminRepository.findAdminByEmail(email);
-    if (existingAdmin) {
-        throw new Error("Admin already exists");
+    const existingAdminEmail = await adminRepository.findAdminByEmail(email);
+    const existingAdminUsername = await adminRepository.findAdminByUsername(username);
+    if (existingAdminEmail) {
+        throw new Error("Admin Email already exists");
+    } else if (existingAdminUsername) {
+        throw new Error("Admin Username already exists");
     }
 
     // Hash password
@@ -31,11 +34,11 @@ export const addAdmin = async (adminData: IAdmin) => {
 };
 
 
-export const loginAdmin = async (loginData: { email: string; password: string }) => {
-    const { email, password } = loginData;
+export const loginAdmin = async (loginData: { username: string; password: string }) => {
+    const { username, password } = loginData;
 
     // Check for existing admin in db
-    const admin = await adminRepository.findAdminByEmail(email);
+    const admin = await adminRepository.findAdminByUsername(username);
     if (!admin) {
         throw new Error("Invalid credentials");
     }

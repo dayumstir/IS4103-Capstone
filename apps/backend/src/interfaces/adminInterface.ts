@@ -4,6 +4,7 @@ export interface IAdmin {
     name: string;
     profile_picture: string;
     email: string;
+    username: string;
     password: string;
     contact_number: string;
     address: string;

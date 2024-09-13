@@ -12,6 +12,11 @@ export const findAdminByEmail = async (email: string) => {
     return prisma.admin.findUnique({ where: { email } });
 };
 
+// Find admin by email (unique attribute) in db
+export const findAdminByUsername = async (username: string) => {
+    return prisma.admin.findUnique({ where: { username } });
+};
+
 
 // Find admin by id (unique attribute) in db
 export const findAdminById = async (admin_id: number) => {
