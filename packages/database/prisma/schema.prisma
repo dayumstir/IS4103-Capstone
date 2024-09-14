@@ -8,43 +8,84 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+
 model Customer {
-  customer_id     Int      @id @default(autoincrement())
+  customer_id     String    @id @default(cuid())
   name            String
   profile_picture String
-  email           String   @unique
+  email           String    @unique
   password        String
   contact_number  String
   address         String
-  date_of_birth   DateTime 
-  status          String  // TODO: Implement as enum
+  date_of_birth   DateTime   
+  status          String    // TODO: Implement as enum
   credit_score    Int
-  credit_tier_id  Int
+  credit_tier_id  String    // TODO: Implemented as cuid()
 }
 
-model TokenBlackList {
-  id        Int      @id @default(autoincrement())
-  token     String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-}
 
 model Admin {
-  admin_id        Int      @id @default(autoincrement())
+  admin_id        String    @id @default(cuid())
   name            String
   profile_picture String
-  email           String   @unique
-  username        String   @unique
+  email           String    @unique
+  username        String    @unique
   password        String
   contact_number  String
   address         String
-  date_of_birth   DateTime
-  admin_type      String
+  date_of_birth   DateTime  
+  admin_type      String    // TODO: Implement as enum
+}
+
+
+model Merchant {
+    merchant_id     String  @id @default(cuid())
+    name            String
+    profile_picture String
+    email           String  @unique
+    password        String
+    contact_number  String
+    address         String
+    status          String  // TODO: Implement as enum
+    qr_code         String
+}
+
+
+model Transaction {
+  transaction_id      String    @id @default(cuid())
+  amount              Decimal   @db.Decimal(10, 2)
+  date                DateTime  
+  status              String
+  customer_id         Int
+  merchant_id         Int
+  merchant_payment_id Int
+  installment_plan_id Int
+}
+
+
+// Utility Schemas
+// Customer Register Use Case: Store email verification tokens
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  expiresAt DateTime  @default(now())
+  used      Boolean   @default(false)
+  email     String    
+}
+
+
+// Customer Logout Use Case: JWT Blacklisting
+model TokenBlackList {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
 }
 
 model Merchant {
