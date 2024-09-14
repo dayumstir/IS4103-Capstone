@@ -1,6 +1,6 @@
 // Defines the structure of a customer object
 export interface ICustomer {
-    customer_id: number;
+    customer_id: string;
     name: string;
     profile_picture: string;
     email: string;
@@ -10,5 +10,5 @@ export interface ICustomer {
     date_of_birth: Date;
     status: string;     // TODO: Implement as enum
     credit_score: number;
-    credit_tier_id: number;
+    credit_tier_id: string;
 }
