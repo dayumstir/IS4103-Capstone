@@ -22,7 +22,6 @@ export default function VerifyPurchaseScreen({
         {formatCurrency(price)}
       </Text>
 
-      {/* Cancel & Next Buttons */}
       <View className="flex w-full gap-4">
         <TouchableOpacity
           className="w-full rounded-md bg-white p-3 shadow-sm"

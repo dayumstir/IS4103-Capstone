@@ -39,6 +39,7 @@ model Admin {
   name            String
   profile_picture String
   email           String   @unique
+  username        String   @unique
   password        String
   contact_number  String
   address         String

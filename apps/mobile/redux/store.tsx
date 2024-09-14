@@ -1,9 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
-import authReducer from "./features/authSlice";
+import customerAuthReducer from "./features/customerAuthSlice";
 import customerReducer from "./features/customerSlice";
 import paymentStageReducer from "./features/paymentStageSlice";
-import { authApi } from "./services/auth";
+import { customerAuthApi } from "./services/customerAuth";
+import { customerApi } from "./services/customer";
 import { transactionApi } from "./services/transaction";
 
 const customSerializableCheck = {
@@ -13,15 +14,17 @@ const customSerializableCheck = {
 
 export const store = configureStore({
   reducer: {
-    auth: authReducer,
+    customerAuth: customerAuthReducer,
     customer: customerReducer,
     paymentStage: paymentStageReducer,
-    [authApi.reducerPath]: authApi.reducer,
+    [customerAuthApi.reducerPath]: customerAuthApi.reducer,
+    [customerApi.reducerPath]: customerApi.reducer,
     [transactionApi.reducerPath]: transactionApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: customSerializableCheck }).concat(
-      authApi.middleware,
+      customerAuthApi.middleware,
+      customerApi.middleware,
       transactionApi.middleware,
     ),
 });

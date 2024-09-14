@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Text, View, TouchableOpacity } from "react-native";
 import { useCameraPermissions } from "expo-camera";
 import { useDispatch, useSelector } from "react-redux";
@@ -27,15 +27,6 @@ export default function ScanScreen() {
   const [createTransaction, { isLoading, isError, error }] =
     useCreateTransactionMutation();
   const [transaction, setTransaction] = useState<ITransaction | null>(null);
-
-  // TODO: Remove this
-  useEffect(() => {
-    setProduct({
-      merchantName: "Merchant Name",
-      price: 888.88,
-    });
-    dispatch(setPaymentStage("Verify Purchase"));
-  }, []);
 
   if (!status) {
     // Camera permissions are still loading

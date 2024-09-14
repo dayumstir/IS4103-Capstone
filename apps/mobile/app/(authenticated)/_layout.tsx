@@ -6,7 +6,7 @@ import { setPaymentStage } from "../../redux/features/paymentStageSlice";
 
 export default function AuthenticatedLayout() {
   const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated,
+    (state: RootState) => state.customerAuth.isAuthenticated,
   );
 
   if (!isAuthenticated) {
