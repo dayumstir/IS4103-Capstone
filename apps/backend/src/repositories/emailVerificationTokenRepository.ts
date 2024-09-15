@@ -17,7 +17,11 @@ export const createToken = async (email: string, token: string, expiresAt: Date,
 // Find a token by its value
 export const findToken = async (token: string) => {
     return prisma.emailVerificationToken.findUnique({ 
-        where: { token } 
+        where: { 
+            token,
+            expiresAt: { gt: new Date() },  // Check that it is not expired
+            used: false,                    // Ensure that it has not been used
+        } 
     });
 };
 
