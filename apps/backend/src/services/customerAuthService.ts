@@ -146,6 +146,11 @@ export const login = async (loginData: { email: string; password: string }) => {
         throw new Error("Invalid credentials");
     }
 
+    // Check if the customer's status is ACTIVE
+    if (customer.status !== CustomerStatus.ACTIVE) {
+        throw new Error("Your account is not active.");
+    }
+
     // Check if passwords match
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
