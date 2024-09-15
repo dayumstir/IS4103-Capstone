@@ -15,9 +15,12 @@ import * as emailVerificationTokenRepository from "../repositories/emailVerifica
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import * as otpRepository from "../repositories/otpRepository";
 
+import logger from "../utils/logger";
+
 
 // Step 1: Register customer with basic information
 export const registerCustomer = async (customerData: ICustomer) => {
+    logger.info('Executing registerCustomer...');
     // Check if customer already exists
     const existingCustomer = await customerRepository.findCustomerByEmail(customerData.email);
     if (existingCustomer) {
@@ -42,6 +45,7 @@ export const registerCustomer = async (customerData: ICustomer) => {
 
 // Step 2: Send email verification link
 export const sendEmailVerification = async (email: string, customer_id: string) => {
+    logger.info('Executing sendEmailVerification...');
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)    // Token expires in 24hrs
 
@@ -70,6 +74,7 @@ export const sendEmailVerification = async (email: string, customer_id: string) 
 
 // Step 3: Confirm email
 export const confirmEmail = async (token: string) => {
+    logger.info('Executing confirmEmail...');
     const emailVerificationToken = await emailVerificationTokenRepository.findToken(token);
     if (!emailVerificationToken || emailVerificationToken.used) {
         throw new Error("Invalid or expired token");
@@ -86,6 +91,7 @@ export const confirmEmail = async (token: string) => {
 
 // Step 4: Send OTP to contact number
 export const sendPhoneNumberOTP = async (contact_number: string) => {
+    logger.info('Executing sendPhoneNumberOTP...');
     const otp = Math.floor(100000 + Math.random() * 900000).toString();     // Generate 6-digit OTP
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000)                 // Token expires in 10 mins
 
@@ -107,6 +113,7 @@ export const sendPhoneNumberOTP = async (contact_number: string) => {
             to: contact_number
         });
     } catch (error) {
+        logger.error('An error occurred:', error);
         throw new Error("Failed to send OTP via SMS.");
     }
 };
@@ -114,6 +121,7 @@ export const sendPhoneNumberOTP = async (contact_number: string) => {
 
 // Step 5: Verify phone number with OTP
 export const verifyPhoneNumberOTP = async (otp: string) => {
+    logger.info('Executing verifyPhoneNumberOTP...');
     const validOTP = await otpRepository.findOTP(otp);
     if (!validOTP) {
         throw new Error("Invalid OTP");
@@ -138,22 +146,27 @@ export const verifyPhoneNumberOTP = async (otp: string) => {
 
 
 export const login = async (loginData: { email: string; password: string }) => {
+    logger.info('Executing login...');
     const { email, password } = loginData;
 
     // Check for existing customer
+    logger.info(`Attempting login for email: ${email}`);
     const customer = await customerRepository.findCustomerByEmail(email);
     if (!customer) {
+        logger.warn(`Login failed for email: ${email} - Customer not found`);
         throw new Error("Invalid credentials");
     }
 
     // Check if the customer's status is ACTIVE
     if (customer.status !== CustomerStatus.ACTIVE) {
+        logger.warn(`Login failed for email: ${email} - Account not active`);
         throw new Error("Your account is not active.");
     }
 
     // Check if passwords match
     const isPasswordValid = await bcrypt.compare(password, customer.password);
     if (!isPasswordValid) {
+        logger.warn(`Login failed for email: ${email} - Invalid password`);
         throw new Error("Invalid credentials");
     }
 
@@ -163,11 +176,13 @@ export const login = async (loginData: { email: string; password: string }) => {
         process.env.JWT_SECRET!, 
         { expiresIn: "1h" });
 
+    logger.info(`Login successful for email: ${email}`);
     return token;
 };
 
 
 export const logout = async (token: string) => {
+    logger.info('Executing logout...');
     try {
         // Decode the JWT token to extract its expiration time
         const decoded = jwt.decode(token) as any;
@@ -180,12 +195,14 @@ export const logout = async (token: string) => {
 
         await jwtTokenRepository.blacklistToken(token, expiresAt);
     } catch (error: any) {
+        logger.error('An error occurred:', error);
         throw new Error(error.message || "Failed to log out");
     }
 };
 
 
 export const resetPassword = async (email: string, newPassword: string) => {
+    logger.info('Executing resetPassword...');
     const customer = await customerRepository.findCustomerByEmail(email);
     if (!customer) {
         throw new Error("Customer not found");

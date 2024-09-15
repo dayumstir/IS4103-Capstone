@@ -1,6 +1,8 @@
 import { prisma } from "../repositories/db";
+import logger from "./logger";
 
 export const cleanupExpiredTokens = async () => {
+    logger.info('Executing cleanupExpiredTokens...');
     try {
         // Delete expired email verification tokens
         const deletedEmailVerificationTokens = await prisma.emailVerificationToken.deleteMany({
@@ -24,8 +26,8 @@ export const cleanupExpiredTokens = async () => {
             },
         });
 
-        console.log(`Expired tokens cleanup completed. Deleted ${deletedEmailVerificationTokens.count} email tokens, ${deletedOtps.count} OTPs and ${deletedJWTs.count} blacklisted JWTs.`);
+        logger.info(`Expired tokens cleanup completed. Deleted ${deletedEmailVerificationTokens.count} email tokens, ${deletedOtps.count} OTPs and ${deletedJWTs.count} blacklisted JWTs.`);
     } catch (error) {
-        console.error("Error during expired tokens cleanup", error);
+        logger.error("Error during expired tokens cleanup", error);
     }
 };
