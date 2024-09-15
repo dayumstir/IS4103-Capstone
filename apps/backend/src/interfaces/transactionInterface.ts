@@ -1,12 +1,13 @@
 // Defines the structure of a transaction object
 
+
 export interface ITransaction {
-  transaction_id: number;
-  amount: number;
-  date: Date;
-  status: string;
-  customer_id: number;
-  merchant_id: number;
-  merchant_payment_id: number;
-  installment_plan_id: number;
+    transaction_id: string;
+    amount: number;
+    date: Date;
+    status: string;   // TODO: Implement as enum
+    customer_id: string;
+    merchant_id: string;
+    merchant_payment_id: string;
+    installment_plan_id: string;
 }

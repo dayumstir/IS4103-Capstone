@@ -15,7 +15,7 @@ datasource db {
 }
 
 
-enum CustomerStatus {
+enum Status {
   PENDING_EMAIL_VERIFICATION
   PENDING_PHONE_VERIFICATION
   ACTIVE
@@ -32,7 +32,7 @@ model Customer {
   contact_number            String          @unique
   address                   String
   date_of_birth             DateTime   
-  status                    CustomerStatus  
+  status                    Status  
   credit_score              Int
   credit_tier_id            String
 
@@ -64,17 +64,17 @@ model EmailVerificationToken {
 
 // Customer Sign Up Use Case: Store phone number OTP
 model Otp {
-  id              String    @id @default(cuid())
-  contact_number  String    
-  otp             String    @unique
+  id             String    @id @default(cuid())
+  contact_number String    
+  otp            String    @unique
 
-  expiresAt       DateTime  @default(now())
-  used            Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  expiresAt      DateTime  @default(now())
+  used           Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  customer        Customer  @relation(fields: [customer_id], references: [customer_id])
-  customer_id     String
+  customer       Customer  @relation(fields: [customer_id], references: [customer_id])
+  customer_id    String
 
   @@index([customer_id])
 }
@@ -104,15 +104,15 @@ model Admin {
 
 
 model Merchant {
-    merchant_id     String  @id @default(cuid())
-    name            String
-    profile_picture String
-    email           String  @unique
-    password        String
-    contact_number  String
-    address         String
-    status          String  // TODO: Implement as enum
-    qr_code         String
+  merchant_id     String  @id @default(cuid())
+  name            String
+  email           String  @unique
+  password        String
+  contact_number  String
+  address         String
+  qr_code         String
+  status          Status
+  profile_picture String
 }
 
 
@@ -121,8 +121,8 @@ model Transaction {
   amount              Decimal   @db.Decimal(10, 2)
   date                DateTime  
   status              String
-  customer_id         Int
-  merchant_id         Int
-  merchant_payment_id Int
-  installment_plan_id Int
+  customer_id         String
+  merchant_id         String
+  merchant_payment_id String
+  installment_plan_id String
 }

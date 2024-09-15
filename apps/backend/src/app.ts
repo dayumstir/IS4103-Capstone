@@ -7,8 +7,6 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 
 import customerAuthRoutes from "./routes/customerAuthRoutes";
-
-import customerAuthRoutes from "./routes/customerAuthRoutes";
 import customerRoutes from "./routes/customerRoutes";
 import transactionRoutes from "./routes/transactionRoutes";
 
