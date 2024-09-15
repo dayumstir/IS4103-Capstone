@@ -2,16 +2,26 @@
 
 import app from "./app";
 import { connectDatabase } from "./config/database.config";
+import { cleanupExpiredTokens } from "./utils/tokenCleanup";
+
 
 const PORT = process.env.PORT || 3000;
 
-connectDatabase()
-    .then(() => {
+const startServer = async () => {
+    try {
+        // Connect to the database
+        await connectDatabase();
+
+        // Cleanup expired tokens when the server starts
+        await cleanupExpiredTokens();
+
+        // Start the server
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
         });
-    })
-    .catch((err => {
-        console.error('Failed to connect to the database', err);
-    }))
+    } catch (error) {
+        console.error('Error starting server:', error);
+    }
+};
     
+startServer();
