@@ -18,7 +18,13 @@ export const cleanupExpiredTokens = async () => {
             },
         });
 
-        console.log(`Expired tokens cleanup completed. Deleted ${deletedEmailVerificationTokens.count} email tokens and ${deletedOtps.count} OTPs.`);
+        const deletedJWTs = await prisma.tokenBlackList.deleteMany({
+            where: {
+                expiresAt: { lt: new Date() },  // Tokens where expiredAt is less than current time
+            },
+        });
+
+        console.log(`Expired tokens cleanup completed. Deleted ${deletedEmailVerificationTokens.count} email tokens, ${deletedOtps.count} OTPs and ${deletedJWTs.count} blacklisted JWTs.`);
     } catch (error) {
         console.error("Error during expired tokens cleanup", error);
     }
