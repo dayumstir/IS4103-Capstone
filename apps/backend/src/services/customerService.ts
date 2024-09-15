@@ -3,7 +3,7 @@ import { ICustomer } from "../interfaces/customerInterface";
 import * as customerRepository from "../repositories/customerRepository";
 
 
-export const getCustomerById = async (customer_id: number) => {
+export const getCustomerById = async (customer_id: string) => {
     const customer = await customerRepository.findCustomerById(customer_id);
     if (!customer) {
         throw new Error("Customer not found");
@@ -12,7 +12,7 @@ export const getCustomerById = async (customer_id: number) => {
 };
 
 
-export const updateCustomer = async (customer_id: number, updateData: Partial<ICustomer>) => {
+export const updateCustomer = async (customer_id: string, updateData: Partial<ICustomer>) => {
     const customer = await customerRepository.updateCustomer(customer_id, updateData);
     if (!customer) {
         throw new Error("Customer not found");
