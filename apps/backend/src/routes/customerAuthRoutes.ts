@@ -1,6 +1,6 @@
 // Defines routes related to authentication
 import { Router } from "express";
-import { registerCustomer, confirmEmail, sendPhoneNumberOTP, verifyPhoneNumberOTP, login, resetPassword, logout } from "../controllers/customerAuthController";
+import { registerCustomer, confirmEmail, sendPhoneNumberOTP, verifyPhoneNumberOTP, login, logout, resetPassword } from "../controllers/customerAuthController";
 import { customerAuthMiddleware } from "../middlewares/customerAuthMiddleware";
 
 const router = Router();

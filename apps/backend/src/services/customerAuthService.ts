@@ -7,7 +7,9 @@ const nodemailer = require('nodemailer');
 import twilio from "twilio";
 
 // Internal dependencies
+import { CustomerStatus } from "../interfaces/customerStatus";
 import { ICustomer } from "../interfaces/customerInterface";
+
 import * as customerRepository from "../repositories/customerRepository";
 import * as emailVerificationTokenRepository from "../repositories/emailVerificationTokenRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
@@ -29,9 +31,9 @@ export const registerCustomer = async (customerData: ICustomer) => {
     const customer = await customerRepository.createCustomer({
         ...customerData,
         password: hashedPassword,
-        status: "PENDING_EMAIL_VERIFICATION",   // Set status as pending verification
-        credit_score: 0,                        // Default value
-        credit_tier_id: "tier_1"                // Default credit tier
+        status: CustomerStatus.PENDING_EMAIL_VERIFICATION,  // Set status as pending verification
+        credit_score: 0,                                    // Default value
+        credit_tier_id: "tier_1"                            // Default credit tier
     });
 
     return customer;
@@ -39,11 +41,12 @@ export const registerCustomer = async (customerData: ICustomer) => {
 
 
 // Step 2: Send email verification link
-export const sendEmailVerification = async (email: string) => {
+export const sendEmailVerification = async (email: string, customer_id: string) => {
     const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)    // Token expires in 24hrs
 
     // Save the email verification token
-    await emailVerificationTokenRepository.createToken(email, token);
+    await emailVerificationTokenRepository.createToken(email, token, expiresAt, customer_id);
 
     // Send email with the confirmation link (using nodemailer)
     const confirmationLink = `http://localhost:5173/confirm-email?token=${token}`;
@@ -73,7 +76,8 @@ export const confirmEmail = async (token: string) => {
     }
 
     // Update customer status to "PENDING_PHONE_VERIFICATION"
-    await customerRepository.updateCustomerStatusByEmail(emailVerificationToken.email, "PENDING_PHONE_VERIFICATION");
+    const updateData = { status: CustomerStatus.PENDING_PHONE_VERIFICATION };
+    await customerRepository.updateCustomer(emailVerificationToken.customer_id, updateData);
 
     // Mark token as used
     await emailVerificationTokenRepository.markTokenAsUsed(token);
@@ -83,9 +87,16 @@ export const confirmEmail = async (token: string) => {
 // Step 4: Send OTP to contact number
 export const sendPhoneNumberOTP = async (contact_number: string) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();     // Generate 6-digit OTP
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000)                 // Token expires in 10 mins
+
+    // Retrieve customer based on contact number
+    const customer = await customerRepository.findCustomerByPhoneNumber(contact_number);
+    if (!customer) {
+        throw new Error("Customer does not exist");
+    }
 
     // Save the OTP in the database
-    await otpRepository.saveOTP(contact_number, otp);
+    await otpRepository.saveOTP(contact_number, otp, expiresAt, customer.customer_id);
 
     // Send OTP via SMS using Twilio
     const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
@@ -102,17 +113,18 @@ export const sendPhoneNumberOTP = async (contact_number: string) => {
 
 
 // Step 5: Verify phone number with OTP
-export const verifyPhoneNumberOTP = async (contact_number: string, otp: string) => {
-    const validOTP = await otpRepository.findOTP(contact_number, otp);
+export const verifyPhoneNumberOTP = async (otp: string) => {
+    const validOTP = await otpRepository.findOTP(otp);
     if (!validOTP) {
         throw new Error("Invalid OTP");
     }
 
     // Mark OTP as used
-    await otpRepository.markOTPAsUsed(contact_number);
+    await otpRepository.markOTPAsUsed(otp);
     
     // Update customer status to "ACTIVE"
-    const customer = await customerRepository.updateCustomerStatusByPhone(contact_number, "ACTIVE");
+    const updateData = { status: CustomerStatus.ACTIVE };
+    const customer = await customerRepository.updateCustomer(validOTP.customer_id, updateData);
 
     // Generate JWT token for the customer
     const token = jwt.sign(
@@ -128,7 +140,7 @@ export const verifyPhoneNumberOTP = async (contact_number: string, otp: string) 
 export const login = async (loginData: { email: string; password: string }) => {
     const { email, password } = loginData;
 
-    // Check for existing customer in db
+    // Check for existing customer
     const customer = await customerRepository.findCustomerByEmail(email);
     if (!customer) {
         throw new Error("Invalid credentials");
@@ -141,7 +153,10 @@ export const login = async (loginData: { email: string; password: string }) => {
     }
 
     // Generate JWT
-    const token = jwt.sign({ customer_id: customer.customer_id }, process.env.JWT_SECRET!, { expiresIn: "1h" });
+    const token = jwt.sign(
+        { customer_id: customer.customer_id, email: customer.email }, 
+        process.env.JWT_SECRET!, 
+        { expiresIn: "1h" });
 
     return token;
 };

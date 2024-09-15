@@ -7,8 +7,8 @@ export const blacklistToken = async (token: string, expiresAt: Date) => {
     try {
         await prisma.tokenBlackList.create({
             data: {
-                token: token,
-                expiresAt: expiresAt,
+                token,
+                expiresAt,
             }
         });
     } catch (error) {
@@ -17,7 +17,9 @@ export const blacklistToken = async (token: string, expiresAt: Date) => {
 };
 
 
-// Find token in db
+// Find token
 export const findToken = async (token: string) => {
-    return prisma.tokenBlackList.findUnique({ where: { token } });
+    return prisma.tokenBlackList.findUnique({ 
+        where: { token } 
+    });
 };

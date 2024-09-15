@@ -2,36 +2,34 @@ import { prisma } from "./db";
 
 
 // Save OTP to the database
-export const saveOTP = async (contact_number: string, otp: string) => {
+export const saveOTP = async (contact_number: string, otp: string, expiresAt: Date, customer_id: string) => {
     await prisma.otp.create({
         data: {
             contact_number,
             otp,
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000),   // OTP expires in 10 minutes
+            expiresAt,
+            customer_id,
         }
     });
 };
 
 
 // Find OTP in the database
-export const findOTP = async (contact_number: string, otp: string) => {
-    return prisma.otp.findFirst({
+export const findOTP = async (otp: string) => {
+    return prisma.otp.findUnique({
         where: {
-            contact_number,
             otp,
             expiresAt: { gt: new Date() },      // Check that the OTP is not expired
-            used: false,    // Ensure that the OTP has not been used
+            used: false,                        // Ensure that the OTP has not been used
         },
     });
 };
 
 
 // Mark OTP as used in the database
-export const markOTPAsUsed = async (contact_number: string) => {
-    await prisma.otp.updateMany({
-        where: { contact_number },
-        data: {
-            used: true
-        },
+export const markOTPAsUsed = async (otp: string) => {
+    await prisma.otp.update({
+        where: { otp },
+        data: { used: true },
     });
 };

@@ -9,7 +9,7 @@ export const registerCustomer = async (req: Request, res: Response) => {
         const customer = await customerAuthService.registerCustomer(req.body);
 
         // Send email verification link
-        await customerAuthService.sendEmailVerification(customer.email);
+        await customerAuthService.sendEmailVerification(customer.email, customer.customer_id);
 
         res.status(200).json({ message: "Customer registered. A confirmation link has been sent to your email.", customer });
     } catch (error: any) {
@@ -46,23 +46,22 @@ export const sendPhoneNumberOTP = async (req: Request, res: Response) => {
 
 // Customer Sign Up: Verify contact number with OTP
 export const verifyPhoneNumberOTP = async (req: Request, res: Response) => {
-    const { contact_number, otp } = req.body;
+    const { otp } = req.body;
 
     try {
-        const token = await customerAuthService.verifyPhoneNumberOTP(contact_number, otp);
-        res.status(200).json({ message: "Phone number verified successfully.", token });
+        const jwtToken = await customerAuthService.verifyPhoneNumberOTP(otp);
+        res.status(200).json({ message: "Phone number verified successfully.", jwtToken });
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }
 };
 
 
-
 // Customer Login
 export const login = async (req: Request, res: Response) => {
     try {
-        const token = await customerAuthService.login(req.body);
-        res.status(200).json({ token });
+        const jwtToken = await customerAuthService.login(req.body);
+        res.status(200).json({ jwtToken });
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }
@@ -71,14 +70,14 @@ export const login = async (req: Request, res: Response) => {
 
 // Customer Logout
 export const logout = async (req: Request, res: Response) => {
-    const token = req.headers.authorization?.split(" ")[1];
+    const jwtToken = req.headers.authorization?.split(" ")[1];
 
-    if (!token) {
+    if (!jwtToken) {
         return res.status(400).json({ message: 'No token provided' });
     }
 
     try {
-        await customerAuthService.logout(token);
+        await customerAuthService.logout(jwtToken);
         return res.status(200).json({ message: 'Logout successful' });
     } catch (error: any) {
         return res.status(500).json({ message: 'Could not log out', error: error.message });
