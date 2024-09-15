@@ -30,3 +30,21 @@ export const updateCustomer = async (customer_id: string, updateData: Partial<IC
         data: updateData,
     });
 };
+
+
+// Update customer status by email
+export const updateCustomerStatusByEmail = async (email: string, status: string) => {
+    return prisma.customer.update({
+        where: { email },
+        data: { status },
+    });
+};
+
+
+// Update customer status by phone
+export const updateCustomerStatusByPhone = async (contact_number: string, status: string) => {
+    return prisma.customer.update({
+        where: { contact_number },
+        data: { status },
+    });
+};

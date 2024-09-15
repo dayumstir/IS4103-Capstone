@@ -3,60 +3,58 @@ import { Request, Response } from "express";
 import * as customerAuthService from "../services/customerAuthService";
 
 
-// Customer Sign Up: Send email confirmation link
-export const sendConfirmationEmail = async (req: Request, res: Response) => {
-    const { email } = req.body;
-
+// Customer Sign Up
+export const registerCustomer = async (req: Request, res: Response) => {
     try {
-        await customerAuthService.sendConfirmationEmail(email);
-        res.status(200).json({ message: "Confirmation link sent to email" });
-    } catch (error : any) {
-        res.status(400).json({ error: error.message });
-    }
-};
+        const customer = await customerAuthService.registerCustomer(req.body);
 
+        // Send email verification link
+        await customerAuthService.sendEmailVerification(customer.email);
 
-// Customer Sign Up: Confirm email and register customer
-export const confirmEmailAndRegister = async (req: Request, res: Response) => {
-    const { token, customer } = req.body;
-
-    try {
-        const newCustomer = await customerAuthService.confirmEmailAndRegister(token, customer);
-        res.status(200).json(newCustomer);
+        res.status(200).json({ message: "Customer registered. A confirmation link has been sent to your email.", customer });
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }
 };
 
 
-// Customer Sign Up: Send phone number OTP
-// export const sendPhoneNumberOTP = async (req: Request, res: Response) => {
-//     const { contact_number } = req.body;
+// Customer Sign Up: Confirm email for the customer
+export const confirmEmail = async (req: Request, res: Response) => {
+    const { token } = req.body;
 
-//     try {
-//         await customerAuthService.sendPhoneNumberOTP(contact_number);
-//         res.status(200).json({ message: "OTP sent to phone" });
-//     } catch (error: any) {
-//         res.status(400).json({ error: error.message });
-//     }
-// };
+    try {
+        await customerAuthService.confirmEmail(token);
+        res.status(200).json({ message: "Email confirmed. Please verify your phone number."});
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
 
-// Customer Sign Up: Verify phone number
-// export const verifyPhoneNumberOTP = async (req: Request, res: Response) => {
-//     const { contact_number, otp } = req.body;
+// Customer Sign Up: Send OTP to contact number
+export const sendPhoneNumberOTP = async (req: Request, res: Response) => {
+    const { contact_number } = req.body;
 
-//     try {
-//         const isVerified = await authService.verifyPhoneNumberOTP(contact_number, otp);
-//         if (isVerified) {
-//             res.status(200).json({ message: 'Phone number verified' });
-//         } else {
-//             res.status(400).json({ message: 'Invalid OTP' });
-//         }
-//     } catch (error: any) {
-//         res.status(400).json({ error: error.message });
-//     }
-// };
+    try {
+        await customerAuthService.sendPhoneNumberOTP(contact_number);
+        res.status(200).json({ message: "OTP sent to phone." });
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+// Customer Sign Up: Verify contact number with OTP
+export const verifyPhoneNumberOTP = async (req: Request, res: Response) => {
+    const { contact_number, otp } = req.body;
+
+    try {
+        const token = await customerAuthService.verifyPhoneNumberOTP(contact_number, otp);
+        res.status(200).json({ message: "Phone number verified successfully.", token });
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
 
 
