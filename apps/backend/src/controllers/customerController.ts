@@ -1,10 +1,12 @@
 // Manages customer-related actions
 import { Request, Response } from "express";
 import * as customerService from "../services/customerService";
+import logger from "../utils/logger";
 
 
 // Customer View Profile
 export const getProfile = async (req: Request, res: Response) => {
+    logger.info('Executing getProfile...');
     try {
         // Currently, the controller supplies id based on the decoded JWT.
         // TODO: To allow admin to view other customer profiles, customer_id will be sent in via params. A check is needed
@@ -12,6 +14,7 @@ export const getProfile = async (req: Request, res: Response) => {
         const customer = await customerService.getCustomerById(req.body.customer_id);
         res.status(200).json(customer);
     } catch(error: any) {
+        logger.error('An error occurred:', error);
         res.status(400).json({ error: error.message });
     }
 };
@@ -19,6 +22,7 @@ export const getProfile = async (req: Request, res: Response) => {
 
 // Customer Edit Profile
 export const editProfile = async (req: Request, res: Response) => {
+    logger.info('Executing editProfile...');
     try {
         // Currently, the controller supplies id based on the decoded JWT.
         // TODO: To allow admin to edit other customer profiles, customer_id will be sent in via params. A check is needed
@@ -27,6 +31,7 @@ export const editProfile = async (req: Request, res: Response) => {
         const updatedCustomer = await customerService.updateCustomer(req.body.customer_id, req.body);
         res.status(200).json(updatedCustomer);
     } catch(error: any) {
+        logger.error('An error occurred:', error);
         res.status(400).json({ error: error.message });
     }
 };
