@@ -1,3 +1,4 @@
+// Defines the structure of a customer object
 import { CustomerStatus } from "./customerStatus";
 
 
