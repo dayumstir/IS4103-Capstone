@@ -1,13 +1,14 @@
-import React from "react";
+import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import { useDispatch } from "react-redux";
-import { login } from "../redux/features/authSlice";
-import { Link } from "expo-router";
+import { login } from "../redux/features/customerAuthSlice";
+import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLoginMutation } from "../redux/services/auth";
+import { useLoginMutation } from "../redux/services/customerAuth";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 // Define your Zod schema
 const loginSchema = z.object({
@@ -24,6 +25,7 @@ export type LoginFormValues = z.infer<typeof loginSchema>;
 export default function Login() {
   const dispatch = useDispatch();
   const [loginMutation, { isLoading, error }] = useLoginMutation();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     control,
@@ -35,9 +37,13 @@ export default function Login() {
 
   // Form submit handler
   const onSubmit = async (data: LoginFormValues) => {
-    const result = await loginMutation(data);
-    if (result.data) {
-      dispatch(login());
+    try {
+      const result = await loginMutation(data).unwrap();
+      dispatch(login(result));
+      // Delete the history to prevent user from swiping back to the login page
+      router.replace("/home");
+    } catch (error) {
+      console.error("Login failed:", error);
     }
   };
 
@@ -60,11 +66,12 @@ export default function Login() {
         render={({ field: { onChange, onBlur, value } }) => (
           <View className="mb-4">
             <TextInput
-              className="rounded-md border border-gray-300 p-4"
+              className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
               onChangeText={onChange}
               onBlur={onBlur}
               value={value}
               placeholder="Email"
+              autoCapitalize="none"
             />
             {errors.email && (
               <Text className="mt-1 text-red-500">{errors.email.message}</Text>
@@ -80,13 +87,23 @@ export default function Login() {
         render={({ field: { onChange, onBlur, value } }) => (
           <View className="mb-4">
             <TextInput
-              className="rounded-md border border-gray-300 p-4"
+              className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
               onChangeText={onChange}
               onBlur={onBlur}
               value={value}
               placeholder="Password"
-              secureTextEntry
+              secureTextEntry={!showPassword}
             />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-3"
+            >
+              <Ionicons
+                name={showPassword ? "eye" : "eye-off"}
+                size={24}
+                color="gray"
+              />
+            </TouchableOpacity>
             {errors.password && (
               <Text className="mt-1 text-red-500">
                 {errors.password.message}
@@ -105,8 +122,9 @@ export default function Login() {
 
       {/* ===== Login Button ===== */}
       <TouchableOpacity
-        onPress={handleSubmit(onSubmit)}
         className="rounded-md bg-blue-500 py-4"
+        onPress={handleSubmit(onSubmit)}
+        disabled={isLoading}
       >
         {isLoading ? (
           <AntDesign
@@ -125,9 +143,12 @@ export default function Login() {
       {/* ===== Register Link ===== */}
       <View className="mt-4 flex flex-row items-center justify-center gap-2">
         <Text>Don't have an account?</Text>
-        <Link href="/register" className="text-center text-blue-500">
+        <Text
+          onPress={() => router.replace("/register")}
+          className="text-center text-blue-500"
+        >
           Register
-        </Link>
+        </Text>
       </View>
     </View>
   );

@@ -1,71 +1,79 @@
 // Handles authentication-related actions
 import { Request, Response } from "express";
 import * as customerAuthService from "../services/customerAuthService";
+import logger from "../utils/logger";
 
 
-// Customer Sign Up: Send email confirmation link
-export const sendConfirmationEmail = async (req: Request, res: Response) => {
-    const { email } = req.body;
-
+// Customer Sign Up
+export const registerCustomer = async (req: Request, res: Response) => {
+    logger.info('Executing registerCustomer...');
     try {
-        await customerAuthService.sendConfirmationEmail(email);
-        res.status(200).json({ message: "Confirmation link sent to email" });
-    } catch (error : any) {
-        res.status(400).json({ error: error.message });
-    }
-};
+        const customer = await customerAuthService.registerCustomer(req.body);
 
+        // Send email verification link
+        await customerAuthService.sendEmailVerification(customer.email, customer.customer_id);
 
-// Customer Sign Up: Confirm email and register customer
-export const confirmEmailAndRegister = async (req: Request, res: Response) => {
-    const { token, customer } = req.body;
-
-    try {
-        const newCustomer = await customerAuthService.confirmEmailAndRegister(token, customer);
-        res.status(200).json(newCustomer);
+        res.status(200).json({ message: "Customer registered. A confirmation link has been sent to your email.", customer });
     } catch (error: any) {
+        logger.error('An error occurred:', error);
         res.status(400).json({ error: error.message });
     }
 };
 
 
-// Customer Sign Up: Send phone number OTP
-// export const sendPhoneNumberOTP = async (req: Request, res: Response) => {
-//     const { contact_number } = req.body;
+// Customer Sign Up: Confirm email for the customer
+export const confirmEmail = async (req: Request, res: Response) => {
+    logger.info('Executing confirmEmail...');
+    const { token } = req.body;
 
-//     try {
-//         await customerAuthService.sendPhoneNumberOTP(contact_number);
-//         res.status(200).json({ message: "OTP sent to phone" });
-//     } catch (error: any) {
-//         res.status(400).json({ error: error.message });
-//     }
-// };
+    try {
+        await customerAuthService.confirmEmail(token);
+        res.status(200).json({ message: "Email confirmed. Please verify your phone number."});
+    } catch (error: any) {
+        logger.error('An error occurred:', error);
+        res.status(400).json({ error: error.message });
+    }
+};
 
 
-// Customer Sign Up: Verify phone number
-// export const verifyPhoneNumberOTP = async (req: Request, res: Response) => {
-//     const { contact_number, otp } = req.body;
+// Customer Sign Up: Send OTP to contact number
+export const sendPhoneNumberOTP = async (req: Request, res: Response) => {
+    logger.info('Executing sendPhoneNumberOTP...');
+    const { contact_number } = req.body;
 
-//     try {
-//         const isVerified = await authService.verifyPhoneNumberOTP(contact_number, otp);
-//         if (isVerified) {
-//             res.status(200).json({ message: 'Phone number verified' });
-//         } else {
-//             res.status(400).json({ message: 'Invalid OTP' });
-//         }
-//     } catch (error: any) {
-//         res.status(400).json({ error: error.message });
-//     }
-// };
+    try {
+        await customerAuthService.sendPhoneNumberOTP(contact_number);
+        res.status(200).json({ message: "OTP sent to phone." });
+    } catch (error: any) {
+        logger.error('An error occurred:', error);
+        res.status(400).json({ error: error.message });
+    }
+};
 
+
+// Customer Sign Up: Verify contact number with OTP
+export const verifyPhoneNumberOTP = async (req: Request, res: Response) => {
+    logger.info('Executing verifyPhoneNumberOTP...');
+    const { otp } = req.body;
+
+    try {
+        const jwtToken = await customerAuthService.verifyPhoneNumberOTP(otp);
+        res.status(200).json({ message: "Phone number verified successfully.", jwtToken });
+    } catch (error: any) {
+        logger.error('An error occurred:', error);
+        res.status(400).json({ error: error.message });
+    }
+};
 
 
 // Customer Login
 export const login = async (req: Request, res: Response) => {
+    logger.info('Executing login...');
     try {
-        const token = await customerAuthService.login(req.body);
-        res.status(200).json({ token });
+        const jwtToken = await customerAuthService.login(req.body);
+        res.status(200).json({ jwtToken });
     } catch (error: any) {
+        logger.error('An error occurred:', error);
         res.status(400).json({ error: error.message });
     }
 };
@@ -73,16 +81,18 @@ export const login = async (req: Request, res: Response) => {
 
 // Customer Logout
 export const logout = async (req: Request, res: Response) => {
-    const token = req.headers.authorization?.split(" ")[1];
+    logger.info('Executing logout...');
+    const jwtToken = req.headers.authorization?.split(" ")[1];
 
-    if (!token) {
+    if (!jwtToken) {
         return res.status(400).json({ message: 'No token provided' });
     }
 
     try {
-        await customerAuthService.logout(token);
+        await customerAuthService.logout(jwtToken);
         return res.status(200).json({ message: 'Logout successful' });
     } catch (error: any) {
+        logger.error('An error occurred:', error);
         return res.status(500).json({ message: 'Could not log out', error: error.message });
     }
 };
@@ -90,10 +100,46 @@ export const logout = async (req: Request, res: Response) => {
 
 // Customer Reset Password
 export const resetPassword = async (req: Request, res: Response) => {
+    logger.info('Executing resetPassword...');
+    const { email, oldPassword, newPassword } = req.body;
+
     try {
-        await customerAuthService.resetPassword(req.body.email, req.body.newPassword);
+        await customerAuthService.resetPassword(email, oldPassword, newPassword);
         res.status(200).json({ message: "Password reset successful"});
     } catch (error: any) {
+        logger.error('An error occurred:', error);
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+// Customer Forget Password: Send reset password link
+export const forgetPassword = async (req: Request, res: Response) => {
+    logger.info('Executing forgetPassword...');
+
+    const { email } = req.body;
+
+    try {
+        await customerAuthService.sendPasswordResetEmail(email);
+        res.status(200).json({ message: "Password reset email sent" });
+    } catch (error: any) {
+        logger.error('An error occurred:', error);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+
+// Customer Forget Password: Reset password via token
+export const resetPasswordWithToken = async (req: Request, res: Response) => {
+    logger.info('Executing resetPasswordWithToken...');
+
+    const { token, newPassword } = req.body;
+
+    try {
+        await customerAuthService.resetPasswordWithToken(token, newPassword);
+        res.status(200).json({ message: "Password reset successfully."});
+    } catch (error: any) {
+        logger.error('An error occurred:', error);
         res.status(400).json({ error: error.message });
     }
 };

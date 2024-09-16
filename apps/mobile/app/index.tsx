@@ -4,7 +4,7 @@ import { RootState } from "../redux/store";
 
 export default function Index() {
   const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated,
+    (state: RootState) => state.customerAuth.isAuthenticated,
   );
 
   if (isAuthenticated) {

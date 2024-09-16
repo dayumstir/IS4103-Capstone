@@ -15,18 +15,97 @@ datasource db {
 }
 
 
+enum Status {
+  PENDING_EMAIL_VERIFICATION
+  PENDING_PHONE_VERIFICATION
+  ACTIVE
+  SUSPENDED
+}
+
+
 model Customer {
-  customer_id     String    @id @default(cuid())
-  name            String
-  profile_picture String
-  email           String    @unique
-  password        String
-  contact_number  String
-  address         String
-  date_of_birth   DateTime   
-  status          String    // TODO: Implement as enum
-  credit_score    Int
-  credit_tier_id  String    // TODO: Implemented as cuid()
+  customer_id               String          @id @default(cuid())
+  name                      String
+  profile_picture           String
+  email                     String          @unique
+  password                  String
+  contact_number            String          @unique
+  address                   String
+  date_of_birth             DateTime   
+  status                    Status  
+  credit_score              Int
+  credit_tier_id            String
+
+  // Relationships
+  emailVerificationTokens   EmailVerificationToken[]
+  otps                      Otp[]
+  passwordResetTokens       PasswordResetToken[]
+}
+
+
+// Utility Schemas
+// Customer Sign Up Use Case: Store email verification tokens
+model EmailVerificationToken {
+  id            String    @id @default(cuid())
+  email         String 
+  token         String    @unique
+
+  expiresAt     DateTime  @default(now())
+  used          Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // 1 Customer to Many EmailVerificationTokens
+  customer      Customer  @relation(fields: [customer_id], references: [customer_id])
+  customer_id   String  
+
+  @@index([customer_id])
+}
+
+
+// Customer Sign Up Use Case: Store phone number OTPs
+model Otp {
+  id             String    @id @default(cuid())
+  contact_number String    
+  otp            String    @unique
+
+  expiresAt      DateTime  @default(now())
+  used           Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  customer       Customer  @relation(fields: [customer_id], references: [customer_id])
+  customer_id    String
+
+  @@index([customer_id])
+}
+
+
+// Customer Logout Use Case: JWT Blacklisting
+model TokenBlackList {
+  id        String    @id @default(cuid())
+  token     String    @unique
+
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+}
+
+
+// Customer Forget Password Use Case: Store PasswordResetTokens
+model PasswordResetToken {
+  id            String    @id @default(cuid())
+  email         String
+  token         String    @unique
+
+  expiresAt     DateTime
+  used          Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  customer      Customer  @relation(fields: [customer_id], references: [customer_id])
+  customer_id   String
+
+  @@index([customer_id])
 }
 
 
@@ -45,15 +124,15 @@ model Admin {
 
 
 model Merchant {
-    merchant_id     String  @id @default(cuid())
-    name            String
-    profile_picture String
-    email           String  @unique
-    password        String
-    contact_number  String
-    address         String
-    status          String  // TODO: Implement as enum
-    qr_code         String
+  merchant_id     String  @id @default(cuid())
+  name            String
+  email           String  @unique
+  password        String
+  contact_number  String
+  address         String
+  qr_code         String
+  status          Status
+  profile_picture String
 }
 
 
@@ -62,28 +141,21 @@ model Transaction {
   amount              Decimal   @db.Decimal(10, 2)
   date                DateTime  
   status              String
-  customer_id         Int
-  merchant_id         Int
-  merchant_payment_id Int
-  installment_plan_id Int
+  customer_id         String
+  merchant_id         String
+  merchant_payment_id String
+  installment_plan_id String
 }
 
 
-// Utility Schemas
-// Customer Register Use Case: Store email verification tokens
-model EmailVerificationToken {
-  id        String    @id @default(cuid())
-  token     String    @unique
-  expiresAt DateTime  @default(now())
-  used      Boolean   @default(false)
-  email     String    
+model InstalmentPlan {
+  instalment_plan_id String  @id @default(cuid())
+  name               String
+  description        String
+  frequency          String // TODO: Implement as enum?
+  interest_rate      Decimal @db.Decimal(5, 2)
+  minimum_amount     Decimal @db.Decimal(10, 2)
+  maximum_amount     Decimal @db.Decimal(10, 2)
+  status             String // TODO: Implement as enum
 }
 
-
-// Customer Logout Use Case: JWT Blacklisting
-model TokenBlackList {
-  id        String    @id @default(cuid())
-  token     String    @unique
-  expiresAt DateTime
-  createdAt DateTime  @default(now())
-}
