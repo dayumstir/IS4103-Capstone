@@ -14,6 +14,7 @@ import * as customerRepository from "../repositories/customerRepository";
 import * as emailVerificationTokenRepository from "../repositories/emailVerificationTokenRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import * as otpRepository from "../repositories/otpRepository";
+import * as passwordResetTokenRepository from "../repositories/passwordResetTokenRepository"
 
 import logger from "../utils/logger";
 
@@ -223,4 +224,66 @@ export const resetPassword = async (email: string, oldPassword: string, newPassw
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await customerRepository.updateCustomer(customer.customer_id, { password: hashedPassword });
+};
+
+
+export const sendPasswordResetEmail = async (email: string) => {
+    logger.info('Executing sendPasswordResetEmail...');
+
+    // Find customer by email
+    const customer = await customerRepository.findCustomerByEmail(email);
+    if (!customer) {
+        throw new Error("Customer not found");
+    }
+
+    // Generate unique reset token
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);    // Token expires in 1h
+
+    // Save reset token to database
+    await passwordResetTokenRepository.createToken(email, token, expiresAt, customer.customer_id);
+
+    // Send password reset link using nodemailer
+    const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: parseInt(process.env.EMAIL_PORT || "2525"),
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email, 
+        subject: 'Password Reset Request',
+        text: `Please confirm your email by clicking this link: ${resetLink}`,
+    });
+};
+
+
+export const resetPasswordWithToken = async (token: string, newPassword: string) => {
+    logger.info('Executing resetPasswordWithToken...');
+
+    // Find password reset token
+    const passwordResetToken = await passwordResetTokenRepository.findToken(token);
+    if (!passwordResetToken) {
+        throw new Error("Invalid or expired password reset token.");
+    }
+
+    // Find customer
+    const customer = await customerRepository.findCustomerById(passwordResetToken.customer_id);
+    if (!customer) {
+        throw new Error("Customer not found.");
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    // Update customer password
+    await customerRepository.updateCustomer(customer.customer_id, { password: hashedPassword });
+
+    // Delete the password reset token
+    await passwordResetTokenRepository.deleteToken(token);
 };

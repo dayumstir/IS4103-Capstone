@@ -39,6 +39,7 @@ model Customer {
   // Relationships
   emailVerificationTokens   EmailVerificationToken[]
   otps                      Otp[]
+  passwordResetTokens       PasswordResetToken[]
 }
 
 
@@ -62,7 +63,7 @@ model EmailVerificationToken {
 }
 
 
-// Customer Sign Up Use Case: Store phone number OTP
+// Customer Sign Up Use Case: Store phone number OTPs
 model Otp {
   id             String    @id @default(cuid())
   contact_number String    
@@ -84,8 +85,27 @@ model Otp {
 model TokenBlackList {
   id        String    @id @default(cuid())
   token     String    @unique
+
   expiresAt DateTime
   createdAt DateTime  @default(now())
+}
+
+
+// Customer Forget Password Use Case: Store PasswordResetTokens
+model PasswordResetToken {
+  id            String    @id @default(cuid())
+  email         String
+  token         String    @unique
+
+  expiresAt     DateTime
+  used          Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  customer      Customer  @relation(fields: [customer_id], references: [customer_id])
+  customer_id   String
+
+  @@index([customer_id])
 }
 
 
@@ -126,3 +146,16 @@ model Transaction {
   merchant_payment_id String
   installment_plan_id String
 }
+
+
+model InstalmentPlan {
+  instalment_plan_id String  @id @default(cuid())
+  name               String
+  description        String
+  frequency          String // TODO: Implement as enum?
+  interest_rate      Decimal @db.Decimal(5, 2)
+  minimum_amount     Decimal @db.Decimal(10, 2)
+  maximum_amount     Decimal @db.Decimal(10, 2)
+  status             String // TODO: Implement as enum
+}
+
