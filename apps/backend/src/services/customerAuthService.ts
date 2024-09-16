@@ -14,6 +14,7 @@ import * as customerRepository from "../repositories/customerRepository";
 import * as emailVerificationTokenRepository from "../repositories/emailVerificationTokenRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import * as otpRepository from "../repositories/otpRepository";
+import * as passwordResetTokenRepository from "../repositories/passwordResetTokenRepository"
 
 import logger from "../utils/logger";
 
@@ -21,6 +22,7 @@ import logger from "../utils/logger";
 // Step 1: Register customer with basic information
 export const registerCustomer = async (customerData: ICustomer) => {
     logger.info('Executing registerCustomer...');
+
     // Check if customer already exists
     const existingCustomer = await customerRepository.findCustomerByEmail(customerData.email);
     if (existingCustomer) {
@@ -46,6 +48,7 @@ export const registerCustomer = async (customerData: ICustomer) => {
 // Step 2: Send email verification link
 export const sendEmailVerification = async (email: string, customer_id: string) => {
     logger.info('Executing sendEmailVerification...');
+
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)    // Token expires in 24hrs
 
@@ -75,6 +78,7 @@ export const sendEmailVerification = async (email: string, customer_id: string) 
 // Step 3: Confirm email
 export const confirmEmail = async (token: string) => {
     logger.info('Executing confirmEmail...');
+
     const emailVerificationToken = await emailVerificationTokenRepository.findToken(token);
     if (!emailVerificationToken || emailVerificationToken.used) {
         throw new Error("Invalid or expired token");
@@ -92,6 +96,7 @@ export const confirmEmail = async (token: string) => {
 // Step 4: Send OTP to contact number
 export const sendPhoneNumberOTP = async (contact_number: string) => {
     logger.info('Executing sendPhoneNumberOTP...');
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();     // Generate 6-digit OTP
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000)                 // Token expires in 10 mins
 
@@ -122,6 +127,7 @@ export const sendPhoneNumberOTP = async (contact_number: string) => {
 // Step 5: Verify phone number with OTP
 export const verifyPhoneNumberOTP = async (otp: string) => {
     logger.info('Executing verifyPhoneNumberOTP...');
+    
     const validOTP = await otpRepository.findOTP(otp);
     if (!validOTP) {
         throw new Error("Invalid OTP");
@@ -201,13 +207,83 @@ export const logout = async (token: string) => {
 };
 
 
-export const resetPassword = async (email: string, newPassword: string) => {
+export const resetPassword = async (email: string, oldPassword: string, newPassword: string) => {
     logger.info('Executing resetPassword...');
+
+    // Retrieve custoner from database
     const customer = await customerRepository.findCustomerByEmail(email);
     if (!customer) {
         throw new Error("Customer not found");
     }
 
+    // Verify that old password matches
+    const isPasswordValid = await bcrypt.compare(oldPassword, customer.password);
+    if (!isPasswordValid) {
+        throw new Error("Old password is incorrect");
+    }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await customerRepository.updateCustomer(customer.customer_id, { password: hashedPassword });
+};
+
+
+export const sendPasswordResetEmail = async (email: string) => {
+    logger.info('Executing sendPasswordResetEmail...');
+
+    // Find customer by email
+    const customer = await customerRepository.findCustomerByEmail(email);
+    if (!customer) {
+        throw new Error("Customer not found");
+    }
+
+    // Generate unique reset token
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);    // Token expires in 1h
+
+    // Save reset token to database
+    await passwordResetTokenRepository.createToken(email, token, expiresAt, customer.customer_id);
+
+    // Send password reset link using nodemailer
+    const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: parseInt(process.env.EMAIL_PORT || "2525"),
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email, 
+        subject: 'Password Reset Request',
+        text: `Please confirm your email by clicking this link: ${resetLink}`,
+    });
+};
+
+
+export const resetPasswordWithToken = async (token: string, newPassword: string) => {
+    logger.info('Executing resetPasswordWithToken...');
+
+    // Find password reset token
+    const passwordResetToken = await passwordResetTokenRepository.findToken(token);
+    if (!passwordResetToken) {
+        throw new Error("Invalid or expired password reset token.");
+    }
+
+    // Find customer
+    const customer = await customerRepository.findCustomerById(passwordResetToken.customer_id);
+    if (!customer) {
+        throw new Error("Customer not found.");
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    // Update customer password
+    await customerRepository.updateCustomer(customer.customer_id, { password: hashedPassword });
+
+    // Delete the password reset token
+    await passwordResetTokenRepository.deleteToken(token);
 };
