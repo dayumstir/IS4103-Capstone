@@ -101,8 +101,10 @@ export const logout = async (req: Request, res: Response) => {
 // Customer Reset Password
 export const resetPassword = async (req: Request, res: Response) => {
     logger.info('Executing resetPassword...');
+    const { email, oldPassword, newPassword } = req.body;
+
     try {
-        await customerAuthService.resetPassword(req.body.email, req.body.newPassword);
+        await customerAuthService.resetPassword(email, oldPassword, newPassword);
         res.status(200).json({ message: "Password reset successful"});
     } catch (error: any) {
         logger.error('An error occurred:', error);

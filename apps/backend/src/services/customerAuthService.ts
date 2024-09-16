@@ -21,6 +21,7 @@ import logger from "../utils/logger";
 // Step 1: Register customer with basic information
 export const registerCustomer = async (customerData: ICustomer) => {
     logger.info('Executing registerCustomer...');
+
     // Check if customer already exists
     const existingCustomer = await customerRepository.findCustomerByEmail(customerData.email);
     if (existingCustomer) {
@@ -46,6 +47,7 @@ export const registerCustomer = async (customerData: ICustomer) => {
 // Step 2: Send email verification link
 export const sendEmailVerification = async (email: string, customer_id: string) => {
     logger.info('Executing sendEmailVerification...');
+
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)    // Token expires in 24hrs
 
@@ -75,6 +77,7 @@ export const sendEmailVerification = async (email: string, customer_id: string) 
 // Step 3: Confirm email
 export const confirmEmail = async (token: string) => {
     logger.info('Executing confirmEmail...');
+
     const emailVerificationToken = await emailVerificationTokenRepository.findToken(token);
     if (!emailVerificationToken || emailVerificationToken.used) {
         throw new Error("Invalid or expired token");
@@ -92,6 +95,7 @@ export const confirmEmail = async (token: string) => {
 // Step 4: Send OTP to contact number
 export const sendPhoneNumberOTP = async (contact_number: string) => {
     logger.info('Executing sendPhoneNumberOTP...');
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();     // Generate 6-digit OTP
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000)                 // Token expires in 10 mins
 
@@ -122,6 +126,7 @@ export const sendPhoneNumberOTP = async (contact_number: string) => {
 // Step 5: Verify phone number with OTP
 export const verifyPhoneNumberOTP = async (otp: string) => {
     logger.info('Executing verifyPhoneNumberOTP...');
+    
     const validOTP = await otpRepository.findOTP(otp);
     if (!validOTP) {
         throw new Error("Invalid OTP");
@@ -201,11 +206,19 @@ export const logout = async (token: string) => {
 };
 
 
-export const resetPassword = async (email: string, newPassword: string) => {
+export const resetPassword = async (email: string, oldPassword: string, newPassword: string) => {
     logger.info('Executing resetPassword...');
+
+    // Retrieve custoner from database
     const customer = await customerRepository.findCustomerByEmail(email);
     if (!customer) {
         throw new Error("Customer not found");
+    }
+
+    // Verify that old password matches
+    const isPasswordValid = await bcrypt.compare(oldPassword, customer.password);
+    if (!isPasswordValid) {
+        throw new Error("Old password is incorrect");
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
