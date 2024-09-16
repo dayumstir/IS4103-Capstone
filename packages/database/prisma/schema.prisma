@@ -8,12 +8,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 
 enum Status {
   PENDING_EMAIL_VERIFICATION
@@ -22,91 +20,85 @@ enum Status {
   SUSPENDED
 }
 
-
 model Customer {
-  customer_id               String          @id @default(cuid())
-  name                      String
-  profile_picture           String
-  email                     String          @unique
-  password                  String
-  contact_number            String          @unique
-  address                   String
-  date_of_birth             DateTime   
-  status                    Status  
-  credit_score              Int
-  credit_tier_id            String
+  customer_id     String   @id @default(cuid())
+  name            String
+  profile_picture String
+  email           String   @unique
+  password        String
+  contact_number  String   @unique
+  address         String
+  date_of_birth   DateTime
+  status          Status
+  credit_score    Int
+  credit_tier_id  String
 
   // Relationships
-  emailVerificationTokens   EmailVerificationToken[]
-  otps                      Otp[]
+  emailVerificationTokens EmailVerificationToken[]
+  otps                    Otp[]
 }
-
 
 // Utility Schemas
 // Customer Sign Up Use Case: Store email verification tokens
 model EmailVerificationToken {
-  id            String    @id @default(cuid())
-  email         String 
-  token         String    @unique
+  id    String @id @default(cuid())
+  email String
+  token String @unique
 
-  expiresAt     DateTime  @default(now())
-  used          Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  expiresAt DateTime @default(now())
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // 1 Customer to Many EmailVerificationTokens
-  customer      Customer  @relation(fields: [customer_id], references: [customer_id])
-  customer_id   String  
+  customer    Customer @relation(fields: [customer_id], references: [customer_id])
+  customer_id String
 
   @@index([customer_id])
 }
-
 
 // Customer Sign Up Use Case: Store phone number OTP
 model Otp {
-  id             String    @id @default(cuid())
-  contact_number String    
-  otp            String    @unique
+  id             String @id @default(cuid())
+  contact_number String
+  otp            String @unique
 
-  expiresAt      DateTime  @default(now())
-  used           Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  expiresAt DateTime @default(now())
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  customer       Customer  @relation(fields: [customer_id], references: [customer_id])
-  customer_id    String
+  customer    Customer @relation(fields: [customer_id], references: [customer_id])
+  customer_id String
 
   @@index([customer_id])
 }
 
-
 // Customer Logout Use Case: JWT Blacklisting
 model TokenBlackList {
-  id        String    @id @default(cuid())
-  token     String    @unique
+  id        String   @id @default(cuid())
+  token     String   @unique
   expiresAt DateTime
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 }
 
-
 model Admin {
-  admin_id        String    @id @default(cuid())
+  admin_id        String   @id @default(cuid())
   name            String
   profile_picture String
-  email           String    @unique
-  username        String    @unique
+  email           String   @unique
+  username        String   @unique
   password        String
   contact_number  String
   address         String
-  date_of_birth   DateTime  
-  admin_type      String    // TODO: Implement as enum
+  date_of_birth   DateTime
+  admin_type      String // TODO: Implement as enum
 }
 
-
 model Merchant {
-  merchant_id     String  @id @default(cuid())
+  merchant_id     String @id @default(cuid())
   name            String
-  email           String  @unique
+  email           String @unique
   password        String
   contact_number  String
   address         String
@@ -115,14 +107,24 @@ model Merchant {
   profile_picture String
 }
 
-
 model Transaction {
-  transaction_id      String    @id @default(cuid())
-  amount              Decimal   @db.Decimal(10, 2)
-  date                DateTime  
+  transaction_id      String   @id @default(cuid())
+  amount              Decimal  @db.Decimal(10, 2)
+  date                DateTime
   status              String
   customer_id         String
   merchant_id         String
   merchant_payment_id String
   installment_plan_id String
+}
+
+model InstalmentPlan {
+  instalment_plan_id String  @id @default(cuid())
+  name               String
+  description        String
+  frequency          String // TODO: Implement as enum?
+  interest_rate      Decimal @db.Decimal(5, 2)
+  minimum_amount     Decimal @db.Decimal(10, 2)
+  maximum_amount     Decimal @db.Decimal(10, 2)
+  status             String // TODO: Implement as enum
 }
