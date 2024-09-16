@@ -39,9 +39,34 @@ model Admin {
   name            String
   profile_picture String
   email           String    @unique
+  username        String    @unique
   password        String
   contact_number  String
   address         String
   date_of_birth   DateTime
   admin_type      String
+}
+
+
+model Merchant {
+    merchant_id     Int     @id @default(autoincrement())
+    name            String
+    profile_picture String
+    email           String  @unique
+    password        String
+    contact_number  String
+    address         String
+    status          String
+    qr_code         String
+}
+
+model Transaction {
+  transaction_id      Int      @id @default(autoincrement())
+  amount              Decimal  @db.Decimal(10, 2)
+  date                DateTime
+  status              String
+  customer_id         Int
+  merchant_id         Int
+  merchant_payment_id Int
+  installment_plan_id Int
 }
