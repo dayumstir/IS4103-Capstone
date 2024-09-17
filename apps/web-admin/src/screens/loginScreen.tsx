@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { FormProps } from "antd";
 import {
   Button,
@@ -21,6 +21,7 @@ type FieldType = {
 const LoginScreen: React.FC = () => {
   const navigate = useNavigate();
   const { Text, Title } = Typography;
+  const [error, setError] = useState<string | null>(null);
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     const { username, password } = values;
@@ -46,6 +47,7 @@ const LoginScreen: React.FC = () => {
         navigate('/admin/profile');
       } catch (error) {
         console.error('Error:', error);
+        setError('Invalid username or password. Please try again.');
       }
   };
 
@@ -87,6 +89,12 @@ const LoginScreen: React.FC = () => {
           >
             <Input.Password />
           </Form.Item>
+
+          {error && (
+            <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
+              <Text type="danger">{error}</Text>
+            </Form.Item>
+          )}
 
           <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
             <Button type="primary" htmlType="submit">
