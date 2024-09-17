@@ -1,11 +1,11 @@
 // Defines routes related to admin actions
 import { Router } from "express";
-import { getAdmin, editAdmin } from "../controllers/adminController";
+import { get, edit } from "../controllers/adminController";
 import { adminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
 
 const router = Router();
 
-router.get("/profile", adminAuthMiddleware, getAdmin);
-router.put("/profile", adminAuthMiddleware, editAdmin);
+router.get("/profile", adminAuthMiddleware, get);
+router.put("/profile", adminAuthMiddleware, edit);
 
 export default router;

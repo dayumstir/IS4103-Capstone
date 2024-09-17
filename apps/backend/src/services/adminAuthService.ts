@@ -8,7 +8,7 @@ import { AdminType } from "../interfaces/adminType";
 
 import logger from "../utils/logger";
 
-export const addAdmin = async (adminData: IAdmin) => {
+export const add = async (adminData: IAdmin) => {
     const { username, email, password } = adminData;
 
     // Check for existing admin in db
@@ -38,7 +38,7 @@ export const addAdmin = async (adminData: IAdmin) => {
 };
 
 
-export const loginAdmin = async (loginData: { username: string; password: string }) => {
+export const login= async (loginData: { username: string; password: string }) => {
     const { username, password } = loginData;
 
     // Check for existing admin in db
@@ -60,7 +60,7 @@ export const loginAdmin = async (loginData: { username: string; password: string
 };
 
 
-export const logoutAdmin = async (token: string) => {
+export const logout= async (token: string) => {
     try {
         // Decode the JWT token to extract its expiration time
         const decoded = jwt.decode(token) as any;
@@ -78,7 +78,7 @@ export const logoutAdmin = async (token: string) => {
 };
 
 
-export const resetPasswordAdmin = async (email: string, oldPassword: string, newPassword: string ) => {
+export const resetPassword = async (email: string, oldPassword: string, newPassword: string ) => {
     logger.info('Executing resetPassword...');
 
     const admin = await adminRepository.findAdminByEmail(email);
