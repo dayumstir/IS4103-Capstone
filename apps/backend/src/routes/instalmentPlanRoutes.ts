@@ -1,4 +1,4 @@
-// Defines routes related to transaction actions
+// Defines routes related to instalment plan actions
 import { Router } from "express";
 import {
     createInstalmentPlan,

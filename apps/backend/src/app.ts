@@ -10,6 +10,7 @@ import customerAuthRoutes from "./routes/customerAuthRoutes";
 import customerRoutes from "./routes/customerRoutes";
 import transactionRoutes from "./routes/transactionRoutes";
 import instalmentPlanRoutes from "./routes/instalmentPlanRoutes";
+import creditTierRoutes from "./routes/creditTierRoutes";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/customerAuth", customerAuthRoutes);
 app.use("/customer", customerRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/instalmentPlan", instalmentPlanRoutes);
+app.use("/creditTier", creditTierRoutes);
 
 // Dummy route for the root
 app.get("/", (req, res) => {

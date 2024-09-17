@@ -128,3 +128,10 @@ model InstalmentPlan {
   maximum_amount     Decimal @db.Decimal(10, 2)
   status             String // TODO: Implement as enum
 }
+
+model CreditTier {
+  credit_tier_id   String @id @default(cuid())
+  name             String
+  min_credit_score Int
+  max_credit_score Int
+}
