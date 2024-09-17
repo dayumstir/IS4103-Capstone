@@ -3,7 +3,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { IAdmin } from "../interfaces/adminInterface";
 import * as adminRepository from "../repositories/adminRepository";
+import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
+import { AdminType } from "../interfaces/adminType";
 
+import logger from "../utils/logger";
 
 export const addAdmin = async (adminData: IAdmin) => {
     const { username, email, password } = adminData;
@@ -24,11 +27,12 @@ export const addAdmin = async (adminData: IAdmin) => {
     const newAdmin= await adminRepository.createAdmin({
         ...adminData,
         password: hashedPassword,
+        admin_type: AdminType.NORMAL,
     });
 
     // Generate JWT
     // TODO: Create .env folder with JWT Secret
-    const token = jwt.sign({ admin_id: newAdmin.admin_id }, process.env.JWT_SECRET!, { expiresIn: "1h"});
+    const token = jwt.sign({ admin_id: newAdmin.admin_id , email: newAdmin.email}, process.env.JWT_SECRET!, { expiresIn: "1h"});
 
     return { admin: newAdmin, token };
 };
@@ -50,7 +54,7 @@ export const loginAdmin = async (loginData: { username: string; password: string
     }
 
     // Generate JWT
-    const token = jwt.sign({ admin_id: admin.admin_id }, process.env.JWT_SECRET!, { expiresIn: "1h"});
+    const token = jwt.sign({ admin_id: admin.admin_id, email : admin.email }, process.env.JWT_SECRET!, { expiresIn: "1h"});
 
     return token;
 };
@@ -67,17 +71,25 @@ export const logoutAdmin = async (token: string) => {
 
         const expiresAt = new Date(decoded.exp * 1000);  // Convert expiration time to Date object
 
-        await adminRepository.blacklistToken(token, expiresAt);
+        await jwtTokenRepository.blacklistToken(token, expiresAt);
     } catch (error: any) {
         throw new Error(error.message || "Failed to log out");
     }
 };
 
 
-export const resetPasswordAdmin = async (email: string, newPassword: string ) => {
+export const resetPasswordAdmin = async (email: string, oldPassword: string, newPassword: string ) => {
+    logger.info('Executing resetPassword...');
+
     const admin = await adminRepository.findAdminByEmail(email);
     if (!admin) {
         throw new Error("Admin not found");
+    }
+
+        // Verify that old password matches
+    const isPasswordValid = await bcrypt.compare(oldPassword, admin.password);
+    if (!isPasswordValid) {
+        throw new Error("Old password is incorrect");
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);

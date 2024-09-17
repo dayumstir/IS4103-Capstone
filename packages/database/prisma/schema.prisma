@@ -108,6 +108,11 @@ model PasswordResetToken {
   @@index([customer_id])
 }
 
+enum AdminType {
+  SUPER
+  NORMAL
+}
+
 
 model Admin {
   admin_id        String    @id @default(cuid())
@@ -119,7 +124,7 @@ model Admin {
   contact_number  String
   address         String
   date_of_birth   DateTime  
-  admin_type      String    // TODO: Implement as enum
+  admin_type      AdminType    // TODO: Implement as enum
 }
 
 

@@ -27,7 +27,7 @@ app.use("/customerAuth", customerAuthRoutes);
 app.use("/customer", customerRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/admin", adminRoutes);
-app.use("/adminauth", adminAuthRoutes);
+app.use("/adminAuth", adminAuthRoutes);
 
 // Dummy route for the root
 app.get("/", (req, res) => {

@@ -1,7 +1,7 @@
 // Handles authentication-related actions
 import { Request, Response } from "express";
 import * as adminAuthService from "../services/adminAuthService";
-
+import logger from "../utils/logger";
 
 export const addAdmin = async (req: Request, res: Response) => {
     try {
@@ -38,8 +38,11 @@ export const logoutAdmin  = async (req: Request, res: Response) => {
 };
 
 export const resetPasswordAdmin = async(req: Request, res: Response) => {
+    logger.info('Executing resetPassword...');
+    const { email, oldPassword, newPassword } = req.body;
+
     try {
-        await adminAuthService.resetPasswordAdmin(req.body.email, req.body.newPassword);
+        await adminAuthService.resetPasswordAdmin(email, oldPassword, newPassword);
         res.status(200).json({ message: "Password reset successful"});
     } catch (error: any) {
         res.status(400).json({ error: error.message });
