@@ -101,9 +101,43 @@ export const logout = async (req: Request, res: Response) => {
 // Customer Reset Password
 export const resetPassword = async (req: Request, res: Response) => {
     logger.info('Executing resetPassword...');
+    const { email, oldPassword, newPassword } = req.body;
+
     try {
-        await customerAuthService.resetPassword(req.body.email, req.body.newPassword);
+        await customerAuthService.resetPassword(email, oldPassword, newPassword);
         res.status(200).json({ message: "Password reset successful"});
+    } catch (error: any) {
+        logger.error('An error occurred:', error);
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+// Customer Forget Password: Send reset password link
+export const forgetPassword = async (req: Request, res: Response) => {
+    logger.info('Executing forgetPassword...');
+
+    const { email } = req.body;
+
+    try {
+        await customerAuthService.sendPasswordResetEmail(email);
+        res.status(200).json({ message: "Password reset email sent" });
+    } catch (error: any) {
+        logger.error('An error occurred:', error);
+        res.status(400).json({ error: error.message });
+    }
+}
+
+
+// Customer Forget Password: Reset password via token
+export const resetPasswordWithToken = async (req: Request, res: Response) => {
+    logger.info('Executing resetPasswordWithToken...');
+
+    const { token, newPassword } = req.body;
+
+    try {
+        await customerAuthService.resetPasswordWithToken(token, newPassword);
+        res.status(200).json({ message: "Password reset successfully."});
     } catch (error: any) {
         logger.error('An error occurred:', error);
         res.status(400).json({ error: error.message });

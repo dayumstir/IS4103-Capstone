@@ -8,7 +8,6 @@ export const cleanupExpiredTokens = async () => {
         const deletedEmailVerificationTokens = await prisma.emailVerificationToken.deleteMany({
             where: {
                 expiresAt: { lt: new Date() },  // Tokens where expiredAt is less than current time
-                used: false,
             },
         });
 
@@ -16,7 +15,6 @@ export const cleanupExpiredTokens = async () => {
         const deletedOtps = await prisma.otp.deleteMany({
             where: {
                 expiresAt: { lt: new Date() },  // Tokens where expiredAt is less than current time
-                used: false,
             },
         });
 

@@ -34,8 +34,9 @@ model Customer {
   credit_tier_id  String
 
   // Relationships
-  emailVerificationTokens EmailVerificationToken[]
-  otps                    Otp[]
+  emailVerificationTokens   EmailVerificationToken[]
+  otps                      Otp[]
+  passwordResetTokens       PasswordResetToken[]
 }
 
 // Utility Schemas
@@ -57,7 +58,8 @@ model EmailVerificationToken {
   @@index([customer_id])
 }
 
-// Customer Sign Up Use Case: Store phone number OTP
+
+// Customer Sign Up Use Case: Store phone number OTPs
 model Otp {
   id             String @id @default(cuid())
   contact_number String
@@ -76,11 +78,36 @@ model Otp {
 
 // Customer Logout Use Case: JWT Blacklisting
 model TokenBlackList {
-  id        String   @id @default(cuid())
-  token     String   @unique
+  id        String    @id @default(cuid())
+  token     String    @unique
+
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+
+
+// Customer Forget Password Use Case: Store PasswordResetTokens
+model PasswordResetToken {
+  id            String    @id @default(cuid())
+  email         String
+  token         String    @unique
+
+  expiresAt     DateTime
+  used          Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  customer      Customer  @relation(fields: [customer_id], references: [customer_id])
+  customer_id   String
+
+  @@index([customer_id])
+}
+
+enum AdminType {
+  SUPER
+  NORMAL
+}
+
 
 model Admin {
   admin_id        String   @id @default(cuid())
@@ -91,8 +118,8 @@ model Admin {
   password        String
   contact_number  String
   address         String
-  date_of_birth   DateTime
-  admin_type      String // TODO: Implement as enum
+  date_of_birth   DateTime  
+  admin_type      AdminType    // TODO: Implement as enum
 }
 
 model Merchant {
