@@ -9,6 +9,8 @@ import {
 
 import LoginScreen from "./screens/loginScreen";
 import ProfileScreen from "./screens/profileScreen";
+import EditProfileScreen from "./screens/editProfileScreen";
+import ResetPasswordScreen from "./screens/resetPasswordScreen";
 
 const App = () => {
   const { Header, Footer } = Layout;
@@ -98,6 +100,8 @@ const App = () => {
           <Route path="/" element={<Navigate to="/login" />} />
          <Route path="/login" element={<LoginScreen />} /> 
          <Route path="/admin/profile" element={< ProfileScreen/>} />
+         <Route path="/admin/editprofile" element={<EditProfileScreen/>} />
+         <Route path="/admin/resetpassword" element={<ResetPasswordScreen/>} />
         </Routes>
       
       </div>

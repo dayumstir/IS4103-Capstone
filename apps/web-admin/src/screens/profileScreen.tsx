@@ -2,7 +2,8 @@ import React, { useEffect, useState }  from "react";
 import {
   Card,
   Typography,
-  Spin
+  Spin,
+  Button 
 } from "antd";
 import { useNavigate  } from "react-router-dom";
 const { Title, Text } = Typography;
@@ -84,9 +85,25 @@ interface AdminProfileData {
           <Title level={4}>Date of Birth</Title>
           <Text>{user.date_of_birth}</Text>
           {}
+
+        <Button 
+          type="primary" 
+          style={{ marginTop: 16 }} 
+          onClick={() => navigate('/admin/editprofile')}
+        >
+          Edit Profile
+        </Button>
+        <Button
+          type="default"
+          style={{ marginTop: 16, marginLeft: 8 }}
+          onClick={() => navigate('/admin/resetpassword')}
+        >
+          Reset Password
+        </Button>
         </Card>
       </div>
     );
   };
   
   export default ProfileScreen;
+  
