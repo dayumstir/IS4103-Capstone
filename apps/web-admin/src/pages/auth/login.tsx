@@ -1,15 +1,8 @@
 import React, { useState } from "react";
 import type { FormProps } from "antd";
-import {
-  Button,
-  Card,
-  Form,
-  Input,
-  Typography,
-  Space,
-} from "antd";
-import { NavLink,useNavigate  } from "react-router-dom";
-import logo from "../assets/pandapay_logo.png";
+import { Button, Card, Form, Input, Typography, Space } from "antd";
+import { NavLink, useNavigate } from "react-router-dom";
+import logo from "../../assets/pandapay_logo.png";
 
 type FieldType = {
   username?: string;
@@ -17,44 +10,45 @@ type FieldType = {
   remember?: string;
 };
 
-
-const LoginScreen: React.FC = () => {
+export default function LoginPage() {
   const navigate = useNavigate();
   const { Text, Title } = Typography;
   const [error, setError] = useState<string | null>(null);
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     const { username, password } = values;
-  
+
     try {
-        const response = await fetch('http://localhost:3000/adminauth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username, password }), // Convert to JSON
-        });
-  
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-  
-        const data = await response.json();
+      const response = await fetch("http://localhost:3000/adminauth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }), // Convert to JSON
+      });
 
-        localStorage.setItem('token', data.token);
-        // Redirect to profile page
-
-        navigate('/admin/profile');
-      } catch (error) {
-        console.error('Error:', error);
-        setError('Invalid username or password. Please try again.');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const data = await response.json();
+
+      localStorage.setItem("token", data.token);
+      // Redirect to profile page
+
+      navigate("/admin/profile");
+    } catch (error) {
+      console.error("Error:", error);
+      setError("Invalid username or password. Please try again.");
+    }
   };
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
+  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+    errorInfo,
+  ) => {
     console.log("Failed:", errorInfo);
   };
-  
+
   return (
     <Space
       direction="vertical"
@@ -107,7 +101,6 @@ const LoginScreen: React.FC = () => {
             valuePropName="checked"
             wrapperCol={{ offset: 6, span: 30 }}
           >
-            {}
             <Text>
               Don't have an account yet?{" "}
               <NavLink to="/register">Click to Register</NavLink>
@@ -117,6 +110,4 @@ const LoginScreen: React.FC = () => {
       </Card>
     </Space>
   );
-};
-
-export default LoginScreen;
+}
