@@ -1,39 +1,46 @@
-import React from "react";
+import { LoadingOutlined } from "@ant-design/icons";
 import type { FormProps } from "antd";
-import {
-  Button,
-  Card,
-  Checkbox,
-  Form,
-  Input,
-  Typography,
-  Space,
-  Image,
-} from "antd";
-import { NavLink } from "react-router-dom";
+import { Button, Card, Form, Input, Space, Spin, Typography } from "antd";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
-// import PandaPay from "@repo/ui"
+import { login } from "../redux/features/authSlice";
+import { useLoginMutation } from "../redux/services/auth";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+import { Alert } from "antd";
 
-type FieldType = {
-  username?: string;
+export type LoginFormValues = {
+  email?: string;
   password?: string;
-  remember?: string;
-};
-
-const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-  console.log("Success:", values);
-};
-
-const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
-  console.log("Failed:", errorInfo);
 };
 
 const LoginScreen: React.FC = () => {
   const { Text, Title } = Typography;
-  // const logo = require("../assets/pandapay_logo.png");
-  const tailLayout = {
-    wrapperCol: { offset: 6, span: 20 },
+  const dispatch = useDispatch();
+  const [loginMutation, { isLoading, error }] = useLoginMutation();
+  const navigate = useNavigate();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated,
+  );
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated]);
+
+  const onFinish: FormProps<LoginFormValues>["onFinish"] = async (data) => {
+    console.log(data);
+    const result = await loginMutation(data);
+    if (result.data) {
+      dispatch(login());
+    }
+
+    console.log("Success:", data);
   };
+
   return (
     <Space
       direction="vertical"
@@ -48,20 +55,19 @@ const LoginScreen: React.FC = () => {
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
           style={{ minWidth: 600 }}
-          initialValues={{ remember: true }}
+          // initialValues={{ remember: true }}
           onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
-          <Form.Item<FieldType>
-            label="Username"
-            name="username"
-            rules={[{ required: true, message: "Please input your username!" }]}
+          <Form.Item<LoginFormValues>
+            label="Email"
+            name="email"
+            rules={[{ required: true, message: "Please input your Email!" }]}
           >
             <Input />
           </Form.Item>
 
-          <Form.Item<FieldType>
+          <Form.Item<LoginFormValues>
             label="Password"
             name="password"
             rules={[{ required: true, message: "Please input your password!" }]}
@@ -70,17 +76,27 @@ const LoginScreen: React.FC = () => {
           </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
-            <Button type="primary" htmlType="submit">
-              Login
-            </Button>
+            {isLoading ? (
+              <Spin indicator={<LoadingOutlined spin />} />
+            ) : (
+              <Space>
+                <Button type="primary" htmlType="submit">
+                  Login
+                </Button>
+                {error ? (
+                  <Alert
+                    message="Login Failed. Please try again!"
+                    type="error"
+                    style={{ height: 35 }}
+                  />
+                ) : (
+                  <></>
+                )}
+              </Space>
+            )}
           </Form.Item>
 
-          <Form.Item<FieldType>
-            name="remember"
-            valuePropName="checked"
-            wrapperCol={{ offset: 6, span: 30 }}
-          >
-            {/* <Checkbox>Remember me</Checkbox> */}
+          <Form.Item wrapperCol={{ offset: 6, span: 30 }}>
             <Text>
               Don't have an account yet?{" "}
               <NavLink to="/register">Click to Register</NavLink>

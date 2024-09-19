@@ -9,6 +9,7 @@ import dotenv from "dotenv";
 import customerAuthRoutes from "./routes/customerAuthRoutes";
 import customerRoutes from "./routes/customerRoutes";
 import transactionRoutes from "./routes/transactionRoutes";
+import merchantRoutes from "./routes/merchantRoutes";
 
 const app = express();
 
@@ -23,11 +24,12 @@ dotenv.config(); // Load environment variables
 // Routes
 app.use("/customerAuth", customerAuthRoutes);
 app.use("/customer", customerRoutes);
+app.use("/merchant", merchantRoutes);
 app.use("/transaction", transactionRoutes);
 
 // Dummy route for the root
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "Backend server is running!" });
+    res.status(200).json({ message: "Backend server is running!" });
 });
 
 export default app;

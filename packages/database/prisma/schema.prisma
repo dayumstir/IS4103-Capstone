@@ -108,6 +108,10 @@ model PasswordResetToken {
   @@index([customer_id])
 }
 
+enum AdminType {
+  SUPER
+  NORMAL
+}
 
 model Admin {
   admin_id        String    @id @default(cuid())
@@ -119,7 +123,7 @@ model Admin {
   contact_number  String
   address         String
   date_of_birth   DateTime  
-  admin_type      String    // TODO: Implement as enum
+  admin_type      AdminType // TODO: Implement as enum
 }
 
 
@@ -132,9 +136,8 @@ model Merchant {
   address         String
   qr_code         String
   status          Status
-  profile_picture String
+  profile_picture Bytes? @db.ByteA  
 }
-
 
 model Transaction {
   transaction_id      String    @id @default(cuid())
@@ -159,3 +162,9 @@ model InstalmentPlan {
   status             String // TODO: Implement as enum
 }
 
+model CreditTier {
+  credit_tier_id   String @id @default(cuid())
+  name             String
+  min_credit_score Int
+  max_credit_score Int
+}
