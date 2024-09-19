@@ -65,8 +65,8 @@ export default function ProfilePage() {
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <Card title="Admin Profile" style={{ width: 300 }}>
+    <div className="p-16">
+      <Card title="Admin Profile" className="w-64">
         <Title level={4}>Username</Title>
         <Text>{user.username}</Text>
         <Title level={4}>Email</Title>
@@ -79,7 +79,6 @@ export default function ProfilePage() {
         <Text>{user.address}</Text>
         <Title level={4}>Date of Birth</Title>
         <Text>{user.date_of_birth}</Text>
-        {}
       </Card>
     </div>
   );

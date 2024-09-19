@@ -122,6 +122,8 @@ export default function InstalmentPlanAdmin() {
       title: "Frequency",
       dataIndex: "frequency",
       key: "frequency",
+      width: 1,
+      render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
     },
     {
       title: <div className="whitespace-nowrap">Interest Rate (%)</div>,
@@ -289,7 +291,7 @@ export default function InstalmentPlanAdmin() {
   );
 
   return (
-    <div className="px-8 py-20">
+    <div className="px-8 py-4">
       {/* ===== Create Instalment Plan ===== */}
       <Card
         className="mb-8 border border-gray-300"

@@ -6,9 +6,9 @@ import LoginPage from "./pages/auth/login";
 import ProfilePage from "./pages/profile";
 import InstalmentPlanPage from "./pages/instalmentPlan";
 import CreditTierPage from "./pages/creditTier";
+import ProtectedRoute from "./pages/auth/protectedRoute";
 
 export default function App() {
-  const { Header, Footer } = Layout;
   const items = [
     { label: <a href="/holder">Home</a>, key: "Home" },
     { label: <a href="/admin/profile">Profile</a>, key: "Profile" },
@@ -23,6 +23,8 @@ export default function App() {
   const navigate = useNavigate();
 
   const jwt_token = localStorage.getItem("token");
+  const isAuthenticated = !!jwt_token;
+
   const handleLogout = async () => {
     try {
       if (!jwt_token) {
@@ -54,62 +56,42 @@ export default function App() {
   };
 
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      <Header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          backgroundColor: "#F5F5F5",
-          position: "fixed",
-          top: 0,
-          width: "100%",
-          zIndex: 1, // Keep it above content
-        }}
-      >
-        <>
-          {jwt_token && (
-            <Menu
-              mode="horizontal"
-              defaultSelectedKeys={["2"]}
-              items={items}
-              style={{ flex: 1, minWidth: 0, backgroundColor: "#F5F5F5" }}
-            />
-          )}
-        </>
+    <Layout className="min-h-screen">
+      {isAuthenticated && (
+        <Layout.Header className="fixed top-0 z-10 flex w-full items-center bg-gray-200">
+          <Menu
+            className="flex-1 bg-inherit"
+            mode="horizontal"
+            // TODO: Remove default selected keys
+            defaultSelectedKeys={["2"]}
+            items={items}
+          />
+          <Button onClick={handleLogout} danger>
+            Logout
+          </Button>
+        </Layout.Header>
+      )}
 
-        <>{jwt_token && <Button onClick={handleLogout}>Logout</Button>}</>
-      </Header>
-
-      <div
-        style={{
-          height: window.outerHeight - 70 - 50,
-          marginTop: 70,
-          marginBottom: 50,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <Layout.Content className={`${isAuthenticated ? "mt-16" : ""} bg-white`}>
         <Routes>
+          {/* ===== Public routes ===== */}
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/admin/profile" element={<ProfilePage />} />
-          <Route
-            path="/admin/instalment-plan"
-            element={<InstalmentPlanPage />}
-          />
-          <Route path="/admin/credit-tier" element={<CreditTierPage />} />
+          <Route element={<ProtectedRoute />}>
+            {/* ===== Protected routes ===== */}
+            <Route path="/admin/profile" element={<ProfilePage />} />
+            <Route
+              path="/admin/instalment-plan"
+              element={<InstalmentPlanPage />}
+            />
+            <Route path="/admin/credit-tier" element={<CreditTierPage />} />
+          </Route>
         </Routes>
-      </div>
-      <Footer
-        style={{
-          textAlign: "center",
-          position: "fixed",
-          bottom: 0,
-          width: "100%",
-        }}
-      >
+      </Layout.Content>
+
+      <Layout.Footer className="flex items-center justify-center">
         PandaPay ©{new Date().getFullYear()}
-      </Footer>
-    </div>
+      </Layout.Footer>
+    </Layout>
   );
 }

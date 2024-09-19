@@ -50,11 +50,8 @@ export default function LoginPage() {
   };
 
   return (
-    <Space
-      direction="vertical"
-      className="flex h-screen items-center justify-center"
-    >
-      <img src={logo} width="100%" style={{ alignSelf: "center" }} />
+    <div className="flex flex-col items-center justify-center py-16">
+      <img src={logo} width={240} className="mb-4" />
       <Title>PandaPay Admin</Title>
       <Title level={3}>Staff Login</Title>
       <Card style={{ backgroundColor: "#F5F5F5" }}>
@@ -108,6 +105,6 @@ export default function LoginPage() {
           </Form.Item>
         </Form>
       </Card>
-    </Space>
+    </div>
   );
 }

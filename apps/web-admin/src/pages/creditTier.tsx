@@ -235,7 +235,7 @@ export default function CreditTierAdmin() {
   );
 
   return (
-    <div className="px-8 py-20">
+    <div className="px-8 py-4">
       {/* ===== Create Credit Tier Terms ===== */}
       <Card
         className="mb-8 border border-gray-300"
