@@ -9,13 +9,15 @@ import {
 
 import LoginScreen from "./screens/loginScreen";
 import ProfileScreen from "./screens/profileScreen";
+import AllCustomersScreen from "./screens/allCustomersScreen";
+import CustomerProfileScreen from "./screens/customerProfileScreen";
 
 const App = () => {
   const { Header, Footer } = Layout;
   const items = [
     { label: <a href="/holder">Home</a>, key: "Home" },
     { label: <a href="/admin/profile">Profile</a>, key: "Profile" },
-    { label: <a href="/holder">Customers</a>, key: "Customers" },
+    { label: <a href="/admin/customers">Customers</a>, key: "Customers" },
     { label: <a href="/holder">Merchants</a>, key: "Merchants" },
     { label: <a href="/holder">Business management</a>, key: "Business management" },
   ];
@@ -98,6 +100,8 @@ const App = () => {
           <Route path="/" element={<Navigate to="/login" />} />
          <Route path="/login" element={<LoginScreen />} /> 
          <Route path="/admin/profile" element={< ProfileScreen/>} />
+         <Route path="/admin/customers" element={< AllCustomersScreen/>} />
+         <Route path="/admin/customer/:id" element={< CustomerProfileScreen/>} />
         </Routes>
       
       </div>
