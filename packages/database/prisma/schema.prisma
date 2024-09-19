@@ -128,7 +128,7 @@ model Merchant {
   address         String
   qr_code         String
   status          Status
-  profile_picture String
+  profile_picture Bytes? @db.ByteA  
 }
 
 model Transaction {

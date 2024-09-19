@@ -9,6 +9,7 @@ import dotenv from "dotenv";
 import customerAuthRoutes from "./routes/customerAuthRoutes";
 import customerRoutes from "./routes/customerRoutes";
 import transactionRoutes from "./routes/transactionRoutes";
+import merchantRoutes from "./routes/merchantRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import adminAuthRoutes from "./routes/adminAuthRoutes";
 import instalmentPlanRoutes from "./routes/instalmentPlanRoutes";
@@ -27,6 +28,7 @@ dotenv.config(); // Load environment variables
 // Routes
 app.use("/customerAuth", customerAuthRoutes);
 app.use("/customer", customerRoutes);
+app.use("/merchant", merchantRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/admin", adminRoutes);
 app.use("/adminAuth", adminAuthRoutes);
