@@ -10,13 +10,21 @@ import ProtectedRoute from "./pages/auth/protectedRoute";
 
 export default function App() {
   const items = [
-    { label: <a href="/holder">Home</a>, key: "Home" },
+    { label: <a href="/home">Home</a>, key: "Home" },
     { label: <a href="/admin/profile">Profile</a>, key: "Profile" },
-    { label: <a href="/holder">Customers</a>, key: "Customers" },
-    { label: <a href="/holder">Merchants</a>, key: "Merchants" },
+    { label: <a href="/customers">Customers</a>, key: "Customers" },
+    { label: <a href="/merchants">Merchants</a>, key: "Merchants" },
     {
-      label: <a href="/holder">Business management</a>,
+      label: <a href="/business-management">Business management</a>,
       key: "Business management",
+    },
+    {
+      label: <a href="/credit-tier">Credit Tier</a>,
+      key: "Credit Tier",
+    },
+    {
+      label: <a href="/instalment-plan">Instalment Plan</a>,
+      key: "Instalment Plan",
     },
   ];
 
@@ -80,11 +88,8 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             {/* ===== Protected routes ===== */}
             <Route path="/admin/profile" element={<ProfilePage />} />
-            <Route
-              path="/admin/instalment-plan"
-              element={<InstalmentPlanPage />}
-            />
-            <Route path="/admin/credit-tier" element={<CreditTierPage />} />
+            <Route path="/instalment-plan" element={<InstalmentPlanPage />} />
+            <Route path="/credit-tier" element={<CreditTierPage />} />
           </Route>
         </Routes>
       </Layout.Content>
