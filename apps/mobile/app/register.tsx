@@ -1,3 +1,5 @@
+// A register screen component
+
 import {
   View,
   Text,

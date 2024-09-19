@@ -4,25 +4,24 @@ import { ICustomer } from "../../interfaces/customerInterface";
 interface customerAuthState {
   isAuthenticated: boolean;
   token: string | null;
-  customer: ICustomer | null;
 }
 
+const initialState: customerAuthState = {
+  isAuthenticated: false,
+  token: null,
+};
+
 const customerAuthSlice = createSlice({
-  name: "customerAuth",
-  initialState: {
-    isAuthenticated: false,
-    token: null,
-    customer: null,
-  } as customerAuthState,
+  name: 'customerAuth',
+  initialState,
   reducers: {
-    login: (state, action: PayloadAction<string>) => {
+    login: (state, action: PayloadAction<{ jwtToken: string }>) => {
+      state.token = action.payload.jwtToken;
       state.isAuthenticated = true;
-      state.token = action.payload;
     },
     logout: (state) => {
-      state.isAuthenticated = false;
       state.token = null;
-      state.customer = null;
+      state.isAuthenticated = false;
     },
   },
 });

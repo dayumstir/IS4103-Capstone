@@ -1,3 +1,5 @@
+// A screen component for the login functionality, handling email verification.
+
 import { View, Text, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
