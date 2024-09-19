@@ -10,6 +10,10 @@ import customerAuthRoutes from "./routes/customerAuthRoutes";
 import customerRoutes from "./routes/customerRoutes";
 import transactionRoutes from "./routes/transactionRoutes";
 import merchantRoutes from "./routes/merchantRoutes";
+import adminRoutes from "./routes/adminRoutes";
+import adminAuthRoutes from "./routes/adminAuthRoutes";
+import instalmentPlanRoutes from "./routes/instalmentPlanRoutes";
+import creditTierRoutes from "./routes/creditTierRoutes";
 
 const app = express();
 
@@ -26,6 +30,10 @@ app.use("/customerAuth", customerAuthRoutes);
 app.use("/customer", customerRoutes);
 app.use("/merchant", merchantRoutes);
 app.use("/transaction", transactionRoutes);
+app.use("/admin", adminRoutes);
+app.use("/adminAuth", adminAuthRoutes);
+app.use("/instalmentPlan", instalmentPlanRoutes);
+app.use("/creditTier", creditTierRoutes);
 
 // Dummy route for the root
 app.get("/", (req, res) => {
