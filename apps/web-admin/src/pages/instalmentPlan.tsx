@@ -1,34 +1,113 @@
 import React, { useState } from "react";
-import { Button, Modal, Popconfirm, Table, TableProps, Tag } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
-import InstalmentPlanForm from "../components/instalmentPlanForm";
-import { useQuery } from "@tanstack/react-query";
+import {
+  Form,
+  Input,
+  Button,
+  Table,
+  Card,
+  message,
+  Modal,
+  Popconfirm,
+  Empty,
+  InputNumber,
+  Select,
+  FormInstance,
+  Tag,
+} from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { IInstalmentPlan } from "../interfaces/instalmentPlanInterface";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  createInstalmentPlan,
+  fetchInstalmentPlanList,
+  updateInstalmentPlan,
+} from "../api/instalmentPlanApi";
 
-export default function InstalmentPlanPage() {
-  const [plans, setPlans] = useState<IInstalmentPlan[]>([]);
-  const [editingPlan, setEditingPlan] = useState<IInstalmentPlan | null>(null);
+export default function InstalmentPlanAdmin() {
+  const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const fetchInstalmentPlanList = async () => {
-    const response = await fetch("http://localhost:3000/instalmentPlan");
-    return response.json();
-  };
+  const [editingPlan, setEditingPlan] = useState<IInstalmentPlan | null>(null);
+  const queryClient = useQueryClient();
 
-  const { data, isLoading, isError, error } = useQuery({
+  const instalmentPlanListQuery = useQuery({
     queryKey: ["instalment-plans"],
     queryFn: fetchInstalmentPlanList,
   });
 
-  const handleDelete = (id: string) => {
-    setPlans(plans.filter((plan) => plan.instalment_plan_id !== id));
+  const createInstalmentPlanMutation = useMutation({
+    mutationFn: createInstalmentPlan,
+    onSettled: async () => {
+      return await queryClient.invalidateQueries({
+        queryKey: ["instalment-plans"],
+      });
+    },
+    onError: (error) => {
+      message.error(`Failed to create instalment plan: ${error.message}`);
+    },
+    onSuccess: (newInstalmentPlan) => {
+      message.success(
+        `New instalment plan "${newInstalmentPlan.name}" has been created.`,
+      );
+    },
+  });
+
+  const updateInstalmentPlanMutation = useMutation({
+    mutationFn: updateInstalmentPlan,
+    onSettled: async () => {
+      return await queryClient.invalidateQueries({
+        queryKey: ["instalment-plans"],
+      });
+    },
+    onError: (error) => {
+      message.error(`Failed to update instalment plan: ${error.message}`);
+    },
+  });
+
+  const handleCreatePlan = (
+    newInstalmentPlan: Omit<IInstalmentPlan, "instalment_plan_id">,
+  ) => {
+    createInstalmentPlanMutation.mutate(newInstalmentPlan);
+    form.resetFields();
   };
 
-  const handleSubmit = (plan: IInstalmentPlan) => {
-    setPlans([...plans, plan]);
+  const handleEditPlan = (plan: IInstalmentPlan) => {
+    setEditingPlan(plan);
+    // Data from db is string, need to convert them back to number
+    editForm.setFieldsValue({
+      ...plan,
+      interest_rate: Number(plan.interest_rate),
+      minimum_amount: Number(plan.minimum_amount),
+      maximum_amount: Number(plan.maximum_amount),
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleUpdatePlan = (
+    values: Omit<IInstalmentPlan, "instalment_plan_id">,
+  ) => {
+    if (!editingPlan) {
+      message.error("No instalment plan selected for editing");
+      return;
+    }
+
+    const updatedPlan: IInstalmentPlan = {
+      ...values,
+      instalment_plan_id: editingPlan.instalment_plan_id,
+    };
+
+    updateInstalmentPlanMutation.mutate(updatedPlan);
     setIsModalOpen(false);
+    setEditingPlan(null);
+    message.success(`Instalment plan "${updatedPlan.name}" has been updated.`);
   };
 
-  const columns: TableProps<IInstalmentPlan>["columns"] = [
+  // TODO: Implement delete instalment plan
+  const handleDeletePlan = (id: string) => {
+    message.success("Instalment plan has been deleted.");
+  };
+
+  const columns = [
     {
       title: "Name",
       dataIndex: "name",
@@ -45,52 +124,52 @@ export default function InstalmentPlanPage() {
       key: "frequency",
     },
     {
-      title: "Interest Rate (%)",
+      title: <div className="whitespace-nowrap">Interest Rate (%)</div>,
       dataIndex: "interest_rate",
       key: "interest_rate",
+      width: 1,
     },
     {
-      title: "Minimum Amount ($)",
+      title: <div className="whitespace-nowrap">Minimum Amount ($)</div>,
       dataIndex: "minimum_amount",
       key: "minimum_amount",
+      width: 1,
     },
     {
-      title: "Maximum Amount ($)",
+      title: <div className="whitespace-nowrap">Maximum Amount ($)</div>,
       dataIndex: "maximum_amount",
       key: "maximum_amount",
+      width: 1,
     },
     {
       title: "Status",
-      key: "status",
       dataIndex: "status",
-      render: (status) => (
-        <Tag color={status === "Active" ? "green" : "volcano"} key={status}>
-          {status.toUpperCase()}
-        </Tag>
+      key: "status",
+      width: 1,
+      render: (text: string) => (
+        <Tag color={text === "Active" ? "green" : "volcano"}>{text}</Tag>
       ),
     },
     {
       title: "Actions",
       key: "actions",
-      render: () => (
-        <div className="flex gap-2">
+      width: 1,
+      render: (text: string, record: IInstalmentPlan) => (
+        <div className="whitespace-nowrap">
           <Button
-            className="font-semibold"
-            onClick={() => {
-              setIsModalOpen(false);
-              setEditingPlan(editingPlan);
-            }}
+            className="mr-2"
+            icon={<EditOutlined />}
+            onClick={() => handleEditPlan(record)}
           >
             Edit
           </Button>
           <Popconfirm
-            title="Delete the task"
-            description="Are you sure to delete this task?"
-            onConfirm={() => handleDelete(editingPlan!.instalment_plan_id)}
+            title="Are you sure you want to delete this instalment plan?"
+            onConfirm={() => handleDeletePlan(record.instalment_plan_id)}
             okText="Yes"
             cancelText="No"
           >
-            <Button className="font-semibold" type="primary" danger>
+            <Button icon={<DeleteOutlined />} danger>
               Delete
             </Button>
           </Popconfirm>
@@ -99,49 +178,152 @@ export default function InstalmentPlanPage() {
     },
   ];
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error: {error.message}</div>;
-
-  return (
-    <div>
-      <div className="flex items-center justify-between pb-8">
-        <h1 className="text-2xl font-bold text-black">Instalment Plans</h1>
-        <Button
-          className="font-semibold"
-          type="primary"
-          onClick={() => {
-            setEditingPlan(null);
-            setIsModalOpen(true);
-          }}
-          icon={<PlusOutlined className="font-bold" />}
+  const renderForm = (formInstance: FormInstance) => (
+    <Form
+      form={formInstance}
+      name="instalment_plan"
+      onFinish={formInstance === form ? handleCreatePlan : handleUpdatePlan}
+      layout="vertical"
+    >
+      <div className="grid grid-cols-2 gap-x-8">
+        <Form.Item
+          name="name"
+          label="Plan Name"
+          rules={[{ required: true, message: "Please input the plan name!" }]}
         >
-          Create New Plan
-        </Button>
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          name="frequency"
+          label="Frequency"
+          rules={[{ required: true, message: "Please select the frequency!" }]}
+        >
+          <Select>
+            <Select.Option value="Weekly">Weekly</Select.Option>
+            <Select.Option value="Every 2 Weeks">Every 2 Weeks</Select.Option>
+            <Select.Option value="Monthly">Monthly</Select.Option>
+            <Select.Option value="Quarterly">Quarterly</Select.Option>
+            <Select.Option value="Yearly">Yearly</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          name="interest_rate"
+          label="Interest Rate (%)"
+          rules={[
+            { required: true, message: "Please input the interest rate!" },
+            {
+              type: "number",
+              min: 0,
+              max: 100,
+              message: "Interest rate must be positive",
+            },
+          ]}
+        >
+          <InputNumber className="w-full" step={0.01} />
+        </Form.Item>
+
+        <Form.Item
+          name="minimum_amount"
+          label="Minimum Amount ($)"
+          rules={[
+            { required: true, message: "Please input the minimum amount!" },
+            { type: "number", min: 0, message: "Amount must be positive" },
+          ]}
+        >
+          <InputNumber className="w-full" step={0.01} />
+        </Form.Item>
+
+        <Form.Item
+          name="status"
+          label="Status"
+          rules={[{ required: true, message: "Please select the status!" }]}
+        >
+          <Select>
+            <Select.Option value="Active">Active</Select.Option>
+            <Select.Option value="Inactive">Inactive</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          name="maximum_amount"
+          label="Maximum Amount ($)"
+          rules={[
+            { required: true, message: "Please input the maximum amount!" },
+            { type: "number", min: 0, message: "Amount must be positive" },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue("minimum_amount") < value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(
+                  new Error(
+                    "Maximum amount must be greater than minimum amount!",
+                  ),
+                );
+              },
+            }),
+          ]}
+        >
+          <InputNumber className="w-full" step={0.01} />
+        </Form.Item>
       </div>
 
-      <Table columns={columns} dataSource={data} />
-      <Modal
-        title={
-          editingPlan ? "Edit Instalment Plan" : "Create New Instalment Plan"
-        }
-        okText={editingPlan ? "Save Changes" : "Create"}
-        cancelText="Cancel"
-        open={isModalOpen}
-        onOk={() => {
-          setIsModalOpen(false);
-          handleSubmit(editingPlan!);
-        }}
-        onCancel={() => {
-          setIsModalOpen(false);
-        }}
-        centered
-        footer={null}
+      <Form.Item
+        name="description"
+        label="Description"
+        rules={[{ required: true, message: "Please input the description!" }]}
       >
-        <InstalmentPlanForm
-          handleSubmit={handleSubmit}
-          handleCancel={() => setIsModalOpen(false)}
-          editingPlan={editingPlan}
+        <Input.TextArea rows={1} />
+      </Form.Item>
+
+      <Form.Item>
+        <Button type="primary" htmlType="submit" icon={<PlusOutlined />}>
+          {formInstance === form
+            ? "Create Instalment Plan"
+            : "Update Instalment Plan"}
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+
+  return (
+    <div className="px-8 py-20">
+      {/* ===== Create Instalment Plan ===== */}
+      <Card
+        className="mb-8 border border-gray-300"
+        title="Create Instalment Plan"
+      >
+        {renderForm(form)}
+      </Card>
+
+      {/* ===== View and Manage Instalment Plans ===== */}
+      <Card
+        className="mb-8 border border-gray-300"
+        title="View and Manage Instalment Plans"
+      >
+        <Table
+          dataSource={instalmentPlanListQuery.data}
+          columns={columns}
+          rowKey="instalment_plan_id"
+          pagination={false}
+          loading={instalmentPlanListQuery.isLoading}
+          locale={{
+            emptyText: <Empty description="No instalment plans found"></Empty>,
+          }}
         />
+      </Card>
+
+      {/* ===== Edit Instalment Plan Modal ===== */}
+      <Modal
+        title="Edit Instalment Plan"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+        centered
+      >
+        {renderForm(editForm)}
       </Modal>
     </div>
   );

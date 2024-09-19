@@ -10,6 +10,7 @@ import {
   Popconfirm,
   Empty,
   InputNumber,
+  FormInstance,
 } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { ICreditTier } from "../interfaces/creditTierInterface";
@@ -117,20 +118,25 @@ export default function CreditTierAdmin() {
       key: "name",
     },
     {
-      title: "Min Score",
+      title: <div className="whitespace-nowrap">Min Credit Score</div>,
       dataIndex: "min_credit_score",
       key: "min_credit_score",
+      width: 1,
+      render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
     },
     {
-      title: "Max Score",
+      title: <div className="whitespace-nowrap">Max Credit Score</div>,
       dataIndex: "max_credit_score",
       key: "max_credit_score",
+      width: 1,
+      render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
     },
     {
       title: "Actions",
       key: "actions",
+      width: 1,
       render: (text: string, record: ICreditTier) => (
-        <>
+        <div className="whitespace-nowrap">
           <Button
             className="mr-2"
             icon={<EditOutlined />}
@@ -148,10 +154,85 @@ export default function CreditTierAdmin() {
               Delete
             </Button>
           </Popconfirm>
-        </>
+        </div>
       ),
     },
   ];
+
+  const renderForm = (formInstance: FormInstance) => (
+    <Form
+      form={formInstance}
+      name="credit_tier"
+      onFinish={formInstance === form ? handleCreateTier : handleUpdateTier}
+      layout="vertical"
+    >
+      <Form.Item
+        name="name"
+        label="Credit Tier Name"
+        rules={[
+          { required: true, message: "Please input the credit tier name!" },
+        ]}
+      >
+        <Input />
+      </Form.Item>
+
+      <div className="grid grid-cols-2 gap-x-8">
+        <Form.Item
+          name="min_credit_score"
+          label="Minimum Credit Score"
+          rules={[
+            {
+              required: true,
+              message: "Please input the minimum credit score!",
+            },
+            {
+              type: "number",
+              min: 0,
+              max: 1000,
+              message: "Credit score must be between 0 and 1000",
+            },
+          ]}
+        >
+          <InputNumber className="w-full" />
+        </Form.Item>
+
+        <Form.Item
+          name="max_credit_score"
+          label="Maximum Credit Score"
+          rules={[
+            {
+              required: true,
+              message: "Please input the maximum credit score!",
+            },
+            {
+              type: "number",
+              min: 0,
+              max: 1000,
+              message: "Credit score must be between 0 and 1000",
+            },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue("min_credit_score") < value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(
+                  new Error("Max score must be greater than min score!"),
+                );
+              },
+            }),
+          ]}
+        >
+          <InputNumber className="w-full" />
+        </Form.Item>
+      </div>
+
+      <Form.Item>
+        <Button type="primary" htmlType="submit" icon={<PlusOutlined />}>
+          {formInstance === form ? "Create Credit Tier" : "Update Credit Tier"}
+        </Button>
+      </Form.Item>
+    </Form>
+  );
 
   return (
     <div className="px-8 py-20">
@@ -160,79 +241,7 @@ export default function CreditTierAdmin() {
         className="mb-8 border border-gray-300"
         title="Create Credit Tier Terms"
       >
-        <Form
-          form={form}
-          name="create_credit_tier"
-          onFinish={handleCreateTier}
-          layout="vertical"
-        >
-          <Form.Item
-            name="name"
-            label="Credit Tier Name"
-            rules={[
-              { required: true, message: "Please input the credit tier name!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-
-          <div className="flex gap-8">
-            <Form.Item
-              className="w-1/2"
-              name="min_credit_score"
-              label="Minimum Credit Score"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input the minimum credit score!",
-                },
-                {
-                  type: "number",
-                  min: 0,
-                  max: 100,
-                  message: "Credit score must be between 0 and 100",
-                },
-              ]}
-            >
-              <InputNumber className="w-full" />
-            </Form.Item>
-            <Form.Item
-              className="w-1/2"
-              name="max_credit_score"
-              label="Maximum Credit Score"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input the maximum credit score!",
-                },
-                {
-                  type: "number",
-                  min: 0,
-                  max: 100,
-                  message: "Credit score must be between 0 and 100",
-                },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue("min_credit_score") < value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(
-                      new Error("Max score must be greater than min score!"),
-                    );
-                  },
-                }),
-              ]}
-            >
-              <InputNumber className="w-full" />
-            </Form.Item>
-          </div>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" icon={<PlusOutlined />}>
-              Create Credit Tier
-            </Button>
-          </Form.Item>
-        </Form>
+        {renderForm(form)}
       </Card>
 
       {/* ===== View and Manage Credit Tier Terms ===== */}
@@ -260,74 +269,7 @@ export default function CreditTierAdmin() {
         footer={null}
         centered
       >
-        <Form
-          form={editForm}
-          name="edit_credit_tier"
-          onFinish={handleUpdateTier}
-          layout="vertical"
-        >
-          <Form.Item
-            name="name"
-            label="Tier Name"
-            rules={[{ required: true, message: "Please input the tier name!" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="min_credit_score"
-            label="Minimum Credit Score"
-            rules={[
-              {
-                required: true,
-                message: "Please input the minimum credit score!",
-              },
-              {
-                type: "number",
-                min: 0,
-                max: 100,
-                message: "Credit score must be between 0 and 100",
-              },
-            ]}
-          >
-            <InputNumber className="w-full" />
-          </Form.Item>
-          <Form.Item
-            name="max_credit_score"
-            label="Maximum Credit Score"
-            rules={[
-              {
-                required: true,
-                message: "Please input the maximum credit score!",
-              },
-              {
-                type: "number",
-                min: 0,
-                max: 100,
-                message: "Credit score must be between 0 and 100",
-              },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("min_credit_score") < value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error(
-                      "Maximum credit score must be greater than minimum credit score!",
-                    ),
-                  );
-                },
-              }),
-            ]}
-          >
-            <InputNumber className="w-full" />
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Update Credit Tier
-            </Button>
-          </Form.Item>
-        </Form>
+        {renderForm(editForm)}
       </Modal>
     </div>
   );
