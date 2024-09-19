@@ -11,6 +11,8 @@ import customerRoutes from "./routes/customerRoutes";
 import transactionRoutes from "./routes/transactionRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import adminAuthRoutes from "./routes/adminAuthRoutes";
+import instalmentPlanRoutes from "./routes/instalmentPlanRoutes";
+import creditTierRoutes from "./routes/creditTierRoutes";
 
 const app = express();
 
@@ -28,10 +30,12 @@ app.use("/customer", customerRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/admin", adminRoutes);
 app.use("/adminAuth", adminAuthRoutes);
+app.use("/instalmentPlan", instalmentPlanRoutes);
+app.use("/creditTier", creditTierRoutes);
 
 // Dummy route for the root
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "Backend server is running!" });
+    res.status(200).json({ message: "Backend server is running!" });
 });
 
 export default app;
