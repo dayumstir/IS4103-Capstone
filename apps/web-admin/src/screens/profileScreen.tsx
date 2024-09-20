@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Card, Typography, Spin, Button } from "antd";
+import { Card, Typography, Spin, Button, Alert, Modal, Form, Input, message } from "antd";
 import { useNavigate } from "react-router-dom";
+
 const { Title, Text } = Typography;
 
 interface AdminProfileData {
@@ -15,7 +16,10 @@ interface AdminProfileData {
 const ProfileScreen: React.FC = () => {
   const [user, setUser] = useState<AdminProfileData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [form] = Form.useForm();
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,21 +47,62 @@ const ProfileScreen: React.FC = () => {
         setUser(data);
       } catch (error) {
         console.error("Failed to fetch user information:", error);
-        navigate("/login"); // Redirect to login if fetch fails
+        setError("Could not fetch user data. Redirecting to login...");
+        setTimeout(() => navigate("/login"), 3000);
       } finally {
-        setLoading(false); // Update loading state
+        setLoading(false);
       }
     };
 
     fetchUserProfile();
   }, [navigate]);
 
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    form.resetFields();
+  };
+
+  const onFinish = async (values: { oldPassword: string; newPassword: string }) => {
+    const { oldPassword, newPassword } = values;
+
+    try {
+      const email = user?.email;
+      const response = await fetch("http://localhost:3000/adminauth/reset-password", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, oldPassword, newPassword }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Could not update password.");
+      }
+
+      message.success("Password changed successfully!");
+      handleCancel(); 
+    } catch (error) {
+      console.error("Error updating password:", error);
+      message.error("Could not update password. Please try again.");
+    }
+  };
+
   if (loading) {
-    return <Spin size="large" />; // Display loading spinner while fetching
+    return <Spin size="large" tip="Loading profile..." />;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <Alert message={error} type="error" showIcon />;
   }
 
   if (!user) {
@@ -91,12 +136,82 @@ const ProfileScreen: React.FC = () => {
           <Button
             type="default"
             style={{ marginTop: 16, marginLeft: 8 }}
-            onClick={() => navigate("/admin/resetpassword")}
+            onClick={showModal}
+            aria-label="Reset Password"
           >
             Reset Password
           </Button>
         </div>
       </Card>
+
+      <Modal
+        title="Reset Password"
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={null}
+      >
+        <Form
+          form={form}
+          name="resetPassword"
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 16 }}
+          onFinish={onFinish}
+          autoComplete="off"
+        >
+          <Form.Item
+            label="Old Password"
+            name="oldPassword"
+            rules={[{ required: true, message: "Please input your old password" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            label="New Password"
+            name="newPassword"
+            rules={[
+              { required: true, message: "Please input your new password" },
+              {
+                validator: (_, value) => {
+                  const oldPassword = form.getFieldValue("oldPassword");
+                  if (value && value === oldPassword) {
+                    return Promise.reject(new Error("New password cannot be the same as old password"));
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            label="Confirm New Password"
+            name="confirmPassword"
+            rules={[
+              { required: true, message: "Please input your new password" },
+              {
+                validator: (_, value) => {
+                  const newPassword = form.getFieldValue("newPassword");
+                  if (value && value !== newPassword) {
+                    return Promise.reject(new Error("New password fields do not match"));
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
+          >
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Change Password
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
