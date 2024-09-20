@@ -2,15 +2,14 @@ import React from "react";
 import { Layout, Menu, Button } from "antd";
 import { Route, Routes, useNavigate, Navigate } from "react-router-dom";
 
-import LoginPage from "./pages/auth/login";
-import ProfilePage from "./pages/profile";
-import InstalmentPlanPage from "./pages/instalmentPlan";
-import CreditTierPage from "./pages/creditTier";
-import ProtectedRoute from "./pages/auth/protectedRoute";
+import LoginScreen from "./screens/loginScreen";
+import ProfileScreen from "./screens/profileScreen";
+import InstalmentPlanScreen from "./screens/instalmentPlanScreen";
+import CreditTierScreen from "./screens/creditTierScreen";
 import EditProfileScreen from "./screens/editProfileScreen";
 import ResetPasswordScreen from "./screens/resetPasswordScreen";
 
-
+import ProtectedRoute from "./components/protectedRoute";
 export default function App() {
   const items = [
     { label: <a href="/home">Home</a>, key: "Home" },
@@ -87,15 +86,17 @@ export default function App() {
         <Routes>
           {/* ===== Public routes ===== */}
           <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<LoginScreen />} />
           <Route element={<ProtectedRoute />}>
             {/* ===== Protected routes ===== */}
-            <Route path="/admin/profile" element={<ProfilePage />} />
-            <Route path="/admin/editprofile" element={<EditProfileScreen/>} />
-            <Route path="/admin/resetpassword" element={<ResetPasswordScreen/>} />
-            <Route path="/instalment-plan" element={<InstalmentPlanPage />} />
-            <Route path="/credit-tier" element={<CreditTierPage />} />
-            
+            <Route path="/admin/profile" element={<ProfileScreen />} />
+            <Route path="/admin/editprofile" element={<EditProfileScreen />} />
+            <Route
+              path="/admin/resetpassword"
+              element={<ResetPasswordScreen />}
+            />
+            <Route path="/instalment-plan" element={<InstalmentPlanScreen />} />
+            <Route path="/credit-tier" element={<CreditTierScreen />} />
           </Route>
         </Routes>
       </Layout.Content>

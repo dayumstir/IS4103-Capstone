@@ -16,21 +16,20 @@ const EditProfileScreen: React.FC = () => {
   const navigate = useNavigate();
   const [, setError] = useState<string | null>(null);
   const [initialValues, setInitialValues] = useState({
-
-    email: '',
-    contact_number: '',
-    address: '',
-    profile_picture: '',
+    email: "",
+    contact_number: "",
+    address: "",
+    profile_picture: "",
   });
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await fetch('http://localhost:3000/admin/profile', {
-          method: 'GET',
+        const response = await fetch("http://localhost:3000/admin/profile", {
+          method: "GET",
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
           },
         });
 
@@ -46,42 +45,49 @@ const EditProfileScreen: React.FC = () => {
           profile_picture: data.profile_picture,
         });
       } catch (error) {
-        console.error('Error fetching profile data:', error);
-        setError('Could not fetch profile data. Please try again later.');
+        console.error("Error fetching profile data:", error);
+        setError("Could not fetch profile data. Please try again later.");
       }
     };
 
     fetchProfileData();
   }, []);
 
-  const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     const { email, contact_number, address, profile_picture } = values;
 
     try {
-      const response = await fetch('http://localhost:3000/admin/profile', {
-        method: 'PUT',
+      const response = await fetch("http://localhost:3000/admin/profile", {
+        method: "PUT",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, contact_number, address, profile_picture }),
+        body: JSON.stringify({
+          email,
+          contact_number,
+          address,
+          profile_picture,
+        }),
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-    // Show success message
-    message.success('Profile updated successfully!');
-    navigate('/admin/profile');
+      // Show success message
+      message.success("Profile updated successfully!");
+      navigate("/admin/profile");
     } catch (error) {
-      console.error('Error updating profile:', error);
-      setError('Could not update profile. Please try again.');
+      console.error("Error updating profile:", error);
+      setError("Could not update profile. Please try again.");
     }
   };
 
-  const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
-    console.log('Failed:', errorInfo);
+  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+    errorInfo,
+  ) => {
+    console.log("Failed:", errorInfo);
   };
 
   const validateEmail = (email: string) => {
@@ -95,11 +101,14 @@ const EditProfileScreen: React.FC = () => {
   };
 
   return (
-    <Space direction="vertical" className="flex h-screen items-start justify-start pl-4 pt-4">
+    <Space
+      direction="vertical"
+      className="flex h-screen items-start justify-start pl-4 pt-4"
+    >
       <Title level={3}>Edit Profile</Title>
-      <Card style={{ backgroundColor: '#F5F5F5' }}>
+      <Card style={{ backgroundColor: "#F5F5F5" }}>
         <Form
-          key={JSON.stringify(initialValues)} 
+          key={JSON.stringify(initialValues)}
           name="editProfile"
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
@@ -112,17 +121,18 @@ const EditProfileScreen: React.FC = () => {
           <Form.Item
             label="Email"
             name="email"
-            rules={[{ required: true, message: 'Please input your email' },
-                {
-                  validator: (_, value) => {
-                    if (validateEmail(value)) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(new Error("Invalid email format"));
-                  },
+            rules={[
+              { required: true, message: "Please input your email" },
+              {
+                validator: (_, value) => {
+                  if (validateEmail(value)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Invalid email format"));
                 },
-              ]}
-            >
+              },
+            ]}
+          >
             <Input />
           </Form.Item>
 
@@ -130,27 +140,29 @@ const EditProfileScreen: React.FC = () => {
             label="Contact Number"
             name="contact_number"
             rules={[
-                {
-                  required: true,
-                  message: "Please input your contact number",
+              {
+                required: true,
+                message: "Please input your contact number",
+              },
+              {
+                validator: (_, value) => {
+                  if (validateContactNumber(value)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error("Invalid contact number format"),
+                  );
                 },
-                {
-                  validator: (_, value) => {
-                    if (validateContactNumber(value)) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(new Error("Invalid contact number format"));
-                  },
-                },
-              ]}
-            >
+              },
+            ]}
+          >
             <Input />
           </Form.Item>
 
           <Form.Item
             label="Address"
             name="address"
-            rules={[{ required: true, message: 'Please input your address' }]}
+            rules={[{ required: true, message: "Please input your address" }]}
           >
             <Input />
           </Form.Item>
@@ -158,7 +170,9 @@ const EditProfileScreen: React.FC = () => {
           <Form.Item
             label="Profile Picture"
             name="profile_picture"
-            rules={[{ required: true, message: 'Please input your profile picture' }]}
+            rules={[
+              { required: true, message: "Please input your profile picture" },
+            ]}
           >
             <Input />
           </Form.Item>

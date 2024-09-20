@@ -23,7 +23,7 @@ import {
   updateInstalmentPlan,
 } from "../api/instalmentPlanApi";
 
-export default function InstalmentPlanAdmin() {
+export default function InstalmentPlanScreen() {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
