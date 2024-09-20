@@ -21,7 +21,7 @@ import {
   updateCreditTier,
 } from "../api/creditTierApi";
 
-export default function CreditTierAdmin() {
+export default function CreditTierScreen() {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);

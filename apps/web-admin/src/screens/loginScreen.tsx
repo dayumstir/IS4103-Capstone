@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import type { FormProps } from "antd";
 import { Button, Card, Form, Input, Typography, Space } from "antd";
 import { NavLink, useNavigate } from "react-router-dom";
-import logo from "../../assets/pandapay_logo.png";
+import logo from "../assets/pandapay_logo.png";
 
 type FieldType = {
   username?: string;
@@ -10,7 +10,7 @@ type FieldType = {
   remember?: string;
 };
 
-export default function LoginPage() {
+const LoginScreen: React.FC = () => {
   const navigate = useNavigate();
   const { Text, Title } = Typography;
   const [error, setError] = useState<string | null>(null);
@@ -50,8 +50,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-16">
-      <img src={logo} width={240} className="mb-4" />
+    <Space
+      direction="vertical"
+      className="flex h-screen items-center justify-center"
+    >
+      <img src={logo} width="100%" style={{ alignSelf: "center" }} />
       <Title>PandaPay Admin</Title>
       <Title level={3}>Staff Login</Title>
       <Card style={{ backgroundColor: "#F5F5F5" }}>
@@ -98,6 +101,7 @@ export default function LoginPage() {
             valuePropName="checked"
             wrapperCol={{ offset: 6, span: 30 }}
           >
+            {}
             <Text>
               Don't have an account yet?{" "}
               <NavLink to="/register">Click to Register</NavLink>
@@ -105,6 +109,8 @@ export default function LoginPage() {
           </Form.Item>
         </Form>
       </Card>
-    </div>
+    </Space>
   );
-}
+};
+
+export default LoginScreen;
