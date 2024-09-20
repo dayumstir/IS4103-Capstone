@@ -1,12 +1,16 @@
 import React, { useEffect, useState }  from "react";
 import {
-  List,
-  Typography,
   Spin,
-  Avatar
+  Popconfirm,
+  Button,
+  Card,
+  Table,
+  Empty,
+  Tag,
+  message
 } from "antd";
 import { useNavigate  } from "react-router-dom";
-const { Title, Text } = Typography;
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 interface ICustomer {
     customer_id: string;
@@ -54,7 +58,7 @@ const AllCustomersScreen: React.FC = () => {
         } catch (error) {
           console.error('Failed to fetch customers:', error);
         } finally {
-          setLoading(false); // Update loading state
+          setLoading(false);
         }
       };
   
@@ -62,7 +66,7 @@ const AllCustomersScreen: React.FC = () => {
     }, [navigate]);
   
     if (loading) {
-      return <Spin size="large" />; // Display loading spinner while fetching
+      return <Spin size="large" />;
     }
   
     if (error) {
@@ -72,34 +76,131 @@ const AllCustomersScreen: React.FC = () => {
     if (!customers || customers.length === 0) {
       return <div>No customer data available</div>; 
     }
+
+// Function to update customer
+const updateCustomer = async (customer_id: string, newStatus: string) => {
+  try {
+    const jwt_token = localStorage.getItem("token");
+    if (!jwt_token) {
+      throw new Error("No token found");
+    }
+
+    const response = await fetch(`http://localhost:3000/customer/${customer_id}/status`, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwt_token}`,
+      },
+      body: JSON.stringify({ status: newStatus }), // Send the new status
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update customer status");
+    }
+
+    // Update frontend state to reflect status change
+    setCustomers((prevCustomers) => {
+      if (!prevCustomers) return prevCustomers;
+      return prevCustomers.map((customer) =>
+        customer.customer_id === customer_id
+          ? { ...customer, status: newStatus }
+          : customer
+      )
+    }
+  );
+
+    message.success(`Customer status updated to ${newStatus}.`);
+  } catch (error) {
+    console.error(`Failed to update customer status:`, error);
+    message.error(`Failed to update customer status.`);
+  }
+};
+
+
+    const columns = [
+      {
+        title: "Name",
+        dataIndex: "name",
+        key: "name",
+      },
+      {
+        title: "Email",
+        dataIndex: "email",
+        key: "email",
+      },
+      {
+        title: "Contact Number",
+        dataIndex: "contact_number",
+        key: "contact_number",
+      },
+      {
+        title: "Credit Score",
+        dataIndex: "credit_score",
+        key: "credit_score",
+      },
+      {
+        title: "Credit Tier ID",
+        dataIndex: "credit_tier_id",
+        key: "credit_tier_id",
+      },
+      {
+        title: "Status",
+        dataIndex: "status",
+        key: "status",
+        render: (text: string) => (
+          <Tag color={text === "Active" ? "green" : "volcano"}>{text}</Tag>
+        ),
+      },
+      {
+        key: "actions",
+        width: 1,
+        render: (text: string, record: ICustomer) => (
+          <div className="whitespace-nowrap">
+            <Button
+            className="mr-2"
+            onClick={() => navigate(`/admin/customer/${record.customer_id}`)}
+          >
+            View Profile
+          </Button>
+          <Popconfirm
+            title={
+              record.status === "INACTIVE"
+                ? "Customer is suspended. Would you like to unsuspend the customer?"
+                : "Would you like to suspend the customer?"
+            }
+            onConfirm={() =>
+              updateCustomer(
+                record.customer_id,
+                record.status === "Inactive" ? "Active" : "Inactive" // Toggle status
+              )
+            }
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button icon={<ExclamationCircleOutlined />} danger>
+              {record.status === "Inactive" ? "Unsuspend" : "Suspend"}
+            </Button>
+          </Popconfirm>
+          </div>
+        ),
+      },
+    ];
+
   
     return (
       <div style={{ padding: '20px 100px' }}>
-        <Title level={2}>All Customers</Title>
-      <List
-        itemLayout="horizontal"
-        dataSource={customers}
-        renderItem={(customer) => (
-          <List.Item
-            actions={[
-              <a onClick={() => navigate(`/admin/customer/${customer.customer_id}`)}>View Profile</a>
-            ]}
-          >
-            <List.Item.Meta
-              avatar={<Avatar src={customer.profile_picture} />}
-              title={<Text>{customer.name}</Text>}
-              description={
-                <div>
-                  <Text>Email: {customer.email}</Text>
-                </div>
-              }
-            />
-
-
-
-          </List.Item>
-        )} 
-      />
+        <Card
+        title="View All Customers"
+      >
+        <Table
+          dataSource={customers}
+          columns={columns}
+          locale={{
+            emptyText: <Empty description="No customers found"></Empty>,
+          }}
+        />
+      </Card>
       </div>
     );
   };

@@ -21,8 +21,6 @@ interface IMerchant {
     address: string;
     date_of_birth: Date;
     status: string;
-    credit_score: number;
-    credit_tier_id: string;
   }
 
   const MerchantProfileScreen: React.FC = () => {
