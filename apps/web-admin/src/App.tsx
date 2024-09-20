@@ -7,7 +7,6 @@ import ProfileScreen from "./screens/profileScreen";
 import InstalmentPlanScreen from "./screens/instalmentPlanScreen";
 import CreditTierScreen from "./screens/creditTierScreen";
 import EditProfileScreen from "./screens/editProfileScreen";
-import ResetPasswordScreen from "./screens/resetPasswordScreen";
 
 import ProtectedRoute from "./components/protectedRoute";
 export default function App() {
@@ -91,10 +90,6 @@ export default function App() {
             {/* ===== Protected routes ===== */}
             <Route path="/admin/profile" element={<ProfileScreen />} />
             <Route path="/admin/editprofile" element={<EditProfileScreen />} />
-            <Route
-              path="/admin/resetpassword"
-              element={<ResetPasswordScreen />}
-            />
             <Route path="/instalment-plan" element={<InstalmentPlanScreen />} />
             <Route path="/credit-tier" element={<CreditTierScreen />} />
           </Route>
