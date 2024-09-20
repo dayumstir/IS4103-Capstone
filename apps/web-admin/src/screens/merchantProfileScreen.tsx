@@ -12,8 +12,8 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
 
-interface ICustomer {
-    customer_id: string;
+interface IMerchant {
+    merchant_id: string;
     name: string;
     profile_picture: string;
     email: string;
@@ -25,22 +25,22 @@ interface ICustomer {
     credit_tier_id: string;
   }
 
-  const CustomerProfileScreen: React.FC = () => {
-    const { id } = useParams<{ id: string }>(); // Get customer_id from URL
-    const [customer, setCustomer] = useState<ICustomer | null>(null);
+  const MerchantProfileScreen: React.FC = () => {
+    const { id } = useParams<{ id: string }>();
+    const [merchant, setMerchant] = useState<IMerchant | null>(null);
     const [loading, setLoading] = useState(true);
     const [error] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchCustomerProfile = async () => {
+        const fetchMerchantProfile = async () => {
           try {
             const jwt_token = localStorage.getItem("token");
             if (!jwt_token) {
               throw new Error("No token found");
             }
     
-            const response = await fetch(`http://localhost:3000/customer/${id}`, {
+            const response = await fetch(`http://localhost:3000/merchant/${id}`, {
               method: "GET",
               headers: {
                 'Accept': 'application/json',
@@ -50,19 +50,19 @@ interface ICustomer {
             });
     
             if (!response.ok) {
-              throw new Error("Failed to fetch customer profile");
+              throw new Error("Failed to fetch merchant profile");
             }
     
             const data = await response.json();
-            setCustomer(data);
+            setMerchant(data);
           } catch (error) {
-            console.error("Failed to fetch customer profile:", error);
+            console.error("Failed to fetch merchant profile:", error);
           } finally {
             setLoading(false);
           }
         };
     
-        fetchCustomerProfile();
+        fetchMerchantProfile();
       }, [id]);
     
       if (loading) {
@@ -73,32 +73,28 @@ interface ICustomer {
         return <div>Error: {error}</div>;
       }
     
-      if (!customer) {
-        return <div>No customer profile available</div>;
+      if (!merchant) {
+        return <div>No merchant profile available</div>;
       }
     
       return (
         <div style={{ padding: '30px' }}>
           <LeftOutlined style={{ fontSize: '40px' }}
-          onClick={() => navigate("/admin/customers")}/>
+          onClick={() => navigate("/admin/merchants")}/>
           <div style={{ padding: '20px 80px' }}>
-            <Title level={2}>Customer Profile</Title>
+            <Title level={2}>Merchant Profile</Title>
             <Card
-              cover={<Avatar size={100} src={customer.profile_picture} />}
+              cover={<Avatar size={100} src={merchant.profile_picture} />}
               actions={[<EditOutlined key="edit" style={{ fontSize: '30px' }}/>]}
             >
-              <Title level={4}>{customer.name}</Title>
-              <Text>Email: {customer.email}</Text>
+              <Title level={4}>{merchant.name}</Title>
+              <Text>Email: {merchant.email}</Text>
               <br />
-              <Text>Contact: {customer.contact_number}</Text>
+              <Text>Contact: {merchant.contact_number}</Text>
               <br />
-              <Text>Address: {customer.address}</Text>
+              <Text>Address: {merchant.address}</Text>
               <br />
-              <Text>Status: {customer.status}</Text>
-              <br />
-              <Text>Credit Score: {customer.credit_score}</Text>
-              <br />
-              <Text>Credit Tier ID: {customer.credit_tier_id}</Text>
+              <Text>Status: {merchant.status}</Text>
               <br />
             </Card>
             </div>
@@ -107,4 +103,4 @@ interface ICustomer {
       );
     };
     
-    export default CustomerProfileScreen;
+    export default MerchantProfileScreen;

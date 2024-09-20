@@ -85,19 +85,6 @@ interface AdminProfileData {
           <Text>{user.date_of_birth}</Text>
           {}
         </Card>
-        <button
-          onClick={() => navigate('/admin/customers')}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-        >
-          View All Customers
-        </button>
       </div>
     );
   };
