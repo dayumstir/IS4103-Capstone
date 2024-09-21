@@ -39,13 +39,16 @@ const EditProfileScreen: React.FC = () => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-
+       
         const data = await response.json();
+        const profilePictureBase64 = `data:image/png;base64,${Buffer.from(data.profile_picture).toString("base64")}`;
+        setProfilePictureDisplay(profilePictureBase64);
+
       setInitialValues({
           email: data.email,
           contact_number: data.contact_number,
           address: data.address,
-          profile_picture:`data:image/png;base64,${Buffer.from(data.profile_picture).toString("base64")}`,
+          profile_picture: data.profile_picture,
         }); 
 
       } catch (error) {
