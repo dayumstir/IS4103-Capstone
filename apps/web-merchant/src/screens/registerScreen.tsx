@@ -25,7 +25,7 @@ import {
   DetailsProps,
   EmailNameProps,
   PasswordProps,
-} from "../interfaces/RegisterFormInterface";
+} from "../interfaces/registerFormInterface";
 
 type RegisterFormValues = {
   name: string;
@@ -294,7 +294,7 @@ const Details = ({
     profilePicture && formData.append("profile_picture", profilePicture);
     const result = await registerMutation(formData);
     if (result.data) {
-      dispatch(login());
+      dispatch(login({ merchantId: result.data.merchant_id }));
       navigate("/");
     }
   };

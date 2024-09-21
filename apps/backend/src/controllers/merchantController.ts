@@ -4,8 +4,9 @@ import * as merchantService from "../services/merchantService";
 
 // Merchant View Profile
 export const getProfile = async (req: Request, res: Response) => {
+    const id = req.params.id;
     try {
-        const merchant = await merchantService.getMerchantById(req.body.merchant_id);
+        const merchant = await merchantService.getMerchantById(id);
         res.status(200).json(merchant);
     } catch (error: any) {
         res.status(400).json({ error: error.message });

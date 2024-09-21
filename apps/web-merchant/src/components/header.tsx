@@ -5,6 +5,7 @@ import { RootState } from "../redux/store";
 import { logout } from "../redux/features/authSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { UserOutlined } from "@ant-design/icons";
 
 const Header: React.FC = () => {
   const { Header } = Layout;
@@ -35,17 +36,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <Header
-      style={{
-        display: "flex",
-        alignItems: "center",
-        backgroundColor: "#F5F5F5",
-        position: "fixed",
-        top: 0,
-        width: "100%",
-        zIndex: 1, // Keep it above content
-      }}
-    >
+    <Header className="fixed top-0 z-10 flex w-full items-center bg-gray-100">
       <Menu
         mode="horizontal"
         defaultSelectedKeys={["2"]}
@@ -54,7 +45,12 @@ const Header: React.FC = () => {
         onClick={(menuInfo) => navigateToScreen(menuInfo.key)}
       />
       {isAuthenticated ? (
-        <Button onClick={() => submitLogout()}>Logout</Button>
+        <div>
+          <Button onClick={() => submitLogout()} className="m-10">
+            Logout
+          </Button>
+          <UserOutlined onClick={() => navigate("/profile")} />
+        </div>
       ) : (
         <Button onClick={() => navigate("/login")}>Login</Button>
       )}

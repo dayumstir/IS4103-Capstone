@@ -3,11 +3,11 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import HomeScreen from "./screens/homeScreen";
 import LoginScreen from "./screens/loginScreen";
 import RegisterScreen from "./screens/registerScreen";
-import TransactionScreen from "./screens/transactionScreen";
 import Header from "./components/header";
 import { useSelector } from "react-redux";
 import { RootState } from "./redux/store";
 import Footer from "./components/footer";
+import ProfileScreen from "./screens/profileScreen";
 
 // import "./App.css";
 
@@ -17,27 +17,21 @@ const App = () => {
   );
 
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="flex h-screen flex-col">
       <Header />
 
-      <div
-        style={{
-          // flexGrow: 1,
-          height: window.outerHeight - 70 - 50,
-          marginTop: 70,
-          marginBottom: 70,
-          padding: 10,
-          display: "flex",
-          flexDirection: "column",
-          marginLeft: 50,
-          marginRight: 50,
-        }}
-      >
+      <div className="mx-12 mb-16 mt-16 flex h-[calc(100vh-120px)] flex-col p-2">
         <Routes>
           <Route
             path="/"
             element={
               isAuthenticated ? <HomeScreen /> : <Navigate to="/login" />
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              isAuthenticated ? <ProfileScreen /> : <Navigate to="/login" />
             }
           />
           <Route path="/register" element={<RegisterScreen />} />

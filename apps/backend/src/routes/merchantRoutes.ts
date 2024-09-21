@@ -8,7 +8,7 @@ import multer from "multer";
 const merchantRouter = Router();
 
 // PROFILE
-merchantRouter.get("/profile", merchantAuthMiddleware, getProfile);
+merchantRouter.get("/profile/:id", merchantAuthMiddleware, getProfile);
 merchantRouter.put("/profile", merchantAuthMiddleware, editProfile);
 
 //AUTH
