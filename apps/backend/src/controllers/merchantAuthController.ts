@@ -4,8 +4,6 @@ import * as merchantAuthService from "../services/merchantAuthService";
 
 // Merchant Sign Up
 export const register = async (req: Request, res: Response) => {
-    console.log(req.body);
-    console.log(req.file?.buffer);
     try {
         const merchant = await merchantAuthService.register(req.body, req.file?.buffer);
         res.status(201).json(merchant);
@@ -17,8 +15,8 @@ export const register = async (req: Request, res: Response) => {
 // Merchant Login
 export const login = async (req: Request, res: Response) => {
     try {
-        const token = await merchantAuthService.login(req.body);
-        res.status(200).json({ token });
+        const { id, token } = await merchantAuthService.login(req.body);
+        res.status(200).json({ id, token });
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }
