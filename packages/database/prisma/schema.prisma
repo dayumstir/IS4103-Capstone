@@ -107,16 +107,16 @@ enum AdminType {
 }
 
 model Admin {
-  admin_id        String    @id @default(cuid())
+  admin_id        String @id @default(cuid())
   name            String
-  profile_picture String
-  email           String    @unique
-  username        String    @unique
-  password        String
-  contact_number  String
-  address         String
-  date_of_birth   DateTime
-  admin_type      AdminType // TODO: Implement as enum
+  profile_picture Bytes? @db.ByteA
+  email          String    @unique
+  username       String    @unique
+  password       String
+  contact_number String
+  address        String
+  date_of_birth  DateTime
+  admin_type     AdminType // TODO: Implement as enum
 }
 
 model Merchant {
@@ -128,7 +128,7 @@ model Merchant {
   address         String
   qr_code         String
   status          Status
-  profile_picture Bytes? @db.ByteA  
+  profile_picture Bytes? @db.ByteA
 }
 
 model Transaction {

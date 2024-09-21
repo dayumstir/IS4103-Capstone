@@ -35,7 +35,8 @@ const LoginScreen: React.FC = () => {
     console.log(data);
     const result = await loginMutation(data);
     if (result.data) {
-      dispatch(login());
+      dispatch(login({ merchantId: result.data.id }));
+      localStorage.setItem("token", result.data.token);
     }
 
     console.log("Success:", data);

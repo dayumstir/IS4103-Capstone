@@ -25,16 +25,8 @@ import {
   DetailsProps,
   EmailNameProps,
   PasswordProps,
-} from "../interfaces/RegisterFormInterface";
-
-type RegisterFormValues = {
-  name: string;
-  email: string;
-  profile_picture?: File;
-  password: string;
-  contact_number: string;
-  address: string;
-};
+  RegisterFormValues,
+} from "../interfaces/registerFormInterface";
 
 enum pageType {
   EmailUsername = 0,
@@ -294,7 +286,7 @@ const Details = ({
     profilePicture && formData.append("profile_picture", profilePicture);
     const result = await registerMutation(formData);
     if (result.data) {
-      dispatch(login());
+      dispatch(login({ merchantId: result.data.merchant_id }));
       navigate("/");
     }
   };

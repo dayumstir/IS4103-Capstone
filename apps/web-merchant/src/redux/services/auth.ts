@@ -1,21 +1,21 @@
 // Need to use the React-specific entry point to import createApi
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { LoginFormValues } from "../../screens/loginScreen";
-import { RegisterFormValues } from "../../screens/registerScreen";
+import { IMerchant } from "../../interfaces/merchantInterface";
 
 // Define a service using a base URL and expected endpoints
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:3000/merchant/auth" }),
   endpoints: (builder) => ({
-    login: builder.mutation<string, LoginFormValues>({
+    login: builder.mutation<{ id: string; token: string }, LoginFormValues>({
       query: (credentials) => ({
         url: "/login",
         method: "POST",
         body: credentials,
       }),
     }),
-    register: builder.mutation<string, FormData>({
+    register: builder.mutation<IMerchant, FormData>({
       query: (body) => ({
         url: "/register",
         method: "POST",
