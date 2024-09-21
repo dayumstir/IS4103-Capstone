@@ -1,13 +1,13 @@
 import React from "react";
-import { Button, Layout, Menu } from "antd";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux/store";
-import { logout } from "../redux/features/authSlice";
-import { useDispatch } from "react-redux";
+import { Button, Layout, Menu, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
+import { useLogoutMutation } from "../redux/services/auth";
 
 const Header: React.FC = () => {
+  const jwt_token = localStorage.getItem("token");
+  const isAuthenticated = !!jwt_token;
+
   const { Header } = Layout;
   enum HeaderTitles {
     Home = "Home",
@@ -16,21 +16,23 @@ const Header: React.FC = () => {
   const items = [{ label: HeaderTitles.Home, key: HeaderTitles.Home }];
 
   const navigateToScreen = (key: string) => {
-    console.log(key);
     if (key == HeaderTitles.Home) {
       navigate("/");
     }
   };
 
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated,
-  );
-
-  const dispatch = useDispatch();
+  const [logoutMutation] = useLogoutMutation();
 
   const submitLogout = () => {
-    dispatch(logout());
-    console.log(isAuthenticated);
+    logoutMutation()
+      .unwrap()
+      .then(() => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("merchantId");
+        message.info("Logout Successful!");
+      })
+      .catch((error) => message.error(error));
+    navigate("/login");
   };
 
   const navigate = useNavigate();
