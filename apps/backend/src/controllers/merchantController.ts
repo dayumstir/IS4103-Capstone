@@ -15,10 +15,12 @@ export const getProfile = async (req: Request, res: Response) => {
 
 // Merchant Edit Profile
 export const editProfile = async (req: Request, res: Response) => {
+    const id = req.params.id;
     try {
         const updatedMerchant = await merchantService.updateMerchant(
-            req.body.merchant_id,
-            req.body
+            id,
+            req.body,
+            req.file?.buffer
         );
         res.status(200).json(updatedMerchant);
     } catch (error: any) {

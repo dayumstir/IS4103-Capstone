@@ -22,9 +22,16 @@ export const profileApi = createApi({
         method: "GET",
       }),
     }),
+    editProfile: builder.mutation<IMerchant, { id: string; body: FormData }>({
+      query: ({ id, body }) => ({
+        url: `/${id}`,
+        method: "PUT",
+        body: body,
+      }),
+    }),
   }),
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetProfileQuery } = profileApi;
+export const { useGetProfileQuery, useEditProfileMutation } = profileApi;
