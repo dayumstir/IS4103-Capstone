@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import { ICustomer } from "../../interfaces/customerInterface";
 
 interface CustomerState {
@@ -14,7 +14,7 @@ const customerSlice = createSlice({
     initialState,
     reducers: {
         // Set customer profile in the state
-        setProfile: (state, action: PayloadAction<ICustomer>) => {
+        setProfile: (state, action) => {
             state.profile = action.payload;
         },
     },

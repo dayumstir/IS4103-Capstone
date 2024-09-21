@@ -1,5 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ICustomer } from "../../interfaces/customerInterface";
+import { createSlice } from "@reduxjs/toolkit";
 
 interface customerAuthState {
   isAuthenticated: boolean;
@@ -15,13 +14,13 @@ const customerAuthSlice = createSlice({
   name: 'customerAuth',
   initialState,
   reducers: {
-    login: (state, action: PayloadAction<{ jwtToken: string }>) => {
-      state.token = action.payload.jwtToken;
+    login: (state, action) => {
       state.isAuthenticated = true;
+      state.token = action.payload.jwtToken;
     },
     logout: (state) => {
-      state.token = null;
       state.isAuthenticated = false;
+      state.token = null;
     },
   },
 });

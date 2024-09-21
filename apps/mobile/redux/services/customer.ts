@@ -10,24 +10,25 @@ export const customerApi = createApi({
     baseUrl: "http://localhost:3000/customer",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).customerAuth.token;
-      console.log(token);
       if (token) {
-        headers.set("authorization", `Bearer ${token}`);  // Pass JWT token in header
+        headers.set("Authorization", `Bearer ${token}`);  // Pass JWT token in header
       }
       return headers;
     },
   }),
 
   endpoints: (builder) => ({
-    // View Profile API Call
+    // View profile API call
     getProfile: builder.query<ICustomer, void>({
       query: () => "/profile",  // API endpoint for fetching profile
     }),
-    editProfile: builder.mutation<string, string>({
-      query: (updateData) => ({
+
+    // Edit profile API call
+    editProfile: builder.mutation<any, FormData>({
+      query: (formData) => ({
         url: "/profile",
         method: "PUT",
-        body: updateData,
+        body: formData,
       }),
     }),
   }),
