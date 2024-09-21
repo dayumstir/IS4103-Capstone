@@ -1,122 +1,111 @@
 import React from "react";
 import { Layout, Menu, Button } from "antd";
-import {
-  Route,
-  Routes,
-  useNavigate,
-  Navigate 
-} from "react-router-dom";
+import { Route, Routes, useNavigate, Navigate } from "react-router-dom";
 
 import LoginScreen from "./screens/loginScreen";
 import ProfileScreen from "./screens/profileScreen";
+import InstalmentPlanScreen from "./screens/instalmentPlanScreen";
+import CreditTierScreen from "./screens/creditTierScreen";
+import EditProfileScreen from "./screens/editProfileScreen";
 import AllCustomersScreen from "./screens/allCustomersScreen";
 import CustomerProfileScreen from "./screens/customerProfileScreen";
 
-const App = () => {
-  const { Header, Footer } = Layout;
+import ProtectedRoute from "./components/protectedRoute";
+export default function App() {
   const items = [
-    { label: <a href="/holder">Home</a>, key: "Home" },
+    { label: <a href="/home">Home</a>, key: "Home" },
     { label: <a href="/admin/profile">Profile</a>, key: "Profile" },
     { label: <a href="/admin/customers">Customers</a>, key: "Customers" },
-    { label: <a href="/holder">Merchants</a>, key: "Merchants" },
-    { label: <a href="/holder">Business management</a>, key: "Business management" },
+    { label: <a href="/admin/merchants">Merchants</a>, key: "Merchants" },
+    {
+      label: <a href="/business-management">Business management</a>,
+      key: "Business management",
+    },
+    {
+      label: <a href="/credit-tier">Credit Tier</a>,
+      key: "Credit Tier",
+    },
+    {
+      label: <a href="/instalment-plan">Instalment Plan</a>,
+      key: "Instalment Plan",
+    },
   ];
 
   const navigate = useNavigate();
 
-  const jwt_token = localStorage.getItem('token');
+  const jwt_token = localStorage.getItem("token");
+  const isAuthenticated = !!jwt_token;
+
   const handleLogout = async () => {
     try {
       if (!jwt_token) {
-        throw new Error('No token found');
+        throw new Error("No token found");
       }
       // Send a POST request to the logout endpoint with a JSON payload
-      const response = await fetch('http://localhost:3000/adminauth/logout', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/adminauth/logout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwt_token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify({
-          reason: 'User requested logout'
+          reason: "User requested logout",
         }),
       });
-      console.log(response)
+      console.log(response);
       if (response.ok) {
-        // Handle successful logout 
-        localStorage.removeItem('token');
-        navigate('/login');
+        // Handle successful logout
+        localStorage.removeItem("token");
+        navigate("/login");
       } else {
         // Handle errors
-        console.error('Logout failed');
+        console.error("Logout failed");
       }
     } catch (error) {
-      console.error('An error occurred during logout:', error);
+      console.error("An error occurred during logout:", error);
     }
   };
 
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      <Header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          backgroundColor: "#F5F5F5",
-          position: "fixed",
-          top: 0,
-          width: "100%",
-          zIndex: 1, // Keep it above content
-        }}
-      >
-        <>
-        {jwt_token && (
-        <Menu
-          mode="horizontal"
-          defaultSelectedKeys={["2"]}
-          items={items}
-          style={{ flex: 1, minWidth: 0, backgroundColor: "#F5F5F5" }}
-        />
+    <Layout className="min-h-screen">
+      {isAuthenticated && (
+        <Layout.Header className="fixed top-0 z-10 flex w-full items-center bg-gray-200">
+          <Menu
+            className="flex-1 bg-inherit"
+            mode="horizontal"
+            // TODO: Remove default selected keys
+            defaultSelectedKeys={["2"]}
+            items={items}
+          />
+          <Button onClick={handleLogout} danger>
+            Logout
+          </Button>
+        </Layout.Header>
       )}
-    </>
-      
-        <>
-      {jwt_token && (
-        <Button onClick={handleLogout}>Logout</Button>
-      )}
-    </>
-      </Header>
 
-      {}
-      <div
-        style={{
-          height: window.outerHeight - 70 - 50,
-          marginTop: 70,
-          marginBottom: 50,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <Layout.Content className={`${isAuthenticated ? "mt-16" : ""} bg-white`}>
         <Routes>
+          {/* ===== Public routes ===== */}
           <Route path="/" element={<Navigate to="/login" />} />
-         <Route path="/login" element={<LoginScreen />} /> 
-         <Route path="/admin/profile" element={< ProfileScreen/>} />
-         <Route path="/admin/customers" element={< AllCustomersScreen/>} />
-         <Route path="/admin/customer/:id" element={< CustomerProfileScreen/>} />
+          <Route path="/login" element={<LoginScreen />} />
+          <Route element={<ProtectedRoute />}>
+            {/* ===== Protected routes ===== */}
+            <Route path="/admin/profile" element={<ProfileScreen />} />
+            <Route path="/admin/editprofile" element={<EditProfileScreen />} />
+            <Route path="/instalment-plan" element={<InstalmentPlanScreen />} />
+            <Route path="/credit-tier" element={<CreditTierScreen />} />
+            <Route path="/admin/customers" element={< AllCustomersScreen/>} />
+            <Route path="/admin/customer/:id" element={< CustomerProfileScreen/>} />
+            <Route path="/admin/merchants" element={< AllMerchantsScreen/>} />
+            <Route path="/admin/merchant/:id" element={< MerchantProfileScreen/>} />
+
+          </Route>
         </Routes>
-      
-      </div>
-      <Footer
-        style={{
-          textAlign: "center",
-          position: "fixed",
-          bottom: 0,
-          width: "100%",
-        }}
-      >
+      </Layout.Content>
+
+      <Layout.Footer className="flex items-center justify-center">
         PandaPay ©{new Date().getFullYear()}
-      </Footer>
-    </div>
+      </Layout.Footer>
+    </Layout>
   );
 }
-
-export default App;
