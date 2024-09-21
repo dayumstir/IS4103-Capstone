@@ -62,6 +62,27 @@ export default function CreditTierScreen() {
     },
   });
 
+  const checkOverlappingRanges = (
+    min_credit_score: number,
+    max_credit_score: number,
+    excludeTierId?: string,
+  ): boolean => {
+    const existingTiers = creditTierListQuery.data || [];
+    return existingTiers.some((tier: ICreditTier) => {
+      if (excludeTierId && tier.credit_tier_id === excludeTierId) {
+        return false; // Skip the current tier being edited
+      }
+      return (
+        (min_credit_score >= tier.min_credit_score &&
+          min_credit_score <= tier.max_credit_score) ||
+        (max_credit_score >= tier.min_credit_score &&
+          max_credit_score <= tier.max_credit_score) ||
+        (min_credit_score <= tier.min_credit_score &&
+          max_credit_score >= tier.max_credit_score)
+      );
+    });
+  };
+
   const handleCreateTier = (
     newCreditTier: Omit<ICreditTier, "credit_tier_id">,
   ) => {
@@ -72,6 +93,14 @@ export default function CreditTierScreen() {
       );
       return;
     }
+
+    if (checkOverlappingRanges(min_credit_score, max_credit_score)) {
+      message.error(
+        "The new credit tier range overlaps with an existing tier. Please adjust the range.",
+      );
+      return;
+    }
+
     createCreditTierMutation.mutate(newCreditTier);
     form.resetFields();
   };
@@ -88,9 +117,23 @@ export default function CreditTierScreen() {
       return;
     }
 
-    if (values.min_credit_score >= values.max_credit_score) {
+    const { min_credit_score, max_credit_score } = values;
+    if (min_credit_score >= max_credit_score) {
       message.error(
         "Minimum credit score must be less than maximum credit score.",
+      );
+      return;
+    }
+
+    if (
+      checkOverlappingRanges(
+        min_credit_score,
+        max_credit_score,
+        editingTier.credit_tier_id,
+      )
+    ) {
+      message.error(
+        "The updated credit tier range overlaps with an existing tier. Please adjust the range.",
       );
       return;
     }

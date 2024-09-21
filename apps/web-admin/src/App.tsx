@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Layout, Menu, Button } from "antd";
 import { Route, Routes, useNavigate, Navigate } from "react-router-dom";
 
@@ -7,14 +7,57 @@ import ProfileScreen from "./screens/profileScreen";
 import InstalmentPlanScreen from "./screens/instalmentPlanScreen";
 import CreditTierScreen from "./screens/creditTierScreen";
 import EditProfileScreen from "./screens/editProfileScreen";
+import AddAdminScreen from "./screens/addAdmin";
 import AllCustomersScreen from "./screens/allCustomersScreen";
 import CustomerProfileScreen from "./screens/customerProfileScreen";
 
 import ProtectedRoute from "./components/protectedRoute";
+
 export default function App() {
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false); // State for super admin status
+
+  const fetchProfileData = async () => {
+    let superAdminStatus = false; // Declare isSuperAdmin
+
+    try {
+      const response = await fetch("http://localhost:3000/admin/profile", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.admin_type === "SUPER") {
+        superAdminStatus = true;
+      }
+    } catch (error) {
+      console.error("Failed to fetch profile data:", error);
+    }
+
+    return superAdminStatus; // Return the final value of isSuperAdmin
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const status = await fetchProfileData();
+      setIsSuperAdmin(status);
+    };
+
+    fetchData();
+  }, []);
+
   const items = [
     { label: <a href="/home">Home</a>, key: "Home" },
     { label: <a href="/admin/profile">Profile</a>, key: "Profile" },
+    ...(isSuperAdmin
+      ? [{ label: <a href="/admin/add">Add Admin</a>, key: "AddAdmin" }]
+      : []),
     { label: <a href="/admin/customers">Customers</a>, key: "Customers" },
     { label: <a href="/admin/merchants">Merchants</a>, key: "Merchants" },
     {
@@ -92,6 +135,7 @@ export default function App() {
             {/* ===== Protected routes ===== */}
             <Route path="/admin/profile" element={<ProfileScreen />} />
             <Route path="/admin/editprofile" element={<EditProfileScreen />} />
+            <Route path="/admin/add" element={<AddAdminScreen />} />
             <Route path="/instalment-plan" element={<InstalmentPlanScreen />} />
             <Route path="/credit-tier" element={<CreditTierScreen />} />
             <Route path="/admin/customers" element={< AllCustomersScreen/>} />

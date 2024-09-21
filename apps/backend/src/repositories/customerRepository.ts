@@ -27,14 +27,6 @@ export const findCustomerByEmail = async (email: string) => {
 };
 
 
-// Find customer by contact number (unique attribute)
-export const findCustomerByPhoneNumber = async (contact_number: string) => {
-    return prisma.customer.findUnique({
-        where: { contact_number }
-    });
-};
-
-
 // Update customer in database
 export const updateCustomer = async (customer_id: string, updateData: Partial<ICustomer>) => {
     return prisma.customer.update({

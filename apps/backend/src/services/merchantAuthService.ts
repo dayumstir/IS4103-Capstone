@@ -62,7 +62,7 @@ export const login = async (loginData: { email: string; password: string }) => {
         expiresIn: "1h",
     });
 
-    return token;
+    return { id: merchant.merchant_id, token };
 };
 
 export const logout = async (token: string) => {

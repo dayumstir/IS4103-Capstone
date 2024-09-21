@@ -10,7 +10,12 @@ export const getMerchantById = async (merchant_id: string) => {
     return merchant;
 };
 
-export const updateMerchant = async (merchant_id: string, updateData: Partial<IMerchant>) => {
+export const updateMerchant = async (
+    merchant_id: string,
+    updateData: Partial<IMerchant>,
+    merchantProfilePicture?: Buffer
+) => {
+    updateData.profile_picture = merchantProfilePicture;
     const merchant = await merchantReporsitory.updateMerchant(merchant_id, updateData);
     if (!merchant) {
         throw new Error("Merchant not found");

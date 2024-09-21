@@ -1,31 +1,37 @@
-// Need to use the React-specific entry point to import createApi
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store";
+import { ICustomer } from "../../interfaces/customerInterface";
 
-// Define a service using a base URL and expected endpoints
+// Define the base URL for customer API interactions
 export const customerApi = createApi({
   reducerPath: "customerApi",
+
   baseQuery: fetchBaseQuery({
-    // TODO: Change to env variable (base url)
     baseUrl: "http://localhost:3000/customer",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).customerAuth.token;
       if (token) {
-        headers.set("authorization", `Bearer ${token}`);
+        headers.set("Authorization", `Bearer ${token}`);  // Pass JWT token in header
       }
       return headers;
     },
   }),
+
   endpoints: (builder) => ({
-    profile: builder.query<string, string>({
-      query: () => "/profile",
+    // View profile API call
+    getProfile: builder.query<ICustomer, void>({
+      query: () => "/profile",  // API endpoint for fetching profile
     }),
-    editProfile: builder.mutation<string, string>({
-      query: () => "/profile",
+
+    // Edit profile API call
+    editProfile: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: "/profile",
+        method: "PUT",
+        body: formData,
+      }),
     }),
   }),
 });
 
-// Export hooks for usage in functional components, which are
-// auto-generated based on the defined endpoints
-export const { useProfileQuery, useEditProfileMutation } = customerApi;
+export const { useGetProfileQuery, useEditProfileMutation } = customerApi;

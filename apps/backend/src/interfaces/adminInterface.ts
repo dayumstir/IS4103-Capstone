@@ -4,7 +4,7 @@ import { AdminType } from "./adminType";
 export interface IAdmin {
     admin_id: string;
     name: string;
-    profile_picture: string;
+    profile_picture: Buffer;
     email: string;
     username: string;
     password: string;
