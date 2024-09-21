@@ -105,20 +105,20 @@ export const confirmEmail = async (token: string) => {
 
 
 // Step 4: Send OTP to contact number
-export const sendPhoneNumberOTP = async (contact_number: string) => {
+export const sendPhoneNumberOTP = async (email: string) => {
     logger.info('Executing sendPhoneNumberOTP...');
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();     // Generate 6-digit OTP
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000)                 // Token expires in 10 mins
 
     // Retrieve customer based on contact number
-    const customer = await customerRepository.findCustomerByPhoneNumber(contact_number);
+    const customer = await customerRepository.findCustomerByEmail(email);
     if (!customer) {
         throw new Error("Customer does not exist");
     }
 
     // Save the OTP in the database
-    await otpRepository.saveOTP(contact_number, otp, expiresAt, customer.customer_id);
+    await otpRepository.saveOTP(customer.contact_number, otp, expiresAt, customer.customer_id);
 
     // Send OTP via SMS using Twilio
     const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
@@ -126,7 +126,7 @@ export const sendPhoneNumberOTP = async (contact_number: string) => {
         await client.messages.create({
             body: `Your verification code is ${otp}`,
             from: process.env.TWILIO_PHONE_NUMBER,
-            to: contact_number
+            to: customer.contact_number
         });
     } catch (error) {
         logger.error('An error occurred:', error);
