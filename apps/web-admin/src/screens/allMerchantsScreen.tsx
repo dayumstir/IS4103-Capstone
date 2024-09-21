@@ -27,7 +27,7 @@ const AllMerchantsScreen: React.FC = () => {
     const navigate = useNavigate();
   
     useEffect(() => {
-      const fetchAllMetchants = async () => {
+      const fetchAllMerchants = async () => {
         try {
             const jwt_token = localStorage.getItem('token');
             if (!jwt_token) {
