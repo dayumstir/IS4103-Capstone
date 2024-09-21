@@ -16,8 +16,6 @@ import {
 } from "antd";
 import logo from "../assets/pandapay_logo.png";
 import { useRegisterMutation } from "../redux/services/auth";
-import { useDispatch } from "react-redux";
-import { login } from "../redux/features/authSlice";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate, NavLink } from "react-router-dom";
 import { message } from "antd";
@@ -273,7 +271,6 @@ const Details = ({
   setPageIdx,
 }: DetailsProps) => {
   const [registerMutation, { isLoading, error }] = useRegisterMutation();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const formData = new FormData();
 
@@ -286,7 +283,6 @@ const Details = ({
     profilePicture && formData.append("profile_picture", profilePicture);
     const result = await registerMutation(formData);
     if (result.data) {
-      dispatch(login({ merchantId: result.data.merchant_id }));
       navigate("/");
     }
   };
@@ -305,9 +301,9 @@ const Details = ({
   type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
   const beforeUpload = (file: FileType) => {
-    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
+    const isJpgOrPng = file.type === "image/png";
     if (!isJpgOrPng) {
-      message.error("You can only upload JPG/PNG file!");
+      message.error("You can only upload PNG file!");
     }
     const isLt2M = file.size / 1024 / 1024 < 2;
     if (!isLt2M) {
