@@ -219,7 +219,7 @@ export default function InstalmentPlanScreen() {
               type: "number",
               min: 0,
               max: 100,
-              message: "Interest rate must be positive",
+              message: "Interest rate must be between 0% and 100%",
             },
           ]}
         >
