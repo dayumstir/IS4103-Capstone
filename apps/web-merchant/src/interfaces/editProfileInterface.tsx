@@ -6,5 +6,5 @@ export interface EditProfileProps {
   initAddress: string;
   initProfileDisplay: string;
   isModalOpen: boolean;
-  setIsEditProfileModalOpen: (isOpen: boolean) => void;
+  setModalOpen: (isOpen: boolean) => void;
 }

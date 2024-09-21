@@ -82,10 +82,23 @@ export const logout = async (token: string) => {
     }
 };
 
-export const resetPassword = async (email: string, newPassword: string) => {
-    const merchant = await merchantRepository.findMerchantByEmail(email);
+export const resetPassword = async (id: string, oldPassword: string, newPassword: string) => {
+    // Retrieve merchant from database
+    const merchant = await merchantRepository.findMerchantById(id);
     if (!merchant) {
         throw new Error("Merchant not found");
+    }
+
+    // Verify that old password matches
+    const isPasswordValid = await bcrypt.compare(oldPassword, merchant.password);
+    if (!isPasswordValid) {
+        throw new Error("Old password is incorrect");
+    }
+
+    // Ensure new password is different from old password
+    const isNewPasswordSame = await bcrypt.compare(newPassword, merchant.password);
+    if (isNewPasswordSame) {
+        throw new Error("New password cannot be the same as old password");
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);

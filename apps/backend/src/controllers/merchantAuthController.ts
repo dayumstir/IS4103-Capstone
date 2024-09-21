@@ -40,8 +40,11 @@ export const logout = async (req: Request, res: Response) => {
 
 // Merchant Reset Password
 export const resetPassword = async (req: Request, res: Response) => {
+    const id = req.params.id;
+    const { oldPassword, newPassword } = req.body;
+
     try {
-        await merchantAuthService.resetPassword(req.body.email, req.body.newPassword);
+        await merchantAuthService.resetPassword(id, oldPassword, newPassword);
         res.status(200).json({ message: "Password reset successful" });
     } catch (error: any) {
         res.status(400).json({ error: error.message });
