@@ -1,28 +1,26 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ICustomer } from "../../interfaces/customerInterface";
+import { createSlice } from "@reduxjs/toolkit";
 
 interface customerAuthState {
   isAuthenticated: boolean;
   token: string | null;
-  customer: ICustomer | null;
 }
 
+const initialState: customerAuthState = {
+  isAuthenticated: false,
+  token: null,
+};
+
 const customerAuthSlice = createSlice({
-  name: "customerAuth",
-  initialState: {
-    isAuthenticated: false,
-    token: null,
-    customer: null,
-  } as customerAuthState,
+  name: 'customerAuth',
+  initialState,
   reducers: {
-    login: (state, action: PayloadAction<string>) => {
+    login: (state, action) => {
       state.isAuthenticated = true;
-      state.token = action.payload;
+      state.token = action.payload.jwtToken;
     },
     logout: (state) => {
       state.isAuthenticated = false;
       state.token = null;
-      state.customer = null;
     },
   },
 });
