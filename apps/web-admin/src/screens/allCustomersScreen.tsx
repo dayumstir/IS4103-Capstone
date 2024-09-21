@@ -1,4 +1,4 @@
-import React, { useEffect, useState }  from "react";
+import React, { useEffect, useState } from "react";
 import {
   Spin,
   Popconfirm,
@@ -7,157 +7,161 @@ import {
   Table,
   Empty,
   Tag,
-  message
+  message,
 } from "antd";
-import { useNavigate  } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 interface ICustomer {
-    customer_id: string;
-    name: string;
-    profile_picture: string;
-    email: string;
-    password: string;
-    contact_number: string;
-    address: string;
-    date_of_birth: Date;
-    status: string;   
-    credit_score: number;
-    credit_tier_id: string;
+  customer_id: string;
+  name: string;
+  profile_picture: string;
+  email: string;
+  password: string;
+  contact_number: string;
+  address: string;
+  date_of_birth: Date;
+  status: string;
+  credit_score: number;
+  credit_tier_id: string;
 }
 
 const AllCustomersScreen: React.FC = () => {
-    const [customers, setCustomers] = useState<ICustomer[] | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error] = useState<string | null>(null);
-    const navigate = useNavigate();
-  
-    useEffect(() => {
-      const fetchAllCustomers = async () => {
-        try {
-            const jwt_token = localStorage.getItem('token');
-            if (!jwt_token) {
-              throw new Error('No token found');
-            }
-    
-            const response = await fetch('http://localhost:3000/admin/allCustomers', {
-              method: 'GET',
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${jwt_token}`,
-              },
-            });
-            
-          if (!response.ok) {
-            throw new Error('Failed to fetch customers');
-          }
-  
-          const data = await response.json();
-          setCustomers(data);
-        } catch (error) {
-          console.error('Failed to fetch customers:', error);
-        } finally {
-          setLoading(false);
+  const [customers, setCustomers] = useState<ICustomer[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchAllCustomers = async () => {
+      try {
+        const jwt_token = localStorage.getItem("token");
+        if (!jwt_token) {
+          throw new Error("No token found");
         }
-      };
-  
-      fetchAllCustomers();
-    }, [navigate]);
-  
-    if (loading) {
-      return <Spin size="large" />;
-    }
-  
-    if (error) {
-      return <div>Error: {error}</div>; 
-    }
-  
-    if (!customers || customers.length === 0) {
-      return <div>No customer data available</div>; 
-    }
 
-// Function to update customer
-const updateCustomer = async (customer_id: string, newStatus: string) => {
-  try {
-    const jwt_token = localStorage.getItem("token");
-    if (!jwt_token) {
-      throw new Error("No token found");
-    }
+        const response = await fetch(
+          "http://localhost:3000/admin/allCustomers",
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${jwt_token}`,
+            },
+          },
+        );
 
-    const response = await fetch(`http://localhost:3000/customer/${customer_id}/status`, {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt_token}`,
-      },
-      body: JSON.stringify({ status: newStatus }), // Send the new status
-    });
+        if (!response.ok) {
+          throw new Error("Failed to fetch customers");
+        }
 
-    if (!response.ok) {
-      throw new Error("Failed to update customer status");
-    }
+        const data = await response.json();
+        setCustomers(data);
+      } catch (error) {
+        console.error("Failed to fetch customers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // Update frontend state to reflect status change
-    setCustomers((prevCustomers) => {
-      if (!prevCustomers) return prevCustomers;
-      return prevCustomers.map((customer) =>
-        customer.customer_id === customer_id
-          ? { ...customer, status: newStatus }
-          : customer
-      )
-    }
-  );
+    fetchAllCustomers();
+  }, [navigate]);
 
-    message.success(`Customer status updated to ${newStatus}.`);
-  } catch (error) {
-    console.error(`Failed to update customer status:`, error);
-    message.error(`Failed to update customer status.`);
+  if (loading) {
+    return <Spin size="large" />;
   }
-};
 
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
-    const columns = [
-      {
-        title: "Name",
-        dataIndex: "name",
-        key: "name",
-      },
-      {
-        title: "Email",
-        dataIndex: "email",
-        key: "email",
-      },
-      {
-        title: "Contact Number",
-        dataIndex: "contact_number",
-        key: "contact_number",
-      },
-      {
-        title: "Credit Score",
-        dataIndex: "credit_score",
-        key: "credit_score",
-      },
-      {
-        title: "Credit Tier ID",
-        dataIndex: "credit_tier_id",
-        key: "credit_tier_id",
-      },
-      {
-        title: "Status",
-        dataIndex: "status",
-        key: "status",
-        render: (text: string) => (
-          <Tag color={text === "Active" ? "green" : "volcano"}>{text}</Tag>
-        ),
-      },
-      {
-        key: "actions",
-        width: 1,
-        render: (text: string, record: ICustomer) => (
-          <div className="whitespace-nowrap">
-            <Button
+  if (!customers || customers.length === 0) {
+    return <div>No customer data available</div>;
+  }
+
+  // Function to update customer
+  const updateCustomer = async (customer_id: string, newStatus: string) => {
+    try {
+      const jwt_token = localStorage.getItem("token");
+      if (!jwt_token) {
+        throw new Error("No token found");
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/customer/${customer_id}/status`,
+        {
+          method: "PUT",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwt_token}`,
+          },
+          body: JSON.stringify({ status: newStatus }), // Send the new status
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update customer status");
+      }
+
+      // Update frontend state to reflect status change
+      setCustomers((prevCustomers) => {
+        if (!prevCustomers) return prevCustomers;
+        return prevCustomers.map((customer) =>
+          customer.customer_id === customer_id
+            ? { ...customer, status: newStatus }
+            : customer,
+        );
+      });
+
+      message.success(`Customer status updated to ${newStatus}.`);
+    } catch (error) {
+      console.error(`Failed to update customer status:`, error);
+      message.error(`Failed to update customer status.`);
+    }
+  };
+
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "Contact Number",
+      dataIndex: "contact_number",
+      key: "contact_number",
+    },
+    {
+      title: "Credit Score",
+      dataIndex: "credit_score",
+      key: "credit_score",
+    },
+    {
+      title: "Credit Tier ID",
+      dataIndex: "credit_tier_id",
+      key: "credit_tier_id",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (text: string) => (
+        <Tag color={text === "ACTIVE" ? "green" : "volcano"}>{text}</Tag>
+      ),
+    },
+    {
+      key: "actions",
+      width: 1,
+      render: (text: string, record: ICustomer) => (
+        <div className="whitespace-nowrap">
+          <Button
             className="mr-2"
             onClick={() => navigate(`/admin/customer/${record.customer_id}`)}
           >
@@ -165,34 +169,31 @@ const updateCustomer = async (customer_id: string, newStatus: string) => {
           </Button>
           <Popconfirm
             title={
-              record.status === "INACTIVE"
+              record.status === "SUSPENDED"
                 ? "Customer is suspended. Would you like to unsuspend the customer?"
-                : "Would you like to suspend the customer?"
+                : "Are you sure you would like to suspend the customer?"
             }
             onConfirm={() =>
               updateCustomer(
                 record.customer_id,
-                record.status === "Inactive" ? "Active" : "Inactive" // Toggle status
+                record.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED", // Toggle status
               )
             }
             okText="Yes"
             cancelText="No"
           >
             <Button icon={<ExclamationCircleOutlined />} danger>
-              {record.status === "Inactive" ? "Unsuspend" : "Suspend"}
+              {record.status === "SUSPENDED" ? "Unsuspend" : "Suspend"}
             </Button>
           </Popconfirm>
-          </div>
-        ),
-      },
-    ];
+        </div>
+      ),
+    },
+  ];
 
-  
-    return (
-      <div style={{ padding: '20px 100px' }}>
-        <Card
-        title="View All Customers"
-      >
+  return (
+    <div style={{ padding: "20px 100px" }}>
+      <Card title="View All Customers">
         <Table
           dataSource={customers}
           columns={columns}
@@ -201,8 +202,8 @@ const updateCustomer = async (customer_id: string, newStatus: string) => {
           }}
         />
       </Card>
-      </div>
-    );
-  };
-  
-  export default AllCustomersScreen;
+    </div>
+  );
+};
+
+export default AllCustomersScreen;
