@@ -1,3 +1,5 @@
+// Main entry point of application
+
 import { Redirect } from "expo-router";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";

@@ -1,5 +1,14 @@
 import { FormInstance } from "antd";
 
+export type RegisterFormValues = {
+  name: string;
+  email: string;
+  profile_picture?: File;
+  password: string;
+  contact_number: string;
+  address: string;
+};
+
 export interface EmailNameProps {
   form: FormInstance;
   email: string;

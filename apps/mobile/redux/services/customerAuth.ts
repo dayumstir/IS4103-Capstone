@@ -1,12 +1,24 @@
-// Need to use the React-specific entry point to import createApi
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { LoginFormValues } from "../../app/login";
 import { RegisterFormValues } from "../../app/register";
+import { RootState } from "../store";
+import { login } from "../features/customerAuthSlice";
 
-// Define a service using a base URL and expected endpoints
+// Define the API service for authentication
 export const customerAuthApi = createApi({
   reducerPath: "customerAuthApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:3000/customerAuth" }),
+
+  baseQuery: fetchBaseQuery({ 
+    baseUrl: "http://localhost:3000/customerAuth",
+    prepareHeaders: (headers, { getState} ) => {
+      const token = (getState() as RootState).customerAuth.token;
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
+      return headers;
+    }
+  }),
+
   endpoints: (builder) => ({
     login: builder.mutation<string, LoginFormValues>({
       query: (body) => ({
