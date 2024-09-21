@@ -25,16 +25,8 @@ import {
   DetailsProps,
   EmailNameProps,
   PasswordProps,
+  RegisterFormValues,
 } from "../interfaces/registerFormInterface";
-
-type RegisterFormValues = {
-  name: string;
-  email: string;
-  profile_picture?: File;
-  password: string;
-  contact_number: string;
-  address: string;
-};
 
 enum pageType {
   EmailUsername = 0,

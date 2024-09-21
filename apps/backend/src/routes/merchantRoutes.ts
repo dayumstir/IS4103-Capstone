@@ -8,16 +8,21 @@ import multer from "multer";
 const merchantRouter = Router();
 
 // PROFILE
-merchantRouter.get("/profile/:id", merchantAuthMiddleware, getProfile);
-merchantRouter.put("/profile", merchantAuthMiddleware, editProfile);
-
-//AUTH
-const authRouter = Router();
-merchantRouter.use("/auth", authRouter);
 const upload = multer({
     storage: multer.memoryStorage(), // Store file in memory as Buffer
     limits: { fileSize: 2 * 1024 * 1024 }, // Limit file size to 2 MB
 });
+merchantRouter.get("/profile/:id", merchantAuthMiddleware, getProfile);
+merchantRouter.put(
+    "/profile/:id",
+    merchantAuthMiddleware,
+    upload.single("profile_picture"),
+    editProfile
+);
+
+//AUTH
+const authRouter = Router();
+merchantRouter.use("/auth", authRouter);
 
 authRouter.post("/register", upload.single("profile_picture"), register);
 authRouter.post("/login", login);
