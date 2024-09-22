@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { useGetProfileQuery, useEditProfileMutation } from "../../../redux/services/customer";
 import { setProfile } from "../../../redux/features/customerSlice";
 import { logout } from "../../../redux/features/customerAuthSlice";   
-import { router } from "expo-router";
+import { router, useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +27,7 @@ const profileSchema = z.object({
 
 export default function AccountPage() {
   const dispatch = useDispatch();
+  const router = useRouter(); 
   
   // Fetch the profile using the API call
   const { data: profile, error, isLoading, refetch } = useGetProfileQuery();
@@ -135,6 +136,9 @@ export default function AccountPage() {
                     <Button type="primary" onPress={handleEditToggle}>
                       Edit Profile
                     </Button>
+                    <Button type="primary" onPress={() => router.push("/resetPassword")}>
+                      Reset Password
+                    </Button>
                     <Button type="primary" onPress={handleLogout}>
                       Logout
                     </Button>
@@ -210,8 +214,8 @@ export default function AccountPage() {
                     )}
                   />
                   <View className="mt-10 w-full px-10 gap-4">
-                    <Button onPress={handleSubmit(onSubmit)}>Save</Button>
-                    <Button onPress={handleCancel}>Cancel</Button>
+                    <Button type="primary" onPress={handleSubmit(onSubmit)}>Save</Button>
+                    <Button type="ghost" onPress={handleCancel}>Cancel</Button>
                   </View>
                   <BottomSheet ref={bottomSheetRef} index={-1} snapPoints={[350]} enablePanDownToClose>
                     <View className="flex-1 px-8 py-4">
