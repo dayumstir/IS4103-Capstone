@@ -1,10 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, Button, Card, Space, Typography } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import { useGetProfileQuery } from "../redux/services/profile";
+import { Buffer } from "buffer";
 
 const HomeScreen = () => {
   const received = 100;
   const { Text } = Typography;
+  const navigate = useNavigate();
+  const merchantId = localStorage.getItem("merchantId");
+  if (!merchantId) {
+    navigate("/login");
+    return null;
+  }
+  const [profilePictureDisplay, setProfilePictureDisplay] = useState("");
+
+  const { data: profile } = useGetProfileQuery(merchantId);
+
+  useEffect(() => {
+    if (profile?.profile_picture) {
+      const profilePictureBase64 = `data:image/png;base64,${Buffer.from(profile.profile_picture).toString("base64")}`;
+      setProfilePictureDisplay(profilePictureBase64);
+    }
+  });
 
   return (
     <Space
@@ -20,7 +39,7 @@ const HomeScreen = () => {
       <Text style={{ fontSize: 30 }}>
         Hello{" "}
         <Text strong={true} style={{ fontSize: 30 }}>
-          User
+          {profile?.name}
         </Text>
       </Text>
       <Text>All payments have been received for this month!</Text>
@@ -29,7 +48,18 @@ const HomeScreen = () => {
         style={{ backgroundColor: "#F5F5F5", width: 0.9 * window.outerWidth }}
       >
         <Space direction="vertical" align="center" style={{ width: "100%" }}>
-          <Avatar size={64} icon={<UserOutlined />} />
+          {profilePictureDisplay != "" ? (
+            <img
+              src={profilePictureDisplay}
+              alt="avatar1"
+              className="h-36 w-36 object-cover"
+            />
+          ) : (
+            <Avatar
+              className="h-36 w-36 object-cover"
+              icon={<UserOutlined />}
+            />
+          )}
           <Text strong={true} style={{ fontSize: 20 }}>
             ${received}
           </Text>
