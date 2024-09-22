@@ -11,7 +11,7 @@ export const customerApi = createApi({
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).customerAuth.token;
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);  // Pass JWT token in header
+        headers.set("Authorization", `Bearer ${token}`); // Pass JWT token in header
       }
       return headers;
     },
@@ -20,7 +20,7 @@ export const customerApi = createApi({
   endpoints: (builder) => ({
     // View profile API call
     getProfile: builder.query<ICustomer, void>({
-      query: () => "/profile",  // API endpoint for fetching profile
+      query: () => "/profile", // API endpoint for fetching profile
     }),
 
     // Edit profile API call
