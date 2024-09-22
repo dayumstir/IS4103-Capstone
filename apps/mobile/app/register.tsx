@@ -13,7 +13,9 @@ import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useDispatch } from "react-redux";
 import { useRegisterMutation } from "../redux/services/customerAuth";
+import { setCustomer } from "../redux/features/customerAuthSlice";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useState, useRef } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -29,7 +31,7 @@ const registerSchema = z.object({
     .string()
     .min(8, "Password must be at least 8 characters")
     .max(30, "Password must not exceed 30 characters"),
-  contact_number: z.string().min(8, "Contact number must be at least 8 digits"),
+  contact_number: z.string().regex(/^\+\d{1,3}\d{6,14}$/, "Phone number must follow the format +[country code][number] (e.g., +1234567890)"),
   address: z.string().min(5, "Address must be at least 5 characters"),
   date_of_birth: z.date(),
 });
@@ -38,6 +40,7 @@ const registerSchema = z.object({
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function Register() {
+  const dispatch = useDispatch();
   const [registerMutation, { isLoading, error }] = useRegisterMutation();
   const [showPassword, setShowPassword] = useState(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -62,7 +65,11 @@ export default function Register() {
       credit_tier_id: 3,
     };
     try {
-      await registerMutation(registrationData).unwrap();
+      const result = await registerMutation(registrationData).unwrap();
+
+      // Sore customer data in redux
+      dispatch(setCustomer(result))
+
       router.replace("/confirmation");
       console.log("Register success:", data);
     } catch (error) {
