@@ -40,6 +40,7 @@ export const confirmEmail = async (req: Request, res: Response) => {
 export const sendPhoneNumberOTP = async (req: Request, res: Response) => {
     logger.info('Executing sendPhoneNumberOTP...');
     const { contact_number } = req.body;
+    console.log(contact_number);
 
     try {
         await customerAuthService.sendPhoneNumberOTP(contact_number);
@@ -106,6 +107,21 @@ export const resetPassword = async (req: Request, res: Response) => {
     try {
         await customerAuthService.resetPassword(email, oldPassword, newPassword);
         res.status(200).json({ message: "Password reset successful"});
+    } catch (error: any) {
+        logger.error('An error occurred:', error);
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+// Customer Sign Up: Confirm email for the customer
+export const resendEmailVerification = async (req: Request, res: Response) => {
+    logger.info('Executing confirmEmail...');
+    const { email } = req.body;
+
+    try {
+        await customerAuthService.resendEmailVerification(email);
+        res.status(200).json({ message: "A confirmation link has been sent to your email." });
     } catch (error: any) {
         logger.error('An error occurred:', error);
         res.status(400).json({ error: error.message });

@@ -23,7 +23,7 @@ enum Status {
 model Customer {
   customer_id     String   @id @default(cuid())
   name            String
-  profile_picture String   
+  profile_picture Bytes    @db.ByteA   
   email           String   @unique
   password        String
   contact_number  String
@@ -164,6 +164,40 @@ model Merchant {
   // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
 }
+
+
+// Merchant Sign Up Use Case: Store phone number OTPs
+model MerchantOtp {
+  id             String @id @default(cuid())
+  contact_number String
+  otp            String @unique
+
+  expiresAt DateTime @default(now())
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+// Merchant Sign Up Use Case: Store email verification tokens
+model MerchantEmailVerificationToken {
+  id    String @id @default(cuid())
+  email String
+  token String
+
+  expiresAt DateTime @default(now())
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 1 Merchant to Many EmailVerificationTokens
+  merchant    Merchant @relation(fields: [merchant_id], references: [merchant_id])
+  merchant_id String
+
+  @@index([merchant_id])
+  @@unique([email, token])
+}
+
 
 model Transaction {
   transaction_id      String   @id @default(cuid())

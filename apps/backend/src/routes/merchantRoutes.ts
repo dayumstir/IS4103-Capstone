@@ -1,6 +1,10 @@
 // Defines routes related to merchant actions
 import { Router } from "express";
-import { getProfile, editProfile } from "../controllers/merchantController";
+import {
+    getMerchantProfile,
+    editMerchantProfile,
+    listAllMerchants,
+} from "../controllers/merchantController";
 import { merchantAuthMiddleware } from "../middlewares/merchantAuthMiddleware";
 import {
     register,
@@ -22,13 +26,17 @@ const upload = multer({
     storage: multer.memoryStorage(), // Store file in memory as Buffer
     limits: { fileSize: 2 * 1024 * 1024 }, // Limit file size to 2 MB
 });
-merchantRouter.get("/profile/:id", merchantAuthMiddleware, getProfile);
+merchantRouter.get("/profile/:id", merchantAuthMiddleware, getMerchantProfile);
 merchantRouter.put(
     "/profile/:id",
     merchantAuthMiddleware,
     upload.single("profile_picture"),
-    editProfile
+    editMerchantProfile
 );
+
+merchantRouter.get("/allMerchants", listAllMerchants);
+merchantRouter.get("/:merchant_id", getMerchantProfile);
+merchantRouter.put("/allMerchants", editMerchantProfile);
 
 //AUTH
 const authRouter = Router();

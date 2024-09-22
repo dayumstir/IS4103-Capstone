@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Card, Typography, Spin, Button, Alert, Modal, Form, Input, message } from "antd";
+import { Avatar, Card, Typography, Spin, Button, Alert, Modal, Form, Input, message } from "antd";
 import { useNavigate } from "react-router-dom";
+import { UserOutlined } from "@ant-design/icons";
+import { Buffer } from "buffer";
 
 const { Title, Text } = Typography;
 
@@ -11,6 +13,7 @@ interface AdminProfileData {
   contact_number: string;
   address: string;
   date_of_birth: string;
+  profile_picture:string;
 }
 
 const ProfileScreen: React.FC = () => {
@@ -69,6 +72,10 @@ const ProfileScreen: React.FC = () => {
     setIsModalVisible(false);
     form.resetFields();
   };
+  const validatePassword = (password: string) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    return passwordRegex.test(password);
+};
 
   const onFinish = async (values: { oldPassword: string; newPassword: string }) => {
     const { oldPassword, newPassword } = values;
@@ -112,6 +119,18 @@ const ProfileScreen: React.FC = () => {
   return (
     <div style={{ padding: "20px" }}>
       <Card title="Admin Profile" style={{ width: 300 }}>
+
+      <Title level={4}>Profile Picture</Title>
+      {user.profile_picture ? (
+          <img
+            src={`data:image/png;base64,${Buffer.from(user.profile_picture).toString("base64")}`}
+            alt="avatar1"
+            className="h-36 w-36 object-cover"
+          />
+        ) : (
+          <Avatar className="h-36 w-36 object-cover" icon={<UserOutlined />} />
+        )}
+
         <Title level={4}>Username</Title>
         <Text>{user.username}</Text>
         <Title level={4}>Email</Title>
@@ -154,7 +173,7 @@ const ProfileScreen: React.FC = () => {
         <Form
           form={form}
           name="resetPassword"
-          labelCol={{ span: 6 }}
+          labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
           onFinish={onFinish}
           autoComplete="off"
@@ -174,11 +193,21 @@ const ProfileScreen: React.FC = () => {
               { required: true, message: "Please input your new password" },
               {
                 validator: (_, value) => {
-                  const oldPassword = form.getFieldValue("oldPassword");
-                  if (value && value === oldPassword) {
-                    return Promise.reject(new Error("New password cannot be the same as old password"));
+                  const oldPassword = form.getFieldValue("oldPassword"); // Get the old password
+
+                  // Check if the new password is the same as the old password
+                  if (value === oldPassword) {
+                    return Promise.reject(new Error("New password cannot be the same as the old password."));
                   }
-                  return Promise.resolve();
+          
+                  // Check the password validation criteria
+                  if (!validatePassword(value)) {
+                    return Promise.reject(
+                      new Error("New password must have at least 1 lowercase letter, 1 uppercase letter, 1 digit, 1 special character, and be at least 8 characters long.")
+                    );
+                  }
+          
+                  return Promise.resolve(); // If all checks pass
                 },
               },
             ]}
@@ -187,7 +216,7 @@ const ProfileScreen: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            label="Confirm New Password"
+            label="Confirm Password"
             name="confirmPassword"
             rules={[
               { required: true, message: "Please input your new password" },
@@ -205,8 +234,8 @@ const ProfileScreen: React.FC = () => {
             <Input.Password />
           </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
+          <Form.Item className="flex justify-end w-full">
+            <Button type="primary" htmlType="submit" >
               Change Password
             </Button>
           </Form.Item>

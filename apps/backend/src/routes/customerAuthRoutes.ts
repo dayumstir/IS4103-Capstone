@@ -8,6 +8,7 @@ import {
     login, 
     logout, 
     resetPassword, 
+    resendEmailVerification,
     forgetPassword, 
     resetPasswordWithToken 
 } from "../controllers/customerAuthController";
@@ -22,6 +23,7 @@ router.post("/verify-phone-number-otp", verifyPhoneNumberOTP);
 router.post("/login", login);
 router.post("/logout", customerAuthMiddleware, logout);
 router.post("/reset-password", customerAuthMiddleware, resetPassword);
+router.post("/resend-email", resendEmailVerification);
 router.post('/forget-password', forgetPassword);
 router.post('/reset-password-with-token', resetPasswordWithToken);
 

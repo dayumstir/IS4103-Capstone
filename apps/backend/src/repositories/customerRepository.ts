@@ -26,6 +26,13 @@ export const findCustomerByEmail = async (email: string) => {
     });
 };
 
+// Find customer by contact number
+export const findCustomerByContactNumber = async (contact_number: string) => {
+    return prisma.customer.findFirst({
+        where: { contact_number },
+    })
+}
+
 
 // Update customer in database
 export const updateCustomer = async (customer_id: string, updateData: Partial<ICustomer>) => {
@@ -33,4 +40,10 @@ export const updateCustomer = async (customer_id: string, updateData: Partial<IC
         where: { customer_id: customer_id },
         data: updateData,
     });
+};
+
+
+// Find All Customers
+export const listAllCustomers = async () => {
+    return prisma.customer.findMany();
 };

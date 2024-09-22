@@ -6,6 +6,8 @@ import crypto from "crypto";
 const nodemailer = require('nodemailer');
 import twilio from "twilio";
 import validator from "validator";
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Internal dependencies
 import { CustomerStatus } from "../interfaces/customerStatus";
@@ -43,13 +45,18 @@ export const registerCustomer = async (customerData: ICustomer) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(customerData.password, 10);
 
+    // Set default profile picture
+    const defaultProfilePicturePath = path.join(__dirname, '../src/assets/default-profile-picture.png');
+    const defaultProfilePicture = fs.readFileSync(defaultProfilePicturePath);
+
     // Create the customer in the database
     const customer = await customerRepository.createCustomer({
         ...customerData,
         password: hashedPassword,
         status: CustomerStatus.PENDING_EMAIL_VERIFICATION,  // Set status as pending verification
         credit_score: 0,                                    // Default value
-        credit_tier_id: "tier_1"                            // Default credit tier
+        credit_tier_id: "tier_1",                            // Default credit tier
+        profile_picture: defaultProfilePicture
     });
 
     return customer;
@@ -60,14 +67,14 @@ export const registerCustomer = async (customerData: ICustomer) => {
 export const sendEmailVerification = async (email: string, customer_id: string) => {
     logger.info('Executing sendEmailVerification...');
 
-    const token = crypto.randomBytes(32).toString("hex");
+    const token = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)    // Token expires in 24hrs
 
     // Save the email verification token
     await emailVerificationTokenRepository.createToken(email, token, expiresAt, customer_id);
 
     // Send email with the confirmation link (using nodemailer)
-    const confirmationLink = `http://localhost:5173/confirm-email?token=${token}`;
+    const confirmationNumber = `${token}`;
     const transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
         port: parseInt(process.env.EMAIL_PORT || "2525"),
@@ -81,7 +88,47 @@ export const sendEmailVerification = async (email: string, customer_id: string) 
         from: process.env.EMAIL_USER,
         to: email, 
         subject: 'Confirm your email',
-        text: `Please confirm your email by clicking this link: ${confirmationLink}`,
+        text: `Please confirm your email by entering this number in your mobile application: ${confirmationNumber}`,
+    });
+};
+
+
+// Resend Email Verification
+export const resendEmailVerification = async (email: string) => {
+    logger.info('Executing resendEmailVerification...');
+
+    // Check for existing customer
+    const customer = await customerRepository.findCustomerByEmail(email);
+    if (!customer) {
+        logger.warn(`${email} - Customer not found`);
+        throw new Error("Invalid credentials");
+    }
+
+    // Invalidate previous email verification tokens
+    await emailVerificationTokenRepository.invalidateTokensByEmail(email);
+
+    const token = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)    // Token expires in 24hrs
+
+    // Save the email verification token
+    await emailVerificationTokenRepository.createToken(email, token, expiresAt, customer.customer_id);
+
+    // Send email with the confirmation link (using nodemailer)
+    const confirmationNumber = `${token}`;
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: parseInt(process.env.EMAIL_PORT || "2525"),
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email, 
+        subject: 'Confirm your email',
+        text: `Please confirm your email by entering this number in your mobile application: ${confirmationNumber}`,
     });
 };
 
@@ -105,14 +152,14 @@ export const confirmEmail = async (token: string) => {
 
 
 // Step 4: Send OTP to contact number
-export const sendPhoneNumberOTP = async (email: string) => {
+export const sendPhoneNumberOTP = async (contact_number: string) => {
     logger.info('Executing sendPhoneNumberOTP...');
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();     // Generate 6-digit OTP
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000)                 // Token expires in 10 mins
 
     // Retrieve customer based on contact number
-    const customer = await customerRepository.findCustomerByEmail(email);
+    const customer = await customerRepository.findCustomerByContactNumber(contact_number);
     if (!customer) {
         throw new Error("Customer does not exist");
     }

@@ -28,3 +28,22 @@ export const updateCustomer = async (customer_id: string, updateData: Partial<IC
     }
     return customer;
 };
+
+
+// List all customers
+export const getAllCustomers = async () => {
+    const customers = await customerRepository.listAllCustomers();
+    if (!customers || customers.length === 0) {
+        throw new Error("No customers found");
+    }
+    return customers;
+};
+
+
+// Update the customer's profile picture in the database
+export const updateProfilePicture = async (customerId: string, profilePictureBuffer: Buffer) => {
+    logger.info('Updating profile picture for customer:', customerId);
+
+    // Update the profile picture in the database
+    await customerRepository.updateCustomer(customerId, { profile_picture: profilePictureBuffer });
+};
