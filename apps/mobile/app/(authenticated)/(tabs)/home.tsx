@@ -58,7 +58,8 @@ export default function HomePage() {
         <View className="flex w-full flex-row justify-between">
           <View className="flex max-w-[200px]">
             <Text className="text-3xl">
-              Hello <Text className="font-bold">{name}</Text>
+              Hello 
+              {/* <Text className="font-bold">{name}</Text> */}
             </Text>
             <Text className="text-base">
               You do not have enough balance in ur wallet for this month's

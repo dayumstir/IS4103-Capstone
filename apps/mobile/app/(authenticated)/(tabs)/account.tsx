@@ -7,7 +7,8 @@ import {
   Linking,
   TextInput,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  Alert
 } from "react-native";
 import { Button, DatePicker, Toast } from "@ant-design/react-native";
 import { useDispatch } from "react-redux";
@@ -24,6 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import { format, setMonth } from "date-fns";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 // Validation Schema using zod
 const profileSchema = z.object({
@@ -41,6 +43,7 @@ const profileSchema = z.object({
 export default function AccountPage() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(null);
 
   // Fetch the profile using the API call
   const { data: profile, error, isLoading, refetch } = useGetProfileQuery();
@@ -113,13 +116,27 @@ export default function AccountPage() {
         date_of_birth: dayjs(updatedProfile.date_of_birth).format("YYYY-MM-DD"),
       });
 
-      Toast.success({
-        content: "Profile updated successfully",
-        duration: 1,
-      });
+      Alert.alert("Success", "Profile updated successfully");
+      // Toast.success({
+      //   content: "Profile updated successfully",
+      //   duration: 1,
+      // });
       setIsEditing(false); // Exit edit mode
-    } catch (error) {
-      console.error("Failed to update profile:", error);
+    } catch (err: any) {
+      // console.error("Failed to update profile:", error);
+
+      let errorMessage = "An error occurred. Please try again.";
+
+      // Check if the error is of type FetchBaseQueryError
+      if ('data' in err) {
+          const fetchError = err as FetchBaseQueryError;
+          if (fetchError.data && typeof fetchError.data === 'object' && 'error' in fetchError.data) {
+              errorMessage = fetchError.data.error as string;
+          }
+      }
+
+      // Set the error message in local state to be displayed
+      setCustomErrorMessage(errorMessage);
     }
   };
 
@@ -288,6 +305,12 @@ export default function AccountPage() {
                       </View>
                     )}
                   />
+                  {/* ===== Error Message ===== */}
+                  {customErrorMessage && (
+                      <Text className="mb-4 text-red-500">
+                          {customErrorMessage}
+                      </Text>
+                  )}
                   <View className="mt-10 w-full gap-4 px-10">
                     <Button type="primary" onPress={handleSubmit(onSubmit)}>
                       Save

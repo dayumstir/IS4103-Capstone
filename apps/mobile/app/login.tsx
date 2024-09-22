@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLoginMutation } from "../redux/services/customerAuth";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 // Define your Zod schema
 const loginSchema = z.object({
@@ -28,6 +29,7 @@ export default function Login() {
   const dispatch = useDispatch();
   const [loginMutation, { isLoading, error }] = useLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
+  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(null);
 
   const {
     control,
@@ -44,8 +46,21 @@ export default function Login() {
       dispatch(login(result));
       // Delete the history to prevent user from swiping back to the login page
       router.replace("/home");
-    } catch (error) {
-      console.error("Login failed:", error);
+    } catch (err: any) {
+      // console.error("Login failed:", error);
+
+      let errorMessage = "An error occurred. Please try again.";
+
+      // Check if the error is of type FetchBaseQueryError
+      if ('data' in err) {
+          const fetchError = err as FetchBaseQueryError;
+          if (fetchError.data && typeof fetchError.data === 'object' && 'error' in fetchError.data) {
+              errorMessage = fetchError.data.error as string;
+          }
+      }
+
+      // Set the error message in local state to be displayed
+      setCustomErrorMessage(errorMessage);
     }
   };
 
@@ -116,10 +131,10 @@ export default function Login() {
       />
 
       {/* ===== Error Message ===== */}
-      {error && (
-        <Text className="mb-4 text-red-500">
-          Your email or password is incorrect
-        </Text>
+      {customErrorMessage && (
+          <Text className="mb-4 text-red-500">
+              {customErrorMessage}
+          </Text>
       )}
 
       {/* ===== Login Button ===== */}
