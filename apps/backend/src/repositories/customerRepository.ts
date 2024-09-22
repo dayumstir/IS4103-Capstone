@@ -34,3 +34,9 @@ export const updateCustomer = async (customer_id: string, updateData: Partial<IC
         data: updateData,
     });
 };
+
+
+// Find All Customers
+export const listAllCustomers = async () => {
+    return prisma.customer.findMany();
+};
