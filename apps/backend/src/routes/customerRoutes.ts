@@ -14,5 +14,6 @@ router.get("/profile", customerAuthMiddleware, getCustomerProfile);
 router.put("/profile", customerAuthMiddleware, editCustomerProfile);
 router.get("/:customer_id", adminAuthMiddleware, getCustomerProfile);
 router.get("/allCustomers", listAllCustomers);
+router.put("/allCustomers", editCustomerProfile);
 
 export default router;

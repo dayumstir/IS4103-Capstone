@@ -23,6 +23,7 @@ router.post("/add", add);
 router.get("/allCustomers", listAllCustomers);
 router.get("/customer/:customer_id", getCustomerProfile);
 router.put("/allCustomers", editCustomerProfile);
+router.put("/customer/:customer_id", editCustomerProfile);
 router.get("/allMerchants", listAllMerchants);
 router.get("/merchant/:merchant_id", getMerchantProfile);
 router.put("/allMerchants", editMerchantProfile);

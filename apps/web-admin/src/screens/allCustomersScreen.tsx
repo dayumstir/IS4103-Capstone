@@ -89,15 +89,14 @@ const AllCustomersScreen: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://localhost:3000/customer/${customer_id}/status`,
+        `http://localhost:3000/admin/customer/${customer_id}`,
         {
           method: "PUT",
           headers: {
-            Accept: "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json",
-            Authorization: `Bearer ${jwt_token}`,
           },
-          body: JSON.stringify({ status: newStatus }), // Send the new status
+          body: JSON.stringify({ customer_id, status: newStatus }),
         },
       );
 
@@ -152,9 +151,15 @@ const AllCustomersScreen: React.FC = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (text: string) => (
-        <Tag color={text === "ACTIVE" ? "green" : "volcano"}>{text}</Tag>
-      ),
+      render: (text: string) => {
+        let color = "geekblue";
+        if (text === "ACTIVE") {
+          color = "green";
+        } else if (text === "SUSPENDED") {
+          color = "volcano";
+        }
+        return <Tag color={color}>{text}</Tag>;
+      },
     },
     {
       key: "actions",
