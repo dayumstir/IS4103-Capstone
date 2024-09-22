@@ -161,7 +161,7 @@ const AllMerchantsScreen: React.FC = () => {
           </Button>
           <Popconfirm
             title={
-              record.status === "INACTIVE"
+              record.status === "SUSPENDED"
                 ? "Merchant is suspended. Would you like to unsuspend the merchant?"
                 : "Are you sure you would like to suspend the merchant?"
             }
