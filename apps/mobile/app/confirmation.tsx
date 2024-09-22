@@ -1,5 +1,5 @@
 // A screen component for the login functionality, handling email verification.
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -10,6 +10,7 @@ import { RootState } from "../redux/store";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useNavigation } from "expo-router";
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 // Zod schema for validation
 const confirmEmailSchema = z.object({
@@ -23,6 +24,7 @@ export default function ConfirmationScreen() {
   const [sendPhoneNumberOTPMutation] = useSendPhoneNumberOTPMutation();
   const [resendEmailVerificationMutation, { isLoading: isResending }] = useResendEmailVerificationMutation();
   const { customer } = useSelector((state: RootState) => state.customerAuth); // Get the customer from Redux
+  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(null);
   const navigation = useNavigation(); 
   const {
     control,
@@ -53,7 +55,7 @@ export default function ConfirmationScreen() {
 
       // If successful, redirect to phone number OTP page
       router.replace("/phoneVerification");
-    } catch (err) {
+    } catch (err: any) {
       // Show an alert if there's an error
       Alert.alert("Error", "The token you entered is incorrect");
     }
