@@ -1,14 +1,10 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import type { FormProps } from "antd";
 import { Button, Card, Form, Input, Space, Spin, Typography } from "antd";
-import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
-import { login } from "../redux/features/authSlice";
 import { useLoginMutation } from "../redux/services/auth";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux/store";
 import { Alert } from "antd";
 
 export type LoginFormValues = {
@@ -18,25 +14,16 @@ export type LoginFormValues = {
 
 const LoginScreen: React.FC = () => {
   const { Text, Title } = Typography;
-  const dispatch = useDispatch();
   const [loginMutation, { isLoading, error }] = useLoginMutation();
   const navigate = useNavigate();
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated,
-  );
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    }
-  }, [isAuthenticated]);
 
   const onFinish: FormProps<LoginFormValues>["onFinish"] = async (data) => {
     console.log(data);
     const result = await loginMutation(data);
     if (result.data) {
-      dispatch(login({ merchantId: result.data.id }));
       localStorage.setItem("token", result.data.token);
+      localStorage.setItem("merchantId", result.data.id);
+      navigate("/");
     }
 
     console.log("Success:", data);

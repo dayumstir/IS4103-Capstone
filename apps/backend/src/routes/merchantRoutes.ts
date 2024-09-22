@@ -40,6 +40,6 @@ merchantRouter.use("/auth", authRouter);
 authRouter.post("/register", upload.single("profile_picture"), register);
 authRouter.post("/login", login);
 authRouter.post("/logout", merchantAuthMiddleware, logout);
-authRouter.post("/reset-password", resetPassword);
+authRouter.post("/:id/reset-password", resetPassword);
 
 export default merchantRouter;

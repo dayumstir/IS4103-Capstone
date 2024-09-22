@@ -49,6 +49,7 @@ export default function AuthenticatedLayout() {
           },
         }}
       />
+      <Stack.Screen name="resetPassword" options={{ title: 'Reset Password' }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
   );

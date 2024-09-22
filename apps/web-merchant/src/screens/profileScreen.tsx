@@ -16,23 +16,31 @@ import {
   useEditProfileMutation,
   useGetProfileQuery,
 } from "../redux/services/profile";
-import { RootState } from "../redux/store";
-import { useSelector } from "react-redux";
 import { Buffer } from "buffer";
 import { UserOutlined, UploadOutlined } from "@ant-design/icons";
 import { RegisterFormValues } from "../interfaces/registerFormInterface";
 import { EditProfileProps } from "../interfaces/editProfileInterface";
+import {
+  ResetPasswordProps,
+  ResetPasswordValues,
+} from "../interfaces/resetPasswordInterface";
+import { useResetPasswordMutation } from "../redux/services/auth";
 
 const ProfileScreen: React.FC = () => {
-  const merchantId = useSelector((state: RootState) => state.auth.merchantId);
+  const merchantId = localStorage.getItem("merchantId");
+  if (!merchantId) {
+    return;
+  }
+
   const { data: profile, refetch } = useGetProfileQuery(merchantId);
 
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] =
+    useState(false);
 
   const [name, setName] = useState("");
   const [profilePictureDisplay, setProfilePictureDisplay] = useState("");
   const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [address, setAddress] = useState("");
 
@@ -66,7 +74,12 @@ const ProfileScreen: React.FC = () => {
           <p className="text-sm text-gray-600">{email}</p>
         </div>
         <div className="ml-auto flex space-x-2">
-          <Button type="primary">Reset Password</Button>
+          <Button
+            type="primary"
+            onClick={() => setIsResetPasswordModalOpen(true)}
+          >
+            Reset Password
+          </Button>
           <Button
             type="primary"
             onClick={() => setIsEditProfileModalOpen(true)}
@@ -85,7 +98,15 @@ const ProfileScreen: React.FC = () => {
           initContactNumber={contactNumber}
           initProfileDisplay={profilePictureDisplay}
           isModalOpen={isEditProfileModalOpen}
-          setIsEditProfileModalOpen={setIsEditProfileModalOpen}
+          setModalOpen={setIsEditProfileModalOpen}
+        />
+      )}
+
+      {isResetPasswordModalOpen && (
+        <ResetPasswordModal
+          merchantId={merchantId}
+          isModalOpen={isResetPasswordModalOpen}
+          setModalOpen={setIsResetPasswordModalOpen}
         />
       )}
 
@@ -131,7 +152,7 @@ const EditProfileModal = ({
   initAddress,
   initProfileDisplay,
   isModalOpen,
-  setIsEditProfileModalOpen,
+  setModalOpen,
 }: EditProfileProps) => {
   const [editProfileMutation, { isLoading, error }] = useEditProfileMutation();
   const [profilePictureDisplay, setProfilePictureDisplay] =
@@ -147,7 +168,7 @@ const EditProfileModal = ({
     profilePicture && formData.set("profile_picture", profilePicture);
     await editProfileMutation({ id: merchantId, body: formData });
     if (!isLoading) {
-      setIsEditProfileModalOpen(false);
+      setModalOpen(false);
     }
     if (error) {
       message.error("Edit Profile Failed! Please try again");
@@ -204,7 +225,7 @@ const EditProfileModal = ({
       onOk={() => form.submit()}
       cancelText="Cancel"
       okText="Confirm"
-      onCancel={() => setIsEditProfileModalOpen(false)}
+      onCancel={() => setModalOpen(false)}
     >
       <Form name="basic" onFinish={onFinish} form={form} labelCol={{ span: 6 }}>
         <Form.Item<RegisterFormValues>
@@ -256,6 +277,67 @@ const EditProfileModal = ({
           initialValue={initAddress}
         >
           <Input />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
+
+const ResetPasswordModal = ({
+  merchantId,
+  isModalOpen,
+  setModalOpen,
+}: ResetPasswordProps) => {
+  const [form] = Form.useForm();
+  const [resetPasswordMutation] = useResetPasswordMutation();
+
+  const onFinish: FormProps<ResetPasswordValues>["onFinish"] = async (data) => {
+    await resetPasswordMutation({
+      id: merchantId,
+      body: data,
+    })
+      .unwrap()
+      .then(() => {
+        message.info("Reset Password Successful!");
+        setModalOpen(false);
+      })
+      .catch((error) => message.error(error.data.error));
+  };
+  return (
+    <Modal
+      title="Reset Password"
+      open={isModalOpen}
+      onOk={() => form.submit()}
+      cancelText="Cancel"
+      okText="Confirm"
+      onCancel={() => setModalOpen(false)}
+    >
+      <Form name="basic" onFinish={onFinish} form={form} labelCol={{ span: 6 }}>
+        <Form.Item<ResetPasswordValues>
+          name="oldPassword"
+          label="Old Password"
+          rules={[
+            {
+              required: true,
+              message: "Please input your old password!",
+            },
+          ]}
+          hasFeedback
+        >
+          <Input.Password />
+        </Form.Item>
+        <Form.Item<ResetPasswordValues>
+          name="newPassword"
+          label="New Password"
+          rules={[
+            {
+              required: true,
+              message: "Please input your new password!",
+            },
+          ]}
+          hasFeedback
+        >
+          <Input.Password />
         </Form.Item>
       </Form>
     </Modal>
