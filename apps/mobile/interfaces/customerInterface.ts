@@ -3,7 +3,7 @@
 export interface ICustomer {
   customer_id: number;
   name: string;
-  profile_picture: string;
+  profile_picture: Buffer;
   email: string;
   password: string;
   contact_number: string;

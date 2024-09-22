@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Buffer } from "buffer";
 import {
   Text,
   View,
@@ -130,13 +131,13 @@ export default function AccountPage() {
             {!isEditing && (
               <>
                 <Image
-                  source={{ uri: profile.profile_picture }}
-                  className="w-30 h-30 mb-6 rounded-full"
+                  source={{ uri: `data:image/png;base64,${Buffer.from(profile.profile_picture).toString("base64")}` }}
+                  style={{height: 100, width: 100}}
                 />
                 <Text className="mb-1 text-lg font-semibold text-gray-800">
                   My Credit Rating
                 </Text>
-                <Text className="mb-2 text-5xl font-bold text-black">
+                <Text className="mb-2 text-4xl font-bold text-black">
                   {profile.credit_score}
                 </Text>
                 <Text

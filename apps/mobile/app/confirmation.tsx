@@ -52,7 +52,7 @@ export default function ConfirmationScreen() {
       }
 
       // If successful, redirect to phone number OTP page
-      router.push("/phoneVerification");
+      router.replace("/phoneVerification");
     } catch (err) {
       // Show an alert if there's an error
       Alert.alert("Error", "The token you entered is incorrect");
