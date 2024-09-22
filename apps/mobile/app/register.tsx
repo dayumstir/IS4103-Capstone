@@ -66,6 +66,7 @@ export default function Register() {
     };
     try {
       const result = await registerMutation(registrationData).unwrap();
+      console.log(result);
 
       // Sore customer data in redux
       dispatch(setCustomer(result))

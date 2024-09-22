@@ -105,14 +105,14 @@ export const confirmEmail = async (token: string) => {
 
 
 // Step 4: Send OTP to contact number
-export const sendPhoneNumberOTP = async (email: string) => {
+export const sendPhoneNumberOTP = async (contact_number: string) => {
     logger.info('Executing sendPhoneNumberOTP...');
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();     // Generate 6-digit OTP
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000)                 // Token expires in 10 mins
 
     // Retrieve customer based on contact number
-    const customer = await customerRepository.findCustomerByEmail(email);
+    const customer = await customerRepository.findCustomerByContactNumber(contact_number);
     if (!customer) {
         throw new Error("Customer does not exist");
     }

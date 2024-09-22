@@ -3,8 +3,10 @@
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useConfirmEmailMutation } from "../redux/services/customerAuth";
+import { useConfirmEmailMutation, useSendPhoneNumberOTPMutation } from "../redux/services/customerAuth";
 import { useForm, Controller } from "react-hook-form";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
@@ -18,6 +20,8 @@ export type ConfirmEmailFormValues = z.infer<typeof confirmEmailSchema>;
 
 export default function ConfirmationScreen() {
   const [confirmEmailMutation, { isLoading, error }] = useConfirmEmailMutation();
+  const [sendPhoneNumberOTPMutation] = useSendPhoneNumberOTPMutation();
+  const { customer } = useSelector((state: RootState) => state.customerAuth); // Get the customer from Redux
   const {
     control,
     handleSubmit,
@@ -30,6 +34,12 @@ export default function ConfirmationScreen() {
     try {
       // Make the API call to confirm email
       await confirmEmailMutation(data).unwrap();
+
+      // After email confirmation, send OTP to phone number
+      console.log(customer);
+      if (customer?.contact_number) {
+        await sendPhoneNumberOTPMutation({ contact_number: customer.contact_number }).unwrap();
+      }
 
       // If successful, redirect to phone number OTP page
       router.push("/phoneVerification");
