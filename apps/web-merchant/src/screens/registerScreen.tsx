@@ -15,7 +15,12 @@ import {
   UploadProps,
 } from "antd";
 import logo from "../assets/pandapay_logo.png";
-import { useRegisterMutation } from "../redux/services/auth";
+import {
+  useCheckEmailInUseMutation,
+  useRegisterMutation,
+  useSendPhoneNumberOTPMutation,
+  useVerifyPhoneNumberOTPMutation,
+} from "../redux/services/auth";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate, NavLink } from "react-router-dom";
 import { message } from "antd";
@@ -25,6 +30,7 @@ import {
   PasswordProps,
   RegisterFormValues,
 } from "../interfaces/registerFormInterface";
+import PendingEmailConfirmationModal from "../components/pendingEmailConfirmationModal";
 
 enum pageType {
   EmailUsername = 0,
@@ -39,8 +45,14 @@ const RegisterScreen: React.FC = () => {
   const [form] = Form.useForm();
 
   const [name, setName] = useState("");
-  const [profilePicture, setProfilePicture] = useState();
-  const [profilePictureDisplay, setProfilePictureDisplay] = useState("");
+  // const [profilePicture, setProfilePicture] = useState();
+  // const [profilePictureDisplay, setProfilePictureDisplay] = useState("");
+  const [
+    pendingEmailConfirmationModalOpen,
+    setPendingEmailConfirmationModalOpen,
+  ] = useState(false);
+
+  const [otpVerified, setOtpVerified] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [contactNumber, setContactNumber] = useState("");
@@ -60,9 +72,15 @@ const RegisterScreen: React.FC = () => {
             form={form}
             name={name}
             email={email}
+            pendingEmailConfirmationModalOpen={
+              pendingEmailConfirmationModalOpen
+            }
             setName={setName}
             setEmail={setEmail}
             setPageIdx={setPageIdx}
+            setPendingEmailConfirmationModalOpen={
+              setPendingEmailConfirmationModalOpen
+            }
           />
         )}
         {pageIdx == pageType.Password && (
@@ -76,15 +94,13 @@ const RegisterScreen: React.FC = () => {
         {pageIdx == pageType.Details && (
           <Details
             form={form}
+            otpVerified={otpVerified}
             name={name}
             email={email}
-            profilePicture={profilePicture}
-            profilePictureDisplay={profilePictureDisplay}
             password={password}
             contactNumber={contactNumber}
+            setOtpVerified={setOtpVerified}
             setContactNumber={setContactNumber}
-            setProfilePicture={setProfilePicture}
-            setProfilePictureDisplay={setProfilePictureDisplay}
             setAddress={setAddress}
             address={address}
             setPageIdx={setPageIdx}
@@ -101,75 +117,99 @@ const EmailNameForm = ({
   form,
   email,
   name,
+  pendingEmailConfirmationModalOpen,
   setName,
   setEmail,
   setPageIdx,
+  setPendingEmailConfirmationModalOpen,
 }: EmailNameProps) => {
   const { Text } = Typography;
 
+  const [checkEmailInUseMutation] = useCheckEmailInUseMutation();
+
   const onFinish: FormProps<RegisterFormValues>["onFinish"] = async (data) => {
     if (data.name && data.email) {
-      setName(data.name);
-      setEmail(data.email);
-      setPageIdx(pageType.Password);
+      await checkEmailInUseMutation({ email: data.email })
+        .unwrap()
+        .then(() => {
+          setName(data.name);
+          setEmail(data.email);
+          setPageIdx(pageType.Password);
+        })
+        .catch((error) => {
+          if (error.data.error == "Email pending verification") {
+            setPendingEmailConfirmationModalOpen(true);
+          }
+          message.error(error.data.error);
+        });
     }
   };
 
   return (
-    <Form
-      name="basic"
-      labelCol={{ span: 6 }}
-      wrapperCol={{ span: 16 }}
-      style={{ minWidth: 600 }}
-      onFinish={onFinish}
-      autoComplete="off"
-      form={form}
-    >
-      <Form.Item<RegisterFormValues>
-        name="email"
-        label="E-mail"
-        initialValue={email}
-        rules={[
-          {
-            type: "email",
-            message: "The input is not valid E-mail!",
-          },
-          {
-            required: true,
-            message: "Please input your E-mail!",
-          },
-        ]}
+    <div>
+      {pendingEmailConfirmationModalOpen && (
+        <PendingEmailConfirmationModal
+          isModalOpen={pendingEmailConfirmationModalOpen}
+          setModalOpen={setPendingEmailConfirmationModalOpen}
+        />
+      )}
+
+      <Form
+        name="basic"
+        labelCol={{ span: 6 }}
+        wrapperCol={{ span: 16 }}
+        style={{ minWidth: 600 }}
+        onFinish={onFinish}
+        autoComplete="off"
+        form={form}
       >
-        <Input />
-      </Form.Item>
+        <Form.Item<RegisterFormValues>
+          name="email"
+          label="E-mail"
+          initialValue={email}
+          rules={[
+            {
+              type: "email",
+              message: "The input is not valid E-mail!",
+            },
+            {
+              required: true,
+              message: "Please input your E-mail!",
+            },
+          ]}
+        >
+          <Input />
+        </Form.Item>
 
-      <Form.Item<RegisterFormValues>
-        name="name"
-        label="Full Name"
-        initialValue={name}
-        rules={[
-          {
-            required: true,
-            message: "Please input your username!",
-            whitespace: true,
-          },
-        ]}
-      >
-        <Input />
-      </Form.Item>
+        <Form.Item<RegisterFormValues>
+          name="name"
+          label="Full Name"
+          initialValue={name}
+          rules={[
+            {
+              required: true,
+              message: "Please input your username!",
+              whitespace: true,
+            },
+          ]}
+        >
+          <Input />
+        </Form.Item>
 
-      <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
-        <Button type="primary" htmlType="submit">
-          Continue Register
-        </Button>
-      </Form.Item>
+        <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
+          <Button type="primary" htmlType="submit">
+            Continue Register
+          </Button>
+        </Form.Item>
 
-      <Form.Item wrapperCol={{ offset: 6, span: 30 }}>
-        <Text>
-          Have an account already? <NavLink to="/login">Click to Login</NavLink>
-        </Text>
-      </Form.Item>
-    </Form>
+        <Form.Item wrapperCol={{ offset: 6, span: 30 }}>
+          <Text>
+            Have an account already?{" "}
+            <NavLink to="/login">Click to Login</NavLink>
+          </Text>
+        </Form.Item>
+      </Form>
+    </div>
   );
 };
 
@@ -204,6 +244,23 @@ const Password = ({
           {
             required: true,
             message: "Please input your password!",
+          },
+          {
+            validator: (_, value) => {
+              if (!value) {
+                return Promise.reject(new Error("Please input your password!"));
+              }
+              // Check for at least one capital letter and minimum 8 characters
+              const isValid = value.length >= 8 && /[A-Z]/.test(value);
+              if (!isValid) {
+                return Promise.reject(
+                  new Error(
+                    "Password must be at least 8 characters long and contain at least one capital letter!",
+                  ),
+                );
+              }
+              return Promise.resolve();
+            },
           },
         ]}
         hasFeedback
@@ -259,20 +316,23 @@ const Details = ({
   form,
   name,
   email,
-  profilePicture,
-  profilePictureDisplay,
   password,
   address,
+  otpVerified,
+  setOtpVerified,
   contactNumber,
-  setProfilePicture,
-  setProfilePictureDisplay,
   setContactNumber,
   setAddress,
   setPageIdx,
 }: DetailsProps) => {
   const [registerMutation, { isLoading, error }] = useRegisterMutation();
+  const [sendPhoneNumberOTPMutation] = useSendPhoneNumberOTPMutation();
+  const [VerifyPhoneNumberOTPMutation] = useVerifyPhoneNumberOTPMutation();
   const navigate = useNavigate();
   const formData = new FormData();
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  // const [otpVerified, setOtpVerified] = useState(false);
 
   const onFinish: FormProps<RegisterFormValues>["onFinish"] = async (data) => {
     formData.append("name", name);
@@ -280,37 +340,12 @@ const Details = ({
     formData.append("password", password);
     formData.append("contact_number", data.contact_number);
     formData.append("address", data.address);
-    profilePicture && formData.append("profile_picture", profilePicture);
+    // profilePicture && formData.append("profile_picture", profilePicture);
     const result = await registerMutation(formData);
     if (result.data) {
-      navigate("/");
+      localStorage.setItem("email", email);
+      navigate("/register-confirm");
     }
-  };
-
-  const [loading, setLoading] = useState(false);
-
-  const handleChange: UploadProps["onChange"] = (info) => {
-    if (info.file.status === "uploading") {
-      info.file.originFileObj &&
-        formData.append("profile_picture", info.file.originFileObj);
-      setProfilePicture(info.file.originFileObj);
-      setLoading(true);
-      return;
-    }
-  };
-  type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-
-  const beforeUpload = (file: FileType) => {
-    const isJpgOrPng = file.type === "image/png";
-    if (!isJpgOrPng) {
-      message.error("You can only upload PNG file!");
-    }
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      message.error("Image must smaller than 2MB!");
-    }
-
-    return isJpgOrPng && isLt2M;
   };
 
   return (
@@ -323,18 +358,169 @@ const Details = ({
       autoComplete="off"
       form={form}
     >
-      <Form.Item<RegisterFormValues>
-        name="contact_number"
+      <Form.Item
         label="Contact Number"
-        initialValue={contactNumber}
+        name="contact_number"
         rules={[{ required: true }]}
       >
-        <InputNumber
-          onChange={(contactNumber) =>
-            contactNumber && setContactNumber(contactNumber.toString())
-          }
-        />
+        {form.getFieldValue("contact_number") != "" && otpVerified ? (
+          <p>{form.getFieldValue("contact_number")}</p>
+        ) : (
+          <Input
+            onChange={(contactNumber) =>
+              contactNumber && setContactNumber(contactNumber.toString())
+            }
+          />
+        )}
       </Form.Item>
+      <Form.Item
+        rules={[{ required: true }]}
+        wrapperCol={{ offset: 6, span: 16 }}
+      >
+        <div className="flex items-center justify-end">
+          {isOtpSent ? (
+            <Input
+              placeholder="Enter OTP..."
+              onChange={(e) => setOtp(e.target.value)}
+            />
+          ) : undefined}
+          {isOtpSent ? (
+            <div className="flex items-center">
+              <Button
+                type="default"
+                className="ml-5"
+                onClick={() =>
+                  sendPhoneNumberOTPMutation({
+                    contact_number: form.getFieldValue("contact_number"),
+                  })
+                    .unwrap()
+                    .then(() => {
+                      const num = form.getFieldValue("contact_number");
+                      message.info("OTP Sent to " + num);
+                      setIsOtpSent(true);
+                    })
+                    .catch((error) => message.error(error.data.error))
+                }
+              >
+                Resend OTP
+              </Button>
+              <Button
+                type="default"
+                className="ml-5"
+                onClick={() =>
+                  VerifyPhoneNumberOTPMutation({
+                    contact_number: form.getFieldValue("contact_number"),
+                    otp: otp,
+                  })
+                    .unwrap()
+                    .then(() => {
+                      message.info("OTP Verified");
+                      setOtpVerified(true);
+                    })
+                    .catch((error) => message.error(error.data.error))
+                }
+              >
+                Verify OTP
+              </Button>
+            </div>
+          ) : otpVerified ? (
+            <p>Contact Number Verified</p>
+          ) : (
+            <Button
+              type="default"
+              className="ml-5"
+              onClick={() =>
+                sendPhoneNumberOTPMutation({
+                  contact_number: form.getFieldValue("contact_number"),
+                })
+                  .unwrap()
+                  .then(() => {
+                    const num = form.getFieldValue("contact_number");
+                    message.info("OTP Sent to " + num);
+                    setIsOtpSent(true);
+                  })
+                  .catch((error) => message.error(error.data.error))
+              }
+            >
+              Send OTP
+            </Button>
+          )}
+        </div>
+      </Form.Item>
+      {/* </Form.Item> */}
+
+      {/* <Form.Item style={{ marginBottom: 0 }}>
+        <Form.Item<RegisterFormValues>
+          name="contact_number"
+          label="Contact Number"
+          initialValue={contactNumber}
+          rules={[{ required: true }]}
+          style={{ display: "inline-block" }}
+        >
+          <Input
+            onChange={(contactNumber) =>
+              contactNumber && setContactNumber(contactNumber.toString())
+            }
+          />
+        </Form.Item>
+        <Form.Item<RegisterFormValues>
+          name="contact_number"
+          initialValue={contactNumber}
+          rules={[{ required: true }]}
+          style={{ display: "inline-block" }}
+        >
+          <div className="flex items-center">
+            {isOtpSent ? (
+              <Input
+                className="ml-5"
+                placeholder="Enter OTP..."
+                onChange={(e) => setOtp(e.target.value)}
+              />
+            ) : undefined}
+            {isOtpSent ? (
+              <div className="flex items-center">
+                <Button type="default" className="ml-5">
+                  Resend OTP
+                </Button>
+                <Button
+                  type="default"
+                  className="ml-5"
+                  onClick={() =>
+                    VerifyPhoneNumberOTPMutation({
+                      contact_number: form.getFieldValue("contact_number"),
+                      otp: otp,
+                    })
+                      .unwrap()
+                      .then(message.info("OTP Verified"))
+                      .catch((error) => message.error(error.data.error))
+                  }
+                >
+                  Verify OTP
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="default"
+                className="ml-5"
+                onClick={() =>
+                  sendPhoneNumberOTPMutation({
+                    contact_number: form.getFieldValue("contact_number"),
+                  })
+                    .unwrap()
+                    .then(() => {
+                      const num = form.getFieldValue("contact_number");
+                      message.info("OTP Sent to " + { num });
+                      setIsOtpSent(true);
+                    })
+                    .catch((error) => message.error(error.data.error))
+                }
+              >
+                Send OTP
+              </Button>
+            )}
+          </div>
+        </Form.Item>
+      </Form.Item> */}
 
       <Form.Item<RegisterFormValues>
         name="address"
@@ -351,35 +537,6 @@ const Details = ({
         <Input onChange={(e) => setAddress(e.target.value)} />
       </Form.Item>
 
-      <Form.Item<RegisterFormValues>
-        label="Profile Picture"
-        rules={[{ required: false }]}
-      >
-        <Upload
-          name="avatar"
-          listType="picture-circle"
-          className="avatar-uploader"
-          showUploadList={false}
-          beforeUpload={beforeUpload}
-          onChange={handleChange}
-          customRequest={({ file }) => {
-            setProfilePictureDisplay(file);
-          }}
-        >
-          {profilePictureDisplay ? (
-            <img
-              src={URL.createObjectURL(profilePictureDisplay)}
-              alt="avatar"
-              style={{ width: "100%" }}
-            />
-          ) : (
-            <button style={{ border: 0, background: "none" }} type="button">
-              {loading ? <LoadingOutlined /> : <PlusOutlined />}
-              <div style={{ marginTop: 8 }}>Upload</div>
-            </button>
-          )}
-        </Upload>
-      </Form.Item>
       <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
         <Button
           type="primary"
