@@ -65,9 +65,16 @@ export const customerAuthApi = createApi({
         body,
       }),
     }),
+    resendEmailVerification: builder.mutation<void, { email: string }>({
+      query: (body) => ({
+        url: "/resend-email",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useLoginMutation, useRegisterMutation, useResetPasswordMutation, useConfirmEmailMutation, useSendPhoneNumberOTPMutation, useVerifyPhoneNumberOTPMutation } = customerAuthApi;
+export const { useLoginMutation, useRegisterMutation, useResetPasswordMutation, useConfirmEmailMutation, useSendPhoneNumberOTPMutation, useVerifyPhoneNumberOTPMutation, useResendEmailVerificationMutation } = customerAuthApi;

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useConfirmEmailMutation, useSendPhoneNumberOTPMutation } from "../redux/services/customerAuth";
+import { useConfirmEmailMutation, useSendPhoneNumberOTPMutation, useResendEmailVerificationMutation } from "../redux/services/customerAuth";
 import { useForm, Controller } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
@@ -21,6 +21,7 @@ export type ConfirmEmailFormValues = z.infer<typeof confirmEmailSchema>;
 export default function ConfirmationScreen() {
   const [confirmEmailMutation, { isLoading, error }] = useConfirmEmailMutation();
   const [sendPhoneNumberOTPMutation] = useSendPhoneNumberOTPMutation();
+  const [resendEmailVerificationMutation, { isLoading: isResending }] = useResendEmailVerificationMutation();
   const { customer } = useSelector((state: RootState) => state.customerAuth); // Get the customer from Redux
   const navigation = useNavigation(); 
   const {
@@ -55,6 +56,17 @@ export default function ConfirmationScreen() {
     } catch (err) {
       // Show an alert if there's an error
       Alert.alert("Error", "The token you entered is incorrect");
+    }
+  };
+
+  const handleResendEmail = async () => {
+    try {
+      if (customer?.email) {
+        await resendEmailVerificationMutation({ email: customer.email }).unwrap();
+        Alert.alert("Success", "A new confirmation email has been sent.");
+      }
+    } catch (err) {
+      Alert.alert("Error", "Failed to resend the confirmation email.");
     }
   };
 
@@ -126,10 +138,22 @@ export default function ConfirmationScreen() {
         </TouchableOpacity>
 
         <View className="flex gap-4">
-          <TouchableOpacity className="w-full rounded-md bg-blue-600 p-3">
-            <Text className="text-center font-semibold text-white">
-              Resend Confirmation Email
-            </Text>
+          <TouchableOpacity
+            className="w-full rounded-md bg-blue-600 p-3"
+            onPress={handleResendEmail}
+          >
+            {isResending ? (
+              <AntDesign
+                name="loading1"
+                size={17}
+                color="#fff"
+                className="mx-auto animate-spin"
+              />
+            ) : (
+              <Text className="text-center font-semibold text-white">
+                Resend Confirmation Email
+              </Text>
+            )}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.replace("/login")}>
             <Text className="text-center font-semibold text-blue-600">
