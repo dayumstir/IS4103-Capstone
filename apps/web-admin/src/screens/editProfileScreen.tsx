@@ -86,7 +86,7 @@ const EditProfileScreen: React.FC = () => {
       navigate("/admin/profile");
     } catch (error) {
       console.error("Error updating profile:", error);
-      setError("Could not update profile. Please try again.");
+      message.error("Error updating profile, invalid fields");
     }
   };
 
