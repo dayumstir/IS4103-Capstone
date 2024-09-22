@@ -33,3 +33,12 @@ export const markTokenAsUsed = async (token: string) => {
         data: { used: true },
     });
 };
+
+
+// Invalidate all previous tokens for the given email
+export const invalidateTokensByEmail = async (email: string) => {
+    await prisma.emailVerificationToken.updateMany({
+        where: { email },
+        data: { used: true },  // Mark all previous tokens as "used"
+    });
+};

@@ -114,6 +114,21 @@ export const resetPassword = async (req: Request, res: Response) => {
 };
 
 
+// Customer Sign Up: Confirm email for the customer
+export const resendEmailVerification = async (req: Request, res: Response) => {
+    logger.info('Executing confirmEmail...');
+    const { email } = req.body;
+
+    try {
+        await customerAuthService.resendEmailVerification(email);
+        res.status(200).json({ message: "A confirmation link has been sent to your email." });
+    } catch (error: any) {
+        logger.error('An error occurred:', error);
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
 // Customer Forget Password: Send reset password link
 export const forgetPassword = async (req: Request, res: Response) => {
     logger.info('Executing forgetPassword...');
