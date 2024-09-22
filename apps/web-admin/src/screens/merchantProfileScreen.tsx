@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Card, Typography, Spin, Avatar, Descriptions, Tag } from "antd";
-import { EditOutlined, LeftOutlined } from "@ant-design/icons";
+import { EditOutlined, LeftOutlined, UserOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
 
 interface IMerchant {
   merchant_id: string;
   name: string;
-  profile_picture: string;
+  profile_picture: Buffer;
   email: string;
   contact_number: string;
   address: string;
@@ -44,6 +44,15 @@ const MerchantProfileScreen: React.FC = () => {
         }
 
         const data = await response.json();
+        if (data.profile_picture && data.profile_picture.data) {
+          const base64String = btoa(
+            new Uint8Array(data.profile_picture.data).reduce(
+              (data, byte) => data + String.fromCharCode(byte),
+              ''
+            )
+          );
+          data.profile_picture = `data:image/jpeg;base64,${base64String}`;
+        }
         setMerchant(data);
       } catch (error) {
         console.error("Failed to fetch merchant profile:", error);
@@ -79,8 +88,10 @@ const MerchantProfileScreen: React.FC = () => {
           cover={
             <Avatar
               size={100}
-              src={merchant.profile_picture}
-              alt="Merchant's Profile"
+              src={merchant.profile_picture ? (
+                merchant.profile_picture
+              ) : <Avatar className="h-36 w-36 object-cover" size={100} icon={<UserOutlined />} />}
+              alt="Merchant's Profile Picture"
             />
           }
         >

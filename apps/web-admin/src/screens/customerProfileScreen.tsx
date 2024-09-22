@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Card, Typography, Spin, Avatar, Descriptions } from "antd";
-import { EditOutlined, LeftOutlined } from "@ant-design/icons";
+import { EditOutlined, LeftOutlined, UserOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
 
 interface ICustomer {
   customer_id: string;
   name: string;
-  profile_picture: string;
+  profile_picture: Buffer;
   email: string;
   contact_number: string;
   address: string;
@@ -46,6 +46,15 @@ const CustomerProfileScreen: React.FC = () => {
         }
 
         const data = await response.json();
+        if (data.profile_picture && data.profile_picture.data) {
+          const base64String = btoa(
+            new Uint8Array(data.profile_picture.data).reduce(
+              (data, byte) => data + String.fromCharCode(byte),
+              ''
+            )
+          );
+          data.profile_picture = `data:image/jpeg;base64,${base64String}`;
+        }
         setCustomer(data);
       } catch (error) {
         console.error("Failed to fetch customer profile:", error);
@@ -81,8 +90,10 @@ const CustomerProfileScreen: React.FC = () => {
           cover={
             <Avatar
               size={100}
-              src={customer.profile_picture}
-              alt="Profile Picture"
+              src={customer.profile_picture ? (
+                customer.profile_picture
+              ) : <Avatar className="h-36 w-36 object-cover" size={100} icon={<UserOutlined />} />}
+              alt="Customer's Profile Picture"
             />
           }
         >
