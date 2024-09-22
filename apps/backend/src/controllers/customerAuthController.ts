@@ -2,6 +2,7 @@
 import { Request, Response } from "express";
 import * as customerAuthService from "../services/customerAuthService";
 import logger from "../utils/logger";
+import jwt from "jsonwebtoken";
 
 
 // Customer Sign Up
@@ -102,7 +103,15 @@ export const logout = async (req: Request, res: Response) => {
 // Customer Reset Password
 export const resetPassword = async (req: Request, res: Response) => {
     logger.info('Executing resetPassword...');
-    const { email, oldPassword, newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
+
+    // Extract email
+    const jwtToken = req.headers.authorization?.split(" ")[1];
+    if (!jwtToken) {
+        return res.status(400).json({ message: 'No token provided' });
+    }
+    const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!);
+    const email = (decoded as any).email;
 
     try {
         await customerAuthService.resetPassword(email, oldPassword, newPassword);
