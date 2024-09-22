@@ -1,21 +1,24 @@
-import React, { useEffect }  from "react";
+import React, { useState, useEffect }  from "react";
 import {
+  Avatar,
   Form,
   Input,
   Button,
   Card,
   message,
   DatePicker,
-  Upload,
+  Upload, 
+  UploadProps,
+  GetProp
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { IAdmin } from "../../../backend/src/interfaces/adminInterface";
+import { UserOutlined, UploadOutlined } from "@ant-design/icons";
 
 const AdminManagementScreen: React.FC = () => {
   const navigate = useNavigate();
-
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -63,18 +66,72 @@ const AdminManagementScreen: React.FC = () => {
     onSuccess: () => {
       message.success(`New admin has been created.`);
       form.resetFields();
+      setProfilePictureDisplay('');
     },
     onError: (error) => {
       message.error(`Error: ${error.message}`); 
     },
   });
   const handleCreateAdmin = (values: IAdmin) => {
-    createAdminMutation.mutate(values);
+  const base64String = profilePictureDisplay.split(",")[1];
+
+  // Create a new adminData object with the updated profile_picture
+  const adminData: IAdmin = {
+    ...values,
+    profile_picture: base64String,
+  };
+
+  // Pass the updated adminData to the mutate function
+  createAdminMutation.mutate(adminData);
   };
 
   const validateContactNumber = (number: string) => {
     const contactNumberRegex = /^[689]\d{7}$/;
     return contactNumberRegex.test(number);
+  };
+
+  const [profilePictureDisplay, setProfilePictureDisplay] = useState("");
+  
+  const convertImageToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        // The result is a Base64 string
+        resolve(reader.result as string);
+      };
+
+      reader.onerror = () => {
+        reject(new Error("Failed to read file"));
+      };
+
+      // Read the file as a Data URL (Base64)
+      reader.readAsDataURL(file);
+      
+    });
+  };
+
+  const handleChange: UploadProps["onChange"] = async (info) => {
+    if (info.file.originFileObj) {
+      const base64String = await convertImageToBase64(info.file.originFileObj);
+      setProfilePictureDisplay(base64String);
+      return;
+    }
+    return;
+  };
+  type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
+
+  const beforeUpload = (file: FileType) => {
+    const isJpgOrPng = file.type === "image/png";
+    if (!isJpgOrPng) {
+      message.error("You can only upload PNG file!");
+    }
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      message.error("Image must smaller than 2MB!");
+    }
+
+    return isJpgOrPng && isLt2M;
   };
   
   const renderForm = () => (
@@ -158,11 +215,35 @@ const AdminManagementScreen: React.FC = () => {
         <DatePicker style={{ width: "100%" }} />
       </Form.Item>
 
-      <Form.Item name="profile_picture" label="Profile Picture">
-        <Upload beforeUpload={() => false}>
-          <Button>Upload</Button>
-        </Upload>
-      </Form.Item>
+      <Form.Item
+          name="profile_picture"
+          label="Profile Picture"
+        >
+          <div className="flex items-center">
+            {profilePictureDisplay ? (
+              <img
+                src={profilePictureDisplay}
+                alt="avatar1"
+                className="h-36 w-36 object-cover"
+              />
+            ) : (
+              <Avatar
+                className="h-36 w-36 object-cover"
+                icon={<UserOutlined />}
+              />
+            )}
+            <Upload
+              className="ml-5"
+              beforeUpload={beforeUpload}
+              onChange={handleChange}
+              customRequest={() => {}}
+              showUploadList={false}
+            >
+              <Button icon={<UploadOutlined />}>Click to Upload</Button>
+            </Upload>
+          </div>
+        </Form.Item>
+
 
       <Form.Item>
         <Button type="primary" htmlType="submit" icon={<PlusOutlined />}>
