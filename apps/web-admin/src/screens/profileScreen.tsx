@@ -72,6 +72,10 @@ const ProfileScreen: React.FC = () => {
     setIsModalVisible(false);
     form.resetFields();
   };
+  const validatePassword = (password: string) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    return passwordRegex.test(password);
+};
 
   const onFinish = async (values: { oldPassword: string; newPassword: string }) => {
     const { oldPassword, newPassword } = values;
@@ -189,11 +193,21 @@ const ProfileScreen: React.FC = () => {
               { required: true, message: "Please input your new password" },
               {
                 validator: (_, value) => {
-                  const oldPassword = form.getFieldValue("oldPassword");
-                  if (value && value === oldPassword) {
-                    return Promise.reject(new Error("New password cannot be the same as old password"));
+                  const oldPassword = form.getFieldValue("oldPassword"); // Get the old password
+
+                  // Check if the new password is the same as the old password
+                  if (value === oldPassword) {
+                    return Promise.reject(new Error("New password cannot be the same as the old password."));
                   }
-                  return Promise.resolve();
+          
+                  // Check the password validation criteria
+                  if (!validatePassword(value)) {
+                    return Promise.reject(
+                      new Error("New password must have at least 1 lowercase letter, 1 uppercase letter, 1 digit, 1 special character, and be at least 8 characters long.")
+                    );
+                  }
+          
+                  return Promise.resolve(); // If all checks pass
                 },
               },
             ]}
