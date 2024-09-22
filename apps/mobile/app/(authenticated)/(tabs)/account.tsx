@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Buffer } from "buffer";
 import {
   Text,
   View,
@@ -37,12 +38,22 @@ const profileSchema = z.object({
   ),
 });
 
+// Helper function to convert binary data to Base64
+const base64Encode = (buffer: Uint8Array) => {
+  return `data:image/jpeg;base64,${Buffer.from(buffer).toString('base64')}`;
+};
+
+
 export default function AccountPage() {
   const dispatch = useDispatch();
   const router = useRouter();
 
   // Fetch the profile using the API call
   const { data: profile, error, isLoading, refetch } = useGetProfileQuery();
+
+  const profilePicture = profile?.profile_picture
+        ? base64Encode(profile.profile_picture)
+        : 'data:image/jpeg;base64,DEFAULT_BASE64_IMAGE_STRING';
 
   // Form state management using react-hook-form
   const {
@@ -130,7 +141,7 @@ export default function AccountPage() {
             {!isEditing && (
               <>
                 <Image
-                  source={{ uri: profile.profile_picture }}
+                  source={{ uri: profilePicture }}
                   className="w-30 h-30 mb-6 rounded-full"
                 />
                 <Text className="mb-1 text-lg font-semibold text-gray-800">

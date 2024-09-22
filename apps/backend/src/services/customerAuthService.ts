@@ -6,6 +6,8 @@ import crypto from "crypto";
 const nodemailer = require('nodemailer');
 import twilio from "twilio";
 import validator from "validator";
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Internal dependencies
 import { CustomerStatus } from "../interfaces/customerStatus";
@@ -43,13 +45,18 @@ export const registerCustomer = async (customerData: ICustomer) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(customerData.password, 10);
 
+    // Set default profile picture
+    const defaultProfilePicturePath = path.join(__dirname, '../src/assets/default-profile-picture.png');
+    const defaultProfilePicture = fs.readFileSync(defaultProfilePicturePath);
+
     // Create the customer in the database
     const customer = await customerRepository.createCustomer({
         ...customerData,
         password: hashedPassword,
         status: CustomerStatus.PENDING_EMAIL_VERIFICATION,  // Set status as pending verification
         credit_score: 0,                                    // Default value
-        credit_tier_id: "tier_1"                            // Default credit tier
+        credit_tier_id: "tier_1",                            // Default credit tier
+        profile_picture: defaultProfilePicture
     });
 
     return customer;

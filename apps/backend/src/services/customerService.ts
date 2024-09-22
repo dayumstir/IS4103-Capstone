@@ -38,3 +38,12 @@ export const getAllCustomers = async () => {
     }
     return customers;
 };
+
+
+// Update the customer's profile picture in the database
+export const updateProfilePicture = async (customerId: string, profilePictureBuffer: Buffer) => {
+    logger.info('Updating profile picture for customer:', customerId);
+
+    // Update the profile picture in the database
+    await customerRepository.updateCustomer(customerId, { profile_picture: profilePictureBuffer });
+};
