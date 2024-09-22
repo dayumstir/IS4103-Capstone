@@ -1,13 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { ICustomer } from "../../interfaces/customerInterface";
 
 interface customerAuthState {
   isAuthenticated: boolean;
   token: string | null;
+  customer: ICustomer | null;
 }
 
 const initialState: customerAuthState = {
   isAuthenticated: false,
   token: null,
+  customer: null,
 };
 
 const customerAuthSlice = createSlice({
@@ -21,9 +24,13 @@ const customerAuthSlice = createSlice({
     logout: (state) => {
       state.isAuthenticated = false;
       state.token = null;
+      state.customer = null;
+    },
+    setCustomer: (state, action) => {
+      state.customer = action.payload.customer;
     },
   },
 });
 
-export const { login, logout } = customerAuthSlice.actions;
+export const { login, logout, setCustomer } = customerAuthSlice.actions;
 export default customerAuthSlice.reducer;

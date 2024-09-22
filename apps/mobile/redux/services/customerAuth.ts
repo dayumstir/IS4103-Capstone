@@ -4,6 +4,8 @@ import { RegisterFormValues } from "../../app/register";
 import { ResetPasswordFormValues } from "../../app/(authenticated)/resetPassword";
 import { RootState } from "../store";
 import { login } from "../features/customerAuthSlice";
+import { ConfirmEmailFormValues } from "../../app/confirmation";
+import { PhoneVerificationFormValues } from "../../app/phoneVerification";
 
 // Define the API service for authentication
 export const customerAuthApi = createApi({
@@ -42,9 +44,30 @@ export const customerAuthApi = createApi({
         body,
       }),
     }),
+    confirmEmail: builder.mutation<string, ConfirmEmailFormValues>({
+      query: (body) => ({
+        url: "/confirm-email",
+        method: "POST",
+        body,
+      }),
+    }),
+    sendPhoneNumberOTP: builder.mutation<string, { contact_number: string }>({
+      query: (body) => ({
+        url: "/send-phone-number-otp",
+        method: "POST",
+        body,
+      }),
+    }),
+    verifyPhoneNumberOTP: builder.mutation<string, PhoneVerificationFormValues>({
+      query: (body) => ({
+        url: "/verify-phone-number-otp",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useLoginMutation, useRegisterMutation, useResetPasswordMutation } = customerAuthApi;
+export const { useLoginMutation, useRegisterMutation, useResetPasswordMutation, useConfirmEmailMutation, useSendPhoneNumberOTPMutation, useVerifyPhoneNumberOTPMutation } = customerAuthApi;

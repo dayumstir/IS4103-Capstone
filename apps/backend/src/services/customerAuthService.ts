@@ -60,14 +60,14 @@ export const registerCustomer = async (customerData: ICustomer) => {
 export const sendEmailVerification = async (email: string, customer_id: string) => {
     logger.info('Executing sendEmailVerification...');
 
-    const token = crypto.randomBytes(32).toString("hex");
+    const token = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)    // Token expires in 24hrs
 
     // Save the email verification token
     await emailVerificationTokenRepository.createToken(email, token, expiresAt, customer_id);
 
     // Send email with the confirmation link (using nodemailer)
-    const confirmationLink = `http://localhost:5173/confirm-email?token=${token}`;
+    const confirmationNumber = `${token}`;
     const transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
         port: parseInt(process.env.EMAIL_PORT || "2525"),
@@ -81,7 +81,7 @@ export const sendEmailVerification = async (email: string, customer_id: string) 
         from: process.env.EMAIL_USER,
         to: email, 
         subject: 'Confirm your email',
-        text: `Please confirm your email by clicking this link: ${confirmationLink}`,
+        text: `Please confirm your email by entering this number in your mobile application: ${confirmationNumber}`,
     });
 };
 
@@ -105,14 +105,14 @@ export const confirmEmail = async (token: string) => {
 
 
 // Step 4: Send OTP to contact number
-export const sendPhoneNumberOTP = async (email: string) => {
+export const sendPhoneNumberOTP = async (contact_number: string) => {
     logger.info('Executing sendPhoneNumberOTP...');
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();     // Generate 6-digit OTP
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000)                 // Token expires in 10 mins
 
     // Retrieve customer based on contact number
-    const customer = await customerRepository.findCustomerByEmail(email);
+    const customer = await customerRepository.findCustomerByContactNumber(contact_number);
     if (!customer) {
         throw new Error("Customer does not exist");
     }
