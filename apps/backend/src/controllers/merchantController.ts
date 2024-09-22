@@ -20,10 +20,9 @@ export const getMerchantProfile = async (req: Request, res: Response) => {
 
 // Merchant Edit Profile
 export const editMerchantProfile = async (req: Request, res: Response) => {
-  const id = req.params.id;
   try {
     const updatedMerchant = await merchantService.updateMerchant(
-      id,
+      req.body.merchant_id,
       req.body,
       req.file?.buffer
     );

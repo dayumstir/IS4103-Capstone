@@ -181,13 +181,19 @@ const AllCustomersScreen: React.FC = () => {
             onConfirm={() =>
               updateCustomer(
                 record.customer_id,
-                record.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED", // Toggle status
+                record.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED",
               )
             }
             okText="Yes"
             cancelText="No"
           >
-            <Button icon={<ExclamationCircleOutlined />} danger>
+            <Button
+              icon={<ExclamationCircleOutlined />}
+              danger
+              disabled={
+                record.status !== "ACTIVE" && record.status !== "SUSPENDED"
+              }
+            >
               {record.status === "SUSPENDED" ? "Unsuspend" : "Suspend"}
             </Button>
           </Popconfirm>

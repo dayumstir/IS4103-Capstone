@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Spin, Card, Empty, Table, Popconfirm, Button, Tag } from "antd";
+import {
+  Spin,
+  Card,
+  Empty,
+  Table,
+  Popconfirm,
+  Button,
+  Tag,
+  message,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 
@@ -69,6 +78,46 @@ const AllMerchantsScreen: React.FC = () => {
     return <div>No merchant data available</div>;
   }
 
+  const updateMerchant = async (merchant_id: string, newStatus: string) => {
+    try {
+      const jwt_token = localStorage.getItem("token");
+      if (!jwt_token) {
+        throw new Error("No token found");
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/admin/merchant/${merchant_id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ merchant_id, status: newStatus }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update merchant status");
+      }
+
+      // Update frontend state to reflect status change
+      setMerchants((prevMerchants) => {
+        if (!prevMerchants) return prevMerchants;
+        return prevMerchants.map((merchant) =>
+          merchant.merchant_id === merchant_id
+            ? { ...merchant, status: newStatus }
+            : merchant,
+        );
+      });
+
+      message.success(`Merchant status updated to ${newStatus}.`);
+    } catch (error) {
+      console.error(`Failed to update merchant status:`, error);
+      message.error(`Failed to update merchant status.`);
+    }
+  };
+
   const columns = [
     {
       title: "Name",
@@ -89,9 +138,15 @@ const AllMerchantsScreen: React.FC = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (text: string) => (
-        <Tag color={text === "ACTIVE" ? "green" : "volcano"}>{text}</Tag>
-      ),
+      render: (text: string) => {
+        let color = "geekblue";
+        if (text === "ACTIVE") {
+          color = "green";
+        } else if (text === "SUSPENDED") {
+          color = "volcano";
+        }
+        return <Tag color={color}>{text}</Tag>;
+      },
     },
     {
       key: "actions",
@@ -108,18 +163,24 @@ const AllMerchantsScreen: React.FC = () => {
             title={
               record.status === "INACTIVE"
                 ? "Merchant is suspended. Would you like to unsuspend the merchant?"
-                : "Are you sure you would you like to suspend the merchant?"
+                : "Are you sure you would like to suspend the merchant?"
             }
             onConfirm={() =>
               updateMerchant(
                 record.merchant_id,
-                record.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED", // Toggle status
+                record.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED",
               )
             }
             okText="Yes"
             cancelText="No"
           >
-            <Button icon={<ExclamationCircleOutlined />} danger>
+            <Button
+              icon={<ExclamationCircleOutlined />}
+              danger
+              disabled={
+                record.status !== "ACTIVE" && record.status !== "SUSPENDED"
+              }
+            >
               {record.status === "SUSPENDED" ? "Unsuspend" : "Suspend"}
             </Button>
           </Popconfirm>

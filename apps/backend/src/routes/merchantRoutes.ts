@@ -31,6 +31,7 @@ merchantRouter.put(
 
 merchantRouter.get("/allMerchants", listAllMerchants);
 merchantRouter.get("/:merchant_id", getMerchantProfile);
+merchantRouter.put("/allMerchants", editMerchantProfile);
 
 //AUTH
 const authRouter = Router();
