@@ -25,11 +25,14 @@ import {
   ResetPasswordValues,
 } from "../interfaces/resetPasswordInterface";
 import { useResetPasswordMutation } from "../redux/services/auth";
+import { useNavigate } from "react-router-dom";
 
 const ProfileScreen: React.FC = () => {
+  const navigate = useNavigate();
   const merchantId = localStorage.getItem("merchantId");
   if (!merchantId) {
-    return;
+    navigate("/login");
+    return null;
   }
 
   const { data: profile, refetch } = useGetProfileQuery(merchantId);
@@ -163,7 +166,7 @@ const EditProfileModal = ({
 
   const onFinish: FormProps<RegisterFormValues>["onFinish"] = async (data) => {
     formData.set("name", data.name);
-    formData.set("contact_number", data.contact_number);
+    // formData.set("contact_number", data.contact_number);
     formData.set("address", data.address);
     profilePicture && formData.set("profile_picture", profilePicture);
     await editProfileMutation({ id: merchantId, body: formData });
@@ -265,13 +268,6 @@ const EditProfileModal = ({
           <Input />
         </Form.Item>
         <Form.Item<RegisterFormValues>
-          name="contact_number"
-          label="Contact Number"
-          initialValue={initContactNumber}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item<RegisterFormValues>
           name="address"
           label="Address"
           initialValue={initAddress}
@@ -312,7 +308,13 @@ const ResetPasswordModal = ({
       okText="Confirm"
       onCancel={() => setModalOpen(false)}
     >
-      <Form name="basic" onFinish={onFinish} form={form} labelCol={{ span: 6 }}>
+      <Form
+        name="basic"
+        onFinish={onFinish}
+        form={form}
+        labelCol={{ span: 10 }}
+        wrapperCol={{ span: 16 }}
+      >
         <Form.Item<ResetPasswordValues>
           name="oldPassword"
           label="Old Password"
@@ -334,8 +336,53 @@ const ResetPasswordModal = ({
               required: true,
               message: "Please input your new password!",
             },
+            {
+              validator: async (_, value) => {
+                const oldPassword = form.getFieldValue("oldPassword");
+                if (value && value === oldPassword) {
+                  return Promise.reject(
+                    new Error(
+                      "New password must be different from old password!",
+                    ),
+                  );
+                }
+                // Check for at least one capital letter and minimum 8 characters
+                const isValid = value.length >= 8 && /[A-Z]/.test(value);
+                if (!isValid) {
+                  return Promise.reject(
+                    new Error(
+                      "Password must be at least 8 characters long and contain at least one capital letter!",
+                    ),
+                  );
+                }
+              },
+            },
           ]}
           hasFeedback
+        >
+          <Input.Password />
+        </Form.Item>
+        <Form.Item
+          name="confirm"
+          label="Confirm New Password"
+          dependencies={["password"]}
+          hasFeedback
+          rules={[
+            {
+              required: true,
+              message: "Please confirm your password!",
+            },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue("newPassword") === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(
+                  new Error("The new password that you entered do not match!"),
+                );
+              },
+            }),
+          ]}
         >
           <Input.Password />
         </Form.Item>

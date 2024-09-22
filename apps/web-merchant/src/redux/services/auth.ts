@@ -32,6 +32,44 @@ export const authApi = createApi({
         body: credentials,
       }),
     }),
+    checkEmailInUse: builder.mutation<string, { email: string }>({
+      query: ({ email }) => ({
+        url: "/check-email-status",
+        method: "POST",
+        body: { email },
+      }),
+    }),
+    sendPhoneNumberOTP: builder.mutation<string, { contact_number: string }>({
+      query: ({ contact_number }) => ({
+        url: "/send-phone-number-otp",
+        method: "POST",
+        body: { contact_number },
+      }),
+    }),
+    verifyPhoneNumberOTP: builder.mutation<
+      string,
+      { contact_number: string; otp: string }
+    >({
+      query: ({ contact_number, otp }) => ({
+        url: "/verify-phone-number-otp",
+        method: "POST",
+        body: { contact_number, otp },
+      }),
+    }),
+    confirmEmail: builder.mutation<string, { email: string; token: string }>({
+      query: ({ email, token }) => ({
+        url: "/confirm-email",
+        method: "POST",
+        body: { email, token },
+      }),
+    }),
+    resendEmailConfirmation: builder.mutation<string, { email: string }>({
+      query: ({ email }) => ({
+        url: "/resend-email-verification",
+        method: "POST",
+        body: { email },
+      }),
+    }),
     register: builder.mutation<IMerchant, FormData>({
       query: (body) => ({
         url: "/register",
@@ -59,4 +97,9 @@ export const {
   useRegisterMutation,
   useResetPasswordMutation,
   useLogoutMutation,
+  useCheckEmailInUseMutation,
+  useSendPhoneNumberOTPMutation,
+  useVerifyPhoneNumberOTPMutation,
+  useConfirmEmailMutation,
+  useResendEmailConfirmationMutation,
 } = authApi;

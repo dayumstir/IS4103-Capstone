@@ -1,11 +1,20 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import type { FormProps } from "antd";
-import { Button, Card, Form, Input, Space, Spin, Typography } from "antd";
-import React from "react";
+import {
+  Button,
+  Card,
+  Form,
+  Input,
+  message,
+  Space,
+  Spin,
+  Typography,
+} from "antd";
+import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
 import { useLoginMutation } from "../redux/services/auth";
-import { Alert } from "antd";
+import PendingEmailConfirmationModal from "../components/pendingEmailConfirmationModal";
 
 export type LoginFormValues = {
   email?: string;
@@ -14,19 +23,29 @@ export type LoginFormValues = {
 
 const LoginScreen: React.FC = () => {
   const { Text, Title } = Typography;
-  const [loginMutation, { isLoading, error }] = useLoginMutation();
+  const [loginMutation, { isLoading }] = useLoginMutation();
   const navigate = useNavigate();
+  const [
+    pendingEmailConfirmationModalOpen,
+    setPendingEmailConfirmationModalOpen,
+  ] = useState(false);
 
   const onFinish: FormProps<LoginFormValues>["onFinish"] = async (data) => {
-    console.log(data);
-    const result = await loginMutation(data);
-    if (result.data) {
-      localStorage.setItem("token", result.data.token);
-      localStorage.setItem("merchantId", result.data.id);
-      navigate("/");
-    }
+    loginMutation(data)
+      .unwrap()
+      .then((result) => {
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("merchantId", result.id);
+        navigate("/");
 
-    console.log("Success:", data);
+        console.log("Success:", data);
+      })
+      .catch((error) => {
+        if (error.data.error == "Email pending verification") {
+          setPendingEmailConfirmationModalOpen(true);
+        }
+        message.error(error.data.error);
+      });
   };
 
   return (
@@ -34,6 +53,12 @@ const LoginScreen: React.FC = () => {
       direction="vertical"
       className="flex h-screen items-center justify-center"
     >
+      {pendingEmailConfirmationModalOpen && (
+        <PendingEmailConfirmationModal
+          isModalOpen={pendingEmailConfirmationModalOpen}
+          setModalOpen={setPendingEmailConfirmationModalOpen}
+        />
+      )}
       <img src={logo} width="100%" style={{ alignSelf: "center" }} />
       <Title>PandaPay</Title>
       <Title level={3}>Your ultimate BNPL Provider</Title>
@@ -67,20 +92,9 @@ const LoginScreen: React.FC = () => {
             {isLoading ? (
               <Spin indicator={<LoadingOutlined spin />} />
             ) : (
-              <Space>
-                <Button type="primary" htmlType="submit">
-                  Login
-                </Button>
-                {error ? (
-                  <Alert
-                    message="Login Failed. Please try again!"
-                    type="error"
-                    style={{ height: 35 }}
-                  />
-                ) : (
-                  <></>
-                )}
-              </Space>
+              <Button type="primary" htmlType="submit">
+                Login
+              </Button>
             )}
           </Form.Item>
 

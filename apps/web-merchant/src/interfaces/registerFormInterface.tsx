@@ -13,9 +13,11 @@ export interface EmailNameProps {
   form: FormInstance;
   email: string;
   name: string;
+  pendingEmailConfirmationModalOpen: boolean;
   setName: (name: string) => void;
   setEmail: (email: string) => void;
   setPageIdx: (num: number) => void;
+  setPendingEmailConfirmationModalOpen: (isModalOpen: boolean) => void;
 }
 
 export interface PasswordProps {
@@ -29,14 +31,12 @@ export interface DetailsProps {
   form: FormInstance;
   name: string;
   email: string;
-  profilePicture: File | undefined;
-  profilePictureDisplay: any; //TODO
   password: string;
+  otpVerified: boolean;
   address: string;
   contactNumber: string;
-  setProfilePicture: (anything: any) => void; //TODO
-  setProfilePictureDisplay: (anything: any) => void; //TODO
   setContactNumber: (contact: string) => void;
+  setOtpVerified: (isVerified: boolean) => void;
   setAddress: (address: string) => void;
   setPageIdx: (num: number) => void;
 }
