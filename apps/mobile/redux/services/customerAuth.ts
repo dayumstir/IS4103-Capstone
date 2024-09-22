@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { LoginFormValues } from "../../app/login";
 import { RegisterFormValues } from "../../app/register";
+import { ResetPasswordFormValues } from "../../app/(authenticated)/resetPassword";
 import { RootState } from "../store";
 import { login } from "../features/customerAuthSlice";
 
@@ -34,9 +35,16 @@ export const customerAuthApi = createApi({
         body,
       }),
     }),
+    resetPassword: builder.mutation<string, ResetPasswordFormValues>({
+      query: (body) => ({
+        url: "/reset-password",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useLoginMutation, useRegisterMutation } = customerAuthApi;
+export const { useLoginMutation, useRegisterMutation, useResetPasswordMutation } = customerAuthApi;
