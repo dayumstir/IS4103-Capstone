@@ -48,7 +48,7 @@ export default function ResetPassword() {
             // If successful, show success message and navigate back
             Alert.alert('Success', 'Password reset successful');
             reset();  // Reset the form
-            router.push('/account');  // Navigate back to the account page
+            router.back();  // Navigate back to the account page
 
         } catch (err) {
             // If there is an error, handle it (error is already handled via RTK)
@@ -159,7 +159,7 @@ export default function ResetPassword() {
                 {/* Buttons */}
                 <View className="mt-10 w-full px-10 gap-4">
                     <Button onPress={handleSubmit(onSubmit)} type="primary" loading={isLoading}>Save</Button>
-                    <Button onPress={() => router.push('/account')} type="ghost">Cancel</Button>
+                    <Button onPress={() => router.back()} type="ghost">Cancel</Button>
                 </View>
             </View>
         </ScrollView>

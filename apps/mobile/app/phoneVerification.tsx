@@ -37,7 +37,7 @@ export default function PhoneVerificationScreen() {
           const result = await verifyPhoneNumberOTPMutation({ otp: data.otp }).unwrap();
           Alert.alert("Success", "Phone number verified successfully!");
           dispatch(login(result));
-          router.push("/home"); // Redirect to home page after successful OTP verification
+          router.replace("/home"); // Redirect to home page after successful OTP verification
         } catch (err) {
           Alert.alert("Error", "The OTP you entered is incorrect");
         }
