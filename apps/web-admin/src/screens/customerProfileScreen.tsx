@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Typography, Spin, Avatar } from "antd";
+import { Card, Typography, Spin, Avatar, Descriptions } from "antd";
 import { EditOutlined, LeftOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
@@ -77,20 +77,36 @@ const CustomerProfileScreen: React.FC = () => {
       />
       <div style={{ padding: "20px 80px" }}>
         <Title level={2}>Customer Profile</Title>
-        <Card cover={<Avatar size={100} src={customer.profile_picture} />}>
-          <Title level={4}>{customer.name}</Title>
-          <Text>Email: {customer.email}</Text>
-          <br />
-          <Text>Contact: {customer.contact_number}</Text>
-          <br />
-          <Text>Address: {customer.address}</Text>
-          <br />
-          <Text>Status: {customer.status}</Text>
-          <br />
-          <Text>Credit Score: {customer.credit_score}</Text>
-          <br />
-          <Text>Credit Tier ID: {customer.credit_tier_id}</Text>
-          <br />
+        <Card
+          cover={
+            <Avatar
+              size={100}
+              src={customer.profile_picture}
+              alt="Profile Picture"
+            />
+          }
+        >
+          <Descriptions bordered column={1}>
+            <Descriptions.Item label="Name">{customer.name}</Descriptions.Item>
+            <Descriptions.Item label="Email">
+              {customer.email}
+            </Descriptions.Item>
+            <Descriptions.Item label="Contact">
+              {customer.contact_number}
+            </Descriptions.Item>
+            <Descriptions.Item label="Address">
+              {customer.address}
+            </Descriptions.Item>
+            <Descriptions.Item label="Status">
+              {customer.status}
+            </Descriptions.Item>
+            <Descriptions.Item label="Credit Score">
+              {customer.credit_score}
+            </Descriptions.Item>
+            <Descriptions.Item label="Credit Tier ID">
+              {customer.credit_tier_id}
+            </Descriptions.Item>
+          </Descriptions>
         </Card>
       </div>
     </div>

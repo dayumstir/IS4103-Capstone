@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Typography, Spin, Avatar } from "antd";
+import { Card, Typography, Spin, Avatar, Descriptions, Tag } from "antd";
 import { EditOutlined, LeftOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
@@ -75,16 +75,30 @@ const MerchantProfileScreen: React.FC = () => {
       />
       <div style={{ padding: "20px 80px" }}>
         <Title level={2}>Merchant Profile</Title>
-        <Card cover={<Avatar size={100} src={merchant.profile_picture} />}>
-          <Title level={4}>{merchant.name}</Title>
-          <Text>Email: {merchant.email}</Text>
-          <br />
-          <Text>Contact: {merchant.contact_number}</Text>
-          <br />
-          <Text>Address: {merchant.address}</Text>
-          <br />
-          <Text>Status: {merchant.status}</Text>
-          <br />
+        <Card
+          cover={
+            <Avatar
+              size={100}
+              src={merchant.profile_picture}
+              alt="Merchant's Profile"
+            />
+          }
+        >
+          <Descriptions bordered column={1}>
+            <Descriptions.Item label="Name">{merchant.name}</Descriptions.Item>
+            <Descriptions.Item label="Email">
+              {merchant.email}
+            </Descriptions.Item>
+            <Descriptions.Item label="Contact">
+              {merchant.contact_number}
+            </Descriptions.Item>
+            <Descriptions.Item label="Address">
+              {merchant.address}
+            </Descriptions.Item>
+            <Descriptions.Item label="Status">
+              {merchant.status}
+            </Descriptions.Item>
+          </Descriptions>
         </Card>
       </div>
     </div>
