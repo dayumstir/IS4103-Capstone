@@ -28,3 +28,13 @@ export const updateCustomer = async (customer_id: string, updateData: Partial<IC
     }
     return customer;
 };
+
+
+// List all customers
+export const getAllCustomers = async () => {
+    const customers = await customerRepository.listAllCustomers();
+    if (!customers || customers.length === 0) {
+        throw new Error("No customers found");
+    }
+    return customers;
+};

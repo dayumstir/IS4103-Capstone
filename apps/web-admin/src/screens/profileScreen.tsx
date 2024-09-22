@@ -169,7 +169,7 @@ const ProfileScreen: React.FC = () => {
         <Form
           form={form}
           name="resetPassword"
-          labelCol={{ span: 6 }}
+          labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
           onFinish={onFinish}
           autoComplete="off"
@@ -202,7 +202,7 @@ const ProfileScreen: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            label="Confirm New Password"
+            label="Confirm Password"
             name="confirmPassword"
             rules={[
               { required: true, message: "Please input your new password" },
@@ -220,8 +220,8 @@ const ProfileScreen: React.FC = () => {
             <Input.Password />
           </Form.Item>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
+          <Form.Item className="flex justify-end w-full">
+            <Button type="primary" htmlType="submit" >
               Change Password
             </Button>
           </Form.Item>

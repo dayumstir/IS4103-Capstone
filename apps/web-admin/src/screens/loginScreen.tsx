@@ -96,17 +96,7 @@ const LoginScreen: React.FC = () => {
             </Button>
           </Form.Item>
 
-          <Form.Item<FieldType>
-            name="remember"
-            valuePropName="checked"
-            wrapperCol={{ offset: 6, span: 30 }}
-          >
-            {}
-            <Text>
-              Don't have an account yet?{" "}
-              <NavLink to="/register">Click to Register</NavLink>
-            </Text>
-          </Form.Item>
+  
         </Form>
       </Card>
     </Space>
