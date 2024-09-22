@@ -1,5 +1,4 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "./features/authSlice";
 import { authApi } from "./services/auth";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { profileApi } from "./services/profile";
@@ -11,7 +10,6 @@ const customSerializableCheck = {
 
 export const store = configureStore({
   reducer: {
-    auth: authReducer,
     [authApi.reducerPath]: authApi.reducer,
     [profileApi.reducerPath]: profileApi.reducer,
   },

@@ -24,11 +24,11 @@ export const customerApi = createApi({
     }),
 
     // Edit profile API call
-    editProfile: builder.mutation<any, FormData>({
-      query: (formData) => ({
+    editProfile: builder.mutation<ICustomer, Partial<ICustomer>>({
+      query: (body) => ({
         url: "/profile",
         method: "PUT",
-        body: formData,
+        body: body,
       }),
     }),
   }),
