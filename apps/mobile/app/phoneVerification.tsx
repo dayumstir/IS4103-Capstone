@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useVerifyPhoneNumberOTPMutation, useSendPhoneNumberOTPMutation } from "../redux/services/customerAuth";
 import { login } from "../redux/features/customerAuthSlice";
 import { useDispatch } from "react-redux";
@@ -8,7 +9,8 @@ import { RootState } from "../redux/store";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 // Zod schema for validation
 const phoneVerificationSchema = z.object({
@@ -20,6 +22,7 @@ export type PhoneVerificationFormValues = z.infer<typeof phoneVerificationSchema
 export default function PhoneVerificationScreen() {
     const dispatch = useDispatch();
     const [verifyPhoneNumberOTPMutation, { isLoading, error }] = useVerifyPhoneNumberOTPMutation();
+    const navigation = useNavigation();  // Get navigation object
     const { customer } = useSelector((state: RootState) => state.customerAuth); // Get the customer from Redux
     const {
         control,
@@ -40,52 +43,75 @@ export default function PhoneVerificationScreen() {
         }
     };
 
+    // Disable swipe back and back button
+    useEffect(() => {
+        navigation.setOptions({
+        gestureEnabled: false,  // Disable swipe back gesture
+        headerShown: false,     // Hide the back button
+        });
+    }, [navigation]);
+
     return (
-        <View style={{ flex: 1, padding: 16 }}>
-            <Text style={{ fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 16 }}>
-            Verify Your Phone Number
-            </Text>
+        <View className="flex-1 items-center justify-center bg-blue-400 px-8">
+            <View className="flex w-full flex-col gap-8 rounded-lg bg-white p-8 shadow-md">
+                <View className="flex items-center gap-2">
+                    <MaterialCommunityIcons
+                        name="cellphone-check"
+                        size={60}
+                        color="#2563eb"
+                    />
+                    <Text className="text-center text-2xl font-bold">
+                        Check Your Phone
+                    </Text>
+                </View>
 
-            <Controller
-            control={control}
-            name="otp"
-            render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                style={{
-                    borderWidth: 1,
-                    borderColor: errors.otp ? "red" : "gray",
-                    padding: 12,
-                    marginBottom: 16,
-                }}
-                placeholder="Enter OTP"
-                onChangeText={onChange}
-                onBlur={onBlur}
-                value={value}
+                <View className="flex gap-4">
+                    <Text className="text-center leading-normal text-gray-800">
+                        We've sent an SMS to your registered contact number.
+                        Please type in the OTP in the SMS to verify your contact number.
+                    </Text>
+                </View>
+
+                <Controller
+                    control={control}
+                    name="otp"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
+                            placeholder="Enter OTP"
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            value={value}
+                        />
+                    )}
                 />
-            )}
-            />
-            {errors.otp && (
-            <Text style={{ color: "red", marginBottom: 16 }}>{errors.otp.message}</Text>
-            )}
+                {errors.otp && (
+                    <Text className="mt-1 text-red-500">{errors.otp.message}</Text>
+                )}
 
-            {/* Verify Button */}
-            <TouchableOpacity
-            onPress={handleSubmit(onSubmit)}
-            style={{
-                backgroundColor: "#2563eb",
-                padding: 16,
-                alignItems: "center",
-                borderRadius: 8,
-            }}
-            disabled={isLoading}
-            >
-            <Text style={{ color: "#fff", fontWeight: "bold" }}>
-                {isLoading ? "Verifying..." : "Verify OTP"}
-            </Text>
-            </TouchableOpacity>
+                {/* Verify Button */}
+                <TouchableOpacity
+                    onPress={handleSubmit(onSubmit)}
+                    className="rounded-md bg-blue-500 py-4"
+                    disabled={isLoading}
+                    >
+                    {isLoading ? (
+                        <AntDesign
+                        name="loading1"
+                        size={17}
+                        color="#fff"
+                        className="mx-auto animate-spin"
+                        />
+                    ) : (
+                        <Text className="text-center font-semibold uppercase text-white">
+                        Verify Phone Number
+                        </Text>
+                    )}
+                </TouchableOpacity>
 
-            {/* Error Handling */}
-            {error && <Text style={{ color: "red", marginTop: 16 }}>Invalid OTP provided</Text>}
+                {/* Error Handling */}
+                {error && <Text className="mt-1 text-red-500">Invalid OTP provided</Text>}
+            </View>
         </View>
     );
 }

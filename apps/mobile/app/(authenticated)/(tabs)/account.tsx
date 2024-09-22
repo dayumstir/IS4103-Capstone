@@ -6,6 +6,7 @@ import {
   Linking,
   TextInput,
   TouchableOpacity,
+  ScrollView
 } from "react-native";
 import { Button, DatePicker, Toast } from "@ant-design/react-native";
 import { useDispatch } from "react-redux";
@@ -122,182 +123,184 @@ export default function AccountPage() {
   };
 
   return (
-    <View className="flex h-screen w-screen items-center px-8 pt-8">
-      {profile && (
-        <>
-          {!isEditing && (
-            <>
-              <Image
-                source={{ uri: profile.profile_picture }}
-                className="w-30 h-30 mb-6 rounded-full"
-              />
-              <Text className="mb-1 text-lg font-semibold text-gray-800">
-                My Credit Rating
-              </Text>
-              <Text className="mb-2 text-5xl font-bold text-black">
-                {profile.credit_score}
-              </Text>
-              <Text
-                className="text-blue-500 underline"
-                onPress={() =>
-                  Linking.openURL("https://example.com/what-does-this-mean")
-                }
-              >
-                What does this mean?
-              </Text>
-            </>
-          )}
-
-          <View className="mt-5 w-full px-6">
-            {!isEditing ? (
+    <ScrollView>
+      <View className="flex h-screen w-screen items-center px-8 pt-8">
+        {profile && (
+          <>
+            {!isEditing && (
               <>
-                <View className="mt-5 flex w-full gap-4 px-6">
-                  <View>
-                    <Text className="mb-1 text-gray-600">Name</Text>
-                    <Text className="text-lg">{profile.name}</Text>
-                  </View>
-                  <View>
-                    <Text className="mb-1 text-gray-600">Email</Text>
-                    <Text className="text-lg">{profile.email}</Text>
-                  </View>
-                  <View>
-                    <Text className="mb-1 text-gray-600">Contact Number</Text>
-                    <Text className="text-lg">{profile.contact_number}</Text>
-                  </View>
-                  <View>
-                    <Text className="mb-1 text-gray-600">Address</Text>
-                    <Text className="text-lg">{profile.address}</Text>
-                  </View>
-                  <View>
-                    <Text className="mb-1 text-gray-600">Date of Birth</Text>
-                    <Text className="text-lg">
-                      {dayjs(profile.date_of_birth).format("DD MMMM YYYY")}
-                    </Text>
-                  </View>
-                </View>
-                <View className="mt-10 w-full gap-4 px-10">
-                  <Button type="primary" onPress={handleEditToggle}>
-                    Edit Profile
-                  </Button>
-                  <Button
-                    type="primary"
-                    onPress={() => router.push("/resetPassword")}
-                  >
-                    Reset Password
-                  </Button>
-                  <Button type="ghost" onPress={handleLogout}>
-                    Logout
-                  </Button>
-                </View>
-              </>
-            ) : (
-              <>
-                <Text className="mb-8 text-center text-lg font-semibold text-gray-800">
-                  Edit Profile
+                <Image
+                  source={{ uri: profile.profile_picture }}
+                  className="w-30 h-30 mb-6 rounded-full"
+                />
+                <Text className="mb-1 text-lg font-semibold text-gray-800">
+                  My Credit Rating
                 </Text>
-                <Text>Name</Text>
-                <Controller
-                  control={control}
-                  name="name"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <View className="mb-4">
-                      <TextInput
-                        className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        value={value}
-                        placeholder="Name"
-                      />
-                      {errors.name && (
-                        <Text className="mt-1 text-red-500">
-                          {errors.name.message}
-                        </Text>
-                      )}
-                    </View>
-                  )}
-                />
-                <Text>Address</Text>
-                <Controller
-                  control={control}
-                  name="address"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <View className="mb-4">
-                      <TextInput
-                        className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        value={value}
-                        placeholder="Address"
-                        multiline
-                      />
-                      {errors.address && (
-                        <Text className="mt-1 text-red-500">
-                          {errors.address.message}
-                        </Text>
-                      )}
-                    </View>
-                  )}
-                />
-                <Text>Date of Birth</Text>
-                <Controller
-                  control={control}
-                  name="date_of_birth"
-                  render={({ field: { onChange, value } }) => (
-                    <View className="mb-4">
-                      <DatePicker
-                        value={new Date(value)}
-                        defaultValue={new Date()}
-                        minDate={new Date(1900, 0, 1)}
-                        maxDate={new Date()}
-                        onChange={(date) => {
-                          if (date) {
-                            onChange(format(date, "yyyy-MM-dd"));
-                          }
-                        }}
-                        okText="Confirm"
-                        dismissText="Cancel"
-                        format="DD MMMM YYYY"
-                        renderLabel={(type, data) => {
-                          if (type === "month") {
-                            const date = setMonth(
-                              new Date(2000, 0, 1),
-                              data - 1,
-                            );
-                            return <Text>{format(date, "MMMM")}</Text>;
-                          } else {
-                            return data;
-                          }
-                        }}
-                      >
-                        <TouchableOpacity className="rounded-md border border-gray-300 p-4 focus:border-blue-500">
-                          <Text>
-                            {value
-                              ? format(new Date(value), "dd MMMM yyyy")
-                              : "Select Date of Birth"}
-                          </Text>
-                        </TouchableOpacity>
-                      </DatePicker>
-                      {errors.date_of_birth && (
-                        <Text className="mt-1 text-red-500">
-                          {errors.date_of_birth.message}
-                        </Text>
-                      )}
-                    </View>
-                  )}
-                />
-                <View className="mt-10 w-full gap-4 px-10">
-                  <Button type="primary" onPress={handleSubmit(onSubmit)}>
-                    Save
-                  </Button>
-                  <Button type="ghost" onPress={handleCancel}>
-                    Cancel
-                  </Button>
-                </View>
+                <Text className="mb-2 text-5xl font-bold text-black">
+                  {profile.credit_score}
+                </Text>
+                <Text
+                  className="text-blue-500 underline"
+                  onPress={() =>
+                    Linking.openURL("https://example.com/what-does-this-mean")
+                  }
+                >
+                  What does this mean?
+                </Text>
               </>
             )}
-          </View>
-        </>
-      )}
-    </View>
+
+            <View className="mt-5 w-full px-6">
+              {!isEditing ? (
+                <>
+                  <View className="mt-5 flex w-full gap-4 px-6">
+                    <View>
+                      <Text className="mb-1 text-gray-600">Name</Text>
+                      <Text className="text-lg">{profile.name}</Text>
+                    </View>
+                    <View>
+                      <Text className="mb-1 text-gray-600">Email</Text>
+                      <Text className="text-lg">{profile.email}</Text>
+                    </View>
+                    <View>
+                      <Text className="mb-1 text-gray-600">Contact Number</Text>
+                      <Text className="text-lg">{profile.contact_number}</Text>
+                    </View>
+                    <View>
+                      <Text className="mb-1 text-gray-600">Address</Text>
+                      <Text className="text-lg">{profile.address}</Text>
+                    </View>
+                    <View>
+                      <Text className="mb-1 text-gray-600">Date of Birth</Text>
+                      <Text className="text-lg">
+                        {dayjs(profile.date_of_birth).format("DD MMMM YYYY")}
+                      </Text>
+                    </View>
+                  </View>
+                  <View className="mt-10 w-full gap-4 px-10">
+                    <Button type="primary" onPress={handleEditToggle}>
+                      Edit Profile
+                    </Button>
+                    <Button
+                      type="primary"
+                      onPress={() => router.push("/resetPassword")}
+                    >
+                      Reset Password
+                    </Button>
+                    <Button type="ghost" onPress={handleLogout}>
+                      Logout
+                    </Button>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Text className="mb-8 text-center text-lg font-semibold text-gray-800">
+                    Edit Profile
+                  </Text>
+                  <Text>Name</Text>
+                  <Controller
+                    control={control}
+                    name="name"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <View className="mb-4">
+                        <TextInput
+                          className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          value={value}
+                          placeholder="Name"
+                        />
+                        {errors.name && (
+                          <Text className="mt-1 text-red-500">
+                            {errors.name.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  />
+                  <Text>Address</Text>
+                  <Controller
+                    control={control}
+                    name="address"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <View className="mb-4">
+                        <TextInput
+                          className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          value={value}
+                          placeholder="Address"
+                          multiline
+                        />
+                        {errors.address && (
+                          <Text className="mt-1 text-red-500">
+                            {errors.address.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  />
+                  <Text>Date of Birth</Text>
+                  <Controller
+                    control={control}
+                    name="date_of_birth"
+                    render={({ field: { onChange, value } }) => (
+                      <View className="mb-4">
+                        <DatePicker
+                          value={new Date(value)}
+                          defaultValue={new Date()}
+                          minDate={new Date(1900, 0, 1)}
+                          maxDate={new Date()}
+                          onChange={(date) => {
+                            if (date) {
+                              onChange(format(date, "yyyy-MM-dd"));
+                            }
+                          }}
+                          okText="Confirm"
+                          dismissText="Cancel"
+                          format="DD MMMM YYYY"
+                          renderLabel={(type, data) => {
+                            if (type === "month") {
+                              const date = setMonth(
+                                new Date(2000, 0, 1),
+                                data - 1,
+                              );
+                              return <Text>{format(date, "MMMM")}</Text>;
+                            } else {
+                              return data;
+                            }
+                          }}
+                        >
+                          <TouchableOpacity className="rounded-md border border-gray-300 p-4 focus:border-blue-500">
+                            <Text>
+                              {value
+                                ? format(new Date(value), "dd MMMM yyyy")
+                                : "Select Date of Birth"}
+                            </Text>
+                          </TouchableOpacity>
+                        </DatePicker>
+                        {errors.date_of_birth && (
+                          <Text className="mt-1 text-red-500">
+                            {errors.date_of_birth.message}
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  />
+                  <View className="mt-10 w-full gap-4 px-10">
+                    <Button type="primary" onPress={handleSubmit(onSubmit)}>
+                      Save
+                    </Button>
+                    <Button type="ghost" onPress={handleCancel}>
+                      Cancel
+                    </Button>
+                  </View>
+                </>
+              )}
+            </View>
+          </>
+        )}
+      </View>
+    </ScrollView>
   );
 }

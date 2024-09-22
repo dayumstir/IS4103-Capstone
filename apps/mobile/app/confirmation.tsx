@@ -1,5 +1,5 @@
 // A screen component for the login functionality, handling email verification.
-
+import { useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 
 // Zod schema for validation
 const confirmEmailSchema = z.object({
@@ -22,6 +22,7 @@ export default function ConfirmationScreen() {
   const [confirmEmailMutation, { isLoading, error }] = useConfirmEmailMutation();
   const [sendPhoneNumberOTPMutation] = useSendPhoneNumberOTPMutation();
   const { customer } = useSelector((state: RootState) => state.customerAuth); // Get the customer from Redux
+  const navigation = useNavigation(); 
   const {
     control,
     handleSubmit,
@@ -29,6 +30,14 @@ export default function ConfirmationScreen() {
   } = useForm<ConfirmEmailFormValues>({
     resolver: zodResolver(confirmEmailSchema),
   });
+
+  // Disable back navigation
+  useEffect(() => {
+    navigation.setOptions({
+      gestureEnabled: false,  // Disable swipe back gesture
+      headerShown: false,     // Hide header if you want to remove the back button
+    });
+  }, [navigation]);
 
   const onSubmit = async (data: ConfirmEmailFormValues) => {
     try {
@@ -90,11 +99,17 @@ export default function ConfirmationScreen() {
           <Text className="mt-1 text-red-500">{errors.token.message}</Text>
         )}
 
+        {/* ===== Error Message ===== */}
+        {error && (
+          <Text className="mb-4 text-red-500">
+            Your email token is incorrect
+          </Text>
+        )}
+
         {/* Save Button */}
         <TouchableOpacity
           className="rounded-md bg-blue-500 py-4"
           onPress={handleSubmit(onSubmit)}
-          disabled={isLoading}
         >
           {isLoading ? (
             <AntDesign
