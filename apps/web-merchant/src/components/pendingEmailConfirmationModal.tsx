@@ -22,6 +22,7 @@ const PendingEmailConfirmationModal = ({
   const [form] = Form.useForm();
   const [token, setToken] = useState("");
   const email = localStorage.getItem("email");
+  const [emailSent, setEmailSent] = useState(false);
   if (!email) {
     navigate("/login");
     return null;
@@ -48,9 +49,11 @@ const PendingEmailConfirmationModal = ({
     >
       <div className="flex flex-col items-center justify-center text-center">
         <p className="mb-5">Your email has not been verified</p>
-        <p className="mb-5">
-          An email confirmation has been sent to <b>{email}</b>
-        </p>
+        {emailSent && (
+          <p className="mb-5">
+            An email confirmation has been sent to <b>{email}</b>
+          </p>
+        )}
 
         <Form className="mb-5 min-w-[300px]">
           <Form.Item>
@@ -66,6 +69,7 @@ const PendingEmailConfirmationModal = ({
             resendEmailConfirmationMutation({ email: email })
               .unwrap()
               .then(() => {
+                setEmailSent(true);
                 message.info(
                   "Email confirmation code has been sent to " + email,
                 );
