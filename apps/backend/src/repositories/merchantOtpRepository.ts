@@ -48,7 +48,7 @@ export const checkPhoneNumberVerified = async (contact_number: string) => {
         const latestOtp = otpRecords[0]; // Get the latest record
 
         // Ensure the OTP has not been used and has not expired
-        if (!latestOtp.used && latestOtp.expiresAt > new Date()) {
+        if (latestOtp.used) {
             return true; // Phone number is verified
         }
     }

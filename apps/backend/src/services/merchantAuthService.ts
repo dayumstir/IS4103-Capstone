@@ -24,7 +24,9 @@ export const register = async (merchantData: IMerchant, merchantProfilePicture?:
     }
 
     // Check if phone number is verified
-    const isVerified = merchantOtpRepository.checkPhoneNumberVerified(merchantData.contact_number);
+    const isVerified = await merchantOtpRepository.checkPhoneNumberVerified(
+        merchantData.contact_number
+    );
     if (!isVerified) {
         throw new Error("Phone Number has not been verified");
     }

@@ -41,7 +41,8 @@ const LoginScreen: React.FC = () => {
         console.log("Success:", data);
       })
       .catch((error) => {
-        if (error.data.error == "Email pending verification") {
+        if (error.data.error == "Email pending verification" && data.email) {
+          localStorage.setItem("email", data.email);
           setPendingEmailConfirmationModalOpen(true);
         }
         message.error(error.data.error);

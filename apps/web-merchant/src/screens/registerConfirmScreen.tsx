@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import logo from "../assets/pandapay_logo.png";
 import { Button, Form, Input, message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { useConfirmEmailMutation } from "../redux/services/auth";
-
+import {
+  useCheckEmailInUseMutation,
+  useConfirmEmailMutation,
+} from "../redux/services/auth";
 const RegisterConfirmScreen: React.FC = () => {
   const [confirmEmailMutation] = useConfirmEmailMutation();
   const navigate = useNavigate();
@@ -14,6 +16,11 @@ const RegisterConfirmScreen: React.FC = () => {
     navigate("/login");
     return null;
   }
+
+  //   if (email) {
+  //     const [checkEmailInUseMutation] = useCheckEmailInUseMutation()
+  //     checkEmailInUseMutation({email: email}).unwrap().catch((error)=>navigate("/login"));
+  //   }
 
   return (
     <div className="flex h-screen flex-col items-center justify-center text-center">
