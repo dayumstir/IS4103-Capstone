@@ -336,6 +336,10 @@ const Details = ({
   // const [otpVerified, setOtpVerified] = useState(false);
 
   const onFinish: FormProps<RegisterFormValues>["onFinish"] = async (data) => {
+    if (!otpVerified) {
+      message.error("Contact Number is not verified yet");
+      return;
+    }
     formData.append("name", name);
     formData.append("email", email);
     formData.append("password", password);
@@ -366,7 +370,7 @@ const Details = ({
         name="contact_number"
         rules={[{ required: true }]}
       >
-        {form.getFieldValue("contact_number") != "" && otpVerified ? (
+        {form.getFieldValue("contact_number") != "" && isOtpSent ? (
           <p>{form.getFieldValue("contact_number")}</p>
         ) : (
           <Input
