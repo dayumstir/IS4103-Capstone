@@ -15,7 +15,7 @@ import { ExclamationCircleOutlined } from "@ant-design/icons";
 interface ICustomer {
   customer_id: string;
   name: string;
-  profile_picture: string;
+  profile_picture: Buffer;
   email: string;
   password: string;
   contact_number: string;

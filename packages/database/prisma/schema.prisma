@@ -23,15 +23,15 @@ enum Status {
 model Customer {
   customer_id     String   @id @default(cuid())
   name            String
-  profile_picture Bytes    @db.ByteA   
+  profile_picture Bytes    @db.ByteA
   email           String   @unique
   password        String
   contact_number  String
   address         String
   date_of_birth   DateTime
   status          Status
-  credit_score    Int     @default(0)
-  credit_tier_id  String  @default("tier_1")
+  credit_score    Int      @default(0)
+  credit_tier_id  String   @default("tier_1")
 
   // Relationships
   emailVerificationTokens EmailVerificationToken[]
@@ -138,16 +138,16 @@ enum AdminType {
 }
 
 model Admin {
-  admin_id        String @id @default(cuid())
+  admin_id        String    @id @default(cuid())
   name            String
-  profile_picture Bytes? @db.ByteA
-  email          String    @unique
-  username       String    @unique
-  password       String
-  contact_number String
-  address        String
-  date_of_birth  DateTime
-  admin_type     AdminType // TODO: Implement as enum
+  profile_picture Bytes?    @db.ByteA
+  email           String    @unique
+  username        String    @unique
+  password        String
+  contact_number  String
+  address         String
+  date_of_birth   DateTime
+  admin_type      AdminType // TODO: Implement as enum
 }
 
 model Merchant {
@@ -165,7 +165,6 @@ model Merchant {
   emailVerificationTokens MerchantEmailVerificationToken[]
 }
 
-
 // Merchant Sign Up Use Case: Store phone number OTPs
 model MerchantOtp {
   id             String @id @default(cuid())
@@ -177,7 +176,6 @@ model MerchantOtp {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
 
 // Merchant Sign Up Use Case: Store email verification tokens
 model MerchantEmailVerificationToken {
@@ -194,10 +192,9 @@ model MerchantEmailVerificationToken {
   merchant    Merchant @relation(fields: [merchant_id], references: [merchant_id])
   merchant_id String
 
-  @@index([merchant_id])
   @@unique([email, token])
+  @@index([merchant_id])
 }
-
 
 model Transaction {
   transaction_id      String   @id @default(cuid())

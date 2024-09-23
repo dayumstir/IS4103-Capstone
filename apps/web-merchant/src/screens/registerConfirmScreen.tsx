@@ -6,7 +6,6 @@ import {
   useCheckEmailInUseMutation,
   useConfirmEmailMutation,
 } from "../redux/services/auth";
-
 const RegisterConfirmScreen: React.FC = () => {
   const [confirmEmailMutation] = useConfirmEmailMutation();
   const navigate = useNavigate();

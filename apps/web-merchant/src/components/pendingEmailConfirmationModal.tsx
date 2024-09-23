@@ -54,7 +54,6 @@ const PendingEmailConfirmationModal = ({
             An email confirmation has been sent to <b>{email}</b>
           </p>
         )}
-
         <Form className="mb-5 min-w-[300px]">
           <Form.Item>
             <Input

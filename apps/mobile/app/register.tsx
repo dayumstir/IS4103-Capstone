@@ -22,6 +22,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 import BottomSheet from "@gorhom/bottom-sheet";
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 // Define your Zod schema
 const registerSchema = z.object({
@@ -45,6 +46,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [tempDate, setTempDate] = useState<Date | null>(null);
+  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
@@ -73,8 +75,21 @@ export default function Register() {
 
       router.replace("/confirmation");
       console.log("Register success:", data);
-    } catch (error) {
-      console.error("Register failed:", error);
+    } catch (err: any) {
+      // console.error("Register failed:", error);
+
+      let errorMessage = "An error occurred. Please try again.";
+
+      // Check if the error is of type FetchBaseQueryError
+      if ('data' in err) {
+          const fetchError = err as FetchBaseQueryError;
+          if (fetchError.data && typeof fetchError.data === 'object' && 'error' in fetchError.data) {
+              errorMessage = fetchError.data.error as string;
+          }
+      }
+
+      // Set the error message in local state to be displayed
+      setCustomErrorMessage(errorMessage);
     }
   };
 
@@ -242,10 +257,10 @@ export default function Register() {
         />
 
         {/* ===== Error Message ===== */}
-        {error && (
-          <Text className="mb-4 text-red-500">
-            Your email or password is incorrect
-          </Text>
+        {customErrorMessage && (
+            <Text className="mb-4 text-red-500">
+                {customErrorMessage}
+            </Text>
         )}
 
         {/* ===== Register Button ===== */}
