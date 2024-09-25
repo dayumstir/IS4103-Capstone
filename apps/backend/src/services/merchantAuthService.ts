@@ -6,6 +6,7 @@ import * as merchantRepository from "../repositories/merchantRepository";
 import { MerchantStatus } from "../interfaces/merchantStatus";
 import * as merchantEmailVerificationTokenRepository from "../repositories/merchantEmailVerificationTokenRepository";
 import * as merchantOtpRepository from "../repositories/merchantOtpRepository";
+import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 
 import crypto from "crypto";
 const nodemailer = require("nodemailer");
@@ -259,7 +260,7 @@ export const logout = async (token: string) => {
 
         const expiresAt = new Date(decoded.exp * 1000); // Convert expiration time to Date object
 
-        await merchantRepository.blacklistToken(token, expiresAt);
+        await jwtTokenRepository.blacklistToken(token, expiresAt);
     } catch (error: any) {
         throw new Error(error.message || "Failed to log out");
     }

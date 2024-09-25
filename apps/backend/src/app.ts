@@ -14,6 +14,7 @@ import adminRoutes from "./routes/adminRoutes";
 import adminAuthRoutes from "./routes/adminAuthRoutes";
 import instalmentPlanRoutes from "./routes/instalmentPlanRoutes";
 import creditTierRoutes from "./routes/creditTierRoutes";
+import disputeRoutes from "./routes/disputeRoutes";
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/admin", adminRoutes);
 app.use("/adminAuth", adminAuthRoutes);
 app.use("/instalmentPlan", instalmentPlanRoutes);
 app.use("/creditTier", creditTierRoutes);
+app.use("/dispute", disputeRoutes);
 
 // Dummy route for the root
 app.get("/", (req, res) => {
