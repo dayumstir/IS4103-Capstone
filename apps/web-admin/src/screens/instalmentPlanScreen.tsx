@@ -16,59 +16,33 @@ import {
 } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { IInstalmentPlan } from "../interfaces/instalmentPlanInterface";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createInstalmentPlan,
-  fetchInstalmentPlanList,
-  updateInstalmentPlan,
-} from "../api/instalmentPlanApi";
+  useGetInstalmentPlansQuery,
+  useCreateInstalmentPlanMutation,
+  useUpdateInstalmentPlanMutation,
+} from "../redux/services/instalmentPlanService";
 
 export default function InstalmentPlanScreen() {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<IInstalmentPlan | null>(null);
-  const queryClient = useQueryClient();
 
-  const instalmentPlanListQuery = useQuery({
-    queryKey: ["instalment-plans"],
-    queryFn: fetchInstalmentPlanList,
-  });
+  const { data: instalmentPlans, isLoading } = useGetInstalmentPlansQuery();
+  const [createInstalmentPlan] = useCreateInstalmentPlanMutation();
+  const [updateInstalmentPlan] = useUpdateInstalmentPlanMutation();
 
-  const createInstalmentPlanMutation = useMutation({
-    mutationFn: createInstalmentPlan,
-    onSettled: async () => {
-      return await queryClient.invalidateQueries({
-        queryKey: ["instalment-plans"],
-      });
-    },
-    onError: (error) => {
-      message.error(`Failed to create instalment plan: ${error.message}`);
-    },
-    onSuccess: (newInstalmentPlan) => {
-      message.success(
-        `New instalment plan "${newInstalmentPlan.name}" has been created.`,
-      );
-    },
-  });
-
-  const updateInstalmentPlanMutation = useMutation({
-    mutationFn: updateInstalmentPlan,
-    onSettled: async () => {
-      return await queryClient.invalidateQueries({
-        queryKey: ["instalment-plans"],
-      });
-    },
-    onError: (error) => {
-      message.error(`Failed to update instalment plan: ${error.message}`);
-    },
-  });
-
-  const handleCreatePlan = (
+  const handleCreatePlan = async (
     newInstalmentPlan: Omit<IInstalmentPlan, "instalment_plan_id">,
   ) => {
-    createInstalmentPlanMutation.mutate(newInstalmentPlan);
-    form.resetFields();
+    try {
+      const result = await createInstalmentPlan(newInstalmentPlan).unwrap();
+      message.success(`New instalment plan "${result.name}" has been created.`);
+      form.resetFields();
+    } catch (error) {
+      console.error("Error creating instalment plan:", error);
+      message.error("Failed to create instalment plan");
+    }
   };
 
   const handleEditPlan = (plan: IInstalmentPlan) => {
@@ -83,7 +57,7 @@ export default function InstalmentPlanScreen() {
     setIsModalOpen(true);
   };
 
-  const handleUpdatePlan = (
+  const handleUpdatePlan = async (
     values: Omit<IInstalmentPlan, "instalment_plan_id">,
   ) => {
     if (!editingPlan) {
@@ -96,10 +70,17 @@ export default function InstalmentPlanScreen() {
       instalment_plan_id: editingPlan.instalment_plan_id,
     };
 
-    updateInstalmentPlanMutation.mutate(updatedPlan);
-    setIsModalOpen(false);
-    setEditingPlan(null);
-    message.success(`Instalment plan "${updatedPlan.name}" has been updated.`);
+    try {
+      await updateInstalmentPlan(updatedPlan).unwrap();
+      setIsModalOpen(false);
+      setEditingPlan(null);
+      message.success(
+        `Instalment plan "${updatedPlan.name}" has been updated.`,
+      );
+    } catch (error) {
+      console.error("Error updating instalment plan:", error);
+      message.error("Failed to update instalment plan");
+    }
   };
 
   // TODO: Implement delete instalment plan
@@ -107,7 +88,7 @@ export default function InstalmentPlanScreen() {
     message.success("Instalment plan has been deleted.");
   };
 
-  const columns = [
+  const tableColumns = [
     {
       title: "Name",
       dataIndex: "name",
@@ -314,11 +295,11 @@ export default function InstalmentPlanScreen() {
         title="View and Manage Instalment Plans"
       >
         <Table
-          dataSource={instalmentPlanListQuery.data}
-          columns={columns}
+          dataSource={instalmentPlans}
+          columns={tableColumns}
           rowKey="instalment_plan_id"
           pagination={false}
-          loading={instalmentPlanListQuery.isLoading}
+          loading={isLoading}
           locale={{
             emptyText: <Empty description="No instalment plans found"></Empty>,
           }}
