@@ -15,13 +15,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useDispatch } from "react-redux";
 import { useRegisterMutation } from "../redux/services/customerAuth";
 import { setCustomer } from "../redux/features/customerAuthSlice";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { format, setMonth } from "date-fns";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { Button, DatePicker } from "@ant-design/react-native";
-import Toast from "react-native-toast-message";
 
 // Define your Zod schema
 const registerSchema = z.object({
@@ -80,8 +78,6 @@ export default function Register() {
       router.replace("/confirmation");
       console.log("Register success:", data);
     } catch (err: any) {
-      // console.error("Register failed:", error);
-
       let errorMessage = "An error occurred. Please try again.";
 
       // Check if the error is of type FetchBaseQueryError
@@ -292,9 +288,7 @@ export default function Register() {
           loading={isLoading}
           disabled={isLoading}
         >
-          <Text className="text-center font-semibold uppercase text-white">
-            Register
-          </Text>
+          <Text className="font-semibold uppercase text-white">Register</Text>
         </Button>
 
         {/* ===== Login Link ===== */}
@@ -302,7 +296,7 @@ export default function Register() {
           <Text>Already have an account?</Text>
           <Text
             onPress={() => router.replace("/login")}
-            className="text-center font-semibold text-blue-500"
+            className="font-semibold text-blue-500"
           >
             Login
           </Text>

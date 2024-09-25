@@ -2,11 +2,45 @@ import "../global.css";
 import { Stack } from "expo-router";
 import { Provider as ReduxProvider } from "react-redux";
 import { store } from "../redux/store";
-import { Provider as AntProvider } from "@ant-design/react-native";
+import { Provider as AntProvider, View } from "@ant-design/react-native";
 import enUS from "@ant-design/react-native/lib/locale-provider/en_US";
-import Toast from "react-native-toast-message";
+import Toast, { SuccessToast, ErrorToast } from "react-native-toast-message";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 export default function RootLayout() {
+  const toastConfig = {
+    success: (props: any) => (
+      <SuccessToast
+        {...props}
+        text1Style={{
+          fontSize: 14,
+          fontWeight: "600",
+        }}
+        renderLeadingIcon={() => (
+          // Tailwind not supported
+          <View style={{ justifyContent: "center", marginLeft: 20 }}>
+            <AntDesign name="checkcircle" size={24} color="#68C77A" />
+          </View>
+        )}
+      />
+    ),
+    error: (props: any) => (
+      <ErrorToast
+        {...props}
+        text1Style={{
+          fontSize: 14,
+          fontWeight: "600",
+        }}
+        renderLeadingIcon={() => (
+          // Tailwind not supported
+          <View style={{ justifyContent: "center", marginLeft: 20 }}>
+            <AntDesign name="closecircle" size={24} color="#FE6301" />
+          </View>
+        )}
+      />
+    ),
+  };
+
   return (
     <AntProvider
       locale={enUS}
@@ -28,7 +62,7 @@ export default function RootLayout() {
             options={{ headerShown: false }}
           />
         </Stack>
-        <Toast />
+        <Toast config={toastConfig} topOffset={60} visibilityTime={2000} />
       </ReduxProvider>
     </AntProvider>
   );

@@ -49,8 +49,6 @@ export default function Login() {
       // Delete the history to prevent user from swiping back to the login page
       router.replace("/home");
     } catch (err: any) {
-      // console.error("Login failed:", error);
-
       let errorMessage = "An error occurred. Please try again.";
 
       // Check if the error is of type FetchBaseQueryError
@@ -148,9 +146,7 @@ export default function Login() {
         loading={isLoading}
         disabled={isLoading}
       >
-        <Text className="text-center font-semibold uppercase text-white">
-          Login
-        </Text>
+        <Text className="font-semibold uppercase text-white">Login</Text>
       </Button>
 
       {/* ===== Register Link ===== */}
@@ -158,7 +154,7 @@ export default function Login() {
         <Text>Don't have an account?</Text>
         <Text
           onPress={() => router.replace("/register")}
-          className="text-center font-semibold text-blue-500"
+          className="font-semibold text-blue-500"
         >
           Register
         </Text>
