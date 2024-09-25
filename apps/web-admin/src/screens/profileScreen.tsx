@@ -1,115 +1,67 @@
-import React, { useEffect, useState } from "react";
-import { Avatar, Card, Typography, Spin, Button, Alert, Modal, Form, Input, message } from "antd";
+import React, { useState } from "react";
+import {
+  Avatar,
+  Card,
+  Typography,
+  Spin,
+  Button,
+  Modal,
+  Form,
+  Input,
+  message,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
 import { Buffer } from "buffer";
+import { useViewProfileQuery } from "../redux/services/adminService";
+import { useResetPasswordMutation } from "../redux/services/adminAuthService";
 
 const { Title, Text } = Typography;
 
-interface AdminProfileData {
-  username: string;
-  email: string;
-  name: string;
-  contact_number: string;
-  address: string;
-  date_of_birth: string;
-  profile_picture:string;
-}
+export default function ProfileScreen() {
+  const { data: user, isLoading } = useViewProfileQuery();
+  const [resetPassword, { isLoading: isResetting }] =
+    useResetPasswordMutation();
 
-const ProfileScreen: React.FC = () => {
-  const [user, setUser] = useState<AdminProfileData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const jwt_token = localStorage.getItem("token");
-        if (!jwt_token) {
-          throw new Error("No token found");
-        }
-
-        const response = await fetch("http://localhost:3000/admin/profile", {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${jwt_token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch user profile");
-        }
-
-        const data = await response.json();
-        setUser(data);
-      } catch (error) {
-        console.error("Failed to fetch user information:", error);
-        setError("Could not fetch user data. Redirecting to login...");
-        setTimeout(() => navigate("/login"), 3000);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserProfile();
-  }, [navigate]);
-
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleOk = () => {
-    setIsModalVisible(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-    form.resetFields();
-  };
   const validatePassword = (password: string) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
     return passwordRegex.test(password);
-};
+  };
 
-  const onFinish = async (values: { oldPassword: string; newPassword: string }) => {
+  const onFinish = async (values: {
+    oldPassword: string;
+    newPassword: string;
+  }) => {
     const { oldPassword, newPassword } = values;
 
+    if (!user?.email) {
+      message.error("User email not available");
+      return;
+    }
+
     try {
-      const email = user?.email;
-      const response = await fetch("http://localhost:3000/adminauth/reset-password", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, oldPassword, newPassword }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Could not update password.");
-      }
-
+      await resetPassword({
+        email: user.email,
+        oldPassword,
+        newPassword,
+      }).unwrap();
       message.success("Password changed successfully!");
-      handleCancel(); 
+      setIsModalOpen(false);
+      form.resetFields();
     } catch (error) {
       console.error("Error updating password:", error);
       message.error("Could not update password. Please try again.");
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return <Spin size="large" tip="Loading profile..." />;
-  }
-
-  if (error) {
-    return <Alert message={error} type="error" showIcon />;
   }
 
   if (!user) {
@@ -119,9 +71,8 @@ const ProfileScreen: React.FC = () => {
   return (
     <div style={{ padding: "20px" }}>
       <Card title="Admin Profile" style={{ width: 300 }}>
-
-      <Title level={4}>Profile Picture</Title>
-      {user.profile_picture ? (
+        <Title level={4}>Profile Picture</Title>
+        {user.profile_picture ? (
           <img
             src={`data:image/png;base64,${Buffer.from(user.profile_picture).toString("base64")}`}
             alt="avatar1"
@@ -155,7 +106,7 @@ const ProfileScreen: React.FC = () => {
           <Button
             type="default"
             style={{ marginTop: 16, marginLeft: 8 }}
-            onClick={showModal}
+            onClick={() => setIsModalOpen(true)}
             aria-label="Reset Password"
           >
             Reset Password
@@ -165,9 +116,12 @@ const ProfileScreen: React.FC = () => {
 
       <Modal
         title="Reset Password"
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
+        open={isModalOpen}
+        onOk={() => setIsModalOpen(false)}
+        onCancel={() => {
+          setIsModalOpen(false);
+          form.resetFields();
+        }}
         footer={null}
       >
         <Form
@@ -181,7 +135,9 @@ const ProfileScreen: React.FC = () => {
           <Form.Item
             label="Old Password"
             name="oldPassword"
-            rules={[{ required: true, message: "Please input your old password" }]}
+            rules={[
+              { required: true, message: "Please input your old password" },
+            ]}
           >
             <Input.Password />
           </Form.Item>
@@ -197,16 +153,22 @@ const ProfileScreen: React.FC = () => {
 
                   // Check if the new password is the same as the old password
                   if (value === oldPassword) {
-                    return Promise.reject(new Error("New password cannot be the same as the old password."));
+                    return Promise.reject(
+                      new Error(
+                        "New password cannot be the same as the old password.",
+                      ),
+                    );
                   }
-          
+
                   // Check the password validation criteria
                   if (!validatePassword(value)) {
                     return Promise.reject(
-                      new Error("New password must have at least 1 lowercase letter, 1 uppercase letter, 1 digit, 1 special character, and be at least 8 characters long.")
+                      new Error(
+                        "New password must have at least 1 lowercase letter, 1 uppercase letter, 1 digit, 1 special character, and be at least 8 characters long.",
+                      ),
                     );
                   }
-          
+
                   return Promise.resolve(); // If all checks pass
                 },
               },
@@ -224,7 +186,9 @@ const ProfileScreen: React.FC = () => {
                 validator: (_, value) => {
                   const newPassword = form.getFieldValue("newPassword");
                   if (value && value !== newPassword) {
-                    return Promise.reject(new Error("New password fields do not match"));
+                    return Promise.reject(
+                      new Error("New password fields do not match"),
+                    );
                   }
                   return Promise.resolve();
                 },
@@ -234,8 +198,13 @@ const ProfileScreen: React.FC = () => {
             <Input.Password />
           </Form.Item>
 
-          <Form.Item className="flex justify-end w-full">
-            <Button type="primary" htmlType="submit" >
+          <Form.Item className="flex w-full justify-end">
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={isResetting}
+              disabled={isResetting}
+            >
               Change Password
             </Button>
           </Form.Item>
@@ -243,6 +212,4 @@ const ProfileScreen: React.FC = () => {
       </Modal>
     </div>
   );
-};
-
-export default ProfileScreen;
+}
