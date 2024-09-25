@@ -138,6 +138,7 @@ const EmailNameForm = ({
         })
         .catch((error) => {
           if (error.data.error == "Email pending verification") {
+            localStorage.setItem("email", data.email);
             setPendingEmailConfirmationModalOpen(true);
           }
           message.error(error.data.error);
@@ -335,17 +336,23 @@ const Details = ({
   // const [otpVerified, setOtpVerified] = useState(false);
 
   const onFinish: FormProps<RegisterFormValues>["onFinish"] = async (data) => {
+    if (!otpVerified) {
+      message.error("Contact Number is not verified yet");
+      return;
+    }
     formData.append("name", name);
     formData.append("email", email);
     formData.append("password", password);
     formData.append("contact_number", data.contact_number);
     formData.append("address", data.address);
     // profilePicture && formData.append("profile_picture", profilePicture);
-    const result = await registerMutation(formData);
-    if (result.data) {
-      localStorage.setItem("email", email);
-      navigate("/register-confirm");
-    }
+    await registerMutation(formData)
+      .unwrap()
+      .then(() => {
+        localStorage.setItem("email", email);
+        navigate("/register-confirm");
+      })
+      .catch((error) => message.error(error.data.error));
   };
 
   return (
@@ -363,7 +370,7 @@ const Details = ({
         name="contact_number"
         rules={[{ required: true }]}
       >
-        {form.getFieldValue("contact_number") != "" && otpVerified ? (
+        {form.getFieldValue("contact_number") != "" && isOtpSent ? (
           <p>{form.getFieldValue("contact_number")}</p>
         ) : (
           <Input
@@ -548,20 +555,9 @@ const Details = ({
         {isLoading ? (
           <Spin indicator={<LoadingOutlined spin />} />
         ) : (
-          <Space>
-            <Button type="primary" htmlType="submit">
-              Register
-            </Button>
-            {error ? (
-              <Alert
-                message="Registeration Failed. Please try again!"
-                type="error"
-                style={{ height: 35 }}
-              />
-            ) : (
-              <></>
-            )}
-          </Space>
+          <Button type="primary" htmlType="submit">
+            Register
+          </Button>
         )}
       </Form.Item>
     </Form>

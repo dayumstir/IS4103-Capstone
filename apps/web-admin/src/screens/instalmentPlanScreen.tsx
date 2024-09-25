@@ -202,11 +202,15 @@ export default function InstalmentPlanScreen() {
           rules={[{ required: true, message: "Please select the frequency!" }]}
         >
           <Select>
-            <Select.Option value="Weekly">Weekly</Select.Option>
-            <Select.Option value="Every 2 Weeks">Every 2 Weeks</Select.Option>
-            <Select.Option value="Monthly">Monthly</Select.Option>
-            <Select.Option value="Quarterly">Quarterly</Select.Option>
-            <Select.Option value="Yearly">Yearly</Select.Option>
+            <Select.Option value="8 Instalments over 4 Weeks">
+              8 Instalments over 4 Weeks
+            </Select.Option>
+            <Select.Option value="4 Instalments over 8 Weeks">
+              4 Instalments over 8 Weeks
+            </Select.Option>
+            <Select.Option value="6 Instalments over 6 Weeks">
+              6 Instalments over 6 Weeks
+            </Select.Option>
           </Select>
         </Form.Item>
 
@@ -281,7 +285,11 @@ export default function InstalmentPlanScreen() {
       </Form.Item>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" icon={<PlusOutlined />}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          icon={formInstance === form ? <PlusOutlined /> : <EditOutlined />}
+        >
           {formInstance === form
             ? "Create Instalment Plan"
             : "Update Instalment Plan"}

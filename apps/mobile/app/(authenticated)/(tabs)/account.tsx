@@ -8,9 +8,8 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert
 } from "react-native";
-import { Button, DatePicker, Toast } from "@ant-design/react-native";
+import { Button, DatePicker } from "@ant-design/react-native";
 import { useDispatch } from "react-redux";
 import {
   useGetProfileQuery,
@@ -18,14 +17,14 @@ import {
 } from "../../../redux/services/customer";
 import { setProfile } from "../../../redux/features/customerSlice";
 import { logout } from "../../../redux/features/customerAuthSlice";
-import { router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import { format, setMonth } from "date-fns";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import Toast from "react-native-toast-message";
 
 // Validation Schema using zod
 const profileSchema = z.object({
@@ -43,7 +42,9 @@ const profileSchema = z.object({
 export default function AccountPage() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(null);
+  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(
+    null,
+  );
 
   // Fetch the profile using the API call
   const { data: profile, error, isLoading, refetch } = useGetProfileQuery();
@@ -116,23 +117,25 @@ export default function AccountPage() {
         date_of_birth: dayjs(updatedProfile.date_of_birth).format("YYYY-MM-DD"),
       });
 
-      Alert.alert("Success", "Profile updated successfully");
-      // Toast.success({
-      //   content: "Profile updated successfully",
-      //   duration: 1,
-      // });
+      Toast.show({
+        type: "success",
+        text1: "Profile updated successfully",
+      });
+
       setIsEditing(false); // Exit edit mode
     } catch (err: any) {
-      // console.error("Failed to update profile:", error);
-
       let errorMessage = "An error occurred. Please try again.";
 
       // Check if the error is of type FetchBaseQueryError
-      if ('data' in err) {
-          const fetchError = err as FetchBaseQueryError;
-          if (fetchError.data && typeof fetchError.data === 'object' && 'error' in fetchError.data) {
-              errorMessage = fetchError.data.error as string;
-          }
+      if ("data" in err) {
+        const fetchError = err as FetchBaseQueryError;
+        if (
+          fetchError.data &&
+          typeof fetchError.data === "object" &&
+          "error" in fetchError.data
+        ) {
+          errorMessage = fetchError.data.error as string;
+        }
       }
 
       // Set the error message in local state to be displayed
@@ -148,8 +151,10 @@ export default function AccountPage() {
             {!isEditing && (
               <>
                 <Image
-                  source={{ uri: `data:image/png;base64,${Buffer.from(profile.profile_picture).toString("base64")}` }}
-                  style={{height: 100, width: 100}}
+                  source={{
+                    uri: `data:image/png;base64,${Buffer.from(profile.profile_picture).toString("base64")}`,
+                  }}
+                  style={{ height: 100, width: 100 }}
                 />
                 <Text className="mb-1 text-lg font-semibold text-gray-800">
                   My Credit Rating
@@ -168,10 +173,10 @@ export default function AccountPage() {
               </>
             )}
 
-            <View className="mt-5 w-full px-6">
+            <View className="mt-5 w-full px-4">
               {!isEditing ? (
                 <>
-                  <View className="mt-5 flex w-full gap-4 px-6">
+                  <View className="mt-4 flex w-full gap-4 px-8">
                     <View>
                       <Text className="mb-1 text-gray-600">Name</Text>
                       <Text className="text-lg">{profile.name}</Text>
@@ -195,27 +200,33 @@ export default function AccountPage() {
                       </Text>
                     </View>
                   </View>
-                  <View className="mt-10 w-full gap-4 px-10">
+                  <View className="mt-10 w-full gap-4 px-8">
                     <Button type="primary" onPress={handleEditToggle}>
-                      Edit Profile
+                      <Text className="font-semibold text-white">
+                        Edit Profile
+                      </Text>
                     </Button>
                     <Button
                       type="primary"
                       onPress={() => router.push("/resetPassword")}
                     >
-                      Reset Password
+                      <Text className="font-semibold text-white">
+                        Reset Password
+                      </Text>
                     </Button>
                     <Button type="ghost" onPress={handleLogout}>
-                      Logout
+                      <Text className="font-semibold text-blue-500">
+                        Logout
+                      </Text>
                     </Button>
                   </View>
                 </>
               ) : (
                 <>
-                  <Text className="mb-8 text-center text-lg font-semibold text-gray-800">
+                  <Text className="mb-8 text-center text-xl font-semibold text-gray-800">
                     Edit Profile
                   </Text>
-                  <Text>Name</Text>
+                  <Text className="mb-2 text-gray-600">Name</Text>
                   <Controller
                     control={control}
                     name="name"
@@ -236,7 +247,7 @@ export default function AccountPage() {
                       </View>
                     )}
                   />
-                  <Text>Address</Text>
+                  <Text className="mb-2 text-gray-600">Address</Text>
                   <Controller
                     control={control}
                     name="address"
@@ -258,15 +269,14 @@ export default function AccountPage() {
                       </View>
                     )}
                   />
-                  <Text>Date of Birth</Text>
+                  <Text className="mb-2 text-gray-600">Date of Birth</Text>
                   <Controller
                     control={control}
                     name="date_of_birth"
                     render={({ field: { onChange, value } }) => (
                       <View className="mb-4">
                         <DatePicker
-                          value={new Date(value)}
-                          defaultValue={new Date()}
+                          value={value ? new Date(value) : new Date()}
                           minDate={new Date(1900, 0, 1)}
                           maxDate={new Date()}
                           onChange={(date) => {
@@ -307,16 +317,18 @@ export default function AccountPage() {
                   />
                   {/* ===== Error Message ===== */}
                   {customErrorMessage && (
-                      <Text className="mb-4 text-red-500">
-                          {customErrorMessage}
-                      </Text>
+                    <Text className="mb-4 text-red-500">
+                      {customErrorMessage}
+                    </Text>
                   )}
                   <View className="mt-10 w-full gap-4 px-10">
                     <Button type="primary" onPress={handleSubmit(onSubmit)}>
-                      Save
+                      <Text className="font-semibold text-white">Save</Text>
                     </Button>
                     <Button type="ghost" onPress={handleCancel}>
-                      Cancel
+                      <Text className="font-semibold text-blue-500">
+                        Cancel
+                      </Text>
                     </Button>
                   </View>
                 </>

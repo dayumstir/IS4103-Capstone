@@ -270,7 +270,11 @@ export default function CreditTierScreen() {
       </div>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" icon={<PlusOutlined />}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          icon={formInstance === form ? <PlusOutlined /> : <EditOutlined />}
+        >
           {formInstance === form ? "Create Credit Tier" : "Update Credit Tier"}
         </Button>
       </Form.Item>
