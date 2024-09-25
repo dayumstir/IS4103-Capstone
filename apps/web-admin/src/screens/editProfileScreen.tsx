@@ -1,85 +1,51 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import type { FormProps } from "antd";
-import { Avatar, Button, Card, Form, Input, Space, GetProp, Typography, message, Upload, UploadProps} from "antd";
+import {
+  Avatar,
+  Button,
+  Card,
+  Form,
+  Input,
+  Space,
+  GetProp,
+  Typography,
+  message,
+  Upload,
+  UploadProps,
+  Spin,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import { UserOutlined, UploadOutlined } from "@ant-design/icons";
-import { Buffer } from 'buffer';
+import { Buffer } from "buffer";
+import {
+  useUpdateProfileMutation,
+  useViewProfileQuery,
+} from "../redux/services/adminService";
 
 const { Title } = Typography;
 
-type FieldType = {
-  email?: string;
-  contact_number?: string;
-  address?: string;
-  profile_picture?: string;
-};
-
-const EditProfileScreen: React.FC = () => {
+export default function EditProfileScreen() {
   const navigate = useNavigate();
-  const [, setError] = useState<string | null>(null);
-  const [initialValues, setInitialValues] = useState({
-    email: "",
-    contact_number: "",
-    address: "",
-    profile_picture: "",
-  });
+  const { data: profileData, isLoading, error } = useViewProfileQuery();
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [profilePictureDisplay, setProfilePictureDisplay] = useState("");
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/admin/profile", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-       
-        const data = await response.json();
-        const profilePictureBase64 = `data:image/png;base64,${Buffer.from(data.profile_picture).toString("base64")}`;
-        setProfilePictureDisplay(profilePictureBase64);
-
-      setInitialValues({
-          email: data.email,
-          contact_number: data.contact_number,
-          address: data.address,
-          profile_picture: data.profile_picture,
-        }); 
-
-      } catch (error) {
-        console.error("Error fetching profile data:", error);
-        setError("Could not fetch profile data. Please try again later.");
-      }
-    };
-
-    fetchProfileData();
-  }, []);
-
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+  const onFinish = async (values: {
+    email: string;
+    contact_number: string;
+    address: string;
+    profile_picture: string;
+  }) => {
     const { email, contact_number, address } = values;
-    try {
-      const response = await fetch("http://localhost:3000/admin/profile", {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          contact_number,
-          address,
-          profile_picture: profilePictureDisplay.split(",")[1],
-        }),
-      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+    try {
+      await updateProfile({
+        email,
+        contact_number,
+        address,
+        profile_picture: profilePictureDisplay.split(",")[1],
+      }).unwrap();
 
       // Show success message
       message.success("Profile updated successfully!");
@@ -90,14 +56,6 @@ const EditProfileScreen: React.FC = () => {
     }
   };
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
-    errorInfo,
-  ) => {
-    console.log("Failed:", errorInfo);
-  };
-
-  const [profilePictureDisplay, setProfilePictureDisplay] = useState("");
-  
   const convertImageToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -113,7 +71,6 @@ const EditProfileScreen: React.FC = () => {
 
       // Read the file as a Data URL (Base64)
       reader.readAsDataURL(file);
-      
     });
   };
 
@@ -122,10 +79,9 @@ const EditProfileScreen: React.FC = () => {
       setProfilePicture(info.file.originFileObj);
       const base64String = await convertImageToBase64(info.file.originFileObj);
       setProfilePictureDisplay(base64String);
-      return;
     }
-    return;
   };
+
   type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
   const beforeUpload = (file: FileType) => {
@@ -151,6 +107,31 @@ const EditProfileScreen: React.FC = () => {
     return contactNumberRegex.test(number);
   };
 
+  if (isLoading) {
+    return <Spin size="large" tip="Loading profile data..." />;
+  }
+
+  if (error) {
+    message.error("Failed to fetch profile data. Please try again later.");
+    return null;
+  }
+
+  const initialValues = profileData
+    ? {
+        email: profileData.email,
+        contact_number: profileData.contact_number,
+        address: profileData.address,
+        profile_picture: profileData.profile_picture,
+      }
+    : {};
+
+  if (profileData && profileData.profile_picture && !profilePictureDisplay) {
+    const profilePictureBase64 = `data:image/png;base64,${Buffer.from(
+      profileData.profile_picture,
+    ).toString("base64")}`;
+    setProfilePictureDisplay(profilePictureBase64);
+  }
+
   return (
     <Space
       direction="vertical"
@@ -166,7 +147,6 @@ const EditProfileScreen: React.FC = () => {
           style={{ minWidth: 600 }}
           initialValues={initialValues}
           onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
           <Form.Item
@@ -218,34 +198,31 @@ const EditProfileScreen: React.FC = () => {
             <Input />
           </Form.Item>
 
-        <Form.Item
-          name="profile_picture"
-          label="Profile Picture"
-        >
-          <div className="flex items-center">
-            {profilePictureDisplay ? (
-              <img
-                src={profilePictureDisplay}
-                alt="avatar1"
-                className="h-36 w-36 object-cover"
-              />
-            ) : (
-              <Avatar
-                className="h-36 w-36 object-cover"
-                icon={<UserOutlined />}
-              />
-            )}
-            <Upload
-              className="ml-5"
-              beforeUpload={beforeUpload}
-              onChange={handleChange}
-              customRequest={() => {}}
-              showUploadList={false}
-            >
-              <Button icon={<UploadOutlined />}>Click to Upload</Button>
-            </Upload>
-          </div>
-        </Form.Item>
+          <Form.Item name="profile_picture" label="Profile Picture">
+            <div className="flex items-center">
+              {profilePictureDisplay ? (
+                <img
+                  src={profilePictureDisplay}
+                  alt="avatar1"
+                  className="h-36 w-36 object-cover"
+                />
+              ) : (
+                <Avatar
+                  className="h-36 w-36 object-cover"
+                  icon={<UserOutlined />}
+                />
+              )}
+              <Upload
+                className="ml-5"
+                beforeUpload={beforeUpload}
+                onChange={handleChange}
+                customRequest={() => {}}
+                showUploadList={false}
+              >
+                <Button icon={<UploadOutlined />}>Click to Upload</Button>
+              </Upload>
+            </div>
+          </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
             <Button type="primary" htmlType="submit">
@@ -256,6 +233,4 @@ const EditProfileScreen: React.FC = () => {
       </Card>
     </Space>
   );
-};
-
-export default EditProfileScreen;
+}
