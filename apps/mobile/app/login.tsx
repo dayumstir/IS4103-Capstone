@@ -9,9 +9,9 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLoginMutation } from "../redux/services/customerAuth";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { Button } from "@ant-design/react-native";
 
 // Define your Zod schema
 const loginSchema = z.object({
@@ -29,7 +29,9 @@ export default function Login() {
   const dispatch = useDispatch();
   const [loginMutation, { isLoading, error }] = useLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
-  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(null);
+  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(
+    null,
+  );
 
   const {
     control,
@@ -52,11 +54,15 @@ export default function Login() {
       let errorMessage = "An error occurred. Please try again.";
 
       // Check if the error is of type FetchBaseQueryError
-      if ('data' in err) {
-          const fetchError = err as FetchBaseQueryError;
-          if (fetchError.data && typeof fetchError.data === 'object' && 'error' in fetchError.data) {
-              errorMessage = fetchError.data.error as string;
-          }
+      if ("data" in err) {
+        const fetchError = err as FetchBaseQueryError;
+        if (
+          fetchError.data &&
+          typeof fetchError.data === "object" &&
+          "error" in fetchError.data
+        ) {
+          errorMessage = fetchError.data.error as string;
+        }
       }
 
       // Set the error message in local state to be displayed
@@ -132,37 +138,27 @@ export default function Login() {
 
       {/* ===== Error Message ===== */}
       {customErrorMessage && (
-          <Text className="mb-4 text-red-500">
-              {customErrorMessage}
-          </Text>
+        <Text className="mb-4 text-red-500">{customErrorMessage}</Text>
       )}
 
       {/* ===== Login Button ===== */}
-      <TouchableOpacity
-        className="rounded-md bg-blue-500 py-4"
+      <Button
+        type="primary"
         onPress={handleSubmit(onSubmit)}
+        loading={isLoading}
         disabled={isLoading}
       >
-        {isLoading ? (
-          <AntDesign
-            name="loading1"
-            size={17}
-            color="#fff"
-            className="mx-auto animate-spin"
-          />
-        ) : (
-          <Text className="text-center font-semibold uppercase text-white">
-            Login
-          </Text>
-        )}
-      </TouchableOpacity>
+        <Text className="text-center font-semibold uppercase text-white">
+          Login
+        </Text>
+      </Button>
 
       {/* ===== Register Link ===== */}
-      <View className="mt-4 flex flex-row items-center justify-center gap-2">
+      <View className="mt-4 flex flex-row items-center justify-center gap-1">
         <Text>Don't have an account?</Text>
         <Text
           onPress={() => router.replace("/register")}
-          className="text-center text-blue-500"
+          className="text-center font-semibold text-blue-500"
         >
           Register
         </Text>

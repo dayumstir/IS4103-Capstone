@@ -1,16 +1,19 @@
 // A screen component for the login functionality, handling email verification.
-import { useEffect, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import { useEffect } from "react";
+import { View, Text, TextInput, Alert, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import { useConfirmEmailMutation, useSendPhoneNumberOTPMutation, useResendEmailVerificationMutation } from "../redux/services/customerAuth";
+import {
+  useConfirmEmailMutation,
+  useSendPhoneNumberOTPMutation,
+  useResendEmailVerificationMutation,
+} from "../redux/services/customerAuth";
 import { useForm, Controller } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useNavigation } from "expo-router";
-import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import { Button } from "@ant-design/react-native";
 
 // Zod schema for validation
 const confirmEmailSchema = z.object({
@@ -20,12 +23,13 @@ const confirmEmailSchema = z.object({
 export type ConfirmEmailFormValues = z.infer<typeof confirmEmailSchema>;
 
 export default function ConfirmationScreen() {
-  const [confirmEmailMutation, { isLoading, error }] = useConfirmEmailMutation();
+  const [confirmEmailMutation, { isLoading, error }] =
+    useConfirmEmailMutation();
   const [sendPhoneNumberOTPMutation] = useSendPhoneNumberOTPMutation();
-  const [resendEmailVerificationMutation, { isLoading: isResending }] = useResendEmailVerificationMutation();
+  const [resendEmailVerificationMutation, { isLoading: isResending }] =
+    useResendEmailVerificationMutation();
   const { customer } = useSelector((state: RootState) => state.customerAuth); // Get the customer from Redux
-  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(null);
-  const navigation = useNavigation(); 
+  const navigation = useNavigation();
   const {
     control,
     handleSubmit,
@@ -37,8 +41,8 @@ export default function ConfirmationScreen() {
   // Disable back navigation
   useEffect(() => {
     navigation.setOptions({
-      gestureEnabled: false,  // Disable swipe back gesture
-      headerShown: false,     // Hide header if you want to remove the back button
+      gestureEnabled: false, // Disable swipe back gesture
+      headerShown: false, // Hide header if you want to remove the back button
     });
   }, [navigation]);
 
@@ -50,7 +54,9 @@ export default function ConfirmationScreen() {
       // After email confirmation, send OTP to phone number
       console.log(customer);
       if (customer?.contact_number) {
-        await sendPhoneNumberOTPMutation({ contact_number: customer.contact_number }).unwrap();
+        await sendPhoneNumberOTPMutation({
+          contact_number: customer.contact_number,
+        }).unwrap();
       }
 
       // If successful, redirect to phone number OTP page
@@ -64,7 +70,9 @@ export default function ConfirmationScreen() {
   const handleResendEmail = async () => {
     try {
       if (customer?.email) {
-        await resendEmailVerificationMutation({ email: customer.email }).unwrap();
+        await resendEmailVerificationMutation({
+          email: customer.email,
+        }).unwrap();
         Alert.alert("Success", "A new confirmation email has been sent.");
       }
     } catch (err) {
@@ -79,7 +87,7 @@ export default function ConfirmationScreen() {
           <MaterialCommunityIcons
             name="email-check-outline"
             size={60}
-            color="#2563eb"
+            color="#3b82f6"
           />
           <Text className="text-center text-2xl font-bold">
             Check Your Email
@@ -120,47 +128,32 @@ export default function ConfirmationScreen() {
           </Text>
         )}
 
-        {/* Save Button */}
-        <TouchableOpacity
-          className="rounded-md bg-blue-500 py-4"
-          onPress={handleSubmit(onSubmit)}
-        >
-          {isLoading ? (
-            <AntDesign
-              name="loading1"
-              size={17}
-              color="#fff"
-              className="mx-auto animate-spin"
-            />
-          ) : (
+        {/* ===== Button Group ===== */}
+        <View className="flex gap-4">
+          <Button
+            type="primary"
+            onPress={handleSubmit(onSubmit)}
+            loading={isLoading}
+            disabled={isLoading}
+          >
             <Text className="text-center font-semibold uppercase text-white">
               Verify Email
             </Text>
-          )}
-        </TouchableOpacity>
+          </Button>
 
-        <View className="flex gap-4">
-          <TouchableOpacity
-            className="w-full rounded-md bg-blue-600 p-3"
+          <Button
+            type="ghost"
             onPress={handleResendEmail}
+            loading={isResending}
+            disabled={isResending}
           >
-            {isResending ? (
-              <AntDesign
-                name="loading1"
-                size={17}
-                color="#fff"
-                className="mx-auto animate-spin"
-              />
-            ) : (
-              <Text className="text-center font-semibold text-white">
-                Resend Confirmation Email
-              </Text>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.replace("/login")}>
-            <Text className="text-center font-semibold text-blue-600">
-              Back to Login
+            <Text className="text-center font-semibold text-blue-500">
+              Resend Confirmation Email
             </Text>
+          </Button>
+
+          <TouchableOpacity onPress={() => router.replace("/login")}>
+            <Text className="text-center font-semibold">Back to Login</Text>
           </TouchableOpacity>
         </View>
       </View>

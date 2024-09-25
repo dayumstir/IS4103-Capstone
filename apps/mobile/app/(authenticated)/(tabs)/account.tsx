@@ -8,9 +8,9 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert
+  Alert,
 } from "react-native";
-import { Button, DatePicker, Toast } from "@ant-design/react-native";
+import { Button, DatePicker } from "@ant-design/react-native";
 import { useDispatch } from "react-redux";
 import {
   useGetProfileQuery,
@@ -18,14 +18,13 @@ import {
 } from "../../../redux/services/customer";
 import { setProfile } from "../../../redux/features/customerSlice";
 import { logout } from "../../../redux/features/customerAuthSlice";
-import { router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import dayjs from "dayjs";
 import { format, setMonth } from "date-fns";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 // Validation Schema using zod
 const profileSchema = z.object({
@@ -43,7 +42,9 @@ const profileSchema = z.object({
 export default function AccountPage() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(null);
+  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(
+    null,
+  );
 
   // Fetch the profile using the API call
   const { data: profile, error, isLoading, refetch } = useGetProfileQuery();
@@ -128,11 +129,15 @@ export default function AccountPage() {
       let errorMessage = "An error occurred. Please try again.";
 
       // Check if the error is of type FetchBaseQueryError
-      if ('data' in err) {
-          const fetchError = err as FetchBaseQueryError;
-          if (fetchError.data && typeof fetchError.data === 'object' && 'error' in fetchError.data) {
-              errorMessage = fetchError.data.error as string;
-          }
+      if ("data" in err) {
+        const fetchError = err as FetchBaseQueryError;
+        if (
+          fetchError.data &&
+          typeof fetchError.data === "object" &&
+          "error" in fetchError.data
+        ) {
+          errorMessage = fetchError.data.error as string;
+        }
       }
 
       // Set the error message in local state to be displayed
@@ -148,8 +153,10 @@ export default function AccountPage() {
             {!isEditing && (
               <>
                 <Image
-                  source={{ uri: `data:image/png;base64,${Buffer.from(profile.profile_picture).toString("base64")}` }}
-                  style={{height: 100, width: 100}}
+                  source={{
+                    uri: `data:image/png;base64,${Buffer.from(profile.profile_picture).toString("base64")}`,
+                  }}
+                  style={{ height: 100, width: 100 }}
                 />
                 <Text className="mb-1 text-lg font-semibold text-gray-800">
                   My Credit Rating
@@ -265,8 +272,7 @@ export default function AccountPage() {
                     render={({ field: { onChange, value } }) => (
                       <View className="mb-4">
                         <DatePicker
-                          value={new Date(value)}
-                          defaultValue={new Date()}
+                          value={value ? new Date(value) : new Date()}
                           minDate={new Date(1900, 0, 1)}
                           maxDate={new Date()}
                           onChange={(date) => {
@@ -307,9 +313,9 @@ export default function AccountPage() {
                   />
                   {/* ===== Error Message ===== */}
                   {customErrorMessage && (
-                      <Text className="mb-4 text-red-500">
-                          {customErrorMessage}
-                      </Text>
+                    <Text className="mb-4 text-red-500">
+                      {customErrorMessage}
+                    </Text>
                   )}
                   <View className="mt-10 w-full gap-4 px-10">
                     <Button type="primary" onPress={handleSubmit(onSubmit)}>
