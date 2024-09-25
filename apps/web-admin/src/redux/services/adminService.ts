@@ -31,10 +31,7 @@ export const adminApi = createApi({
       query: (updatedProfile) => ({
         url: "/profile",
         method: "PUT",
-        body: {
-          ...updatedProfile,
-          profile_picture: updatedProfile.profile_picture?.split(",")[1],
-        },
+        body: updatedProfile,
       }),
       invalidatesTags: ["AdminProfile"],
     }),

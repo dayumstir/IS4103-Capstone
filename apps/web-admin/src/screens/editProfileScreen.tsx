@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import type { FormProps } from "antd";
 import {
   Avatar,
   Button,
@@ -27,7 +26,7 @@ const { Title } = Typography;
 export default function EditProfileScreen() {
   const navigate = useNavigate();
   const { data: profileData, isLoading, error } = useViewProfileQuery();
-  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+  const [updateProfile] = useUpdateProfileMutation();
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePictureDisplay, setProfilePictureDisplay] = useState("");
 
