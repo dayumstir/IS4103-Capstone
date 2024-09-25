@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Platform,
   ScrollView,
 } from "react-native";
 import { router } from "expo-router";
@@ -16,13 +15,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useDispatch } from "react-redux";
 import { useRegisterMutation } from "../redux/services/customerAuth";
 import { setCustomer } from "../redux/features/customerAuthSlice";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { format } from "date-fns";
-import BottomSheet from "@gorhom/bottom-sheet";
-import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import { format, setMonth } from "date-fns";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { Button, DatePicker } from "@ant-design/react-native";
 
 // Define your Zod schema
 const registerSchema = z.object({
@@ -32,7 +29,12 @@ const registerSchema = z.object({
     .string()
     .min(8, "Password must be at least 8 characters")
     .max(30, "Password must not exceed 30 characters"),
-  contact_number: z.string().regex(/^\+\d{1,3}\d{6,14}$/, "Phone number must follow the format +[country code][number] (e.g., +1234567890)"),
+  contact_number: z
+    .string()
+    .regex(
+      /^\+\d{1,3}\d{6,14}$/,
+      "Phone number must follow the format +[country code][number] (e.g., +1234567890)",
+    ),
   address: z.string().min(5, "Address must be at least 5 characters"),
   date_of_birth: z.date(),
 });
@@ -44,9 +46,9 @@ export default function Register() {
   const dispatch = useDispatch();
   const [registerMutation, { isLoading, error }] = useRegisterMutation();
   const [showPassword, setShowPassword] = useState(false);
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const [tempDate, setTempDate] = useState<Date | null>(null);
-  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(null);
+  const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(
+    null,
+  );
   const {
     control,
     handleSubmit,
@@ -71,21 +73,23 @@ export default function Register() {
       console.log(result);
 
       // Sore customer data in redux
-      dispatch(setCustomer(result))
+      dispatch(setCustomer(result));
 
       router.replace("/confirmation");
       console.log("Register success:", data);
     } catch (err: any) {
-      // console.error("Register failed:", error);
-
       let errorMessage = "An error occurred. Please try again.";
 
       // Check if the error is of type FetchBaseQueryError
-      if ('data' in err) {
-          const fetchError = err as FetchBaseQueryError;
-          if (fetchError.data && typeof fetchError.data === 'object' && 'error' in fetchError.data) {
-              errorMessage = fetchError.data.error as string;
-          }
+      if ("data" in err) {
+        const fetchError = err as FetchBaseQueryError;
+        if (
+          fetchError.data &&
+          typeof fetchError.data === "object" &&
+          "error" in fetchError.data
+        ) {
+          errorMessage = fetchError.data.error as string;
+        }
       }
 
       // Set the error message in local state to be displayed
@@ -95,7 +99,7 @@ export default function Register() {
 
   return (
     <ScrollView>
-      <View className="flex h-full px-8">
+      <View className="flex h-full px-8 pb-8">
         {/* ===== Logo & Title===== */}
         <View className="flex flex-col items-center justify-center gap-2 py-16">
           <Image
@@ -234,19 +238,35 @@ export default function Register() {
           name="date_of_birth"
           render={({ field: { onChange, value } }) => (
             <View className="mb-4">
-              <TouchableOpacity
-                onPress={() => {
-                  setTempDate(value || new Date());
-                  bottomSheetRef.current?.expand();
+              <DatePicker
+                value={value ? new Date(value) : new Date()}
+                minDate={new Date(1900, 0, 1)}
+                maxDate={new Date()}
+                onChange={(date) => {
+                  if (date) {
+                    onChange(format(date, "yyyy-MM-dd"));
+                  }
                 }}
-                className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
+                okText="Confirm"
+                dismissText="Cancel"
+                format="DD MMMM YYYY"
+                renderLabel={(type, data) => {
+                  if (type === "month") {
+                    const date = setMonth(new Date(2000, 0, 1), data - 1);
+                    return <Text>{format(date, "MMMM")}</Text>;
+                  } else {
+                    return data;
+                  }
+                }}
               >
-                <Text>
-                  {value
-                    ? format(value, "dd MMMM yyyy")
-                    : "Select Date of Birth"}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity className="rounded-md border border-gray-300 p-4 focus:border-blue-500">
+                  <Text>
+                    {value
+                      ? format(new Date(value), "dd MMMM yyyy")
+                      : "Select Date of Birth"}
+                  </Text>
+                </TouchableOpacity>
+              </DatePicker>
               {errors.date_of_birth && (
                 <Text className="mt-1 text-red-500">
                   {errors.date_of_birth.message}
@@ -258,77 +278,29 @@ export default function Register() {
 
         {/* ===== Error Message ===== */}
         {customErrorMessage && (
-            <Text className="mb-4 text-red-500">
-                {customErrorMessage}
-            </Text>
+          <Text className="mb-4 text-red-500">{customErrorMessage}</Text>
         )}
 
         {/* ===== Register Button ===== */}
-        <TouchableOpacity
+        <Button
+          type="primary"
           onPress={handleSubmit(onSubmit)}
-          className="rounded-md bg-blue-500 py-4"
+          loading={isLoading}
+          disabled={isLoading}
         >
-          {isLoading ? (
-            <AntDesign
-              name="loading1"
-              size={17}
-              color="#fff"
-              className="mx-auto animate-spin"
-            />
-          ) : (
-            <Text className="text-center font-semibold uppercase text-white">
-              Register
-            </Text>
-          )}
-        </TouchableOpacity>
+          <Text className="font-semibold uppercase text-white">Register</Text>
+        </Button>
 
         {/* ===== Login Link ===== */}
-        <View className="mt-4 flex flex-row items-center justify-center gap-2">
+        <View className="mt-4 flex flex-row items-center justify-center gap-1">
           <Text>Already have an account?</Text>
           <Text
             onPress={() => router.replace("/login")}
-            className="text-center text-blue-500"
+            className="font-semibold text-blue-500"
           >
             Login
           </Text>
         </View>
-
-        {/* ===== Date Picker Bottom Drawer ===== */}
-        <BottomSheet
-          ref={bottomSheetRef}
-          index={-1}
-          snapPoints={[350]}
-          enablePanDownToClose
-        >
-          <View className="flex-1 px-8 py-4">
-            <Text className="text-center text-lg font-semibold">
-              Select your Date of Birth
-            </Text>
-            <DateTimePicker
-              value={tempDate || new Date()}
-              mode="date"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={(event, selectedDate) => {
-                if (selectedDate) {
-                  setTempDate(selectedDate);
-                }
-              }}
-            />
-            <TouchableOpacity
-              onPress={() => {
-                if (tempDate) {
-                  setValue("date_of_birth", tempDate);
-                }
-                bottomSheetRef.current?.close();
-              }}
-              className="mt-4 rounded bg-blue-500 p-3"
-            >
-              <Text className="text-center font-semibold text-white">
-                Confirm
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </BottomSheet>
       </View>
     </ScrollView>
   );

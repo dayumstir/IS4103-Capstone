@@ -75,37 +75,6 @@ model Otp {
   @@index([customer_id])
 }
 
-// Merchant Sign Up Use Case: Store phone number OTPs
-model MerchantOtp {
-  id             String @id @default(cuid())
-  contact_number String
-  otp            String @unique
-
-  expiresAt DateTime @default(now())
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-// Merchant Sign Up Use Case: Store email verification tokens
-model MerchantEmailVerificationToken {
-  id    String @id @default(cuid())
-  email String
-  token String
-
-  expiresAt DateTime @default(now())
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // 1 Merchant to Many EmailVerificationTokens
-  merchant    Merchant @relation(fields: [merchant_id], references: [merchant_id])
-  merchant_id String
-
-  @@index([merchant_id])
-  @@unique([email, token])
-}
-
 // Customer Logout Use Case: JWT Blacklisting
 model TokenBlackList {
   id    String @id @default(cuid())
