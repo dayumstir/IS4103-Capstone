@@ -12,7 +12,7 @@ export default function LoginScreen() {
 
   const onFinish = async (values: { username: string; password: string }) => {
     try {
-      await login(values);
+      await login(values).unwrap();
       navigate("/admin/profile");
     } catch (error) {
       console.error("Error:", error);
