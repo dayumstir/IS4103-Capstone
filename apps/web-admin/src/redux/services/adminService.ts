@@ -5,7 +5,6 @@ import { IAdmin } from "../../interfaces/adminInterface";
 export const adminApi = createApi({
   reducerPath: "adminApi",
   baseQuery: fetchBaseQuery({
-    // TODO: Change to env variable (base url)
     baseUrl: "http://localhost:3000/admin",
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");

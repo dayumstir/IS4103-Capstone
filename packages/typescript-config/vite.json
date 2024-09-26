@@ -4,8 +4,11 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
-    "jsx": "react",
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "jsx": "react-jsx",
     "sourceMap": true,
     "resolveJsonModule": true,
     "noEmit": true,
@@ -13,5 +16,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true
   },
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
