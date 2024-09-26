@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button, Card, Form, Input, Typography, Space } from "antd";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
@@ -13,7 +13,7 @@ export default function LoginScreen() {
   const onFinish = async (values: { username: string; password: string }) => {
     try {
       await login(values).unwrap();
-      navigate("/admin/profile");
+      navigate("/");
     } catch (error) {
       console.error("Error:", error);
       setError("Invalid username or password. Please try again.");

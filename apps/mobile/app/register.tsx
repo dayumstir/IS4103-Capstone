@@ -244,7 +244,7 @@ export default function Register() {
                 maxDate={new Date()}
                 onChange={(date) => {
                   if (date) {
-                    onChange(format(date, "yyyy-MM-dd"));
+                    onChange(date);
                   }
                 }}
                 okText="Confirm"

@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Layout, Menu, Button } from "antd";
-import { Route, Routes, useNavigate, Navigate } from "react-router-dom";
+import { Layout } from "antd";
+import { Route, Routes } from "react-router-dom";
+
+import ProtectedRoute from "./components/protectedRoute";
+import BusinessManagementRoute from "./components/businessManagementRoute";
 
 import LoginScreen from "./screens/loginScreen";
 import ProfileScreen from "./screens/profileScreen";
@@ -12,149 +14,46 @@ import AllCustomersScreen from "./screens/allCustomersScreen";
 import CustomerProfileScreen from "./screens/customerProfileScreen";
 import AllMerchantsScreen from "./screens/allMerchantsScreen";
 import MerchantProfileScreen from "./screens/merchantProfileScreen";
-
-import ProtectedRoute from "./components/protectedRoute";
+import HomeScreen from "./screens/homeScreen";
 
 export default function App() {
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false); // State for super admin status
-
-  const fetchProfileData = async () => {
-    let superAdminStatus = false; // Declare isSuperAdmin
-
-    try {
-      const response = await fetch("http://localhost:3000/admin/profile", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.admin_type === "SUPER") {
-        superAdminStatus = true;
-      }
-    } catch (error) {
-      console.error("Failed to fetch profile data:", error);
-    }
-
-    return superAdminStatus; // Return the final value of isSuperAdmin
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const status = await fetchProfileData();
-      setIsSuperAdmin(status);
-    };
-
-    fetchData();
-  }, []);
-
-  const items = [
-    { label: <a href="/home">Home</a>, key: "Home" },
-    { label: <a href="/admin/profile">Profile</a>, key: "Profile" },
-    ...(isSuperAdmin
-      ? [{ label: <a href="/admin/add">Add Admin</a>, key: "AddAdmin" }]
-      : []),
-    { label: <a href="/admin/customers">Customers</a>, key: "Customers" },
-    { label: <a href="/admin/merchants">Merchants</a>, key: "Merchants" },
-    {
-      label: <a href="/business-management">Business management</a>,
-      key: "Business management",
-    },
-    {
-      label: <a href="/credit-tier">Credit Tier</a>,
-      key: "Credit Tier",
-    },
-    {
-      label: <a href="/instalment-plan">Instalment Plan</a>,
-      key: "Instalment Plan",
-    },
-  ];
-
-  const navigate = useNavigate();
-
-  const jwt_token = localStorage.getItem("token");
-  const isAuthenticated = !!jwt_token;
-
-  const handleLogout = async () => {
-    try {
-      if (!jwt_token) {
-        throw new Error("No token found");
-      }
-      // Send a POST request to the logout endpoint with a JSON payload
-      const response = await fetch("http://localhost:3000/adminauth/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt_token}`,
-        },
-        body: JSON.stringify({
-          reason: "User requested logout",
-        }),
-      });
-      console.log(response);
-      if (response.ok) {
-        // Handle successful logout
-        localStorage.removeItem("token");
-        navigate("/login");
-      } else {
-        // Handle errors
-        console.error("Logout failed");
-      }
-    } catch (error) {
-      console.error("An error occurred during logout:", error);
-    }
-  };
-
   return (
     <Layout className="min-h-screen">
-      {isAuthenticated && (
-        <Layout.Header className="fixed top-0 z-10 flex w-full items-center bg-gray-200">
-          <Menu
-            className="flex-1 bg-inherit"
-            mode="horizontal"
-            // TODO: Remove default selected keys
-            defaultSelectedKeys={["2"]}
-            items={items}
-          />
-          <Button onClick={handleLogout} danger>
-            Logout
-          </Button>
-        </Layout.Header>
-      )}
+      <Routes>
+        {/* ===== Public routes ===== */}
+        <Route path="/login" element={<LoginScreen />} />
+        <Route element={<ProtectedRoute />}>
+          {/* ===== Protected routes ===== */}
+          <Route path="/" element={<HomeScreen />} />
+          <Route path="/admin/profile" element={<ProfileScreen />} />
+          <Route path="/admin/editprofile" element={<EditProfileScreen />} />
+          <Route path="/admin/add" element={<AddAdminScreen />} />
+          <Route path="/admin/customers" element={<AllCustomersScreen />} />
 
-      <Layout.Content className={`${isAuthenticated ? "mt-16" : ""} bg-white`}>
-        <Routes>
-          {/* ===== Public routes ===== */}
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="/login" element={<LoginScreen />} />
-          <Route element={<ProtectedRoute />}>
-            {/* ===== Protected routes ===== */}
-            <Route path="/admin/profile" element={<ProfileScreen />} />
-            <Route path="/admin/editprofile" element={<EditProfileScreen />} />
-            <Route path="/admin/add" element={<AddAdminScreen />} />
-            <Route path="/instalment-plan" element={<InstalmentPlanScreen />} />
-            <Route path="/credit-tier" element={<CreditTierScreen />} />
-            <Route path="/admin/customers" element={<AllCustomersScreen />} />
+          <Route
+            path="/admin/customer/:id"
+            element={<CustomerProfileScreen />}
+          />
+          <Route path="/admin/merchants" element={<AllMerchantsScreen />} />
+          <Route
+            path="/admin/merchant/:id"
+            element={<MerchantProfileScreen />}
+          />
+          <Route element={<BusinessManagementRoute />}>
+            {/* ===== Business Management ===== */}
             <Route
-              path="/admin/customer/:id"
-              element={<CustomerProfileScreen />}
+              path="/business-management/instalment-plan"
+              element={<InstalmentPlanScreen />}
             />
-            <Route path="/admin/merchants" element={<AllMerchantsScreen />} />
             <Route
-              path="/admin/merchant/:id"
-              element={<MerchantProfileScreen />}
+              path="/business-management/credit-tier"
+              element={<CreditTierScreen />}
             />
           </Route>
-        </Routes>
-      </Layout.Content>
+        </Route>
+      </Routes>
 
-      <Layout.Footer className="flex items-center justify-center">
+      <Layout.Footer className="flex items-center justify-center bg-gray-200">
         PandaPay ©{new Date().getFullYear()}
       </Layout.Footer>
     </Layout>
