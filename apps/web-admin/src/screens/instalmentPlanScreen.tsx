@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Form,
   Input,
@@ -113,13 +113,13 @@ export default function InstalmentPlanScreen() {
       width: 1,
     },
     {
-      title: <div className="whitespace-nowrap">Minimum Amount ($)</div>,
+      title: <div className="whitespace-nowrap">Min Amount ($)</div>,
       dataIndex: "minimum_amount",
       key: "minimum_amount",
       width: 1,
     },
     {
-      title: <div className="whitespace-nowrap">Maximum Amount ($)</div>,
+      title: <div className="whitespace-nowrap">Max Amount ($)</div>,
       dataIndex: "maximum_amount",
       key: "maximum_amount",
       width: 1,
@@ -280,7 +280,7 @@ export default function InstalmentPlanScreen() {
   );
 
   return (
-    <div className="px-8 py-4">
+    <div className="w-full px-8 py-4">
       {/* ===== Create Instalment Plan ===== */}
       <Card
         className="mb-8 border border-gray-300"

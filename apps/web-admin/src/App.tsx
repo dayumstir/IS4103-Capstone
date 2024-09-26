@@ -2,6 +2,7 @@ import { Layout } from "antd";
 import { Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "./components/protectedRoute";
+import BusinessManagementRoute from "./components/businessManagementRoute";
 
 import LoginScreen from "./screens/loginScreen";
 import ProfileScreen from "./screens/profileScreen";
@@ -27,9 +28,8 @@ export default function App() {
           <Route path="/admin/profile" element={<ProfileScreen />} />
           <Route path="/admin/editprofile" element={<EditProfileScreen />} />
           <Route path="/admin/add" element={<AddAdminScreen />} />
-          <Route path="/instalment-plan" element={<InstalmentPlanScreen />} />
-          <Route path="/credit-tier" element={<CreditTierScreen />} />
           <Route path="/admin/customers" element={<AllCustomersScreen />} />
+
           <Route
             path="/admin/customer/:id"
             element={<CustomerProfileScreen />}
@@ -39,10 +39,21 @@ export default function App() {
             path="/admin/merchant/:id"
             element={<MerchantProfileScreen />}
           />
+          <Route element={<BusinessManagementRoute />}>
+            {/* ===== Business Management ===== */}
+            <Route
+              path="/business-management/instalment-plan"
+              element={<InstalmentPlanScreen />}
+            />
+            <Route
+              path="/business-management/credit-tier"
+              element={<CreditTierScreen />}
+            />
+          </Route>
         </Route>
       </Routes>
 
-      <Layout.Footer className="flex items-center justify-center">
+      <Layout.Footer className="flex items-center justify-center bg-gray-200">
         PandaPay ©{new Date().getFullYear()}
       </Layout.Footer>
     </Layout>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Form,
   Input,
@@ -264,7 +264,7 @@ export default function CreditTierScreen() {
   );
 
   return (
-    <div className="px-8 py-4">
+    <div className="w-full px-8 py-4">
       {/* ===== Create Credit Tier Terms ===== */}
       <Card
         className="mb-8 border border-gray-300"

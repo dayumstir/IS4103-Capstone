@@ -13,7 +13,7 @@ export default function ProtectedRoute() {
     return (
       <>
         <Header isSuperAdmin={isSuperAdmin} />
-        <div className={`${isAuthenticated ? "mt-16" : ""}`}>
+        <div className={`${isAuthenticated ? "mt-16" : ""} min-h-screen`}>
           <Outlet />
         </div>
       </>
