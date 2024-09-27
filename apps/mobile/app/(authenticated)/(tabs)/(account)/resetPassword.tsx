@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import { Button } from "@ant-design/react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useResetPasswordMutation } from "../../redux/services/customerAuth";
+import { useResetPasswordMutation } from "../../../../redux/services/customerAuth";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
@@ -95,7 +95,7 @@ export default function ResetPassword() {
 
   return (
     <ScrollView>
-      <View className="flex h-screen w-screen px-8 pt-8">
+      <View className="flex w-screen px-12 pt-8">
         {/* ===== Password Field ===== */}
         <Text className="mb-1 text-gray-600">Old Password</Text>
         <Controller
@@ -204,7 +204,7 @@ export default function ResetPassword() {
         )}
 
         {/* Buttons */}
-        <View className="mt-10 w-full gap-4 px-10">
+        <View className="mt-8 w-full gap-4">
           <Button
             onPress={handleSubmit(onSubmit)}
             type="primary"
