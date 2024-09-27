@@ -39,12 +39,7 @@ export default function Header({ isSuperAdmin }: { isSuperAdmin: boolean }) {
 
   return (
     <Layout.Header className="fixed top-0 z-10 flex w-full items-center bg-gray-200">
-      <Menu
-        className="flex-1 bg-inherit"
-        mode="horizontal"
-        items={items}
-        defaultSelectedKeys={["Home"]}
-      />
+      <Menu className="flex-1 bg-gray-200" mode="horizontal" items={items} />
       <Button onClick={handleLogout}>Logout</Button>
     </Layout.Header>
   );
