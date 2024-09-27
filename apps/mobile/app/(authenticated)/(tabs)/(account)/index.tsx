@@ -1,5 +1,7 @@
+import { setProfile } from "../../../../redux/features/customerSlice";
+import { useEffect } from "react";
 import { Buffer } from "buffer";
-import { Text, View, Image, Linking } from "react-native";
+import { Text, View, Image, Linking, TouchableOpacity } from "react-native";
 import { Button } from "@ant-design/react-native";
 import { useDispatch } from "react-redux";
 import { useGetProfileQuery } from "../../../../redux/services/customer";
@@ -7,19 +9,27 @@ import { logout } from "../../../../redux/features/customerAuthSlice";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import { ScrollView } from "react-native";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 export default function AccountPage() {
   const dispatch = useDispatch();
   const router = useRouter();
 
   // Fetch the profile using the API call
-  const { data: profile, error, isLoading, refetch } = useGetProfileQuery();
+  const { data: profile, isLoading } = useGetProfileQuery();
 
   // Logout handler
   const handleLogout = () => {
     dispatch(logout());
     router.replace("/login");
   };
+
+  // Update Redux store when profile data is fetched
+  useEffect(() => {
+    if (profile && !isLoading) {
+      dispatch(setProfile(profile));
+    }
+  }, [profile, isLoading, dispatch]);
 
   return (
     <ScrollView>
@@ -38,14 +48,17 @@ export default function AccountPage() {
             <Text className="mb-2 text-4xl font-bold text-black">
               {profile.credit_score}
             </Text>
-            <Text
-              className="mb-2 text-blue-500 underline"
+            <TouchableOpacity
+              className="mb-2 flex flex-row items-center gap-2"
               onPress={() =>
                 Linking.openURL("https://example.com/what-does-this-mean")
               }
             >
-              What does this mean?
-            </Text>
+              <AntDesign name="infocirlceo" size={16} color="#3b82f6" />
+              <Text className="text-blue-500 underline">
+                What does this mean?
+              </Text>
+            </TouchableOpacity>
 
             <View className="mt-5 w-full px-4">
               <View className="mt-4 flex w-full gap-4 px-8">

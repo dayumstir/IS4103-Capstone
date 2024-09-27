@@ -97,7 +97,7 @@ export default function ResetPassword() {
     <ScrollView>
       <View className="flex w-screen px-12 pt-8">
         {/* ===== Password Field ===== */}
-        <Text className="mb-1 text-gray-600">Old Password</Text>
+        <Text className="mb-2 text-gray-600">Old Password</Text>
         <Controller
           control={control}
           name="oldPassword"
@@ -131,7 +131,7 @@ export default function ResetPassword() {
         />
 
         {/* ===== Password Field ===== */}
-        <Text className="mb-1 text-gray-600">New Password</Text>
+        <Text className="mb-2 text-gray-600">New Password</Text>
         <Controller
           control={control}
           name="newPassword"
@@ -165,7 +165,7 @@ export default function ResetPassword() {
         />
 
         {/* ===== Confirm New Password Field ===== */}
-        <Text className="mb-1 text-gray-600">Confirm New Password</Text>
+        <Text className="mb-2 text-gray-600">Confirm New Password</Text>
         <Controller
           control={control}
           name="confirmPassword"

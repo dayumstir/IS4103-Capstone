@@ -1,19 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Button, DatePicker } from "@ant-design/react-native";
 import { Controller, useForm } from "react-hook-form";
 import { format, setMonth } from "date-fns";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useEditProfileMutation,
-  useGetProfileQuery,
-} from "../../../../redux/services/customer";
-import { useDispatch } from "react-redux";
-import { setProfile } from "../../../../redux/features/customerSlice";
+import { useEditProfileMutation } from "../../../../redux/services/customer";
+import { useSelector } from "react-redux";
 import Toast from "react-native-toast-message";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { useRouter } from "expo-router";
+import { RootState } from "../../../../redux/store";
 
 // Validation Schema using zod
 const profileSchema = z.object({
@@ -23,67 +20,46 @@ const profileSchema = z.object({
 });
 
 export default function EditProfile() {
-  const dispatch = useDispatch();
   const router = useRouter();
-
-  const { data: profile, error, isLoading, refetch } = useGetProfileQuery();
-  const [editProfile] = useEditProfileMutation(); // Mutation hook for editing profile
-
+  const [editProfile, { isLoading }] = useEditProfileMutation(); // Mutation hook for editing profile
   const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(
     null,
   );
+  const profile = useSelector((state: RootState) => state.customer.profile);
 
   // Form state management using react-hook-form
   const {
     control,
     handleSubmit,
     reset,
-    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      name: "",
-      address: "",
-      date_of_birth: new Date(),
+      name: profile?.name ?? "",
+      address: profile?.address ?? "",
+      date_of_birth: profile?.date_of_birth
+        ? new Date(profile.date_of_birth)
+        : new Date(),
     },
     resolver: zodResolver(profileSchema),
   });
 
-  useEffect(() => {
-    if (profile) {
-      reset({
-        name: profile.name,
-        address: profile.address,
-        date_of_birth: profile.date_of_birth,
-      });
-      dispatch(setProfile(profile));
-    }
-  }, [profile, reset]);
-
   // Form submission handler
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: {
+    name: string;
+    address: string;
+    date_of_birth: Date;
+  }) => {
     try {
-      const updatedProfileData = {
-        ...data,
-        date_of_birth: data.date_of_birth.toISOString(), // Convert date to ISO format
-      };
-      const updatedProfile = await editProfile(updatedProfileData).unwrap();
+      await editProfile(data).unwrap();
 
-      // Refetch the latest profile information
-      refetch();
-
-      // Update Redux state and reset form with new profile data
-      dispatch(setProfile(updatedProfile));
-      reset({
-        name: updatedProfile.name,
-        address: updatedProfile.address,
-        date_of_birth: updatedProfile.date_of_birth,
-      });
-
+      // Show success toast
       Toast.show({
         type: "success",
         text1: "Profile updated successfully",
       });
+
+      // Navigate back to previous screen
       router.back();
     } catch (err: any) {
       let errorMessage = "An error occurred. Please try again.";
@@ -132,6 +108,7 @@ export default function EditProfile() {
           </View>
         )}
       />
+
       <Text className="mb-2 text-gray-600">Address</Text>
       <Controller
         control={control}
@@ -154,6 +131,7 @@ export default function EditProfile() {
           </View>
         )}
       />
+
       <Text className="mb-2 text-gray-600">Date of Birth</Text>
       <Controller
         control={control}
@@ -205,7 +183,12 @@ export default function EditProfile() {
 
       {/* ===== Save and Cancel Buttons ===== */}
       <View className="mt-8 w-full gap-4">
-        <Button type="primary" onPress={handleSubmit(onSubmit)}>
+        <Button
+          type="primary"
+          onPress={handleSubmit(onSubmit)}
+          loading={isLoading}
+          disabled={isLoading}
+        >
           <Text className="font-semibold text-white">Save</Text>
         </Button>
         <Button type="ghost" onPress={handleCancel}>
