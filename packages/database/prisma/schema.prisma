@@ -104,6 +104,7 @@ model PasswordResetToken {
 enum AdminType {
   SUPER
   NORMAL
+  DEACTIVATED
 }
 
 model Admin {

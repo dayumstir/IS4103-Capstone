@@ -30,3 +30,11 @@ export const updateAdmin= async (admin_id: string, updateData: Partial<IAdmin>) 
         data: updateData,
     });
 };
+
+export const findAllAdmins = async () => {
+    return prisma.admin.findMany({
+        orderBy: {
+            name : "asc",
+        },
+    });
+};

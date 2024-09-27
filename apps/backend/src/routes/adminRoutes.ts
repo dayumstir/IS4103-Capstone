@@ -1,8 +1,8 @@
 // Defines routes related to admin actions
 import { Router } from "express";
-import { get, edit } from "../controllers/adminController";
+import { get, edit, getAll, deactivateAdmin, activateAdmin, getAdminProfile } from "../controllers/adminController";
 import { add } from "../controllers/adminAuthController";
-import { adminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
+import { adminAuthMiddleware, superAdminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
 import {
   listAllCustomers,
   getCustomerProfile,
@@ -20,6 +20,11 @@ router.get("/profile", adminAuthMiddleware, get);
 router.get("/editprofile", adminAuthMiddleware, get);
 router.put("/profile", adminAuthMiddleware, edit);
 router.post("/add", add);
+router.get("/get-all",superAdminAuthMiddleware, getAll);
+router.put("/deactivate-admin",superAdminAuthMiddleware, deactivateAdmin);
+router.put("/activate-admin",superAdminAuthMiddleware, activateAdmin);
+router.get("/:admin_id",superAdminAuthMiddleware, getAdminProfile);
+
 router.get("/allCustomers", listAllCustomers);
 router.get("/customer/:customer_id", getCustomerProfile);
 router.put("/customer/:customer_id", editCustomerProfile);
