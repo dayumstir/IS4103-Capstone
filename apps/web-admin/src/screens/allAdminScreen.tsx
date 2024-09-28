@@ -180,7 +180,15 @@ const { Title, Text } = Typography;
         className="mb-8 border border-gray-300"
         title="View and Manage Admins"
       >
-    <Link to="/admin/add">Add Admin</Link>
+      <div className="flex justify-between items-center mb-4">
+        <div className="ml-auto">
+        <Link to="/admin/add">
+          <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700">
+            Add Admin
+          </button>
+        </Link>
+      </div>
+      </div>
         <Table
           dataSource={admins}
           columns={tableColumns}
