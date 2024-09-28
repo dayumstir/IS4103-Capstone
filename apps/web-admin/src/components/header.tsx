@@ -1,5 +1,5 @@
 import { Button, Layout, Menu, message } from "antd";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useLogoutMutation } from "../redux/services/adminAuthService";
 
 export default function Header({ isSuperAdmin }: { isSuperAdmin: boolean }) {
@@ -7,18 +7,16 @@ export default function Header({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const [logout] = useLogoutMutation();
 
   const items = [
-    { label: <Link to="/">Home</Link>, key: "Home" },
-    { label: <Link to="/admin/profile">Profile</Link>, key: "Profile" },
+    { label: <a href="/">Home</a>, key: "Home" },
+    { label: <a href="/admin/profile">Profile</a>, key: "Profile" },
     ...(isSuperAdmin
-      ? [{ label: <Link to="/admin/all">View Admins</Link>, key: "View Admin" }]
+      ? [{ label: <a href="/admin/all">View Admins</a>, key: "View Admin" }]
       : []),
-    { label: <Link to="/admin/customers">Customers</Link>, key: "Customers" },
-    { label: <Link to="/admin/merchants">Merchants</Link>, key: "Merchants" },
+    { label: <a href="/admin/customers">Customers</a>, key: "Customers" },
+    { label: <a href="/admin/merchants">Merchants</a>, key: "Merchants" },
     {
       label: (
-        <Link to="/business-management/instalment-plan">
-          Business Management
-        </Link>
+        <a href="/business-management/instalment-plan">Business Management</a>
       ),
       key: "Business Management",
     },
@@ -27,6 +25,7 @@ export default function Header({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const handleLogout = async () => {
     try {
       await logout({ reason: "User requested logout" }).unwrap();
+
       localStorage.removeItem("token");
       navigate("/login");
     } catch (error) {
