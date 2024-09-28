@@ -1,4 +1,4 @@
-import React, { useState, useEffect }  from "react";
+import { useState, useEffect } from "react";
 import {
   Avatar,
   Form,
@@ -7,18 +7,22 @@ import {
   Card,
   message,
   DatePicker,
-  Upload, 
+  Upload,
   UploadProps,
-  GetProp
+  GetProp,
 } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
-import { useMutation } from "@tanstack/react-query";
+import { PlusOutlined, UserOutlined, UploadOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { IAdmin } from "../../../backend/src/interfaces/adminInterface";
-import { UserOutlined, UploadOutlined } from "@ant-design/icons";
+import { useAddAdminMutation } from "../redux/services/adminService";
 
-const AdminManagementScreen: React.FC = () => {
+export default function AddAdminScreen() {
   const navigate = useNavigate();
+  const [form] = Form.useForm();
+  const [profilePictureDisplay, setProfilePictureDisplay] = useState("");
+
+  const [addAdmin, { isLoading }] = useAddAdminMutation();
+
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -34,7 +38,7 @@ const AdminManagementScreen: React.FC = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        if(data.admin_type !== 'SUPER') {
+        if (data.admin_type !== "SUPER") {
           navigate("/admin/profile");
           console.error("Invalid user");
         }
@@ -46,57 +50,17 @@ const AdminManagementScreen: React.FC = () => {
     fetchProfileData();
   }, []);
 
-  const [form] = Form.useForm();
-
-  const createAdminMutation = useMutation({
-    mutationFn: async (newAdmin: IAdmin) => {
-      const response = await fetch('http://localhost:3000/adminAuth/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAdmin),
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json(); 
-        throw new Error(errorData.error || 'An unknown error occurred'); 
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      message.success(`New admin has been created.`);
-      form.resetFields();
-      setProfilePictureDisplay('');
-    },
-    onError: (error) => {
-      message.error(`Error: ${error.message}`); 
-    },
-  });
-  const handleCreateAdmin = (values: IAdmin) => {
-  const base64String = profilePictureDisplay.split(",")[1];
-
-  // Create a new adminData object with the updated profile_picture
-  const adminData: IAdmin = {
-    ...values,
-    profile_picture: base64String,
-  };
-
-  // Pass the updated adminData to the mutate function
-  createAdminMutation.mutate(adminData);
-  };
-
   const validateContactNumber = (number: string) => {
     const contactNumberRegex = /^[689]\d{7}$/;
     return contactNumberRegex.test(number);
   };
 
   const validatePassword = (password: string) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
     return passwordRegex.test(password);
-};
+  };
 
-  const [profilePictureDisplay, setProfilePictureDisplay] = useState("");
-  
   const convertImageToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -112,7 +76,6 @@ const AdminManagementScreen: React.FC = () => {
 
       // Read the file as a Data URL (Base64)
       reader.readAsDataURL(file);
-      
     });
   };
 
@@ -138,7 +101,7 @@ const AdminManagementScreen: React.FC = () => {
 
     return isJpgOrPng && isLt2M;
   };
-  
+
   const renderForm = () => (
     <Form
       form={form}
@@ -176,16 +139,21 @@ const AdminManagementScreen: React.FC = () => {
       <Form.Item
         name="password"
         label="Password"
-        rules={[{ required: true, message: "Please input the password!" },  {
-          validator: (_, value) => {
-            if (validatePassword(value)) {
-              return Promise.resolve();
-            }
-            return Promise.reject(
-              new Error("Password must have atleast 1 lower case, upper case, digits and special character with a minimum length of 8 characters"),
-            );
+        rules={[
+          { required: true, message: "Please input the password!" },
+          {
+            validator: (_, value) => {
+              if (validatePassword(value)) {
+                return Promise.resolve();
+              }
+              return Promise.reject(
+                new Error(
+                  "Password must have atleast 1 lower case, upper case, digits and special character with a minimum length of 8 characters",
+                ),
+              );
+            },
           },
-        },]}
+        ]}
       >
         <Input.Password />
       </Form.Item>
@@ -203,9 +171,7 @@ const AdminManagementScreen: React.FC = () => {
               if (validateContactNumber(value)) {
                 return Promise.resolve();
               }
-              return Promise.reject(
-                new Error("Invalid contact number format"),
-              );
+              return Promise.reject(new Error("Invalid contact number format"));
             },
           },
         ]}
@@ -224,40 +190,38 @@ const AdminManagementScreen: React.FC = () => {
       <Form.Item
         name="date_of_birth"
         label="Date of Birth"
-        rules={[{ required: true, message: "Please select the date of birth!" }]}
+        rules={[
+          { required: true, message: "Please select the date of birth!" },
+        ]}
       >
         <DatePicker style={{ width: "100%" }} />
       </Form.Item>
 
-      <Form.Item
-          name="profile_picture"
-          label="Profile Picture"
-        >
-          <div className="flex items-center">
-            {profilePictureDisplay ? (
-              <img
-                src={profilePictureDisplay}
-                alt="avatar1"
-                className="h-36 w-36 object-cover"
-              />
-            ) : (
-              <Avatar
-                className="h-36 w-36 object-cover"
-                icon={<UserOutlined />}
-              />
-            )}
-            <Upload
-              className="ml-5"
-              beforeUpload={beforeUpload}
-              onChange={handleChange}
-              customRequest={() => {}}
-              showUploadList={false}
-            >
-              <Button icon={<UploadOutlined />}>Click to Upload</Button>
-            </Upload>
-          </div>
-        </Form.Item>
-
+      <Form.Item name="profile_picture" label="Profile Picture">
+        <div className="flex items-center">
+          {profilePictureDisplay ? (
+            <img
+              src={profilePictureDisplay}
+              alt="avatar1"
+              className="h-36 w-36 object-cover"
+            />
+          ) : (
+            <Avatar
+              className="h-36 w-36 object-cover"
+              icon={<UserOutlined />}
+            />
+          )}
+          <Upload
+            className="ml-5"
+            beforeUpload={beforeUpload}
+            onChange={handleChange}
+            customRequest={() => {}}
+            showUploadList={false}
+          >
+            <Button icon={<UploadOutlined />}>Click to Upload</Button>
+          </Upload>
+        </div>
+      </Form.Item>
 
       <Form.Item>
         <Button type="primary" htmlType="submit" icon={<PlusOutlined />}>
@@ -267,6 +231,24 @@ const AdminManagementScreen: React.FC = () => {
     </Form>
   );
 
+  const handleCreateAdmin = async (values: IAdmin) => {
+    const base64String = profilePictureDisplay.split(",")[1];
+
+    const adminData: IAdmin = {
+      ...values,
+      profile_picture: base64String,
+    };
+
+    try {
+      await addAdmin(adminData).unwrap();
+      message.success(`New admin has been created.`);
+      form.resetFields();
+      setProfilePictureDisplay("");
+    } catch (error) {
+      message.error(`Error: ${error.message || "An unknown error occurred"}`);
+    }
+  };
+
   return (
     <div className="px-8 py-4">
       <Card className="mb-8 border border-gray-300" title="Create Admin">
@@ -274,6 +256,4 @@ const AdminManagementScreen: React.FC = () => {
       </Card>
     </div>
   );
-};
-
-export default AdminManagementScreen;
+}
