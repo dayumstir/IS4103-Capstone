@@ -1,52 +1,23 @@
-import React, { useState } from "react";
-import type { FormProps } from "antd";
+import { useState } from "react";
 import { Button, Card, Form, Input, Typography, Space } from "antd";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
+import { useLoginMutation } from "../redux/services/adminAuthService";
 
-type FieldType = {
-  username?: string;
-  password?: string;
-  remember?: string;
-};
-
-const LoginScreen: React.FC = () => {
+export default function LoginScreen() {
   const navigate = useNavigate();
   const { Text, Title } = Typography;
   const [error, setError] = useState<string | null>(null);
+  const [login, { isLoading }] = useLoginMutation();
 
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    const { username, password } = values;
-
+  const onFinish = async (values: { username: string; password: string }) => {
     try {
-      const response = await fetch("http://localhost:3000/adminauth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }), // Convert to JSON
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      localStorage.setItem("token", data.token);
-      // Redirect to profile page
-
-      navigate("/admin/profile");
+      await login(values).unwrap();
+      navigate("/");
     } catch (error) {
       console.error("Error:", error);
       setError("Invalid username or password. Please try again.");
     }
-  };
-
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
-    errorInfo,
-  ) => {
-    console.log("Failed:", errorInfo);
   };
 
   return (
@@ -65,10 +36,9 @@ const LoginScreen: React.FC = () => {
           style={{ minWidth: 600 }}
           initialValues={{ remember: true }}
           onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
-          <Form.Item<FieldType>
+          <Form.Item
             label="Username"
             name="username"
             rules={[{ required: true, message: "Please input your username!" }]}
@@ -76,7 +46,7 @@ const LoginScreen: React.FC = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item<FieldType>
+          <Form.Item
             label="Password"
             name="password"
             rules={[{ required: true, message: "Please input your password!" }]}
@@ -91,16 +61,17 @@ const LoginScreen: React.FC = () => {
           )}
 
           <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
-            <Button type="primary" htmlType="submit">
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={isLoading}
+              disabled={isLoading}
+            >
               Login
             </Button>
           </Form.Item>
-
-  
         </Form>
       </Card>
     </Space>
   );
-};
-
-export default LoginScreen;
+}

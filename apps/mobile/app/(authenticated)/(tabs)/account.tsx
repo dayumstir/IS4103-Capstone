@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Buffer } from "buffer";
 import {
   Text,
@@ -21,7 +21,6 @@ import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import dayjs from "dayjs";
 import { format, setMonth } from "date-fns";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import Toast from "react-native-toast-message";
@@ -30,13 +29,7 @@ import Toast from "react-native-toast-message";
 const profileSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   address: z.string().min(5, "Address must be at least 5 characters"),
-  date_of_birth: z.string().refine(
-    (date) => {
-      const parsedDate = dayjs(date, "YYYY-MM-DD", true);
-      return parsedDate.isValid();
-    },
-    { message: "Invalid date format" },
-  ),
+  date_of_birth: z.date(),
 });
 
 export default function AccountPage() {
@@ -60,7 +53,7 @@ export default function AccountPage() {
     defaultValues: {
       name: "",
       address: "",
-      date_of_birth: "",
+      date_of_birth: new Date(),
     },
     resolver: zodResolver(profileSchema),
   });
@@ -74,7 +67,7 @@ export default function AccountPage() {
       reset({
         name: profile.name,
         address: profile.address,
-        date_of_birth: dayjs(profile.date_of_birth).format("YYYY-MM-DD"),
+        date_of_birth: profile.date_of_birth,
       });
       dispatch(setProfile(profile));
     }
@@ -102,7 +95,7 @@ export default function AccountPage() {
     try {
       const updatedProfileData = {
         ...data,
-        date_of_birth: dayjs(data.date_of_birth).toISOString(), // Convert date to ISO format
+        date_of_birth: data.date_of_birth.toISOString(), // Convert date to ISO format
       };
       const updatedProfile = await editProfile(updatedProfileData).unwrap();
 
@@ -114,7 +107,7 @@ export default function AccountPage() {
       reset({
         name: updatedProfile.name,
         address: updatedProfile.address,
-        date_of_birth: dayjs(updatedProfile.date_of_birth).format("YYYY-MM-DD"),
+        date_of_birth: updatedProfile.date_of_birth,
       });
 
       Toast.show({
@@ -196,7 +189,7 @@ export default function AccountPage() {
                     <View>
                       <Text className="mb-1 text-gray-600">Date of Birth</Text>
                       <Text className="text-lg">
-                        {dayjs(profile.date_of_birth).format("DD MMMM YYYY")}
+                        {format(profile.date_of_birth, "dd MMMM yyyy")}
                       </Text>
                     </View>
                   </View>
@@ -281,7 +274,7 @@ export default function AccountPage() {
                           maxDate={new Date()}
                           onChange={(date) => {
                             if (date) {
-                              onChange(format(date, "yyyy-MM-dd"));
+                              onChange(date);
                             }
                           }}
                           okText="Confirm"

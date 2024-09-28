@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Form,
   Input,
@@ -14,147 +14,23 @@ import {
 } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { ICreditTier } from "../interfaces/creditTierInterface";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createCreditTier,
-  fetchCreditTierList,
-  updateCreditTier,
-} from "../api/creditTierApi";
+  useGetCreditTiersQuery,
+  useCreateCreditTierMutation,
+  useUpdateCreditTierMutation,
+} from "../redux/services/creditTierService";
 
 export default function CreditTierScreen() {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTier, setEditingTier] = useState<ICreditTier | null>(null);
-  const queryClient = useQueryClient();
 
-  const creditTierListQuery = useQuery({
-    queryKey: ["credit-tiers"],
-    queryFn: fetchCreditTierList,
-  });
+  const { data: creditTiers, isLoading } = useGetCreditTiersQuery();
+  const [createCreditTier] = useCreateCreditTierMutation();
+  const [updateCreditTier] = useUpdateCreditTierMutation();
 
-  const createCreditTierMutation = useMutation({
-    mutationFn: createCreditTier,
-    onSettled: async () => {
-      return await queryClient.invalidateQueries({
-        queryKey: ["credit-tiers"],
-      });
-    },
-    onError: (error) => {
-      message.error(`Failed to create credit tier: ${error.message}`);
-    },
-    onSuccess: (newCreditTier) => {
-      message.success(
-        `New credit tier "${newCreditTier.name}" has been created.`,
-      );
-    },
-  });
-
-  const updateCreditTierMutation = useMutation({
-    mutationFn: updateCreditTier,
-    onSettled: async () => {
-      return await queryClient.invalidateQueries({
-        queryKey: ["credit-tiers"],
-      });
-    },
-    onError: (error) => {
-      message.error(`Failed to update credit tier: ${error.message}`);
-    },
-  });
-
-  const checkOverlappingRanges = (
-    min_credit_score: number,
-    max_credit_score: number,
-    excludeTierId?: string,
-  ): boolean => {
-    const existingTiers = creditTierListQuery.data || [];
-    return existingTiers.some((tier: ICreditTier) => {
-      if (excludeTierId && tier.credit_tier_id === excludeTierId) {
-        return false; // Skip the current tier being edited
-      }
-      return (
-        (min_credit_score >= tier.min_credit_score &&
-          min_credit_score <= tier.max_credit_score) ||
-        (max_credit_score >= tier.min_credit_score &&
-          max_credit_score <= tier.max_credit_score) ||
-        (min_credit_score <= tier.min_credit_score &&
-          max_credit_score >= tier.max_credit_score)
-      );
-    });
-  };
-
-  const handleCreateTier = (
-    newCreditTier: Omit<ICreditTier, "credit_tier_id">,
-  ) => {
-    const { min_credit_score, max_credit_score } = newCreditTier;
-    if (min_credit_score >= max_credit_score) {
-      message.error(
-        "Minimum credit score must be less than maximum credit score.",
-      );
-      return;
-    }
-
-    if (checkOverlappingRanges(min_credit_score, max_credit_score)) {
-      message.error(
-        "The new credit tier range overlaps with an existing tier. Please adjust the range.",
-      );
-      return;
-    }
-
-    createCreditTierMutation.mutate(newCreditTier);
-    form.resetFields();
-  };
-
-  const handleEditTier = (tier: ICreditTier) => {
-    setEditingTier(tier);
-    editForm.setFieldsValue(tier);
-    setIsModalOpen(true);
-  };
-
-  const handleUpdateTier = (values: Omit<ICreditTier, "credit_tier_id">) => {
-    if (!editingTier) {
-      message.error("No credit tier selected for editing");
-      return;
-    }
-
-    const { min_credit_score, max_credit_score } = values;
-    if (min_credit_score >= max_credit_score) {
-      message.error(
-        "Minimum credit score must be less than maximum credit score.",
-      );
-      return;
-    }
-
-    if (
-      checkOverlappingRanges(
-        min_credit_score,
-        max_credit_score,
-        editingTier.credit_tier_id,
-      )
-    ) {
-      message.error(
-        "The updated credit tier range overlaps with an existing tier. Please adjust the range.",
-      );
-      return;
-    }
-
-    const updatedTier: ICreditTier = {
-      ...values,
-      credit_tier_id: editingTier.credit_tier_id,
-    };
-
-    updateCreditTierMutation.mutate(updatedTier);
-    setIsModalOpen(false);
-    setEditingTier(null);
-    message.success(`Credit tier "${updatedTier.name}" has been updated.`);
-  };
-
-  // TODO: Implement delete credit tier
-  const handleDeleteTier = (id: string) => {
-    message.success("Credit tier has been deleted.");
-  };
-
-  const columns = [
+  const tableColumns = [
     {
       title: "Name",
       dataIndex: "name",
@@ -201,6 +77,112 @@ export default function CreditTierScreen() {
       ),
     },
   ];
+
+  const checkOverlappingRanges = (
+    min_credit_score: number,
+    max_credit_score: number,
+    excludeTierId?: string,
+  ): boolean => {
+    const existingTiers = creditTiers || [];
+    return existingTiers.some((tier: ICreditTier) => {
+      if (excludeTierId && tier.credit_tier_id === excludeTierId) {
+        return false; // Skip the current tier being edited
+      }
+      return (
+        (min_credit_score >= tier.min_credit_score &&
+          min_credit_score <= tier.max_credit_score) ||
+        (max_credit_score >= tier.min_credit_score &&
+          max_credit_score <= tier.max_credit_score) ||
+        (min_credit_score <= tier.min_credit_score &&
+          max_credit_score >= tier.max_credit_score)
+      );
+    });
+  };
+
+  const handleCreateTier = async (
+    newCreditTier: Omit<ICreditTier, "credit_tier_id">,
+  ) => {
+    const { min_credit_score, max_credit_score } = newCreditTier;
+    if (min_credit_score >= max_credit_score) {
+      message.error(
+        "Minimum credit score must be less than maximum credit score.",
+      );
+      return;
+    }
+
+    if (checkOverlappingRanges(min_credit_score, max_credit_score)) {
+      message.error(
+        "The new credit tier range overlaps with an existing tier. Please adjust the range.",
+      );
+      return;
+    }
+    try {
+      await createCreditTier(newCreditTier).unwrap();
+      message.success(
+        `New credit tier "${newCreditTier.name}" has been created.`,
+      );
+      form.resetFields();
+    } catch (error) {
+      console.error("Error creating credit tier:", error);
+      message.error("Failed to create credit tier");
+    }
+  };
+
+  const handleEditTier = (tier: ICreditTier) => {
+    setEditingTier(tier);
+    editForm.setFieldsValue(tier);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdateTier = async (
+    values: Omit<ICreditTier, "credit_tier_id">,
+  ) => {
+    if (!editingTier) {
+      message.error("No credit tier selected for editing");
+      return;
+    }
+
+    const { min_credit_score, max_credit_score } = values;
+    if (min_credit_score >= max_credit_score) {
+      message.error(
+        "Minimum credit score must be less than maximum credit score.",
+      );
+      return;
+    }
+
+    if (
+      checkOverlappingRanges(
+        min_credit_score,
+        max_credit_score,
+        editingTier.credit_tier_id,
+      )
+    ) {
+      message.error(
+        "The updated credit tier range overlaps with an existing tier. Please adjust the range.",
+      );
+      return;
+    }
+
+    const updatedTier: ICreditTier = {
+      ...values,
+      credit_tier_id: editingTier.credit_tier_id,
+    };
+
+    try {
+      await updateCreditTier(updatedTier).unwrap();
+      setIsModalOpen(false);
+      setEditingTier(null);
+      message.success(`Credit tier "${updatedTier.name}" has been updated.`);
+    } catch (error) {
+      console.error("Error updating credit tier:", error);
+      message.error("Failed to update credit tier");
+    }
+  };
+
+  // TODO: Implement delete credit tier
+  const handleDeleteTier = (id: string) => {
+    message.success("Credit tier has been deleted.");
+  };
 
   const renderForm = (formInstance: FormInstance) => (
     <Form
@@ -282,7 +264,7 @@ export default function CreditTierScreen() {
   );
 
   return (
-    <div className="px-8 py-4">
+    <div className="w-full px-8 py-4">
       {/* ===== Create Credit Tier Terms ===== */}
       <Card
         className="mb-8 border border-gray-300"
@@ -297,11 +279,11 @@ export default function CreditTierScreen() {
         title="View and Manage Credit Tier Terms"
       >
         <Table
-          dataSource={creditTierListQuery.data}
-          columns={columns}
+          dataSource={creditTiers}
+          columns={tableColumns}
           rowKey="credit_tier_id"
           pagination={false}
-          loading={creditTierListQuery.isLoading}
+          loading={isLoading}
           locale={{
             emptyText: <Empty description="No credit tiers found"></Empty>,
           }}
