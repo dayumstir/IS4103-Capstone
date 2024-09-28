@@ -4,7 +4,16 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // Define a service using a base URL and expected endpoints
 export const adminAuthApi = createApi({
   reducerPath: "adminAuthApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:3000/adminAuth" }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: "http://localhost:3000/adminAuth",
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
+  }),
   endpoints: (builder) => ({
     // Login
     login: builder.mutation<
@@ -33,9 +42,19 @@ export const adminAuthApi = createApi({
         body: { email, oldPassword, newPassword },
       }),
     }),
+
+    // Logout
+    logout: builder.mutation<void, { reason: string }>({
+      query: (body) => ({
+        url: "/logout",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useLoginMutation, useResetPasswordMutation } = adminAuthApi;
+export const { useLoginMutation, useResetPasswordMutation, useLogoutMutation } =
+  adminAuthApi;

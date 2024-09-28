@@ -30,3 +30,16 @@ export const updateAdmin= async (admin_id: string, updateData: Partial<IAdmin>) 
         data: updateData,
     });
 };
+
+export const findAllAdmins = async () => {
+    return prisma.admin.findMany({
+        where: {
+            admin_type: {
+                not: "SUPER", // Exclude admins with admin_type "super"
+            },
+        },
+        orderBy: {
+            name : "asc",
+        },
+    });
+};

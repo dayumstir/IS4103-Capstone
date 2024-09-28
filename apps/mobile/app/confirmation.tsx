@@ -152,8 +152,8 @@ export default function ConfirmationScreen() {
             </Text>
           </Button>
 
-          <TouchableOpacity onPress={() => router.replace("/login")}>
-            <Text className="text-center font-semibold">Back to Login</Text>
+          <TouchableOpacity onPress={() => router.replace("/register")}>
+            <Text className="text-center font-semibold">Back to Register</Text>
           </TouchableOpacity>
         </View>
       </View>
