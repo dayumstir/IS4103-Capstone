@@ -10,6 +10,7 @@ import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import { ScrollView } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export default function AccountPage() {
   const dispatch = useDispatch();
@@ -33,9 +34,10 @@ export default function AccountPage() {
 
   return (
     <ScrollView>
-      <View className="flex w-screen items-center px-8 py-8">
+      <View className="flex w-screen items-center px-12 py-8">
         {profile && (
           <>
+            {/* ===== Profile Picture & Credit Score ===== */}
             <Image
               source={{
                 uri: `data:image/png;base64,${Buffer.from(profile.profile_picture).toString("base64")}`,
@@ -60,49 +62,92 @@ export default function AccountPage() {
               </Text>
             </TouchableOpacity>
 
-            <View className="mt-5 w-full px-4">
-              <View className="mt-4 flex w-full gap-4 px-8">
-                <View>
-                  <Text className="mb-1 text-gray-600">Name</Text>
-                  <Text className="text-lg">{profile.name}</Text>
-                </View>
-                <View>
-                  <Text className="mb-1 text-gray-600">Email</Text>
-                  <Text className="text-lg">{profile.email}</Text>
-                </View>
-                <View>
-                  <Text className="mb-1 text-gray-600">Contact Number</Text>
-                  <Text className="text-lg">{profile.contact_number}</Text>
-                </View>
-                <View>
-                  <Text className="mb-1 text-gray-600">Address</Text>
-                  <Text className="text-lg">{profile.address}</Text>
-                </View>
-                <View>
-                  <Text className="mb-1 text-gray-600">Date of Birth</Text>
-                  <Text className="text-lg">
-                    {format(profile.date_of_birth, "dd MMMM yyyy")}
-                  </Text>
-                </View>
+            {/* ===== Profile Details ===== */}
+            <View className="mt-4 flex w-full gap-4">
+              <View>
+                <Text className="mb-1 text-gray-600">Name</Text>
+                <Text className="text-lg">{profile.name}</Text>
               </View>
-              <View className="mt-10 w-full gap-4 px-8">
+              <View>
+                <Text className="mb-1 text-gray-600">Email</Text>
+                <Text className="text-lg">{profile.email}</Text>
+              </View>
+              <View>
+                <Text className="mb-1 text-gray-600">Contact Number</Text>
+                <Text className="text-lg">{profile.contact_number}</Text>
+              </View>
+              <View>
+                <Text className="mb-1 text-gray-600">Address</Text>
+                <Text className="text-lg">{profile.address}</Text>
+              </View>
+              <View>
+                <Text className="mb-1 text-gray-600">Date of Birth</Text>
+                <Text className="text-lg">
+                  {format(profile.date_of_birth, "dd MMMM yyyy")}
+                </Text>
+              </View>
+
+              {/* ===== Button Group ===== */}
+              <View className="mt-10 w-full gap-4">
                 <Button
                   type="primary"
                   onPress={() => router.push("/editProfile")}
                 >
+                  <AntDesign
+                    name="edit"
+                    size={20}
+                    color="white"
+                    className="mr-2"
+                  />
                   <Text className="font-semibold text-white">Edit Profile</Text>
                 </Button>
+
+                <Button type="primary" onPress={() => router.push("/disputes")}>
+                  <MaterialIcons
+                    name="gavel"
+                    size={20}
+                    color="white"
+                    className="mr-2"
+                  />
+                  <Text className="font-semibold text-white">
+                    View All Disputes
+                  </Text>
+                </Button>
+
+                <Button type="primary" onPress={() => router.push("/vouchers")}>
+                  <AntDesign
+                    name="gift"
+                    size={20}
+                    color="white"
+                    className="mr-2"
+                  />
+                  <Text className="font-semibold text-white">
+                    View Cashback & Vouchers
+                  </Text>
+                </Button>
+
                 <Button
-                  type="primary"
+                  type="ghost"
                   onPress={() => router.push("/resetPassword")}
                 >
-                  <Text className="font-semibold text-white">
+                  <MaterialIcons
+                    name="lock"
+                    size={20}
+                    color="#3b82f6"
+                    className="mr-2"
+                  />
+                  <Text className="font-semibold text-blue-500">
                     Reset Password
                   </Text>
                 </Button>
-                <Button type="ghost" onPress={handleLogout}>
-                  <Text className="font-semibold text-blue-500">Logout</Text>
-                </Button>
+
+                <TouchableOpacity
+                  className="flex w-full flex-row items-center justify-center gap-2"
+                  onPress={handleLogout}
+                >
+                  <MaterialIcons name="logout" size={20} color="#ef4444" />
+                  <Text className="font-semibold text-red-500">Logout</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </>
