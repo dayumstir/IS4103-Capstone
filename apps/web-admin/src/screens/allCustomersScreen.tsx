@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Spin,
   Popconfirm,
@@ -11,115 +11,15 @@ import {
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { useGetAllCustomersQuery, useUpdateCustomerStatusMutation } from '../redux/services/customerService';
+import { ICustomer } from "../interfaces/customerInterface";
 
-interface ICustomer {
-  customer_id: string;
-  name: string;
-  profile_picture: Buffer;
-  email: string;
-  password: string;
-  contact_number: string;
-  address: string;
-  date_of_birth: Date;
-  status: string;
-  credit_score: number;
-  credit_tier_id: string;
-}
 
-const AllCustomersScreen: React.FC = () => {
-  const [customers, setCustomers] = useState<ICustomer[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error] = useState<string | null>(null);
+const AllCustomersScreen = () => {
+  const { data: customers, isLoading } = useGetAllCustomersQuery();
+  const [updateCustomer] = useUpdateCustomerStatusMutation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchAllCustomers = async () => {
-      try {
-        const jwt_token = localStorage.getItem("token");
-        if (!jwt_token) {
-          throw new Error("No token found");
-        }
-
-        const response = await fetch(
-          "http://localhost:3000/admin/allCustomers",
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${jwt_token}`,
-            },
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch customers");
-        }
-
-        const data = await response.json();
-        setCustomers(data);
-      } catch (error) {
-        console.error("Failed to fetch customers:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAllCustomers();
-  }, [navigate]);
-
-  if (loading) {
-    return <Spin size="large" />;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!customers || customers.length === 0) {
-    return <div>No customer data available</div>;
-  }
-
-  // Function to update customer
-  const updateCustomer = async (customer_id: string, newStatus: string) => {
-    try {
-      const jwt_token = localStorage.getItem("token");
-      if (!jwt_token) {
-        throw new Error("No token found");
-      }
-
-      const response = await fetch(
-        `http://localhost:3000/admin/customer/${customer_id}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ customer_id, status: newStatus }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update customer status");
-      }
-
-      // Update frontend state to reflect status change
-      setCustomers((prevCustomers) => {
-        if (!prevCustomers) return prevCustomers;
-        return prevCustomers.map((customer) =>
-          customer.customer_id === customer_id
-            ? { ...customer, status: newStatus }
-            : customer,
-        );
-      });
-
-      message.success(`Customer status updated to ${newStatus}.`);
-    } catch (error) {
-      console.error(`Failed to update customer status:`, error);
-      message.error(`Failed to update customer status.`);
-    }
-  };
 
   const columns = [
     {
