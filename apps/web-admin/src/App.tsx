@@ -15,6 +15,7 @@ import CustomerProfileScreen from "./screens/customerProfileScreen";
 import AllMerchantsScreen from "./screens/allMerchantsScreen";
 import MerchantProfileScreen from "./screens/merchantProfileScreen";
 import HomeScreen from "./screens/homeScreen";
+import AllAdminScreen from "./screens/allAdminScreen";
 
 export default function App() {
   return (
@@ -29,7 +30,7 @@ export default function App() {
           <Route path="/admin/editprofile" element={<EditProfileScreen />} />
           <Route path="/admin/add" element={<AddAdminScreen />} />
           <Route path="/admin/customers" element={<AllCustomersScreen />} />
-
+          <Route path="/admin/all" element={<AllAdminScreen />} />
           <Route
             path="/admin/customer/:id"
             element={<CustomerProfileScreen />}

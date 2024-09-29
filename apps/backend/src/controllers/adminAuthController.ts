@@ -2,11 +2,13 @@
 import { Request, Response } from "express";
 import * as adminAuthService from "../services/adminAuthService";
 import logger from "../utils/logger";
+import jwt from "jsonwebtoken";
 
 export const add = async (req: Request, res: Response) => {
     try {
         const admin = await adminAuthService.add(req.body);
-        res.status(201).json(admin);
+        await adminAuthService.sendEmailVerification(admin.admin.email, admin.admin.username, admin.password);
+        res.status(200).json(admin);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }
@@ -15,7 +17,11 @@ export const add = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
     try {
         const token = await adminAuthService.login(req.body);
-        res.status(200).json({ token });
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+        const admin_type = decoded.admin_type;
+        const email= decoded.email;
+        res.status(200).json({ token, admin_type ,email });
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }
