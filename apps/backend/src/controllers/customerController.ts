@@ -51,8 +51,15 @@ export const editCustomerProfile = async (req: Request, res: Response) => {
 // List All Customers
 export const listAllCustomers = async (req: Request, res: Response) => {
   logger.info("Executing listAllCustomers...");
+  const { search } = req.query;
   try {
-    const customers = await customerService.getAllCustomers();
+    let customers;
+    if (search) {
+      customers = await customerService.searchCustomers(search);
+    } else {
+      // Get all customers if no search term is provided
+      customers = await customerService.getAllCustomers();
+    }
     res.status(200).json(customers);
   } catch (error: any) {
     res.status(400).json({ error: error.message });

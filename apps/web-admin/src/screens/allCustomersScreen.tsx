@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Spin,
   Popconfirm,
@@ -8,24 +8,33 @@ import {
   Empty,
   Tag,
   message,
+  Input,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useGetAllCustomersQuery, useUpdateCustomerStatusMutation } from '../redux/services/customerService';
 import { ICustomer } from "../interfaces/customerInterface";
+import { SpaceContext } from "antd/es/space";
+
+const { Search } = Input;
 
 
 const AllCustomersScreen = () => {
-  const { data: customers, isLoading } = useGetAllCustomersQuery();
+  const [searchTerm, setSearchTerm] = useState('');
+  const { data: customers, isLoading } = useGetAllCustomersQuery(searchTerm);
   const [updateCustomer] = useUpdateCustomerStatusMutation();
   const navigate = useNavigate();
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
   const columns = [
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      sorter: (a: ICustomer, b: ICustomer) => a.name.localeCompare(b.name),
     },
     {
       title: "Email",
@@ -41,6 +50,8 @@ const AllCustomersScreen = () => {
       title: "Credit Score",
       dataIndex: "credit_score",
       key: "credit_score",
+      defaultSortOrder: 'descend',
+      sorter: (a: ICustomer, b: ICustomer) => a.credit_score - b.credit_score,
     },
     {
       title: "Credit Tier ID",
@@ -51,6 +62,13 @@ const AllCustomersScreen = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      filters: [
+        { text: 'Active', value: 'ACTIVE' },
+        { text: 'Suspended', value: 'SUSPENDED' },
+        { text: 'Pending Email', value: 'PENDING_EMAIL_VERIFICATION' },
+        { text: 'Pending Phone', value: 'PENDING_PHONE_VERIFICATION' },
+      ],
+      onFilter: (value: string, record: ICustomer) => record.status === value,
       render: (text: string) => {
         let color = "geekblue";
         if (text === "ACTIVE") {
@@ -105,6 +123,12 @@ const AllCustomersScreen = () => {
   return (
     <div style={{ padding: "20px 100px" }}>
       <Card title="View All Customers">
+      <Search
+          placeholder="Search by name, email, or contact"
+          onChange={handleSearchChange}
+          value={searchTerm}
+          style={{ marginBottom: 16 }}
+        />
         <Table
           dataSource={customers}
           columns={columns}

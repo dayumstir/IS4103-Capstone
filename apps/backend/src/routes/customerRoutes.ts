@@ -13,7 +13,7 @@ const router = Router();
 router.get("/profile", customerAuthMiddleware, getCustomerProfile);
 router.put("/profile", customerAuthMiddleware, editCustomerProfile);
 router.get("/:customer_id", adminAuthMiddleware, getCustomerProfile);
-router.get("/allCustomers", listAllCustomers);
+router.get("/allCustomers", adminAuthMiddleware, listAllCustomers);
 router.put("/allCustomers", editCustomerProfile);
 
 export default router;

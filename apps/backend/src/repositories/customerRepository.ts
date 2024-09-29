@@ -47,3 +47,31 @@ export const updateCustomer = async (customer_id: string, updateData: Partial<IC
 export const listAllCustomers = async () => {
     return prisma.customer.findMany();
 };
+
+// Search Customers
+export const listAllCustomersWithSearch = async (search) => {
+    return prisma.customer.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            email: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            contact_number: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
+  };

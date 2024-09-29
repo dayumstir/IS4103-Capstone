@@ -6,6 +6,7 @@ enum MerchantStatus {
 
 
 export interface IMerchant {
+    merchant_id: string;
     name: string;
     email: string;
     password: string;

@@ -17,14 +17,26 @@ export const merchantApi = createApi({
   endpoints: (builder) => ({
     // Get all Merchants
     getAllMerchants: builder.query<IMerchant[], void>({
-      query: () => '/all<Merchant>s',
+      query: () => ({
+        url: "/allMerchants",
+        method: "GET",
+      }),
       providesTags: ['Merchant']
+    }),
+
+    // View Merchant Profile
+    viewMerchantProfile: builder.query<IMerchant, IMerchant>({
+      query: ({ merchant_id }) => ({
+        url: `/merchant/${merchant_id}`,
+        method: "GET",
+      }),
+      providesTags: ["Merchant"],
     }),
 
     // Update Merchant Status
     updateMerchantStatus: builder.mutation({
       query: ({ merchant_id, status }) => ({
-        url: `merchant/${merchant_id}`,
+        url: `/merchant/${merchant_id}`,
         method: 'PUT',
         body: { status },
       }),
