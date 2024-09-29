@@ -13,6 +13,7 @@ import {
   getMerchantProfile,
   editMerchantProfile,
 } from "../controllers/merchantController";
+import { editIssue, getIssue, getIssues } from "../controllers/issueController";
 
 const router = Router();
 
@@ -27,6 +28,10 @@ router.put("/customer/:customer_id", editCustomerProfile);
 router.get("/allMerchants", listAllMerchants);
 router.get("/merchant/:merchant_id", getMerchantProfile);
 router.put("/merchant/:merchant_id", editMerchantProfile);
+router.get("/allIssues", getIssues);
+router.get("/issue/:issue_id", getIssue);
+router.get("/issue/:issue_id", editIssue);
+
 
 router.post("/add", add);
 router.get("/get-all", getAll);

@@ -24,8 +24,14 @@ export const createIssue = async (req: Request, res: Response) => {
 
 // Get Issues
 export const getIssues = async (req: Request, res: Response) => {
+    const { search } = req.query;
     try {
-        const issues = await issueService.getIssues(req.body);
+        let issues;
+        if (search) {
+            issues = await issueService.searchIssues(search);
+        } else {
+            issues = await issueService.getIssues(req.body);
+        }
         res.status(201).json(issues);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
@@ -42,6 +48,19 @@ export const getIssue = async (req: Request, res: Response) => {
         }
         const issue = await issueService.getIssueById(issueId);
         res.status(201).json(issue);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const editIssue = async (req: Request, res: Response) => {
+    const id = req.params.issue_id || req.body.issue_id;
+    try {
+        const updatedIssue = await issueService.updateIssue(
+            id,
+            req.body,
+        );
+        res.status(200).json(updatedIssue);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }
