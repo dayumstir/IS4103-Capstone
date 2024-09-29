@@ -4,7 +4,8 @@ export interface IInstalmentPlan {
     instalment_plan_id: string;
     name: string;
     description: string;
-    frequency: string; // TODO: Change to enum?
+    number_of_instalments: number;
+    time_period: number; // in weeks
     interest_rate: number;
     minimum_amount: number;
     maximum_amount: number;

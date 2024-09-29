@@ -11,5 +11,5 @@ export interface IAdmin {
     contact_number: string;
     address: string;
     date_of_birth: Date;
-    admin_type:AdminType;
+    admin_type: AdminType;
 }

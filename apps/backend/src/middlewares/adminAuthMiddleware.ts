@@ -5,7 +5,20 @@ import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import { AdminType } from "../interfaces/adminType";
 import * as adminRepository from "../repositories/adminRepository";
 
-// Authenticate users using JWT
+
+// Extend the Request interface to include admin information
+declare global {
+    namespace Express {
+        interface Request {
+            admin?: {
+            admin_id: string;
+            };
+        }
+    }
+}
+
+
+// Middleware to authenticate regular admins using JWT
 export const adminAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(" ")[1];
 
@@ -20,11 +33,16 @@ export const adminAuthMiddleware = async (req: Request, res: Response, next: Nex
         const blacklistedToken = await jwtTokenRepository.findToken(token);
 
         if (blacklistedToken) {
-            return res.status(401).json({ message: 'Token is blacklisted. Please log in again.' });
+            return res.status(401).json({ message: "Token is blacklisted. Please log in again." });
         }
 
+        // Decode the token and extract the admin_id
         const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-        req.body.admin_id = (decoded as any).admin_id;
+        const admin_id = (decoded as any).admin_id;
+
+        // Attach the admin_id to req.admin instead of req.body
+        req.admin = { admin_id };
+
         next();
     } catch (error) {
         return res.status(401).json({ message: "Invalid token"});
@@ -32,7 +50,7 @@ export const adminAuthMiddleware = async (req: Request, res: Response, next: Nex
 };
 
 
-// Authenticate users using JWT
+// Middleware to authenticate super admins using JWT
 export const superAdminAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(" ")[1];
 
@@ -47,16 +65,20 @@ export const superAdminAuthMiddleware = async (req: Request, res: Response, next
         const blacklistedToken = await jwtTokenRepository.findToken(token);
 
         if (blacklistedToken) {
-            return res.status(401).json({ message: 'Token is blacklisted. Please log in again.' });
+            return res.status(401).json({ message: "Token is blacklisted. Please log in again." });
         }
 
+        // Decode the token and extract the admin_id
         const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-        req.body.admin_id = (decoded as any).admin_id;
+        const admin_id = (decoded as any).admin_id;
+
+        // Attach the admin_id to req.admin instead of req.body
+        req.admin = { admin_id };
          
-        const admin = await adminRepository.findAdminById(req.body.admin_id);
-        // Check if the admin is a super admin
+        // Verify that the admin is a super admin
+        const admin = await adminRepository.findAdminById(admin_id);
         if (admin && admin.admin_type !== AdminType.SUPER) {
-            return res.status(401).json({ message: "Forbidden: You do not have super admin privileges."});
+            return res.status(403).json({ message: "Forbidden: You do not have super admin privileges."});
         }
 
         next();

@@ -37,6 +37,8 @@ model Customer {
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
   passwordResetTokens     PasswordResetToken[]
+  issues                  Issue[]
+  vouchersAssigned        VoucherAssigned[]
 }
 
 // Utility Schemas
@@ -101,10 +103,13 @@ model PasswordResetToken {
   @@index([customer_id])
 }
 
+
 enum AdminType {
   SUPER
   NORMAL
   DEACTIVATED
+  UNVERIFIED
+  UNVERIFIED
 }
 
 model Admin {
@@ -117,8 +122,13 @@ model Admin {
   contact_number  String
   address         String
   date_of_birth   DateTime
-  admin_type      AdminType // TODO: Implement as enum
+  admin_type      AdminType
+
+  // Relationships
+  issues          Issue[]
+  vouchersCreated Voucher[]
 }
+
 
 model Merchant {
   merchant_id     String @id @default(cuid())
@@ -133,6 +143,7 @@ model Merchant {
 
   // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
+  issues                  Issue[]
 }
 
 // Merchant Sign Up Use Case: Store phone number OTPs
@@ -166,6 +177,7 @@ model MerchantEmailVerificationToken {
   @@index([merchant_id])
 }
 
+
 model Transaction {
   transaction_id      String   @id @default(cuid())
   amount              Decimal  @db.Decimal(10, 2)
@@ -178,14 +190,15 @@ model Transaction {
 }
 
 model InstalmentPlan {
-  instalment_plan_id String  @id @default(cuid())
-  name               String
-  description        String
-  frequency          String // TODO: Implement as enum?
-  interest_rate      Decimal @db.Decimal(5, 2)
-  minimum_amount     Decimal @db.Decimal(10, 2)
-  maximum_amount     Decimal @db.Decimal(10, 2)
-  status             String // TODO: Implement as enum
+  instalment_plan_id    String  @id @default(cuid())
+  name                  String
+  description           String
+  number_of_instalments Int
+  time_period           Int // in weeks
+  interest_rate         Decimal @db.Decimal(5, 2)
+  minimum_amount        Decimal @db.Decimal(10, 2)
+  maximum_amount        Decimal @db.Decimal(10, 2)
+  status                String // TODO: Implement as enum
 }
 
 model CreditTier {
@@ -193,4 +206,71 @@ model CreditTier {
   name             String
   min_credit_score Int
   max_credit_score Int
+}
+
+
+enum IssueStatus {
+  PENDING_OUTCOME
+  RESOLVED
+}
+
+model Issue {
+  issue_id    String @id @default(cuid())
+  title       String
+  description String 
+  outcome     String?
+  status      IssueStatus
+  images      Bytes[] @db.ByteA
+  create_time DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  merchant_id String?  // Optional foreign key to Merchant
+  customer_id String?  // Optional foreign key to Customer
+  admin_id    String?  // Optional foreign key to Admin
+
+  // Relations
+  merchant    Merchant? @relation(fields: [merchant_id], references: [merchant_id])
+  customer    Customer? @relation(fields: [customer_id], references: [customer_id])
+  admin       Admin? @relation(fields: [admin_id], references: [admin_id])
+}
+
+
+// Voucher Management Module
+model Voucher {
+  voucher_id          String            @id @default(cuid())
+  title               String
+  description         String
+  percentage_discount Float
+  amount_discount     Float
+  expiry_date         DateTime
+  terms               String
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  // Relationships
+  admin               Admin             @relation(fields: [created_by_admin], references: [admin_id])
+  created_by_admin    String
+  vouchersAssigned    VoucherAssigned[] 
+}
+
+enum VoucherStatus {
+  AVAILABLE
+  EXPIRED
+  USED
+  UNAVAILABLE
+}
+
+model VoucherAssigned {
+  voucher_assigned_id         String          @id @default(cuid())
+  status                      VoucherStatus
+  date_time_issued            DateTime        @default(now())
+
+  // Relationships
+  voucher                     Voucher         @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
+  voucher_id                  String
+  customer                    Customer        @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  customer_id                 String
+
+  used_installment_payment_id String? // TODO: Associate with installment plan
 }
