@@ -35,7 +35,7 @@ export default function AccountPage() {
   return (
     <ScrollView>
       <View className="flex w-screen items-center px-12 py-8">
-        {profile && (
+        {!!profile && (
           <>
             {/* ===== Profile Picture & Credit Score ===== */}
             <Image
@@ -86,72 +86,52 @@ export default function AccountPage() {
                   {format(profile.date_of_birth, "dd MMMM yyyy")}
                 </Text>
               </View>
-
-              {/* ===== Button Group ===== */}
-              <View className="mt-10 w-full gap-4">
-                <Button
-                  type="primary"
-                  onPress={() => router.push("/editProfile")}
-                >
-                  <AntDesign
-                    name="edit"
-                    size={20}
-                    color="white"
-                    className="mr-2"
-                  />
-                  <Text className="font-semibold text-white">Edit Profile</Text>
-                </Button>
-
-                <Button type="primary" onPress={() => router.push("/disputes")}>
-                  <MaterialIcons
-                    name="gavel"
-                    size={20}
-                    color="white"
-                    className="mr-2"
-                  />
-                  <Text className="font-semibold text-white">
-                    View All Disputes
-                  </Text>
-                </Button>
-
-                <Button type="primary" onPress={() => router.push("/vouchers")}>
-                  <AntDesign
-                    name="gift"
-                    size={20}
-                    color="white"
-                    className="mr-2"
-                  />
-                  <Text className="font-semibold text-white">
-                    View Cashback & Vouchers
-                  </Text>
-                </Button>
-
-                <Button
-                  type="ghost"
-                  onPress={() => router.push("/resetPassword")}
-                >
-                  <MaterialIcons
-                    name="lock"
-                    size={20}
-                    color="#3b82f6"
-                    className="mr-2"
-                  />
-                  <Text className="font-semibold text-blue-500">
-                    Reset Password
-                  </Text>
-                </Button>
-
-                <TouchableOpacity
-                  className="flex w-full flex-row items-center justify-center gap-2"
-                  onPress={handleLogout}
-                >
-                  <MaterialIcons name="logout" size={20} color="#ef4444" />
-                  <Text className="font-semibold text-red-500">Logout</Text>
-                </TouchableOpacity>
-              </View>
             </View>
           </>
         )}
+
+        {/* ===== Button Group ===== */}
+        <View className="mt-10 w-full gap-4">
+          <Button type="primary" onPress={() => router.push("/editProfile")}>
+            <AntDesign name="edit" size={20} color="white" className="mr-2" />
+            <Text className="font-semibold text-white">Edit Profile</Text>
+          </Button>
+
+          <Button type="primary" onPress={() => router.push("/vouchers")}>
+            <AntDesign name="gift" size={20} color="white" className="mr-2" />
+            <Text className="font-semibold text-white">
+              View Cashback & Vouchers
+            </Text>
+          </Button>
+
+          <Button type="primary" onPress={() => router.push("/issues")}>
+            <AntDesign
+              name="exclamationcircleo"
+              size={20}
+              color="white"
+              className="mr-2"
+            />
+            <Text className="font-semibold text-white">View All Issues</Text>
+          </Button>
+
+          <Button type="ghost" onPress={() => router.push("/resetPassword")}>
+            <MaterialIcons
+              name="lock"
+              size={20}
+              color="#3b82f6"
+              className="mr-2"
+            />
+            <Text className="font-semibold text-blue-500">Reset Password</Text>
+          </Button>
+
+          <TouchableOpacity
+            className="flex w-full flex-row items-center justify-center gap-2"
+            onPress={handleLogout}
+          >
+            <MaterialIcons name="logout" size={20} color="#ef4444" />
+            <Text className="font-semibold text-red-500">Logout</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
