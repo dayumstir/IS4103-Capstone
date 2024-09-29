@@ -6,7 +6,6 @@ import { RootState } from "../store"; // Make sure this import path is correct
 export const transactionApi = createApi({
   reducerPath: "transactionApi",
   baseQuery: fetchBaseQuery({
-    // TODO: Change to env variable (base url)
     baseUrl: "http://localhost:3000/transaction",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).customerAuth.token;
