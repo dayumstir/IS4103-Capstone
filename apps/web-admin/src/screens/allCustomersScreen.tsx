@@ -7,14 +7,12 @@ import {
   Table,
   Empty,
   Tag,
-  message,
   Input,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useGetAllCustomersQuery, useUpdateCustomerStatusMutation } from '../redux/services/customerService';
 import { ICustomer } from "../interfaces/customerInterface";
-import { SpaceContext } from "antd/es/space";
 
 const { Search } = Input;
 
@@ -97,10 +95,10 @@ const AllCustomersScreen = () => {
                 : "Are you sure you would like to suspend the customer?"
             }
             onConfirm={() =>
-              updateCustomer(
-                record.customer_id,
-                record.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED",
-              )
+              updateCustomer({
+                customer_id: record.customer_id,
+                status: record.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED"
+              })
             }
             okText="Yes"
             cancelText="No"

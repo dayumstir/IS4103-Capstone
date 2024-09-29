@@ -20,7 +20,7 @@ export const getMerchantProfile = async (req: Request, res: Response) => {
 
 // Merchant Edit Profile
 export const editMerchantProfile = async (req: Request, res: Response) => {
-    const id = req.params.id || req.body.merchant_id;
+    const id = req.params.merchant_id || req.body.merchant_id;
     try {
         const updatedMerchant = await merchantService.updateMerchant(
             id,

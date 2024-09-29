@@ -35,9 +35,10 @@ export const editCustomerProfile = async (req: Request, res: Response) => {
     // TODO: To allow admin to edit other customer profiles, customer_id will be sent in via params. A check is needed
     // 1. If params present, use that id. If not present, means customer itself is the one editing their own profile.
     // Should not be allowed to edit id attribute.
+    const customerId = req.params.customer_id || req.body.customer_id;
     console.log(req.body);
     const updatedCustomer = await customerService.updateCustomer(
-      req.body.customer_id,
+      customerId,
       req.body
     );
     res.status(200).json(updatedCustomer);

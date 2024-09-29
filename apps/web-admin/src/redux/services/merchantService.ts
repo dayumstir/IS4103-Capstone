@@ -38,7 +38,7 @@ export const merchantApi = createApi({
     }),
 
     // Update Merchant Status
-    updateMerchantStatus: builder.mutation({
+    updateMerchantStatus: builder.mutation<IMerchant, { merchant_id: string; status: string }>({
       query: ({ merchant_id, status }) => ({
         url: `/merchant/${merchant_id}`,
         method: 'PUT',

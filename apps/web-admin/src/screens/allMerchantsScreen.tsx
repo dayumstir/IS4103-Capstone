@@ -82,10 +82,10 @@ const AllMerchantsScreen = () => {
                 : "Are you sure you would like to suspend the merchant?"
             }
             onConfirm={() =>
-              updateMerchant(
-                record.merchant_id,
-                record.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED",
-              )
+              updateMerchant({
+                merchant_id: record.merchant_id,
+                status: record.status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED"
+              })
             }
             okText="Yes"
             cancelText="No"

@@ -38,7 +38,7 @@ export const customerApi = createApi({
     }),
 
     // Update Customer Status
-    updateCustomerStatus: builder.mutation<ICustomer, ICustomer>({
+    updateCustomerStatus: builder.mutation<ICustomer, { customer_id: string; status: string }>({
       query: ({ customer_id, status }) => ({
         url: `customer/${customer_id}`,
         method: 'PUT',
