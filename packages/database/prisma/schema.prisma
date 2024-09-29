@@ -109,6 +109,7 @@ enum AdminType {
   NORMAL
   DEACTIVATED
   UNVERIFIED
+  UNVERIFIED
 }
 
 model Admin {

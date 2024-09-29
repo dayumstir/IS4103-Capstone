@@ -137,28 +137,6 @@ export default function AddAdminScreen() {
       </Form.Item>
 
       <Form.Item
-        name="password"
-        label="Password"
-        rules={[
-          { required: true, message: "Please input the password!" },
-          {
-            validator: (_, value) => {
-              if (validatePassword(value)) {
-                return Promise.resolve();
-              }
-              return Promise.reject(
-                new Error(
-                  "Password must have atleast 1 lower case, upper case, digits and special character with a minimum length of 8 characters",
-                ),
-              );
-            },
-          },
-        ]}
-      >
-        <Input.Password />
-      </Form.Item>
-
-      <Form.Item
         name="contact_number"
         label="Contact Number"
         rules={[
