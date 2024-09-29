@@ -1,4 +1,4 @@
-import { VoucherStatus } from "./voucherStatus";
+import { VoucherStatus } from "./voucherStatusInterface";
 
 export interface IVoucherAssigned {
     voucher_assigned_id: string;  
