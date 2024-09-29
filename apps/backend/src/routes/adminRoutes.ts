@@ -2,7 +2,6 @@
 import { Router } from "express";
 import { get, edit, getAll, deactivateAdmin, activateAdmin, getAdminProfile } from "../controllers/adminController";
 import { add } from "../controllers/adminAuthController";
-import { adminAuthMiddleware, superAdminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
 import {
   listAllCustomers,
   getCustomerProfile,
@@ -13,25 +12,25 @@ import {
   getMerchantProfile,
   editMerchantProfile,
 } from "../controllers/merchantController";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { superAdminAuthMiddleware } from "../middlewares/superAdminAuthMiddleware";
 
 const router = Router();
 
+router.get("/profile", authMiddleware, get);
+router.put("/profile", authMiddleware, edit);
 
-router.get("/profile", adminAuthMiddleware, get);
-router.get("/editprofile", adminAuthMiddleware, get);
-router.put("/profile", adminAuthMiddleware, edit);
+router.get("/allCustomers", authMiddleware, listAllCustomers);
+router.get("/customer/:customer_id", authMiddleware, getCustomerProfile);
+router.put("/customer/:customer_id", authMiddleware, editCustomerProfile);
+router.get("/allMerchants", authMiddleware, listAllMerchants);
+router.get("/merchant/:merchant_id", authMiddleware, getMerchantProfile);
+router.put("/merchant/:merchant_id", authMiddleware, editMerchantProfile);
 
-router.get("/allCustomers", listAllCustomers);
-router.get("/customer/:customer_id", getCustomerProfile);
-router.put("/customer/:customer_id", editCustomerProfile);
-router.get("/allMerchants", listAllMerchants);
-router.get("/merchant/:merchant_id", getMerchantProfile);
-router.put("/merchant/:merchant_id", editMerchantProfile);
-
-router.post("/add", add);
-router.get("/get-all", getAll);
-router.put("/deactivate-admin", deactivateAdmin);
-router.put("/activate-admin", activateAdmin);
-router.get("/:admin_id", getAdminProfile);
+router.post("/add", authMiddleware, superAdminAuthMiddleware, add);
+router.get("/get-all", authMiddleware, superAdminAuthMiddleware, getAll);
+router.put("/deactivate-admin", authMiddleware, superAdminAuthMiddleware, deactivateAdmin);
+router.put("/activate-admin", authMiddleware, superAdminAuthMiddleware, activateAdmin);
+router.get("/:admin_id", authMiddleware, superAdminAuthMiddleware, getAdminProfile);
 
 export default router;

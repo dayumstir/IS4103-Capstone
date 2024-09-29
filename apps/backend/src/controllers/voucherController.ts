@@ -8,7 +8,7 @@ export const createVoucher = async (req: Request, res: Response) => {
     logger.info("Executing createVoucher...");
     try {
         // Extract admin_id from req.admin (populated by the middleware)
-        const admin_id = req.admin?.admin_id;
+        const admin_id = req.admin_id;
         if (!admin_id) {
             return res.status(401).json({ error: "admin_id is required" });
         }

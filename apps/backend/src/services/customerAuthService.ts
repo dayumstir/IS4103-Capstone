@@ -12,6 +12,7 @@ import * as path from 'path';
 // Internal dependencies
 import { CustomerStatus } from "../interfaces/customerStatus";
 import { ICustomer } from "../interfaces/customerInterface";
+import { UserType } from "../interfaces/userType";
 
 import * as customerRepository from "../repositories/customerRepository";
 import * as emailVerificationTokenRepository from "../repositories/emailVerificationTokenRepository";
@@ -199,11 +200,11 @@ export const verifyPhoneNumberOTP = async (otp: string) => {
     const customer = await customerRepository.updateCustomer(validOTP.customer_id, updateData);
 
     // Generate JWT token for the customer
-    const token = jwt.sign(
-        { customer_id: customer.customer_id, email: customer.email },
-        process.env.JWT_SECRET!,
-        { expiresIn: "1h" }
-    );
+    const token = jwt.sign({ 
+        role: UserType.CUSTOMER,
+        customer_id: customer.customer_id, 
+        email: customer.email 
+    }, process.env.JWT_SECRET!, { expiresIn: "1h" });
 
     return token;
 };
@@ -235,10 +236,11 @@ export const login = async (loginData: { email: string; password: string }) => {
     }
 
     // Generate JWT
-    const token = jwt.sign(
-        { customer_id: customer.customer_id, email: customer.email }, 
-        process.env.JWT_SECRET!, 
-        { expiresIn: "1h" });
+    const token = jwt.sign({ 
+        role: UserType.CUSTOMER,
+        customer_id: customer.customer_id, 
+        email: customer.email 
+    }, process.env.JWT_SECRET!, { expiresIn: "1h" });
 
     logger.info(`Login successful for email: ${email}`);
     return token;
@@ -265,11 +267,11 @@ export const logout = async (token: string) => {
 };
 
 
-export const resetPassword = async (email: string, oldPassword: string, newPassword: string) => {
+export const resetPassword = async (customer_id: string, oldPassword: string, newPassword: string) => {
     logger.info('Executing resetPassword...');
 
     // Retrieve customer from database
-    const customer = await customerRepository.findCustomerByEmail(email);
+    const customer = await customerRepository.findCustomerById(customer_id);
     if (!customer) {
         throw new Error("Customer not found");
     }

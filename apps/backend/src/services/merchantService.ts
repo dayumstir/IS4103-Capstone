@@ -37,7 +37,7 @@ export const getAllMerchants = async () => {
 };
 
 // Search merchants
-export const searchMerchants = async (searchQuery) => {
+export const searchMerchants = async (searchQuery: string) => {
   logger.info(`Searching for merchants with query: ${searchQuery}`);
   const merchants = await merchantReporsitory.listAllMerchantsWithSearch(searchQuery);
   if (!merchants.length) {
