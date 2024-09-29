@@ -3,7 +3,7 @@ import * as voucherRepository from "../repositories/voucherRepository";
 import logger from "../utils/logger";
 
 
-// Admin Create Voucher
+// Create Voucher
 export const createVoucher = async (voucherData: IVoucher, admin_id: string) => {
     logger.info('Executing createVoucher...');
 
@@ -16,25 +16,34 @@ export const createVoucher = async (voucherData: IVoucher, admin_id: string) => 
 };
 
 
-// Admin Assign Voucher
+// Assign Voucher
 export const assignVoucher = async (voucher_id: string, customer_id: string) => {
     logger.info('Executing assignVoucher...');
 
-    const voucherAssigned = await voucherRepository.assignVoucher(voucher_id, customer_id);
+    const voucher = await voucherRepository.getVoucherById(voucher_id);
+    if (!voucher) {
+        throw new Error('Voucher not found');
+    }
+
+    if (!voucher.is_active) {
+        throw new Error('Voucher is inactive');
+    }
+
+    const voucherAssigned = await voucherRepository.assignVoucher(voucher_id, customer_id, voucher.usage_limit);
     return voucherAssigned;
 };
 
 
-// Admin Remove Voucher
-export const removeVoucher = async (voucher_id: string) => {
-    logger.info("Executing removeVoucher...");
+// Deactivate Voucher
+export const deactivateVoucher = async (voucher_id: string) => {
+    logger.info("Executing deactivateVoucher...");
 
-    const voucher = await voucherRepository.removeVoucher(voucher_id);
+    const voucher = await voucherRepository.deactivateVoucher(voucher_id);
     return voucher;
 };
 
 
-// Admin View All Vouchers
+// View All Vouchers
 export const getAllVouchers = async () => {
     logger.info("Executing getAllVouchers...");
 
@@ -43,7 +52,7 @@ export const getAllVouchers = async () => {
 };
 
 
-// Admin Search Voucher
+// Search Voucher
 export const searchVoucher = async (searchTerm: string) => {
     logger.info("Executing searchVoucher...");
 
@@ -52,7 +61,7 @@ export const searchVoucher = async (searchTerm: string) => {
 };
 
 
-// Admin View Voucher Details
+// View Voucher Details
 export const getVoucherDetails = async (voucher_id: string) => {
     logger.info("Executing getVoucherDetails...");
 
