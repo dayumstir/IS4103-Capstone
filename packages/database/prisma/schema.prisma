@@ -108,6 +108,7 @@ enum AdminType {
   SUPER
   NORMAL
   DEACTIVATED
+  UNVERIFIED
 }
 
 model Admin {
@@ -237,8 +238,8 @@ model Voucher {
   voucher_id          String            @id @default(cuid())
   title               String
   description         String
-  percentage_discount Int?
-  amount_discount     Float?
+  percentage_discount Float
+  amount_discount     Float
   expiry_date         DateTime
   terms               String
 
