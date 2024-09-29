@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Button, Card, Form, Input, Typography, Space, Modal,message } from "antd";
+import {
+  Button,
+  Card,
+  Form,
+  Input,
+  Typography,
+  Space,
+  Modal,
+  message,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
 import { useLoginMutation } from "../redux/services/adminAuthService";
@@ -9,8 +18,8 @@ export default function LoginScreen() {
   const navigate = useNavigate();
   const { Text, Title } = Typography;
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [login, { isLoading }] = useLoginMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -18,7 +27,7 @@ export default function LoginScreen() {
     useResetPasswordMutation();
 
   const validatePassword = (password: string) => {
-  const passwordRegex =
+    const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
     return passwordRegex.test(password);
   };
@@ -28,11 +37,10 @@ export default function LoginScreen() {
       const response = await login(values).unwrap();
       setEmail(response.email);
       setPassword(values.password);
-      const admin_type = response.admin_type
-      if(admin_type=== "UNVERIFIED") {
+      const admin_type = response.admin_type;
+      if (admin_type === "UNVERIFIED") {
         setIsModalOpen(true);
-      }    
-      else {
+      } else {
         navigate("/");
       }
     } catch (error) {
@@ -41,10 +49,8 @@ export default function LoginScreen() {
     }
   };
 
-  const onFinish2 = async (values: {
-    newPassword: string;
-    }) => {
-    const {  newPassword } = values;
+  const onFinish2 = async (values: { newPassword: string }) => {
+    const { newPassword } = values;
 
     if (!email) {
       message.error("User email not available");
@@ -54,13 +60,13 @@ export default function LoginScreen() {
     try {
       await resetPassword({
         email: email,
-        oldPassword : password,
+        oldPassword: password,
         newPassword,
       }).unwrap();
       message.success("Password changed successfully!");
       setIsModalOpen(false);
-      setEmail('');
-      setPassword('');
+      setEmail("");
+      setPassword("");
       form.resetFields();
       navigate("/");
     } catch (error) {
@@ -139,7 +145,6 @@ export default function LoginScreen() {
           onFinish={onFinish2}
           autoComplete="off"
         >
-      
           <Form.Item
             label="New Password"
             name="newPassword"
