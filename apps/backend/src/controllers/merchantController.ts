@@ -36,10 +36,17 @@ export const editMerchantProfile = async (req: Request, res: Response) => {
 // List All Merchants
 export const listAllMerchants = async (req: Request, res: Response) => {
     logger.info("Executing listAllMerchants...");
-    try {
-        const merchants = await merchantService.getAllMerchants();
-        res.status(200).json(merchants);
-    } catch (error: any) {
-        res.status(400).json({ error: error.message });
+    const { search } = req.query;
+  try {
+    let merchants;
+    if (search) {
+      merchants = await merchantService.searchMerchants(search);
+    } else {
+      // Get all merchants if no search term is provided
+      merchants = await merchantService.getAllMerchants();
     }
+    res.status(200).json(merchants);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
 };

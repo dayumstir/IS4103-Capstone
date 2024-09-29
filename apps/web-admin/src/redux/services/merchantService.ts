@@ -16,11 +16,15 @@ export const merchantApi = createApi({
   tagTypes: ['Merchant'],
   endpoints: (builder) => ({
     // Get all Merchants
-    getAllMerchants: builder.query<IMerchant[], void>({
-      query: () => ({
-        url: "/allMerchants",
-        method: "GET",
-      }),
+    getAllMerchants: builder.query<IMerchant[], string | undefined>({
+      query: (search = '') => {
+        // Construct query parameters based on whether there is a search term
+        const queryParams = search ? `?search=${encodeURIComponent(search)}` : '';
+        return {
+          url: `/allMerchants${queryParams}`,
+          method: 'GET',
+        };
+      },
       providesTags: ['Merchant']
     }),
 

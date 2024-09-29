@@ -13,11 +13,17 @@ import { useNavigate } from "react-router-dom";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useGetAllMerchantsQuery, useUpdateMerchantStatusMutation } from '../redux/services/merchantService';
 import { IMerchant } from "../interfaces/merchantInterface";
+import Search from "antd/es/input/Search";
 
 const AllMerchantsScreen = () => {
-  const { data: merchants, isLoading } = useGetAllMerchantsQuery();
+  const [searchTerm, setSearchTerm] = useState('');
+  const { data: merchants, isLoading } = useGetAllMerchantsQuery(searchTerm);
   const [updateMerchant] = useUpdateMerchantStatusMutation();
   const navigate = useNavigate();
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
 
   const columns = [
@@ -25,6 +31,7 @@ const AllMerchantsScreen = () => {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      sorter: (a: IMerchant, b: IMerchant) => a.name.localeCompare(b.name),
     },
     {
       title: "Email",
@@ -40,6 +47,13 @@ const AllMerchantsScreen = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      filters: [
+        { text: 'Active', value: 'ACTIVE' },
+        { text: 'Suspended', value: 'SUSPENDED' },
+        { text: 'Pending Email', value: 'PENDING_EMAIL_VERIFICATION' },
+        { text: 'Pending Phone', value: 'PENDING_PHONE_VERIFICATION' },
+      ],
+      onFilter: (value: string, record: IMerchant) => record.status === value,
       render: (text: string) => {
         let color = "geekblue";
         if (text === "ACTIVE") {
@@ -94,6 +108,12 @@ const AllMerchantsScreen = () => {
   return (
     <div style={{ padding: "20px 100px" }}>
       <Card title="View All Merchants">
+      <Search
+          placeholder="Search by name, email, or contact"
+          onChange={handleSearchChange}
+          value={searchTerm}
+          style={{ marginBottom: 16 }}
+        />
         <Table
           dataSource={merchants}
           columns={columns}
