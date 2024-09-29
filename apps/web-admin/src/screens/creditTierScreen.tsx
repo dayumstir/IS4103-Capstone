@@ -218,7 +218,7 @@ export default function CreditTierScreen() {
             },
           ]}
         >
-          <InputNumber className="w-full" />
+          <InputNumber className="w-full" step={1} precision={0} />
         </Form.Item>
 
         <Form.Item
@@ -247,7 +247,7 @@ export default function CreditTierScreen() {
             }),
           ]}
         >
-          <InputNumber className="w-full" />
+          <InputNumber className="w-full" step={1} precision={0} />
         </Form.Item>
       </div>
 

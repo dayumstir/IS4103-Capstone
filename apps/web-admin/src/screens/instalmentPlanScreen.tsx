@@ -21,6 +21,7 @@ import {
   useCreateInstalmentPlanMutation,
   useUpdateInstalmentPlanMutation,
 } from "../redux/services/instalmentPlanService";
+import { formatCurrency } from "../utils/formatCurrency";
 
 export default function InstalmentPlanScreen() {
   const [form] = Form.useForm();
@@ -95,52 +96,63 @@ export default function InstalmentPlanScreen() {
       key: "name",
     },
     {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
+      title: "Instalments",
+      dataIndex: "number_of_instalments",
+      key: "number_of_instalments",
     },
     {
-      title: "Frequency",
+      title: "Time Period (in weeks)",
+      dataIndex: "time_period",
+      key: "time_period",
+    },
+    {
+      title: "Payment Frequency",
       dataIndex: "frequency",
       key: "frequency",
-      width: 1,
-      render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
+      render: (text: string, record: IInstalmentPlan) => {
+        const frequency =
+          (record.time_period * 7) / record.number_of_instalments;
+        return `Every ${frequency.toFixed(1)} days`;
+      },
     },
     {
-      title: <div className="whitespace-nowrap">Interest Rate (%)</div>,
+      title: "Interest Rate",
       dataIndex: "interest_rate",
       key: "interest_rate",
-      width: 1,
+      render: (rate: string) => `${Number(rate).toFixed(2)}%`,
     },
     {
-      title: <div className="whitespace-nowrap">Min Amount ($)</div>,
+      title: "Min Amount",
       dataIndex: "minimum_amount",
       key: "minimum_amount",
-      width: 1,
+      render: (amount: string) => formatCurrency(Number(amount)),
     },
     {
-      title: <div className="whitespace-nowrap">Max Amount ($)</div>,
+      title: "Max Amount",
       dataIndex: "maximum_amount",
       key: "maximum_amount",
-      width: 1,
+      render: (amount: string) => formatCurrency(Number(amount)),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 1,
       render: (text: string) => (
         <Tag color={text === "Active" ? "green" : "volcano"}>{text}</Tag>
       ),
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
     },
     {
       title: "Actions",
       key: "actions",
       width: 1,
       render: (text: string, record: IInstalmentPlan) => (
-        <div className="whitespace-nowrap">
+        <div className="flex flex-col gap-2">
           <Button
-            className="mr-2"
             icon={<EditOutlined />}
             onClick={() => handleEditPlan(record)}
           >
@@ -178,21 +190,22 @@ export default function InstalmentPlanScreen() {
         </Form.Item>
 
         <Form.Item
-          name="frequency"
-          label="Frequency"
-          rules={[{ required: true, message: "Please select the frequency!" }]}
+          name="number_of_instalments"
+          label="Number of Instalments"
+          rules={[
+            {
+              required: true,
+              message: "Please input the number of instalments!",
+            },
+            {
+              type: "number",
+              min: 0,
+              max: 50,
+              message: "Number of instalments must be between 0 and 50",
+            },
+          ]}
         >
-          <Select>
-            <Select.Option value="8 Instalments over 4 Weeks">
-              8 Instalments over 4 Weeks
-            </Select.Option>
-            <Select.Option value="4 Instalments over 8 Weeks">
-              4 Instalments over 8 Weeks
-            </Select.Option>
-            <Select.Option value="6 Instalments over 6 Weeks">
-              6 Instalments over 6 Weeks
-            </Select.Option>
-          </Select>
+          <InputNumber className="w-full" step={1} precision={0} />
         </Form.Item>
 
         <Form.Item
@@ -208,7 +221,23 @@ export default function InstalmentPlanScreen() {
             },
           ]}
         >
-          <InputNumber className="w-full" step={0.01} />
+          <InputNumber className="w-full" step={0.01} precision={2} />
+        </Form.Item>
+
+        <Form.Item
+          name="time_period"
+          label="Time Period (in weeks)"
+          rules={[
+            { required: true, message: "Please input the time period!" },
+            {
+              type: "number",
+              min: 0,
+              max: 50,
+              message: "Time period must be between 0 and 50",
+            },
+          ]}
+        >
+          <InputNumber className="w-full" step={1} precision={0} />
         </Form.Item>
 
         <Form.Item
@@ -219,18 +248,7 @@ export default function InstalmentPlanScreen() {
             { type: "number", min: 0, message: "Amount must be positive" },
           ]}
         >
-          <InputNumber className="w-full" step={0.01} />
-        </Form.Item>
-
-        <Form.Item
-          name="status"
-          label="Status"
-          rules={[{ required: true, message: "Please select the status!" }]}
-        >
-          <Select>
-            <Select.Option value="Active">Active</Select.Option>
-            <Select.Option value="Inactive">Inactive</Select.Option>
-          </Select>
+          <InputNumber className="w-full" step={0.01} precision={2} />
         </Form.Item>
 
         <Form.Item
@@ -253,17 +271,28 @@ export default function InstalmentPlanScreen() {
             }),
           ]}
         >
-          <InputNumber className="w-full" step={0.01} />
+          <InputNumber className="w-full" step={0.01} precision={2} />
+        </Form.Item>
+
+        <Form.Item
+          name="status"
+          label="Status"
+          rules={[{ required: true, message: "Please select the status!" }]}
+        >
+          <Select>
+            <Select.Option value="Active">Active</Select.Option>
+            <Select.Option value="Inactive">Inactive</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          name="description"
+          label="Description"
+          rules={[{ required: true, message: "Please input the description!" }]}
+        >
+          <Input />
         </Form.Item>
       </div>
-
-      <Form.Item
-        name="description"
-        label="Description"
-        rules={[{ required: true, message: "Please input the description!" }]}
-      >
-        <Input.TextArea rows={1} />
-      </Form.Item>
 
       <Form.Item>
         <Button

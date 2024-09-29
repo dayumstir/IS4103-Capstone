@@ -3,6 +3,7 @@ import { IVoucher } from "../interfaces/voucherInterface";
 import { IVoucherAssigned } from "../interfaces/voucherAssignedInterface";
 import { VoucherStatus } from "../interfaces/voucherStatusInterface";
 
+
 // Admin Create Voucher
 export const createVoucher = async (voucherData: IVoucher) => {
     return await prisma.voucher.create({ 

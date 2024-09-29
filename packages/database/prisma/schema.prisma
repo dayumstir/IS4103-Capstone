@@ -189,14 +189,15 @@ model Transaction {
 }
 
 model InstalmentPlan {
-  instalment_plan_id String  @id @default(cuid())
-  name               String
-  description        String
-  frequency          String // TODO: Implement as enum?
-  interest_rate      Decimal @db.Decimal(5, 2)
-  minimum_amount     Decimal @db.Decimal(10, 2)
-  maximum_amount     Decimal @db.Decimal(10, 2)
-  status             String // TODO: Implement as enum
+  instalment_plan_id    String  @id @default(cuid())
+  name                  String
+  description           String
+  number_of_instalments Int
+  time_period           Int // in weeks
+  interest_rate         Decimal @db.Decimal(5, 2)
+  minimum_amount        Decimal @db.Decimal(10, 2)
+  maximum_amount        Decimal @db.Decimal(10, 2)
+  status                String // TODO: Implement as enum
 }
 
 model CreditTier {

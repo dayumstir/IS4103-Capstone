@@ -7,9 +7,36 @@ import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import { AdminType } from "../interfaces/adminType";
 
 import logger from "../utils/logger";
+const nodemailer = require("nodemailer");
+
+// Function to generate a random password consisting of digits
+const generateRandomPassword = (length = 8) => {
+    const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
+    const upperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const digits = '0123456789';
+    const specialChars = '!@#$%^&*()_+[]{}|;:,.<>?';
+
+    const allChars = lowerCase + upperCase + digits + specialChars;
+    let password = '';
+
+    // Ensure at least one character from each category is included
+    password += lowerCase[Math.floor(Math.random() * lowerCase.length)];
+    password += upperCase[Math.floor(Math.random() * upperCase.length)];
+    password += digits[Math.floor(Math.random() * digits.length)];
+    password += specialChars[Math.floor(Math.random() * specialChars.length)];
+
+    // Fill the remaining length with random characters
+    for (let i = 4; i < length; i++) {
+        password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+
+    // Shuffle the password to ensure randomness
+    return password.split('').sort(() => 0.5 - Math.random()).join('');
+};
+
 
 export const add = async (adminData: IAdmin) => {
-    const { username, email, password } = adminData;
+    const { username, email } = adminData;
 
     // Check for existing admin in db
     const existingAdminEmail = await adminRepository.findAdminByEmail(email);
@@ -20,6 +47,8 @@ export const add = async (adminData: IAdmin) => {
         throw new Error("Admin Username already exists");
     }
 
+    // Generate a random password
+    const password = generateRandomPassword(); // Generate a random password
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -27,14 +56,14 @@ export const add = async (adminData: IAdmin) => {
     const newAdmin= await adminRepository.createAdmin({
         ...adminData,
         password: hashedPassword,
-        admin_type: AdminType.NORMAL,
+        admin_type: AdminType.UNVERIFIED,
     });
 
     // Generate JWT
     // TODO: Create .env folder with JWT Secret
     const token = jwt.sign({ admin_id: newAdmin.admin_id , email: newAdmin.email}, process.env.JWT_SECRET!, { expiresIn: "1h"});
 
-    return { admin: newAdmin, token };
+    return { admin: newAdmin, token, password, username};
 };
 
 
@@ -54,7 +83,7 @@ export const login= async (loginData: { username: string; password: string }) =>
     }
 
     // Generate JWT
-    const token = jwt.sign({ admin_id: admin.admin_id, email : admin.email }, process.env.JWT_SECRET!, { expiresIn: "1h"});
+    const token = jwt.sign({ admin_id: admin.admin_id, email : admin.email, admin_type : admin.admin_type }, process.env.JWT_SECRET!, { expiresIn: "1h"});
 
     return token;
 };
@@ -93,5 +122,25 @@ export const resetPassword = async (email: string, oldPassword: string, newPassw
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await adminRepository.updateAdmin(admin.admin_id, { password: hashedPassword });
+    await adminRepository.updateAdmin(admin.admin_id, { password: hashedPassword, admin_type: AdminType.NORMAL });
+};
+
+
+export const sendEmailVerification = async (email: string, username: string, password:string) => {
+
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: parseInt(process.env.EMAIL_PORT || "2525"),
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Admin Account Created",
+        text: `The username to your account is ${username} and the password is: ${password}`,
+    });
 };
