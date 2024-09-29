@@ -11,7 +11,7 @@ declare global {
     namespace Express {
         interface Request {
             admin?: {
-            admin_id: string;
+                admin_id: string;
             };
         }
     }
@@ -40,7 +40,6 @@ export const adminAuthMiddleware = async (req: Request, res: Response, next: Nex
         const decoded = jwt.verify(token, process.env.JWT_SECRET!);
         const admin_id = (decoded as any).admin_id;
 
-        // Attach the admin_id to req.admin instead of req.body
         req.admin = { admin_id };
 
         next();
@@ -72,7 +71,6 @@ export const superAdminAuthMiddleware = async (req: Request, res: Response, next
         const decoded = jwt.verify(token, process.env.JWT_SECRET!);
         const admin_id = (decoded as any).admin_id;
 
-        // Attach the admin_id to req.admin instead of req.body
         req.admin = { admin_id };
          
         // Verify that the admin is a super admin
