@@ -7,7 +7,7 @@ const router = Router();
 
 router.post("/login", login);
 router.post("/logout", adminAuthMiddleware, logout);
-router.post("/add", add);
+//router.post("/add", add);
 router.post("/reset-password", resetPassword);
 
 
