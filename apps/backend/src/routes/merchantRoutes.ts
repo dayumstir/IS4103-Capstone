@@ -5,7 +5,7 @@ import {
     editMerchantProfile,
     listAllMerchants,
 } from "../controllers/merchantController";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import { authMiddleware } from "../middlewares/merchantAuthMiddleware";
 import {
     register,
     login,

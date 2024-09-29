@@ -1,7 +1,7 @@
 // Defines routes related to instalment plan actions
 import { Router } from "express";
 import { createIssue, getIssue, getIssues } from "../controllers/issueController";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import { authMiddleware } from "../middlewares/merchantAuthMiddleware";
 import multer from "multer";
 
 const router = Router();

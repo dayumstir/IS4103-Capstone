@@ -6,15 +6,16 @@ import { json, urlencoded } from "body-parser";
 import morgan from "morgan";
 import dotenv from "dotenv";
 
+import adminAuthRoutes from "./routes/adminAuthRoutes";
+import adminRoutes from "./routes/adminRoutes";
+import creditTierRoutes from "./routes/creditTierRoutes";
 import customerAuthRoutes from "./routes/customerAuthRoutes";
 import customerRoutes from "./routes/customerRoutes";
-import transactionRoutes from "./routes/transactionRoutes";
-import merchantRoutes from "./routes/merchantRoutes";
-import adminRoutes from "./routes/adminRoutes";
-import adminAuthRoutes from "./routes/adminAuthRoutes";
 import instalmentPlanRoutes from "./routes/instalmentPlanRoutes";
-import creditTierRoutes from "./routes/creditTierRoutes";
 import issueRoutes from "./routes/issueRoutes";
+import merchantRoutes from "./routes/merchantRoutes";
+import transactionRoutes from "./routes/transactionRoutes";
+import voucherRoutes from "./routes/voucherRoutes";
 
 const app = express();
 
@@ -27,15 +28,17 @@ app.use(morgan("dev"));
 dotenv.config(); // Load environment variables
 
 // Routes
+app.use("/adminAuth", adminAuthRoutes);
+app.use("/admin", adminRoutes);
+app.use("/creditTier", creditTierRoutes);
 app.use("/customerAuth", customerAuthRoutes);
 app.use("/customer", customerRoutes);
+app.use("/instalmentPlan", instalmentPlanRoutes);
+app.use("/issue", issueRoutes);
 app.use("/merchant", merchantRoutes);
 app.use("/transaction", transactionRoutes);
-app.use("/admin", adminRoutes);
-app.use("/adminAuth", adminAuthRoutes);
-app.use("/instalmentPlan", instalmentPlanRoutes);
-app.use("/creditTier", creditTierRoutes);
-app.use("/issue", issueRoutes);
+app.use("/voucher", voucherRoutes);
+
 
 // Dummy route for the root
 app.get("/", (req, res) => {

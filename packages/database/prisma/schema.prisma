@@ -37,7 +37,8 @@ model Customer {
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
   passwordResetTokens     PasswordResetToken[]
-  issues Issue[]
+  issues                  Issue[]
+  vouchersAssigned        VoucherAssigned[]
 }
 
 // Utility Schemas
@@ -102,10 +103,12 @@ model PasswordResetToken {
   @@index([customer_id])
 }
 
+
 enum AdminType {
   SUPER
   NORMAL
   DEACTIVATED
+  UNVERIFIED
 }
 
 model Admin {
@@ -118,9 +121,13 @@ model Admin {
   contact_number  String
   address         String
   date_of_birth   DateTime
-  admin_type      AdminType // TODO: Implement as enum
-  issues Issue[]
+  admin_type      AdminType
+
+  // Relationships
+  issues          Issue[]
+  vouchersCreated Voucher[]
 }
+
 
 model Merchant {
   merchant_id     String @id @default(cuid())
@@ -135,8 +142,7 @@ model Merchant {
 
   // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
-  issues Issue[]
-
+  issues                  Issue[]
 }
 
 // Merchant Sign Up Use Case: Store phone number OTPs
@@ -170,6 +176,7 @@ model MerchantEmailVerificationToken {
   @@index([merchant_id])
 }
 
+
 model Transaction {
   transaction_id      String   @id @default(cuid())
   amount              Decimal  @db.Decimal(10, 2)
@@ -199,27 +206,69 @@ model CreditTier {
   max_credit_score Int
 }
 
+
 enum IssueStatus {
   PENDING_OUTCOME
   RESOLVED
 }
 
 model Issue {
-  issue_id  String @id @default(cuid())
+  issue_id    String @id @default(cuid())
   title       String
   description String 
   outcome     String?
   status      IssueStatus
   images      Bytes[] @db.ByteA
   create_time DateTime @default(now())
-  updated_at DateTime @updatedAt
+  updated_at  DateTime @updatedAt
 
   merchant_id String?  // Optional foreign key to Merchant
   customer_id String?  // Optional foreign key to Customer
-  admin_id String?  // Optional foreign key to Admin
+  admin_id    String?  // Optional foreign key to Admin
 
   // Relations
   merchant    Merchant? @relation(fields: [merchant_id], references: [merchant_id])
   customer    Customer? @relation(fields: [customer_id], references: [customer_id])
   admin       Admin? @relation(fields: [admin_id], references: [admin_id])
+}
+
+
+// Voucher Management Module
+model Voucher {
+  voucher_id          String            @id @default(cuid())
+  title               String
+  description         String
+  percentage_discount Float
+  amount_discount     Float
+  expiry_date         DateTime
+  terms               String
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  // Relationships
+  admin               Admin             @relation(fields: [created_by_admin], references: [admin_id])
+  created_by_admin    String
+  vouchersAssigned    VoucherAssigned[] 
+}
+
+enum VoucherStatus {
+  AVAILABLE
+  EXPIRED
+  USED
+  UNAVAILABLE
+}
+
+model VoucherAssigned {
+  voucher_assigned_id         String          @id @default(cuid())
+  status                      VoucherStatus
+  date_time_issued            DateTime        @default(now())
+
+  // Relationships
+  voucher                     Voucher         @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
+  voucher_id                  String
+  customer                    Customer        @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  customer_id                 String
+
+  used_installment_payment_id String? // TODO: Associate with installment plan
 }
