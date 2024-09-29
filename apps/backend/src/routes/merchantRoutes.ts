@@ -26,7 +26,7 @@ const upload = multer({
     storage: multer.memoryStorage(), // Store file in memory as Buffer
     limits: { fileSize: 2 * 1024 * 1024 }, // Limit file size to 2 MB
 });
-merchantRouter.get("/profile/:id", authMiddleware, getMerchantProfile);
+merchantRouter.get("/profile/:merchant_id", authMiddleware, getMerchantProfile);
 merchantRouter.put(
     "/profile/:id",
     authMiddleware,
