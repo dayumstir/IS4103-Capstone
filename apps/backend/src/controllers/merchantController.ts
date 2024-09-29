@@ -20,7 +20,7 @@ export const getMerchantProfile = async (req: Request, res: Response) => {
 
 // Merchant Edit Profile
 export const editMerchantProfile = async (req: Request, res: Response) => {
-    const id = req.params.id || req.body.merchant_id;
+    const id = req.params.merchant_id || req.body.merchant_id;
     try {
         const updatedMerchant = await merchantService.updateMerchant(
             id,
@@ -36,10 +36,17 @@ export const editMerchantProfile = async (req: Request, res: Response) => {
 // List All Merchants
 export const listAllMerchants = async (req: Request, res: Response) => {
     logger.info("Executing listAllMerchants...");
-    try {
-        const merchants = await merchantService.getAllMerchants();
-        res.status(200).json(merchants);
-    } catch (error: any) {
-        res.status(400).json({ error: error.message });
+    const { search } = req.query;
+  try {
+    let merchants;
+    if (search) {
+      merchants = await merchantService.searchMerchants(search);
+    } else {
+      // Get all merchants if no search term is provided
+      merchants = await merchantService.getAllMerchants();
     }
+    res.status(200).json(merchants);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
 };

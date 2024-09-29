@@ -1,6 +1,7 @@
 // Contains the business logic related to merchants
 import { IMerchant } from "../interfaces/merchantInterface";
 import * as merchantReporsitory from "../repositories/merchantRepository";
+import logger from "../utils/logger";
 
 export const getMerchantById = async (merchant_id: string) => {
   const merchant = await merchantReporsitory.findMerchantById(merchant_id);
@@ -31,6 +32,17 @@ export const getAllMerchants = async () => {
   const merchants = await merchantReporsitory.listAllMerchants();
   if (!merchants || merchants.length === 0) {
     throw new Error("No merchants found");
+  }
+  return merchants;
+};
+
+// Search merchants
+export const searchMerchants = async (searchQuery) => {
+  logger.info(`Searching for merchants with query: ${searchQuery}`);
+  const merchants = await merchantReporsitory.listAllMerchantsWithSearch(searchQuery);
+  if (!merchants.length) {
+      logger.warn("No merchants found matching the search criteria");
+      return [];
   }
   return merchants;
 };
