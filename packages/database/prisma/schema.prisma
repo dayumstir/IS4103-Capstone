@@ -37,6 +37,7 @@ model Customer {
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
   passwordResetTokens     PasswordResetToken[]
+  issues Issue[]
 }
 
 // Utility Schemas
@@ -118,6 +119,7 @@ model Admin {
   address         String
   date_of_birth   DateTime
   admin_type      AdminType // TODO: Implement as enum
+  issues Issue[]
 }
 
 model Merchant {
@@ -133,6 +135,8 @@ model Merchant {
 
   // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
+  issues Issue[]
+
 }
 
 // Merchant Sign Up Use Case: Store phone number OTPs
@@ -193,4 +197,29 @@ model CreditTier {
   name             String
   min_credit_score Int
   max_credit_score Int
+}
+
+enum IssueStatus {
+  PENDING_OUTCOME
+  RESOLVED
+}
+
+model Issue {
+  issue_id  String @id @default(cuid())
+  title       String
+  description String 
+  outcome     String?
+  status      IssueStatus
+  images      Bytes[] @db.ByteA
+  create_time DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  merchant_id String?  // Optional foreign key to Merchant
+  customer_id String?  // Optional foreign key to Customer
+  admin_id String?  // Optional foreign key to Admin
+
+  // Relations
+  merchant    Merchant? @relation(fields: [merchant_id], references: [merchant_id])
+  customer    Customer? @relation(fields: [customer_id], references: [customer_id])
+  admin       Admin? @relation(fields: [admin_id], references: [admin_id])
 }
