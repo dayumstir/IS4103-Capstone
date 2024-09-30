@@ -27,7 +27,7 @@ router.get("/allMerchants", authMiddleware, listAllMerchants);
 router.get("/merchant/:merchant_id", authMiddleware, getMerchantProfile);
 router.put("/merchant/:merchant_id", authMiddleware, editMerchantProfile);
 
-router.post("/add", authMiddleware, superAdminAuthMiddleware, add);
+router.post("/add", add);
 router.get("/get-all", authMiddleware, superAdminAuthMiddleware, getAll);
 router.put("/deactivate-admin", authMiddleware, superAdminAuthMiddleware, deactivateAdmin);
 router.put("/activate-admin", authMiddleware, superAdminAuthMiddleware, activateAdmin);
