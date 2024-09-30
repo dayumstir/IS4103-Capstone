@@ -41,7 +41,7 @@ export const getIssues = async (req: Request, res: Response) => {
 // Get Issue
 export const getIssue = async (req: Request, res: Response) => {
     try {
-        const issueId = req.params.issue_id;
+        const issueId = req.params.issue_id || req.body.issue_id;
 
         if (!issueId) {
             return res.status(400).json({ error: "Issue ID is required" });

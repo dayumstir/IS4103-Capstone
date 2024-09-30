@@ -8,10 +8,14 @@ import {
   Empty,
   Tag,
   Input,
+  Form,
+  Modal,
+  Descriptions,
+  message,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
-import { useGetAllIssuesQuery, useUpdateIssueStatusMutation } from '../redux/services/issueService';
+import { useGetAllIssuesQuery, useUpdateIssueOutcomeMutation } from '../redux/services/issueService';
 import { IIssue } from "../interfaces/issueInterface";
 
 const { Search } = Input;
@@ -20,12 +24,47 @@ const { Search } = Input;
 const AllIssuesScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { data: issues, isLoading } = useGetAllIssuesQuery(searchTerm);
-  const [updateIssue] = useUpdateIssueStatusMutation();
+  const [updateIssue] = useUpdateIssueOutcomeMutation();
   const navigate = useNavigate();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentIssue, setCurrentIssue] = useState<IIssue | null>(null);
+  const [form] = Form.useForm();
+  const [isModified, setIsModified] = useState(false);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
+
+  const showIssueModal = (issue: IIssue) => {
+    setCurrentIssue(issue);
+    form.setFieldsValue(issue);
+    setIsModalVisible(true);
+  };
+
+  const onValuesChange = (_, allValues) => {
+    setIsModified(form.isFieldsTouched(true));
+  };
+  
+  const handleUpdateIssue = async (values: Omit<IIssue, "issue_id">,) => {
+    if (!currentIssue) {
+      message.error("No issue selected");
+      return;
+    }
+    const updatedIssue: IIssue = {
+      ...values,
+      issue_id: currentIssue.issue_id,
+    };
+    try {
+      await updateIssue(updatedIssue).unwrap();
+      setIsModalVisible(false);
+      setCurrentIssue(null);
+    } catch (error) {
+      console.error("Error updating issue:", error);
+      message.error("Failed to update issue");
+    }
+    
+  };
+  
 
   const columns = [
     {
@@ -38,17 +77,24 @@ const AllIssuesScreen = () => {
       title: "Description",
       dataIndex: "description",
       key: "description",
-      colSpan: 2,
+      width: 500,
     },
     {
       title: "Outcome",
       dataIndex: "outcome",
       key: "outcome",
+      width: 400,
+      render: (outcome: string | null) => outcome || <Tag color="volcano">PENDING</Tag>,
+      filters: [
+        { text: 'Pending', value: 'Pending' },
+      ],
+      onFilter: (value, record) => !record.outcome
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      width: 250,
       filters: [
         { text: 'Pending Outcome', value: 'PENDING_OUTCOME' },
         { text: 'Resolved', value: 'RESOLVED' },
@@ -67,12 +113,7 @@ const AllIssuesScreen = () => {
         width: 1,
         render: (text: string, record: IIssue) => (
           <div className="whitespace-nowrap">
-            <Button
-              className="mr-2"
-              onClick={() => navigate(`/admin/issue/${record.issue_id}`)}
-            >
-              View Profile
-            </Button>
+            <Button onClick={() => showIssueModal(record)}>View Issue</Button>
             </div>
       ),
     },
@@ -95,6 +136,50 @@ const AllIssuesScreen = () => {
           }}
         />
       </Card>
+      <Modal
+        title="Issue Details"
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        width={1000}
+        footer={[
+          <Button
+            key="submit"
+            type="primary"
+            onClick={() => form.submit()}
+            disabled={!isModified}
+          >
+            Save Changes
+          </Button>
+        ]}
+      >
+        <Descriptions bordered column={2}>
+          <Descriptions.Item label="Title" span={2}>{currentIssue?.title}</Descriptions.Item>
+          <Descriptions.Item label="Description" span={2}>{currentIssue?.description}</Descriptions.Item>
+          <Descriptions.Item label="Status">{currentIssue?.status}</Descriptions.Item>
+          <Descriptions.Item label="Time Created">{currentIssue?.createTime ? new Date(currentIssue.createTime).toLocaleString() : 'Not available'}</Descriptions.Item>
+          {currentIssue?.merchant_id && <Descriptions.Item label="Merchant ID" span={2}>{currentIssue.merchant_id}</Descriptions.Item>}
+    {currentIssue?.customer_id && <Descriptions.Item label="Customer ID" span={2}>{currentIssue.customer_id}</Descriptions.Item>}
+    {currentIssue?.admin_id && <Descriptions.Item label="Admin ID" span={2}>{currentIssue.admin_id}</Descriptions.Item>}
+    {currentIssue?.images && (
+  <Descriptions.Item label="Images" span={2}>
+    {currentIssue.images.map((img, index) => (
+      <img key={index} src={`data:image/jpeg;base64,${img.toString('base64')}`} alt="Issue Image" style={{ width: "100px", height: "100px", marginRight: "10px" }} />
+    ))}
+  </Descriptions.Item>
+)}
+        </Descriptions>
+        <Form
+          form={form}
+          initialValues={{ outcome: currentIssue?.outcome || '' }}
+          onValuesChange={onValuesChange}
+          onFinish={handleUpdateIssue}
+          onFieldsChange={() => form.setFieldsValue(form.getFieldsValue())}
+        >
+          <Form.Item name="outcome" label="Outcome">
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

@@ -30,7 +30,7 @@ router.get("/merchant/:merchant_id", getMerchantProfile);
 router.put("/merchant/:merchant_id", editMerchantProfile);
 router.get("/allIssues", getIssues);
 router.get("/issue/:issue_id", getIssue);
-router.get("/issue/:issue_id", editIssue);
+router.put("/issue/:issue_id", editIssue);
 
 
 router.post("/add", add);
