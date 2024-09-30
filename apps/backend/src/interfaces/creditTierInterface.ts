@@ -1,5 +1,3 @@
-// Defines the structure of a instalment plan object
-
 export interface ICreditTier {
     credit_tier_id: string;
     name: string;

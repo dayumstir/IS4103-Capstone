@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
-import { AdminType } from "../interfaces/adminType";
+import { AdminType } from "../interfaces/adminTypeInterface";
 import { UserType } from "../interfaces/userType";
 
 

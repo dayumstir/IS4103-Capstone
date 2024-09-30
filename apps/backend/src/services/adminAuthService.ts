@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { IAdmin } from "../interfaces/adminInterface";
 import * as adminRepository from "../repositories/adminRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
-import { AdminType } from "../interfaces/adminType";
+import { AdminType } from "../interfaces/adminTypeInterface";
 import { UserType } from "../interfaces/userType";
 
 import logger from "../utils/logger";

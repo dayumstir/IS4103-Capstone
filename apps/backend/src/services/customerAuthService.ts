@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // Internal dependencies
-import { CustomerStatus } from "../interfaces/customerStatus";
+import { CustomerStatus } from "../interfaces/customerStatusInterface";
 import { ICustomer } from "../interfaces/customerInterface";
 import { UserType } from "../interfaces/userType";
 
