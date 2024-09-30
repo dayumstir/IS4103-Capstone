@@ -33,11 +33,15 @@ model Customer {
   credit_score    Int      @default(0)
   credit_tier_id  String   @default("tier_1")
 
-  // Relationships
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
   passwordResetTokens     PasswordResetToken[]
+<<<<<<< HEAD
   issues Issue[]
+=======
+  issues                  Issue[]
+  vouchersAssigned        VoucherAssigned[]
+>>>>>>> 067e0e7c0e43e96b71499a31bb0c65f20d29702d
 }
 
 // Utility Schemas
@@ -52,7 +56,6 @@ model EmailVerificationToken {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 1 Customer to Many EmailVerificationTokens
   customer    Customer @relation(fields: [customer_id], references: [customer_id])
   customer_id String
 
@@ -102,10 +105,12 @@ model PasswordResetToken {
   @@index([customer_id])
 }
 
+
 enum AdminType {
   SUPER
   NORMAL
   DEACTIVATED
+  UNVERIFIED
 }
 
 model Admin {
@@ -118,9 +123,17 @@ model Admin {
   contact_number  String
   address         String
   date_of_birth   DateTime
+<<<<<<< HEAD
   admin_type      AdminType // TODO: Implement as enum
   issues Issue[]
+=======
+  admin_type      AdminType
+
+  issues          Issue[]
+  vouchersCreated Voucher[]
+>>>>>>> 067e0e7c0e43e96b71499a31bb0c65f20d29702d
 }
+
 
 model Merchant {
   merchant_id     String @id @default(cuid())
@@ -133,10 +146,13 @@ model Merchant {
   status          Status
   profile_picture Bytes? @db.ByteA
 
-  // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
+<<<<<<< HEAD
   issues Issue[]
 
+=======
+  issues                  Issue[]
+>>>>>>> 067e0e7c0e43e96b71499a31bb0c65f20d29702d
 }
 
 // Merchant Sign Up Use Case: Store phone number OTPs
@@ -162,13 +178,13 @@ model MerchantEmailVerificationToken {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 1 Merchant to Many EmailVerificationTokens
   merchant    Merchant @relation(fields: [merchant_id], references: [merchant_id])
   merchant_id String
 
   @@unique([email, token])
   @@index([merchant_id])
 }
+
 
 model Transaction {
   transaction_id      String   @id @default(cuid())
@@ -182,14 +198,15 @@ model Transaction {
 }
 
 model InstalmentPlan {
-  instalment_plan_id String  @id @default(cuid())
-  name               String
-  description        String
-  frequency          String // TODO: Implement as enum?
-  interest_rate      Decimal @db.Decimal(5, 2)
-  minimum_amount     Decimal @db.Decimal(10, 2)
-  maximum_amount     Decimal @db.Decimal(10, 2)
-  status             String // TODO: Implement as enum
+  instalment_plan_id    String  @id @default(cuid())
+  name                  String
+  description           String
+  number_of_instalments Int
+  time_period           Int // in weeks
+  interest_rate         Decimal @db.Decimal(5, 2)
+  minimum_amount        Decimal @db.Decimal(10, 2)
+  maximum_amount        Decimal @db.Decimal(10, 2)
+  status                String // TODO: Implement as enum
 }
 
 model CreditTier {
@@ -205,21 +222,68 @@ enum IssueStatus {
 }
 
 model Issue {
-  issue_id  String @id @default(cuid())
+  issue_id    String      @id @default(cuid())
   title       String
-  description String 
+  description String
   outcome     String?
   status      IssueStatus
-  images      Bytes[] @db.ByteA
-  create_time DateTime @default(now())
-  updated_at DateTime @updatedAt
+  images      Bytes[]     @db.ByteA
+  create_time DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
 
-  merchant_id String?  // Optional foreign key to Merchant
-  customer_id String?  // Optional foreign key to Customer
-  admin_id String?  // Optional foreign key to Admin
+  merchant_id    String? // Optional foreign key to Merchant
+  customer_id    String? // Optional foreign key to Customer
+  admin_id       String? // Optional foreign key to Admin
+  transaction_id String? // Optional foreign key to Transaction
 
   // Relations
-  merchant    Merchant? @relation(fields: [merchant_id], references: [merchant_id])
-  customer    Customer? @relation(fields: [customer_id], references: [customer_id])
-  admin       Admin? @relation(fields: [admin_id], references: [admin_id])
+  merchant    Merchant?    @relation(fields: [merchant_id], references: [merchant_id])
+  customer    Customer?    @relation(fields: [customer_id], references: [customer_id])
+  admin       Admin?       @relation(fields: [admin_id], references: [admin_id])
+  transaction Transaction? @relation(fields: [transaction_id], references: [transaction_id])
 }
+
+
+// Voucher Management Module
+enum VoucherStatus {
+  AVAILABLE
+  EXPIRED
+  USED
+  UNAVAILABLE
+}
+
+model Voucher {
+  voucher_id          String            @id @default(cuid())
+  title               String
+  description         String
+  percentage_discount Float
+  amount_discount     Float
+  expiry_date         DateTime
+  terms               String
+  usage_limit         Int
+  is_active           Boolean           @default(true)
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  // Relationships
+  admin               Admin             @relation(fields: [created_by_admin], references: [admin_id])
+  created_by_admin    String
+  vouchersAssigned    VoucherAssigned[] 
+}
+
+model VoucherAssigned {
+  voucher_assigned_id         String          @id @default(cuid())
+  status                      VoucherStatus
+  date_time_issued            DateTime        @default(now())
+  remaining_uses              Int             
+
+  // Relationships
+  voucher                     Voucher         @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
+  voucher_id                  String
+  customer                    Customer        @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  customer_id                 String
+
+  used_installment_payment_id String // TODO: Associate with installment plan
+}
+>>>>>>> 067e0e7c0e43e96b71499a31bb0c65f20d29702d

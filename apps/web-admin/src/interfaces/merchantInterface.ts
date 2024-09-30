@@ -1,6 +1,12 @@
-import { MerchantStatus } from "./merchantStatus";
+enum MerchantStatus {
+    PENDING_EMAIL_VERIFICATION = "PENDING_EMAIL_VERIFICATION",
+    ACTIVE = "ACTIVE",
+    SUSPENDED = "SUSPENDED",
+}
+
 
 export interface IMerchant {
+    merchant_id: string;
     name: string;
     email: string;
     password: string;

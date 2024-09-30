@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Typography, Spin, Avatar, Descriptions } from "antd";
 import { EditOutlined, LeftOutlined, UserOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
+import { useViewCustomerProfileQuery } from "../redux/services/customerService";
 const { Title, Text } = Typography;
 
 interface ICustomer {
@@ -17,61 +18,15 @@ interface ICustomer {
   credit_tier_id: string;
 }
 
-const CustomerProfileScreen: React.FC = () => {
+export default function CustomerProfileScreen(){
   const { id } = useParams<{ id: string }>(); // Get customer_id from URL
-  const [customer, setCustomer] = useState<ICustomer | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error] = useState<string | null>(null);
+  const { data: customer, isLoading } = useViewCustomerProfileQuery(id!);
+
   const navigate = useNavigate();
+  
 
-  useEffect(() => {
-    const fetchCustomerProfile = async () => {
-      try {
-        const jwt_token = localStorage.getItem("token");
-        if (!jwt_token) {
-          throw new Error("No token found");
-        }
-
-        const response = await fetch(`http://localhost:3000/customer/${id}`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${jwt_token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch customer profile");
-        }
-
-        const data = await response.json();
-        if (data.profile_picture && data.profile_picture.data) {
-          const base64String = btoa(
-            new Uint8Array(data.profile_picture.data).reduce(
-              (data, byte) => data + String.fromCharCode(byte),
-              ''
-            )
-          );
-          data.profile_picture = `data:image/jpeg;base64,${base64String}`;
-        }
-        setCustomer(data);
-      } catch (error) {
-        console.error("Failed to fetch customer profile:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCustomerProfile();
-  }, [id]);
-
-  if (loading) {
-    return <Spin size="large" />;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
+  if (isLoading) {
+    return <Spin size="large" tip="Loading profile..." />;
   }
 
   if (!customer) {
@@ -122,6 +77,4 @@ const CustomerProfileScreen: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default CustomerProfileScreen;
+}

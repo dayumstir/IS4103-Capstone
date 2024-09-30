@@ -39,6 +39,17 @@ export const getAllCustomers = async () => {
     return customers;
 };
 
+// Search customers
+export const searchCustomers = async (searchQuery: string) => {
+    logger.info(`Searching for customers with query: ${searchQuery}`);
+    const customers = await customerRepository.listAllCustomersWithSearch(searchQuery);
+    if (!customers.length) {
+        logger.warn("No customers found matching the search criteria");
+        return [];
+    }
+    return customers;
+};
+
 
 // Update the customer's profile picture in the database
 export const updateProfilePicture = async (customerId: string, profilePictureBuffer: Buffer) => {

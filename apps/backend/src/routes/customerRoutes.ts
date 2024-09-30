@@ -2,18 +2,13 @@
 import { Router } from "express";
 import {
   getCustomerProfile,
-  editCustomerProfile,
-  listAllCustomers,
+  editCustomerProfile
 } from "../controllers/customerController";
-import { customerAuthMiddleware } from "../middlewares/customerAuthMiddleware";
-import { adminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.get("/profile", customerAuthMiddleware, getCustomerProfile);
-router.put("/profile", customerAuthMiddleware, editCustomerProfile);
-router.get("/:customer_id", adminAuthMiddleware, getCustomerProfile);
-router.get("/allCustomers", listAllCustomers);
-router.put("/allCustomers", editCustomerProfile);
+router.get("/profile", authMiddleware, getCustomerProfile);
+router.put("/profile", authMiddleware, editCustomerProfile);
 
 export default router;

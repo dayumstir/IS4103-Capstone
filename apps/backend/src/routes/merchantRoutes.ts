@@ -5,7 +5,6 @@ import {
     editMerchantProfile,
     listAllMerchants,
 } from "../controllers/merchantController";
-import { authMiddleware } from "../middlewares/authMiddleware";
 import {
     register,
     login,
@@ -17,6 +16,7 @@ import {
     checkEmailNotInUse,
     resendEmailConfirmation,
 } from "../controllers/merchantAuthController";
+import { authMiddleware } from "../middlewares/authMiddleware";
 import multer from "multer";
 
 const merchantRouter = Router();

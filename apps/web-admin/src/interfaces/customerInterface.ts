@@ -1,4 +1,9 @@
-import { CustomerStatus } from "./customerStatusInterface";
+enum CustomerStatus {
+    PENDING_EMAIL_VERIFICATION = "PENDING_EMAIL_VERIFICATION",
+    PENDING_PHONE_VERIFICATION = "PENDING_PHONE_VERIFICATION",
+    ACTIVE = "ACTIVE",
+    SUSPENDED = "SUSPENDED"
+}
 
 export interface ICustomer {
     customer_id: string;

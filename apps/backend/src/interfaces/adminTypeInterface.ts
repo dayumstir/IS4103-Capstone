@@ -1,5 +1,6 @@
 export enum AdminType {
     SUPER = "SUPER",
     NORMAL = "NORMAL",
-    DEACTIVATED = "DEACTIVATED"
+    DEACTIVATED = "DEACTIVATED",
+    UNVERIFIED = "UNVERIFIED"
 }

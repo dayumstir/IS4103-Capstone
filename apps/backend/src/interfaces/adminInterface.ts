@@ -1,5 +1,4 @@
-// Defines the structure of a admin object
-import { AdminType } from "./adminType";
+import { AdminType } from "./adminTypeInterface";
 
 export interface IAdmin {
     admin_id: string;
@@ -11,5 +10,5 @@ export interface IAdmin {
     contact_number: string;
     address: string;
     date_of_birth: Date;
-    admin_type:AdminType;
+    admin_type: AdminType;
 }

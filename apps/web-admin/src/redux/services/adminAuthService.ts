@@ -17,7 +17,7 @@ export const adminAuthApi = createApi({
   endpoints: (builder) => ({
     // Login
     login: builder.mutation<
-      { token: string },
+      { token: string, admin_type:string, email:string },
       { username: string; password: string }
     >({
       query: (body) => ({
@@ -25,7 +25,7 @@ export const adminAuthApi = createApi({
         method: "POST",
         body,
       }),
-      transformResponse: (response: { token: string }) => {
+      transformResponse: (response: { token: string, admin_type:string, email:string }) => {
         localStorage.setItem("token", response.token);
         return response;
       },
