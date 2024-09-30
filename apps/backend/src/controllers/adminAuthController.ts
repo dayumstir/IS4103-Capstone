@@ -18,9 +18,9 @@ export const login = async (req: Request, res: Response) => {
     try {
         const token = await adminAuthService.login(req.body);
         
-        const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
         const admin_type = decoded.admin_type;
-        const email= decoded.email;
+        const email = decoded.email;
         res.status(200).json({ token, admin_type ,email });
     } catch (error: any) {
         res.status(400).json({ error: error.message });

@@ -1,5 +1,3 @@
-// Defines the structure of a instalment plan object
-
 export interface IInstalmentPlan {
     instalment_plan_id: string;
     name: string;

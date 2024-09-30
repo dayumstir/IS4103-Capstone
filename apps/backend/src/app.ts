@@ -39,7 +39,6 @@ app.use("/merchant", merchantRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/voucher", voucherRoutes);
 
-
 // Dummy route for the root
 app.get("/", (req, res) => {
     res.status(200).json({ message: "Backend server is running!" });

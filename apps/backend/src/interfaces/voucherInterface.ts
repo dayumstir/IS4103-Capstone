@@ -6,9 +6,11 @@ export interface IVoucher {
     amount_discount: number;     
     expiry_date: Date;         
     terms: string;
+    usage_limit: number,
+    is_active: boolean,
          
-    createdAt?: Date;            
-    updatedAt?: Date;    
+    createdAt: Date;            
+    updatedAt: Date;    
     
     created_by_admin: string; 
 }

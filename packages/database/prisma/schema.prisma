@@ -33,7 +33,6 @@ model Customer {
   credit_score    Int      @default(0)
   credit_tier_id  String   @default("tier_1")
 
-  // Relationships
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
   passwordResetTokens     PasswordResetToken[]
@@ -53,7 +52,6 @@ model EmailVerificationToken {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 1 Customer to Many EmailVerificationTokens
   customer    Customer @relation(fields: [customer_id], references: [customer_id])
   customer_id String
 
@@ -123,7 +121,6 @@ model Admin {
   date_of_birth   DateTime
   admin_type      AdminType
 
-  // Relationships
   issues          Issue[]
   vouchersCreated Voucher[]
 }
@@ -140,7 +137,6 @@ model Merchant {
   status          Status
   profile_picture Bytes? @db.ByteA
 
-  // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
   issues                  Issue[]
 }
@@ -168,7 +164,6 @@ model MerchantEmailVerificationToken {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 1 Merchant to Many EmailVerificationTokens
   merchant    Merchant @relation(fields: [merchant_id], references: [merchant_id])
   merchant_id String
 
@@ -235,6 +230,13 @@ model Issue {
 
 
 // Voucher Management Module
+enum VoucherStatus {
+  AVAILABLE
+  EXPIRED
+  USED
+  UNAVAILABLE
+}
+
 model Voucher {
   voucher_id          String            @id @default(cuid())
   title               String
@@ -243,6 +245,8 @@ model Voucher {
   amount_discount     Float
   expiry_date         DateTime
   terms               String
+  usage_limit         Int
+  is_active           Boolean           @default(true)
 
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
@@ -253,17 +257,11 @@ model Voucher {
   vouchersAssigned    VoucherAssigned[] 
 }
 
-enum VoucherStatus {
-  AVAILABLE
-  EXPIRED
-  USED
-  UNAVAILABLE
-}
-
 model VoucherAssigned {
   voucher_assigned_id         String          @id @default(cuid())
   status                      VoucherStatus
   date_time_issued            DateTime        @default(now())
+  remaining_uses              Int             
 
   // Relationships
   voucher                     Voucher         @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
@@ -271,5 +269,5 @@ model VoucherAssigned {
   customer                    Customer        @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
   customer_id                 String
 
-  used_installment_payment_id String? // TODO: Associate with installment plan
+  used_installment_payment_id String // TODO: Associate with installment plan
 }

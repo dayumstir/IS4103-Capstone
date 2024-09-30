@@ -40,7 +40,7 @@ export const getAllCustomers = async () => {
 };
 
 // Search customers
-export const searchCustomers = async (searchQuery) => {
+export const searchCustomers = async (searchQuery: string) => {
     logger.info(`Searching for customers with query: ${searchQuery}`);
     const customers = await customerRepository.listAllCustomersWithSearch(searchQuery);
     if (!customers.length) {

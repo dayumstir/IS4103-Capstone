@@ -3,12 +3,12 @@ import * as voucherService from '../services/voucherService';
 import logger from "../utils/logger";
 
 
-// Admin Create Voucher
+// Create Voucher
 export const createVoucher = async (req: Request, res: Response) => {
     logger.info("Executing createVoucher...");
     try {
         // Extract admin_id from req.admin (populated by the middleware)
-        const admin_id = req.admin?.admin_id;
+        const admin_id = req.admin_id;
         if (!admin_id) {
             return res.status(401).json({ error: "admin_id is required" });
         }
@@ -23,11 +23,11 @@ export const createVoucher = async (req: Request, res: Response) => {
 };
 
 
-// Admin Assign Voucher to a customer
+// Assign Voucher to a customer
 export const assignVoucher = async (req: Request, res: Response) => {
     logger.info('Executing assignVoucher...');
     try {
-        const { customer_id, voucher_id } = req.body;
+        const { voucher_id, customer_id } = req.body;
 
         const voucherAssignment = await voucherService.assignVoucher(voucher_id, customer_id);
         res.status(200).json(voucherAssignment);
@@ -38,14 +38,14 @@ export const assignVoucher = async (req: Request, res: Response) => {
 };
 
 
-// Admin Remove Voucher
-export const removeVoucher = async (req: Request, res: Response) => {
-    logger.info("Executing removeVoucher...");
+// Deactivate Voucher
+export const deactivateVoucher = async (req: Request, res: Response) => {
+    logger.info("Executing deactivateVoucher...");
     try {
         const { voucher_id } = req.params;
 
-        const voucher = await voucherService.removeVoucher(voucher_id);
-        res.status(200).json({ message: "Voucher removed successfully", voucher });
+        const voucher = await voucherService.deactivateVoucher(voucher_id);
+        res.status(200).json({ message: "Voucher deactivated successfully", voucher });
     } catch (error: any) {
         logger.error("An error occurred:", error);
         res.status(500).json({ error: error.message });
@@ -53,7 +53,7 @@ export const removeVoucher = async (req: Request, res: Response) => {
 };
 
 
-// Admin View All Vouchers
+// View All Vouchers
 export const getAllVouchers = async (req: Request, res: Response) => {
     logger.info("Executing getAllVouchers...");
     try {
@@ -66,7 +66,7 @@ export const getAllVouchers = async (req: Request, res: Response) => {
 };
 
 
-// Admin Search Voucher
+// Search Voucher
 export const searchVoucher = async (req: Request, res: Response) => {
     logger.info("Executing searchVoucher...");
     try {
@@ -81,7 +81,7 @@ export const searchVoucher = async (req: Request, res: Response) => {
 };
 
 
-// Admin View Voucher Details
+// View Voucher Details
 export const getVoucherDetails = async (req: Request, res: Response) => {
     logger.info("Executing getVoucherDetails...");
     try {

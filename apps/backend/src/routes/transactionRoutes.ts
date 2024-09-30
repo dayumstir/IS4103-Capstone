@@ -6,13 +6,13 @@ import {
   editTransaction,
   createTransaction,
 } from "../controllers/transactionController";
-import { customerAuthMiddleware } from "../middlewares/customerAuthMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.post("/", customerAuthMiddleware, createTransaction);
-router.get("/user", customerAuthMiddleware, getUserTransactions);
-router.get("/:transaction_id", customerAuthMiddleware, getTransaction);
-router.put("/:transaction_id", customerAuthMiddleware, editTransaction);
+router.post("/", authMiddleware, createTransaction);
+router.get("/user", authMiddleware, getUserTransactions);
+router.get("/:transaction_id", authMiddleware, getTransaction);
+router.put("/:transaction_id", authMiddleware, editTransaction);
 
 export default router;

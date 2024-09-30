@@ -1,10 +1,9 @@
 import { prisma } from "./db";
 import { IVoucher } from "../interfaces/voucherInterface";
-import { IVoucherAssigned } from "../interfaces/voucherAssignedInterface";
 import { VoucherStatus } from "../interfaces/voucherStatusInterface";
 
 
-// Admin Create Voucher
+// Create Voucher
 export const createVoucher = async (voucherData: IVoucher) => {
     return await prisma.voucher.create({ 
         data: voucherData
@@ -12,37 +11,17 @@ export const createVoucher = async (voucherData: IVoucher) => {
 }; 
 
 
-// Admin Assign Voucher
-export const assignVoucher = async (voucher_id: string, customer_id: string) => {
-    return await prisma.voucherAssigned.create({
-        data: {
-            status: VoucherStatus.AVAILABLE,
-            voucher_id,
-            customer_id,
-            used_installment_payment_id: "Placeholder"
-        }
-    });
-};
-
-
-// Admin Remove Voucher
-export const removeVoucher = async (voucher_id: string) => {
-    // First, change the status in all related voucherAssigned entities
-    await prisma.voucherAssigned.updateMany({
-        where: { voucher_id },
-        data: { status: VoucherStatus.UNAVAILABLE },
-    });
-
-    // Then, delete the voucher itself
-    return await prisma.voucher.delete({
-        where: { voucher_id },
-    });
-};
-
-
 // Get all vouchers
 export const getAllVouchers = async () => {
     return await prisma.voucher.findMany();
+};
+
+
+// Get voucher by id
+export const getVoucherById = async(voucher_id: string) => {
+    return await prisma.voucher.findUnique({
+        where: { voucher_id },
+    });
 };
 
 
@@ -70,5 +49,33 @@ export const getVoucherDetails = async (voucher_id: string) => {
                 },
             },
         },
+    });
+};
+
+
+// Assign Voucher to Customer
+export const assignVoucher = async (voucher_id: string, customer_id: string, usage_limit: number) => {
+    return await prisma.voucherAssigned.create({
+        data: {
+            status: VoucherStatus.AVAILABLE,
+            voucher_id,
+            customer_id,
+            remaining_uses: usage_limit,
+            used_installment_payment_id: "Placeholder"
+        }
+    });
+};
+
+
+// Deactivate Voucher
+export const deactivateVoucher = async (voucher_id: string) => {
+    await prisma.voucher.update({
+        where: { voucher_id },
+        data: { is_active: false }  // Deactivate the voucher
+    });
+
+    return await prisma.voucherAssigned.updateMany({
+        where: { voucher_id },
+        data: { status: VoucherStatus.UNAVAILABLE}  // Set all assigned vouchers to UNAVAILABLE
     });
 };

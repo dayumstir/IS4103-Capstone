@@ -1,13 +1,15 @@
 // Contains authentication logic, like JWT generation, verification
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+const nodemailer = require("nodemailer");
+
 import { IAdmin } from "../interfaces/adminInterface";
+import { AdminType } from "../interfaces/adminTypeInterface";
+import { UserType } from "../interfaces/userType";
 import * as adminRepository from "../repositories/adminRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
-import { AdminType } from "../interfaces/adminType";
-
 import logger from "../utils/logger";
-const nodemailer = require("nodemailer");
+
 
 // Function to generate a random password consisting of digits
 const generateRandomPassword = (length = 8) => {
@@ -61,13 +63,17 @@ export const add = async (adminData: IAdmin) => {
 
     // Generate JWT
     // TODO: Create .env folder with JWT Secret
-    const token = jwt.sign({ admin_id: newAdmin.admin_id , email: newAdmin.email}, process.env.JWT_SECRET!, { expiresIn: "1h"});
+    const token = jwt.sign({ 
+        role: UserType.ADMIN,
+        admin_id: newAdmin.admin_id , 
+        email: newAdmin.email
+    }, process.env.JWT_SECRET!, { expiresIn: "1h"});
 
     return { admin: newAdmin, token, password, username};
 };
 
 
-export const login= async (loginData: { username: string; password: string }) => {
+export const login = async (loginData: { username: string; password: string }) => {
     const { username, password } = loginData;
 
     // Check for existing admin in db
@@ -83,7 +89,12 @@ export const login= async (loginData: { username: string; password: string }) =>
     }
 
     // Generate JWT
-    const token = jwt.sign({ admin_id: admin.admin_id, email : admin.email, admin_type : admin.admin_type }, process.env.JWT_SECRET!, { expiresIn: "1h"});
+    const token = jwt.sign({ 
+        role: UserType.ADMIN,
+        admin_id: admin.admin_id, 
+        email : admin.email, 
+        admin_type : admin.admin_type 
+    }, process.env.JWT_SECRET!, { expiresIn: "1h"});
 
     return token;
 };
