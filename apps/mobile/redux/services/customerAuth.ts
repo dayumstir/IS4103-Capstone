@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { LoginFormValues } from "../../app/login";
 import { RegisterFormValues } from "../../app/register";
-import { ResetPasswordFormValues } from "../../app/(authenticated)/(tabs)/(account)/resetPassword";
+import { ResetPasswordFormValues } from "../../app/(authenticated)/(tabs)/account/resetPassword";
 import { RootState } from "../store";
 import { ConfirmEmailFormValues } from "../../app/confirmation";
 import { PhoneVerificationFormValues } from "../../app/phoneVerification";

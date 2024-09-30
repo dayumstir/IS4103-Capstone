@@ -41,7 +41,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="(account)"
+        name="account"
         options={{
           headerShown: false,
           title: "Account",

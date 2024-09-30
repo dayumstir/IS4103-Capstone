@@ -92,29 +92,38 @@ export default function AccountPage() {
 
         {/* ===== Button Group ===== */}
         <View className="mt-10 w-full gap-4">
-          <Button type="primary" onPress={() => router.push("/editProfile")}>
+          <Button
+            type="primary"
+            onPress={() => router.push("/account/editProfile")}
+          >
             <AntDesign name="edit" size={20} color="white" className="mr-2" />
             <Text className="font-semibold text-white">Edit Profile</Text>
           </Button>
 
-          <Button type="primary" onPress={() => router.push("/vouchers")}>
+          <Button
+            type="primary"
+            onPress={() => router.push("/account/vouchers")}
+          >
             <AntDesign name="gift" size={20} color="white" className="mr-2" />
             <Text className="font-semibold text-white">
-              View Cashback & Vouchers
+              Cashback & Vouchers
             </Text>
           </Button>
 
-          <Button type="primary" onPress={() => router.push("/issues")}>
+          <Button type="primary" onPress={() => router.push("/account/issue")}>
             <AntDesign
               name="exclamationcircleo"
               size={20}
               color="white"
               className="mr-2"
             />
-            <Text className="font-semibold text-white">View All Issues</Text>
+            <Text className="font-semibold text-white">My Issues</Text>
           </Button>
 
-          <Button type="ghost" onPress={() => router.push("/resetPassword")}>
+          <Button
+            type="ghost"
+            onPress={() => router.push("/account/resetPassword")}
+          >
             <MaterialIcons
               name="lock"
               size={20}
