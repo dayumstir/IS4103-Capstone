@@ -16,7 +16,7 @@ const generateRandomPassword = (length = 8) => {
     const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
     const upperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const digits = '0123456789';
-    const specialChars = '!@#$%^&*()_+[]{}|;:,.<>?';
+    const specialChars = '!@#$%^&*';
 
     const allChars = lowerCase + upperCase + digits + specialChars;
     let password = '';
