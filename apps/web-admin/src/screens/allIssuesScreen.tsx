@@ -16,7 +16,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useGetAllIssuesQuery, useUpdateIssueOutcomeMutation } from '../redux/services/issueService';
-import { IIssue } from "../interfaces/issueInterface";
+import { IIssue, IssueStatus } from "../interfaces/issueInterface";
 
 const { Search } = Input;
 
@@ -50,13 +50,18 @@ const AllIssuesScreen = () => {
       message.error("No issue selected");
       return;
     }
+    const status = values.outcome && values.outcome.trim() !== '' ? IssueStatus.RESOLVED : currentIssue.status;
     const updatedIssue: IIssue = {
       ...values,
       issue_id: currentIssue.issue_id,
+      status,
     };
+
+    console.log("Issue to update:", updatedIssue);
     try {
       await updateIssue(updatedIssue).unwrap();
       setIsModalVisible(false);
+      message.success("Issue updated successfully");
       setCurrentIssue(null);
     } catch (error) {
       console.error("Error updating issue:", error);

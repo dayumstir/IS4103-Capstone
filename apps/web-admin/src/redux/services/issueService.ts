@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { IIssue } from "../../interfaces/issueInterface";
+import { IIssue, IssueStatus } from "../../interfaces/issueInterface";
 
 export const issueApi = createApi({
   reducerPath: 'issueApi',
@@ -38,11 +38,11 @@ export const issueApi = createApi({
     }),
 
     // Update Issue Outcome
-    updateIssueOutcome: builder.mutation<IIssue, { issue_id: string; outcome: string }>({
-      query: ({ issue_id, outcome }) => ({
+    updateIssueOutcome: builder.mutation<IIssue, { issue_id: string; outcome: string; status: IssueStatus}>({
+      query: ({ issue_id, outcome, status }) => ({
         url: `issue/${issue_id}`,
         method: 'PUT',
-        body: { outcome },
+        body: { outcome, status },
       }),
       invalidatesTags: ['Issue']
     }),
