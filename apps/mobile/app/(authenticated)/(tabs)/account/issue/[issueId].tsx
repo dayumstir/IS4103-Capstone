@@ -1,9 +1,24 @@
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
 import { ActivityIndicator } from "@ant-design/react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useGetIssueByIdQuery } from "../../../../../redux/services/issueService";
 import { IssueStatusBadge } from "../../../../../components/issueStatusBadge";
 import { format } from "date-fns";
+import { Buffer } from "buffer";
+
+function getImageMimeType(buffer: Buffer): string {
+  const signature = buffer.toString("hex", 0, 4);
+  switch (signature) {
+    case "ffd8ffe0":
+    case "ffd8ffe1":
+    case "ffd8ffe2":
+      return "image/jpeg";
+    case "89504e47":
+      return "image/png";
+    default:
+      return "image/jpeg";
+  }
+}
 
 export default function IssueDetailsPage() {
   const router = useRouter();
@@ -53,13 +68,15 @@ export default function IssueDetailsPage() {
         <Text className="pb-4">{issue.description}</Text>
 
         {issue.merchant_id && (
+          // TODO: Replace with actual merchant name
           <Text className="font-semibold">Merchant: {issue.merchant_id}</Text>
         )}
 
-        <Text className="font-semibold">
-          {/* TODO: Replace with actual transaction ID */}
-          Transaction ID: clh9tuuqh0000356g4r11fk1x
-        </Text>
+        {issue.transaction_id && (
+          <Text className="font-semibold">
+            Transaction ID: {issue.transaction_id}
+          </Text>
+        )}
 
         {/* ===== Attached Images ===== */}
         {issue.images && issue.images.length > 0 && (
@@ -67,14 +84,26 @@ export default function IssueDetailsPage() {
             <Text className="mb-2 font-semibold">Supporting Images:</Text>
             <View className="flex-row flex-wrap">
               {issue.images.map((image, index) => (
-                <View key={index} className="m-2">
+                <TouchableOpacity
+                  key={index}
+                  className="m-2"
+                  onPress={() => {
+                    // Open full-screen image viewer
+                    router.push({
+                      pathname: "/account/issue/imageViewer",
+                      params: {
+                        imageUri: `data:image/${getImageMimeType(image)};base64,${Buffer.from(image).toString("base64")}`,
+                      },
+                    });
+                  }}
+                >
                   <Image
                     source={{
-                      uri: `data:image/jpeg;base64,${image.toString("base64")}`,
+                      uri: `data:image/${getImageMimeType(image)};base64,${Buffer.from(image).toString("base64")}`,
                     }}
                     className="h-24 w-24 rounded-md border border-gray-300"
                   />
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           </View>

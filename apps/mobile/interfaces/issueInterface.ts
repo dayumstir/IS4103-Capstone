@@ -19,6 +19,7 @@ export interface IIssue {
   merchant_id?: string; // Optional foreign key to Merchant
   customer_id?: string; // Optional foreign key to Customer
   admin_id?: string; // Optional foreign key to Admin
+  transaction_id?: string; // Optional foreign key to Transaction
 }
 
 export interface IssueFilter {

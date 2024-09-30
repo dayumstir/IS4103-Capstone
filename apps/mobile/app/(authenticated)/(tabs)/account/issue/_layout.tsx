@@ -26,6 +26,7 @@ export default function IssuesLayout() {
         name="[issueId]"
         options={{ headerTitle: "Issue Details" }}
       />
+      <Stack.Screen name="imageViewer" options={{ headerTitle: "Image" }} />
     </Stack>
   );
 }
