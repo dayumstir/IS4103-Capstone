@@ -51,7 +51,7 @@ export const adminApi = createApi({
     >({
       query: ({ updatedAdminId, admin_type }) => {
         console.log("Updating admin ID:", updatedAdminId); // Log the updated admin ID
-        if (admin_type == "DEACTIVATE") {
+        if (admin_type == "DEACTIVATED") {
           return {
             url: "/deactivate-admin",
             method: "PUT",
