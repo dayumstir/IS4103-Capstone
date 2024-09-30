@@ -4,7 +4,6 @@ import app from "./app";
 import { connectDatabase } from "./config/database.config";
 import { cleanupExpiredTokens } from "./utils/tokenCleanup";
 
-
 const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {

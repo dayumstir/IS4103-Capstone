@@ -1,14 +1,15 @@
 // Contains authentication logic, like JWT generation, verification
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+const nodemailer = require("nodemailer");
+
 import { IAdmin } from "../interfaces/adminInterface";
-import * as adminRepository from "../repositories/adminRepository";
-import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import { AdminType } from "../interfaces/adminTypeInterface";
 import { UserType } from "../interfaces/userType";
-
+import * as adminRepository from "../repositories/adminRepository";
+import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import logger from "../utils/logger";
-const nodemailer = require("nodemailer");
+
 
 // Function to generate a random password consisting of digits
 const generateRandomPassword = (length = 8) => {

@@ -18,6 +18,7 @@ export const cleanupExpiredTokens = async () => {
             },
         });
 
+        // Delete expired JWTs
         const deletedJWTs = await prisma.tokenBlackList.deleteMany({
             where: {
                 expiresAt: { lt: new Date() },  // Tokens where expiredAt is less than current time

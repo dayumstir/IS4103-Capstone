@@ -1,3 +1,4 @@
+// Contains the business logic related to vouchers
 import { IVoucher } from "../interfaces/voucherInterface";
 import * as voucherRepository from "../repositories/voucherRepository";
 import logger from "../utils/logger";
@@ -19,7 +20,6 @@ export const createVoucher = async (voucherData: IVoucher, admin_id: string) => 
 // Assign Voucher
 export const assignVoucher = async (voucher_id: string, customer_id: string) => {
     logger.info('Executing assignVoucher...');
-
     const voucher = await voucherRepository.getVoucherById(voucher_id);
     if (!voucher) {
         throw new Error('Voucher not found');
@@ -37,8 +37,10 @@ export const assignVoucher = async (voucher_id: string, customer_id: string) => 
 // Deactivate Voucher
 export const deactivateVoucher = async (voucher_id: string) => {
     logger.info("Executing deactivateVoucher...");
-
     const voucher = await voucherRepository.deactivateVoucher(voucher_id);
+    if (!voucher) {
+        throw new Error("Voucher not found");
+    }
     return voucher;
 };
 
@@ -46,7 +48,6 @@ export const deactivateVoucher = async (voucher_id: string) => {
 // View All Vouchers
 export const getAllVouchers = async () => {
     logger.info("Executing getAllVouchers...");
-
     const vouchers = await voucherRepository.getAllVouchers();
     return vouchers;
 };
@@ -55,7 +56,6 @@ export const getAllVouchers = async () => {
 // Search Voucher
 export const searchVoucher = async (searchTerm: string) => {
     logger.info("Executing searchVoucher...");
-
     const vouchers = await voucherRepository.searchVoucher(searchTerm);
     return vouchers;
 };
@@ -64,7 +64,9 @@ export const searchVoucher = async (searchTerm: string) => {
 // View Voucher Details
 export const getVoucherDetails = async (voucher_id: string) => {
     logger.info("Executing getVoucherDetails...");
-
     const voucher = await voucherRepository.getVoucherDetails(voucher_id);
+    if (!voucher) {
+        throw new Error("Voucher not found");
+    }
     return voucher;
 };

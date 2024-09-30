@@ -8,6 +8,7 @@ import {
     login, 
     logout, 
     resetPassword, 
+    
     resendEmailVerification,
     forgetPassword, 
     resetPasswordWithToken 
