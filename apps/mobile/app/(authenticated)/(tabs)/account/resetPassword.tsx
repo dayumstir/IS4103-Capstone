@@ -14,7 +14,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useResetPasswordMutation } from "../../../../redux/services/customerAuth";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import Toast from "react-native-toast-message";
 
 // Zod schema for validation
@@ -71,25 +70,9 @@ export default function ResetPassword() {
       reset(); // Reset the form
       router.back(); // Navigate back to the account page
     } catch (err: any) {
-      // If there is an error, handle it (error is already handled via RTK)
-      // console.error("Reset Password failed:", err);
-
-      let errorMessage = "An error occurred. Please try again.";
-
-      // Check if the error is of type FetchBaseQueryError
-      if ("data" in err) {
-        const fetchError = err as FetchBaseQueryError;
-        if (
-          fetchError.data &&
-          typeof fetchError.data === "object" &&
-          "error" in fetchError.data
-        ) {
-          errorMessage = fetchError.data.error as string;
-        }
-      }
-
+      console.error(err);
       // Set the error message in local state to be displayed
-      setCustomErrorMessage(errorMessage);
+      setCustomErrorMessage("An error occurred. Please try again.");
     }
   };
 

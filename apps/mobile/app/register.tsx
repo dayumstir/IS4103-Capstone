@@ -12,13 +12,10 @@ import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDispatch } from "react-redux";
 import { useRegisterMutation } from "../redux/services/customerAuth";
-import { setCustomer } from "../redux/features/customerAuthSlice";
 import { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { format, setMonth } from "date-fns";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { Button, DatePicker } from "@ant-design/react-native";
 
 // Define your Zod schema
@@ -43,7 +40,6 @@ const registerSchema = z.object({
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function Register() {
-  const dispatch = useDispatch();
   const [registerMutation, { isLoading, error }] = useRegisterMutation();
   const [showPassword, setShowPassword] = useState(false);
   const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(
@@ -69,31 +65,14 @@ export default function Register() {
       credit_tier_id: 3,
     };
     try {
-      const result = await registerMutation(registrationData).unwrap();
-      console.log(result);
-
-      // Sore customer data in redux
-      dispatch(setCustomer(result));
+      await registerMutation(registrationData).unwrap();
 
       router.replace("/confirmation");
       console.log("Register success:", data);
     } catch (err: any) {
-      let errorMessage = "An error occurred. Please try again.";
-
-      // Check if the error is of type FetchBaseQueryError
-      if ("data" in err) {
-        const fetchError = err as FetchBaseQueryError;
-        if (
-          fetchError.data &&
-          typeof fetchError.data === "object" &&
-          "error" in fetchError.data
-        ) {
-          errorMessage = fetchError.data.error as string;
-        }
-      }
-
+      console.error(err);
       // Set the error message in local state to be displayed
-      setCustomErrorMessage(errorMessage);
+      setCustomErrorMessage("An error occurred. Please try again.");
     }
   };
 
