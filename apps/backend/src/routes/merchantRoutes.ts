@@ -27,7 +27,12 @@ const upload = multer({
     limits: { fileSize: 2 * 1024 * 1024 }, // Limit file size to 2 MB
 });
 merchantRouter.get("/profile/:merchant_id", authMiddleware, getMerchantProfile);
-merchantRouter.put("/profile/:id", authMiddleware, upload.single("profile_picture"), editMerchantProfile);
+merchantRouter.put(
+    "/profile/:id",
+    authMiddleware,
+    upload.single("profile_picture"),
+    editMerchantProfile
+);
 
 merchantRouter.get("/allMerchants", listAllMerchants);
 merchantRouter.get("/:merchant_id", getMerchantProfile);

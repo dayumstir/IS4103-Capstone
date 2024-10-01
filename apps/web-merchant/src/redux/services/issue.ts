@@ -1,12 +1,13 @@
 // Need to use the React-specific entry point to import createApi
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IMerchant } from "../../interfaces/models/merchantInterface";
+
+import { IIssue, IssueFilter } from "../../interfaces/models/issueInterface";
 
 // Define a service using a base URL and expected endpoints
-export const profileApi = createApi({
-  reducerPath: "profileApi",
+export const issueApi = createApi({
+  reducerPath: "issueApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/merchant/profile",
+    baseUrl: "http://localhost:3000/issue",
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) {
@@ -16,16 +17,23 @@ export const profileApi = createApi({
     },
   }),
   endpoints: (builder) => ({
-    getProfile: builder.query<IMerchant, string>({
+    createIssue: builder.mutation<IIssue, FormData>({
+      query: (body) => ({
+        url: "/",
+        method: "POST",
+        body: body,
+      }),
+    }),
+    getIssue: builder.query<IIssue, string>({
       query: (id) => ({
         url: `/${id}`,
         method: "GET",
       }),
     }),
-    editProfile: builder.mutation<IMerchant, { id: string; body: FormData }>({
-      query: ({ id, body }) => ({
-        url: `/${id}`,
-        method: "PUT",
+    getIssues: builder.mutation<IIssue[], IssueFilter>({
+      query: (body) => ({
+        url: "/list",
+        method: "POST",
         body: body,
       }),
     }),
@@ -34,4 +42,8 @@ export const profileApi = createApi({
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetProfileQuery, useEditProfileMutation } = profileApi;
+export const {
+  useCreateIssueMutation,
+  useGetIssueQuery,
+  useGetIssuesMutation,
+} = issueApi;

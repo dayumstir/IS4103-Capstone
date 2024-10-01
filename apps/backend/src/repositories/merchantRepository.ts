@@ -33,27 +33,27 @@ export const listAllMerchants = async () => {
 // Search Merchants
 export const listAllMerchantsWithSearch = async (search) => {
     return prisma.merchant.findMany({
-      where: {
-        OR: [
-          {
-            name: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            email: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            contact_number: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      },
+        where: {
+            OR: [
+                {
+                    name: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+                {
+                    email: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+                {
+                    contact_number: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+            ],
+        },
     });
-  };
+};

@@ -1,36 +1,31 @@
-import React, { useState } from "react";
+import { LoadingOutlined } from "@ant-design/icons";
 import {
   Button,
   Card,
   Form,
+  FormProps,
   Input,
-  Typography,
+  message,
   Space,
   Spin,
-  Alert,
-  InputNumber,
-  Upload,
-  FormProps,
-  GetProp,
-  UploadProps,
+  Typography,
 } from "antd";
+import React, { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
+import PendingEmailConfirmationModal from "../components/pendingEmailConfirmationModal";
+import {
+  DetailsProps,
+  EmailNameProps,
+  PasswordProps,
+  RegisterFormValues,
+} from "../interfaces/screens/registerFormInterface";
 import {
   useCheckEmailInUseMutation,
   useRegisterMutation,
   useSendPhoneNumberOTPMutation,
   useVerifyPhoneNumberOTPMutation,
 } from "../redux/services/auth";
-import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import { useNavigate, NavLink } from "react-router-dom";
-import { message } from "antd";
-import {
-  DetailsProps,
-  EmailNameProps,
-  PasswordProps,
-  RegisterFormValues,
-} from "../interfaces/registerFormInterface";
-import PendingEmailConfirmationModal from "../components/pendingEmailConfirmationModal";
 
 enum pageType {
   EmailUsername = 0,
@@ -403,7 +398,7 @@ const Details = ({
                     .unwrap()
                     .then(() => {
                       const num = form.getFieldValue("contact_number");
-                      message.info("OTP Sent to " + num);
+                      message.success("OTP Sent to " + num);
                       setIsOtpSent(true);
                     })
                     .catch((error) => message.error(error.data.error))
@@ -421,7 +416,7 @@ const Details = ({
                   })
                     .unwrap()
                     .then(() => {
-                      message.info("OTP Verified");
+                      message.success("OTP Verified");
                       setOtpVerified(true);
                     })
                     .catch((error) => message.error(error.data.error))
@@ -443,7 +438,7 @@ const Details = ({
                   .unwrap()
                   .then(() => {
                     const num = form.getFieldValue("contact_number");
-                    message.info("OTP Sent to " + num);
+                    message.success("OTP Sent to " + num);
                     setIsOtpSent(true);
                   })
                   .catch((error) => message.error(error.data.error))
