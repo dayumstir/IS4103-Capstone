@@ -12,7 +12,7 @@ export default function AccountLayout() {
         name="resetPassword"
         options={{ headerTitle: "Reset Password" }}
       />
-      <Stack.Screen name="vouchers" options={{ headerTitle: "Vouchers" }} />
+      <Stack.Screen name="rewards" options={{ headerTitle: "Rewards" }} />
       <Stack.Screen
         name="issue"
         options={{ title: "Issues", headerShown: false }}

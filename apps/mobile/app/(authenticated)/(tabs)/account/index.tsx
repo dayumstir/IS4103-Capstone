@@ -113,11 +113,9 @@ export default function AccountPage() {
       <View className="m-4 flex gap-2 rounded-lg bg-white p-8">
         <Text className="mb-4 text-2xl font-bold">Account Services</Text>
 
-        <Button type="primary" onPress={() => router.push("/account/vouchers")}>
+        <Button type="primary" onPress={() => router.push("/account/rewards")}>
           <AntDesign name="gift" size={20} color="white" className="mr-2" />
-          <Text className="my-auto font-semibold text-white">
-            Cashback & Vouchers
-          </Text>
+          <Text className="my-auto font-semibold text-white">My Rewards</Text>
         </Button>
 
         <Button type="primary" onPress={() => router.push("/account/issue")}>
