@@ -6,9 +6,16 @@ import { format } from "date-fns";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { IssueStatusBadge } from "../../../../../components/issueStatusBadge";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../../redux/store";
 
 export default function AllIssuesPage() {
-  const { data: issues, isLoading, error } = useGetAllIssuesQuery();
+  const { profile } = useSelector((state: RootState) => state.customer);
+  const {
+    data: issues,
+    isLoading,
+    error,
+  } = useGetAllIssuesQuery({ customer_id: profile!.customer_id.toString() });
 
   if (isLoading) {
     return (

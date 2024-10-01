@@ -31,10 +31,11 @@ export const issueApi = createApi({
     }),
 
     // Get All Issues
-    getAllIssues: builder.query<IIssue[], void>({
-      query: () => ({
+    getAllIssues: builder.query<IIssue[], { customer_id: string }>({
+      query: ({ customer_id }) => ({
         url: "/list",
         method: "POST",
+        body: { customer_id },
       }),
       providesTags: ["IssueList"],
     }),

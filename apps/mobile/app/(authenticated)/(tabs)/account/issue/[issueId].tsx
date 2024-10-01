@@ -71,11 +71,13 @@ export default function IssueDetailsPage() {
           Date Created: {format(issue.create_time, "dd MMM yyyy")}
         </Text>
 
-        <Text className="pb-4">{issue.description}</Text>
+        <Text>{issue.description}</Text>
 
         {issue.merchant_id && (
           // TODO: Replace with actual merchant name
-          <Text className="font-semibold">Merchant: {issue.merchant_id}</Text>
+          <Text className="pt-4 font-semibold">
+            Merchant: {issue.merchant_id}
+          </Text>
         )}
 
         {issue.transaction_id && (
