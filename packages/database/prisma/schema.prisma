@@ -181,6 +181,7 @@ model Transaction {
   merchant_id         String
   merchant_payment_id String
   installment_plan_id String
+  Issue               Issue[]
 }
 
 model InstalmentPlan {
@@ -218,14 +219,16 @@ model Issue {
   create_time DateTime @default(now())
   updated_at  DateTime @updatedAt
 
-  merchant_id String?  // Optional foreign key to Merchant
-  customer_id String?  // Optional foreign key to Customer
-  admin_id    String?  // Optional foreign key to Admin
+  merchant_id    String? // Optional foreign key to Merchant
+  customer_id    String? // Optional foreign key to Customer
+  admin_id       String? // Optional foreign key to Admin
+  transaction_id String? // Optional foreign key to Transaction
 
   // Relations
-  merchant    Merchant? @relation(fields: [merchant_id], references: [merchant_id])
-  customer    Customer? @relation(fields: [customer_id], references: [customer_id])
-  admin       Admin? @relation(fields: [admin_id], references: [admin_id])
+  merchant    Merchant?    @relation(fields: [merchant_id], references: [merchant_id])
+  customer    Customer?    @relation(fields: [customer_id], references: [customer_id])
+  admin       Admin?       @relation(fields: [admin_id], references: [admin_id])
+  transaction Transaction? @relation(fields: [transaction_id], references: [transaction_id])
 }
 
 

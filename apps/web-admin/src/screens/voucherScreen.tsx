@@ -11,11 +11,10 @@ import {
   InputNumber,
   DatePicker,
   FormInstance,
-  Tag,
 } from "antd";
 import { PlusOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
 
-import { useGetVouchersQuery, useCreateVoucherMutation } from "../redux/services/voucherService";
+import { useGetVouchersQuery, useCreateVoucherMutation, useDeactivateVoucherMutation } from "../redux/services/voucherService";
 import { useNavigate } from "react-router-dom";
 import { IVoucher } from "../interfaces/voucherInterface";
 
@@ -25,10 +24,13 @@ const { Search } = Input;
 export default function VoucherScreen() {
   const [form] = Form.useForm();
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const navigate = useNavigate();
 
   const { data: vouchers, isLoading } = useGetVouchersQuery(searchTerm);
   const [createVoucher] = useCreateVoucherMutation();
+  const [deactivateVoucher] = useDeactivateVoucherMutation();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -47,9 +49,19 @@ export default function VoucherScreen() {
   };
 
   // Handle voucher deactivation
-  const handleDeactivateVoucher = (id: string) => {
-    message.success("Voucher has been deactivated.");
-    // Logic for deactivating the voucher would go here.
+  const handleDeactivateVoucher = async (voucher: any) => {
+    if (!voucher.is_active) {
+      message.warning(`The voucher "${voucher.title}" is already deactivated.`);
+      return;
+    }
+
+    try {
+      await deactivateVoucher(voucher.voucher_id).unwrap();
+      message.success(`Voucher "${voucher.title}" has been deactivated.`);
+    } catch (error) {
+      console.error("Error deactivating voucher:", error);
+      message.error("Failed to deactivate voucher");
+    }
   };
 
   const tableColumns = [
@@ -83,17 +95,20 @@ export default function VoucherScreen() {
       dataIndex: "expiry_date",
       key: "expiry_date",
       render: (date: string) => new Date(date).toLocaleDateString(),
+      sorter: (a: IVoucher, b: IVoucher) => new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime(),
     },
     {
       title: "Usage Limit",
       dataIndex: "usage_limit",
       key: "usage_limit",
+      sorter: (a: IVoucher, b: IVoucher) => a.usage_limit - b.usage_limit,
     },
 
     {
       title: "Actions",
       key: "actions",
       width: 1,
+      sorter: (a: IVoucher, b: IVoucher) => (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1),
       render: (text: string, record: any) => (
         <div className="flex flex-col gap-2">
           <Button
@@ -103,13 +118,13 @@ export default function VoucherScreen() {
             View Voucher Details
           </Button>
           <Popconfirm
-            title="Are you sure you want to deactivate this voucher?"
-            onConfirm={() => handleDeactivateVoucher(record.voucher_id)}
+            title={`Are you sure you want to deactivate this voucher?`}
+            onConfirm={() => handleDeactivateVoucher(record)}
             okText="Yes"
             cancelText="No"
           >
-            <Button icon={<StopOutlined />} danger>
-              Deactivate
+            <Button icon={<StopOutlined />} danger disabled={!record.is_active}>
+              {record.is_active ? "Deactivate" : "Not In Use"}
             </Button>
           </Popconfirm>
         </div>
@@ -124,6 +139,7 @@ export default function VoucherScreen() {
       name="voucher"
       onFinish={handleCreateVoucher}
       layout="vertical"
+      validateTrigger={['onBlur', 'onSubmit']}
     >
       <div className="grid grid-cols-2 gap-x-8">
         <Form.Item
@@ -145,17 +161,32 @@ export default function VoucherScreen() {
         <Form.Item
           name="percentage_discount"
           label="Percentage Discount"
-          rules={[{ required: true, message: "Please input the percentage discount!" }]}
+          rules={[
+            { required: true, message: "Please input the percentage discount!" },
+            {
+              type: 'number',
+              min: 0,
+              max: 100,
+              message: "Percentage discount must be between 0 and 100",
+            },
+          ]}
         >
-          <InputNumber className="w-full" step={1} min={0} max={100} />
+          <InputNumber className="w-full" step={1} />
         </Form.Item>
 
         <Form.Item
           name="amount_discount"
           label="Amount Discount"
-          rules={[{ required: true, message: "Please input the amount discount!" }]}
+          rules={[
+            { required: true, message: "Please input the amount discount!" },
+            {
+              type: 'number',
+              min: 0,
+              message: "Amount discount must be greater than 0",
+            },
+          ]}
         >
-          <InputNumber className="w-full" step={1} min={0} />
+          <InputNumber className="w-full" step={1} />
         </Form.Item>
 
         <Form.Item
@@ -169,9 +200,16 @@ export default function VoucherScreen() {
         <Form.Item
           name="usage_limit"
           label="Usage Limit"
-          rules={[{ required: true, message: "Please input the usage limit!" }]}
+          rules={[
+            { required: true, message: "Please input the usage limit!" },
+            {
+              type: 'number',
+              min: 1,
+              message: "Usage limit must be greater than 0",
+            },
+          ]}
         >
-          <InputNumber className="w-full" step={1} min={1} />
+          <InputNumber className="w-full" step={1} />
         </Form.Item>
 
         <Form.Item
@@ -215,7 +253,17 @@ export default function VoucherScreen() {
           dataSource={vouchers}
           columns={tableColumns}
           rowKey="voucher_id"
-          pagination={false}
+          pagination={{
+            current: currentPage,
+            pageSize: pageSize,
+            total: vouchers ? vouchers.length : 0, // Assuming total count of vouchers is known
+            onChange: (page, pageSize) => {
+              setCurrentPage(page);
+              setPageSize(pageSize);
+            },
+            showSizeChanger: true, // Show option to change page size
+            pageSizeOptions: ['5', '10', '20', '50'], // Page size options
+          }}
           loading={isLoading}
           locale={{
             emptyText: <Empty description="No vouchers found"></Empty>,
