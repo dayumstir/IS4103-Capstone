@@ -26,9 +26,11 @@ export const createIssue = async (req: Request, res: Response) => {
 export const getIssues = async (req: Request, res: Response) => {
     const { search } = req.query;
     try {
+        const searchTerm = typeof search === "string" ? search : "";
+
         let issues;
         if (search) {
-            issues = await issueService.searchIssues(search);
+            issues = await issueService.searchIssues(searchTerm);
         } else {
             issues = await issueService.getIssues(req.body);
         }
@@ -56,10 +58,7 @@ export const getIssue = async (req: Request, res: Response) => {
 export const editIssue = async (req: Request, res: Response) => {
     const id = req.params.issue_id || req.body.issue_id;
     try {
-        const updatedIssue = await issueService.updateIssue(
-            id,
-            req.body,
-        );
+        const updatedIssue = await issueService.updateIssue(id, req.body);
         res.status(200).json(updatedIssue);
     } catch (error: any) {
         res.status(400).json({ error: error.message });

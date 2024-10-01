@@ -4,7 +4,6 @@ import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import { AdminType } from "../interfaces/adminTypeInterface";
 import { UserType } from "../interfaces/userType";
 
-
 declare global {
     namespace Express {
         interface Request {
@@ -15,7 +14,6 @@ declare global {
         }
     }
 }
-
 
 // Combined Auth Middleware for Admin, Customer, and Merchant
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
@@ -30,7 +28,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         // Check if the token is blacklisted
         const blacklistedToken = await jwtTokenRepository.findToken(token);
         if (blacklistedToken) {
-            return res.status(401).json({ message: 'Token is blacklisted. Please log in again.' });
+            return res.status(401).json({ message: "Token is blacklisted. Please log in again." });
         }
 
         // Decode JWT token
@@ -42,17 +40,24 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
         // Handle based on role
         switch (role) {
             case UserType.ADMIN:
-                if (!admin_id) return res.status(401).json({ message: "Unauthorized: Invalid admin token" });
-                req.admin_id = admin_id;  // Attach admin_id to the request object
-                req.admin_type = admin_type;  // Attach admin_type (admin/superadmin)
+                if (!admin_id)
+                    return res.status(401).json({ message: "Unauthorized: Invalid admin token" });
+                req.admin_id = admin_id; // Attach admin_id to the request object
+                req.admin_type = admin_type; // Attach admin_type (admin/superadmin)
                 break;
             case UserType.CUSTOMER:
-                if (!customer_id) return res.status(401).json({ message: "Unauthorized: Invalid customer token" });
-                req.customer_id = customer_id;  // Attach customer_id to the request object
+                if (!customer_id)
+                    return res
+                        .status(401)
+                        .json({ message: "Unauthorized: Invalid customer token" });
+                req.customer_id = customer_id; // Attach customer_id to the request object
                 break;
             case UserType.MERCHANT:
-                if (!merchant_id) return res.status(401).json({ message: "Unauthorized: Invalid merchant token" });
-                req.merchant_id = merchant_id;  // Attach merchant_id to the request object
+                if (!merchant_id)
+                    return res
+                        .status(401)
+                        .json({ message: "Unauthorized: Invalid merchant token" });
+                req.merchant_id = merchant_id; // Attach merchant_id to the request object
                 break;
             default:
                 return res.status(401).json({ message: "Unauthorized: Invalid user role" });

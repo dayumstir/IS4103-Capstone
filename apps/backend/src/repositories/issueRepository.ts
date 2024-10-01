@@ -19,10 +19,17 @@ export const getIssues = async (issueFilter: IssueFilter) => {
     return prisma.issue.findMany({
         where: whereClause,
         orderBy: sorting ? { [sorting.sortBy]: sorting.sortDirection } : { updated_at: "desc" },
-        include: {
-            merchant: true, // Fetch associated merchant
-            customer: true, // Fetch associated customer
-            admin: true, // Fetch associated admin
+        select: {
+            issue_id: true,
+            title: true,
+            description: true,
+            outcome: true,
+            status: true,
+            create_time: true,
+            updated_at: true,
+            merchant_id: true,
+            customer_id: true,
+            admin_id: true,
         },
     });
 };
@@ -30,7 +37,6 @@ export const getIssues = async (issueFilter: IssueFilter) => {
 export const findIssueById = async (issue_id: string) => {
     return prisma.issue.findUnique({ where: { issue_id } });
 };
-
 
 // update issue
 export const updateIssue = async (issue_id: string, updateData: Partial<IIssue>) => {
@@ -41,24 +47,35 @@ export const updateIssue = async (issue_id: string, updateData: Partial<IIssue>)
 };
 
 // Search Issues
-export const listAllIssuesWithSearch = async (search) => {
+export const listAllIssuesWithSearch = async (search: string) => {
     return prisma.issue.findMany({
-      where: {
-        OR: [
-          {
-            title: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            description: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      },
+        where: {
+            OR: [
+                {
+                    title: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+                {
+                    description: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+            ],
+        },
+        select: {
+            issue_id: true,
+            title: true,
+            description: true,
+            outcome: true,
+            status: true,
+            create_time: true,
+            updated_at: true,
+            merchant_id: true,
+            customer_id: true,
+            admin_id: true,
+        },
     });
-  };
-  
+};

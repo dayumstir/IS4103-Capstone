@@ -243,10 +243,14 @@ export const login = async (loginData: { email: string; password: string }) => {
     }
 
     // Generate JWT
-    const token = jwt.sign({ 
-        role: UserType.MERCHANT,
-        merchant_id: merchant.merchant_id 
-    }, process.env.JWT_SECRET!, { expiresIn: "1h" });
+    const token = jwt.sign(
+        {
+            role: UserType.MERCHANT,
+            merchant_id: merchant.merchant_id,
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "1h" }
+    );
 
     return { id: merchant.merchant_id, token };
 };

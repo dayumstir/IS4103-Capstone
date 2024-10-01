@@ -1,3 +1,5 @@
+import { IVoucherAssigned } from "./voucherAssignedInterface";
+
 export interface IVoucher {
     voucher_id: string;          
     title: string;
@@ -13,4 +15,5 @@ export interface IVoucher {
     updatedAt: Date;    
     
     created_by_admin: string; 
+    vouchersAssigned: IVoucherAssigned[];
 }

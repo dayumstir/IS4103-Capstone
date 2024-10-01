@@ -1,12 +1,12 @@
 // Need to use the React-specific entry point to import createApi
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IMerchant } from "../../interfaces/models/merchantInterface";
+import { ICustomer } from "../../interfaces/models/customerInterface";
 
 // Define a service using a base URL and expected endpoints
-export const profileApi = createApi({
-  reducerPath: "profileApi",
+export const customerApi = createApi({
+  reducerPath: "customerApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/merchant/profile",
+    baseUrl: "http://localhost:3000/admin/customer",
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) {
@@ -16,17 +16,10 @@ export const profileApi = createApi({
     },
   }),
   endpoints: (builder) => ({
-    getProfile: builder.query<IMerchant, string>({
+    getCustomer: builder.query<ICustomer, string>({
       query: (id) => ({
         url: `/${id}`,
         method: "GET",
-      }),
-    }),
-    editProfile: builder.mutation<IMerchant, { id: string; body: FormData }>({
-      query: ({ id, body }) => ({
-        url: `/${id}`,
-        method: "PUT",
-        body: body,
       }),
     }),
   }),
@@ -34,4 +27,4 @@ export const profileApi = createApi({
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetProfileQuery, useEditProfileMutation } = profileApi;
+export const { useGetCustomerQuery } = customerApi;

@@ -18,12 +18,12 @@ import {
 } from "../redux/services/profile";
 import { Buffer } from "buffer";
 import { UserOutlined, UploadOutlined } from "@ant-design/icons";
-import { RegisterFormValues } from "../interfaces/registerFormInterface";
-import { EditProfileProps } from "../interfaces/editProfileInterface";
+import { RegisterFormValues } from "../interfaces/screens/registerFormInterface";
+import { EditProfileProps } from "../interfaces/screens/editProfileInterface";
 import {
   ResetPasswordProps,
   ResetPasswordValues,
-} from "../interfaces/resetPasswordInterface";
+} from "../interfaces/screens/resetPasswordInterface";
 import { useResetPasswordMutation } from "../redux/services/auth";
 import { useNavigate } from "react-router-dom";
 
@@ -61,7 +61,7 @@ const ProfileScreen: React.FC = () => {
   });
 
   return (
-    <div>
+    <div className="px-16 py-2">
       <div className="flex items-center">
         {profilePictureDisplay ? (
           <img
@@ -294,7 +294,7 @@ const ResetPasswordModal = ({
     })
       .unwrap()
       .then(() => {
-        message.info("Reset Password Successful!");
+        message.success("Reset Password Successful!");
         setModalOpen(false);
       })
       .catch((error) => message.error(error.data.error));

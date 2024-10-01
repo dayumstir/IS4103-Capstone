@@ -119,8 +119,7 @@ model Admin {
   contact_number  String
   address         String
   date_of_birth   DateTime
-  admin_type      AdminType
-
+  admin_type      AdminType // TODO: Implement as enum
   issues          Issue[]
   vouchersCreated Voucher[]
 }
@@ -181,6 +180,7 @@ model Transaction {
   merchant_id         String
   merchant_payment_id String
   installment_plan_id String
+  issues              Issue[]
 }
 
 model InstalmentPlan {
@@ -202,30 +202,32 @@ model CreditTier {
   max_credit_score Int
 }
 
-
 enum IssueStatus {
   PENDING_OUTCOME
   RESOLVED
+  CANCELLED
 }
 
 model Issue {
-  issue_id    String @id @default(cuid())
+  issue_id    String      @id @default(cuid())
   title       String
-  description String 
+  description String
   outcome     String?
   status      IssueStatus
-  images      Bytes[] @db.ByteA
-  create_time DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  images      Bytes[]     @db.ByteA
+  create_time DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
 
-  merchant_id String?  // Optional foreign key to Merchant
-  customer_id String?  // Optional foreign key to Customer
-  admin_id    String?  // Optional foreign key to Admin
+  merchant_id    String? // Optional foreign key to Merchant
+  customer_id    String? // Optional foreign key to Customer
+  admin_id       String? // Optional foreign key to Admin
+  transaction_id String? // Optional foreign key to Transaction
 
   // Relations
-  merchant    Merchant? @relation(fields: [merchant_id], references: [merchant_id])
-  customer    Customer? @relation(fields: [customer_id], references: [customer_id])
-  admin       Admin? @relation(fields: [admin_id], references: [admin_id])
+  merchant    Merchant?    @relation(fields: [merchant_id], references: [merchant_id])
+  customer    Customer?    @relation(fields: [customer_id], references: [customer_id])
+  admin       Admin?       @relation(fields: [admin_id], references: [admin_id])
+  transaction Transaction? @relation(fields: [transaction_id], references: [transaction_id])
 }
 
 
