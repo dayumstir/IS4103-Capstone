@@ -1,4 +1,3 @@
-// Defines the structure of a instalment plan object
 import { Sorting } from "./sortingInterface";
 
 export enum IssueStatus {

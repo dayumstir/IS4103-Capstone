@@ -22,6 +22,10 @@ export default function BusinessManagementRoute() {
           label: <Link to="/business-management/credit-tier">Credit Tier</Link>,
         },
         {
+          key: "Voucher",
+          label: <Link to="/business-management/voucher">Voucher</Link>,
+        },
+        {
           key: "Issues",
           label: <Link to="/business-management/issues">Issues</Link>,
         },

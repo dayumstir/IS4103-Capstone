@@ -5,7 +5,6 @@ import {
     editMerchantProfile,
     listAllMerchants,
 } from "../controllers/merchantController";
-import { authMiddleware } from "../middlewares/merchantAuthMiddleware";
 import {
     register,
     login,
@@ -17,6 +16,7 @@ import {
     checkEmailNotInUse,
     resendEmailConfirmation,
 } from "../controllers/merchantAuthController";
+import { authMiddleware } from "../middlewares/authMiddleware";
 import multer from "multer";
 
 const merchantRouter = Router();
@@ -27,12 +27,7 @@ const upload = multer({
     limits: { fileSize: 2 * 1024 * 1024 }, // Limit file size to 2 MB
 });
 merchantRouter.get("/profile/:merchant_id", authMiddleware, getMerchantProfile);
-merchantRouter.put(
-    "/profile/:id",
-    authMiddleware,
-    upload.single("profile_picture"),
-    editMerchantProfile
-);
+merchantRouter.put("/profile/:id", authMiddleware, upload.single("profile_picture"), editMerchantProfile);
 
 merchantRouter.get("/allMerchants", listAllMerchants);
 merchantRouter.get("/:merchant_id", getMerchantProfile);

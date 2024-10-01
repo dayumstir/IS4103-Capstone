@@ -5,8 +5,8 @@ import * as adminService from "../services/adminService";
 
 export const get = async(req: Request, res: Response) => {
     try {
-        // Extract admin_id from req.admin (populated by the middleware)
-        const admin_id = req.admin?.admin_id;
+        // Extract admin_id from req.admin_id (populated by the middleware)
+        const admin_id = req.admin_id;
         if (!admin_id) {
             return res.status(401).json({ error: "admin_id is required" });
         }
@@ -59,10 +59,10 @@ export const getAdminProfile = async(req: Request, res: Response) => {
 };
 
 
-export const edit= async (req: Request, res: Response) => {
+export const edit = async (req: Request, res: Response) => {
     try {
-        // Extract admin_id from req.admin (populated by the middleware)
-        const admin_id = req.admin?.admin_id;
+        // Extract admin_id from req.admin_id (populated by the middleware)
+        const admin_id = req.admin_id;
         if (!admin_id) {
             return res.status(401).json({ error: "admin_id is required" });
         }

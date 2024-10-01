@@ -1,6 +1,5 @@
 import { MerchantStatus } from "./merchantStatus";
 
-// Defines the structure of a merchant object
 export interface IMerchant {
     name: string;
     email: string;

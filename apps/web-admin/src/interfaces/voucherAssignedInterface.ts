@@ -1,4 +1,9 @@
-import { VoucherStatus } from "./voucherStatusInterface";
+enum VoucherStatus {
+    AVAILABLE = "AVAILABLE",
+    EXPIRED = "EXPIRED",
+    USED = "USED",
+    UNAVAILABLE = "UNAVAILABLE"
+}
 
 export interface IVoucherAssigned {
     voucher_assigned_id: string;  

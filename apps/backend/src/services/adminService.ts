@@ -2,7 +2,7 @@
 import { IAdmin } from "../interfaces/adminInterface";
 import * as adminRepository from "../repositories/adminRepository";
 import logger from "../utils/logger";
-import { AdminType } from "../interfaces/adminType";
+import { AdminType } from "../interfaces/adminTypeInterface";
 
 export const getById = async (admin_id: string) => {
   const admin = await adminRepository.findAdminById(admin_id);

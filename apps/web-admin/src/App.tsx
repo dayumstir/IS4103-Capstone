@@ -16,6 +16,7 @@ import AllMerchantsScreen from "./screens/allMerchantsScreen";
 import MerchantProfileScreen from "./screens/merchantProfileScreen";
 import HomeScreen from "./screens/homeScreen";
 import AllAdminScreen from "./screens/allAdminScreen";
+import VoucherScreen from "./screens/voucherScreen";
 import AllIssuesScreen from "./screens/allIssuesScreen";
 
 export default function App() {
@@ -50,6 +51,10 @@ export default function App() {
             <Route
               path="/business-management/credit-tier"
               element={<CreditTierScreen />}
+            />
+            <Route
+              path="/business-management/voucher"
+              element={<VoucherScreen />}
             />
             <Route
               path="/business-management/issues"

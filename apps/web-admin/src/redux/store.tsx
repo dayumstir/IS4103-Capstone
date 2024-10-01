@@ -6,6 +6,7 @@ import { creditTierApi } from "./services/creditTierService";
 import { instalmentPlanApi } from "./services/instalmentPlanService";
 import { customerApi } from "./services/customerService";
 import { merchantApi } from "./services/merchantService";
+import { voucherApi } from "./services/voucherService";
 import { issueApi } from "./services/issueService";
 
 const customSerializableCheck = {
@@ -21,6 +22,7 @@ export const store = configureStore({
     [instalmentPlanApi.reducerPath]: instalmentPlanApi.reducer,
     [customerApi.reducerPath]: customerApi.reducer,
     [merchantApi.reducerPath]: merchantApi.reducer,
+    [voucherApi.reducerPath]: voucherApi.reducer,
     [issueApi.reducerPath]: issueApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -31,6 +33,7 @@ export const store = configureStore({
       instalmentPlanApi.middleware,
       customerApi.middleware,
       merchantApi.middleware,
+      voucherApi.middleware,
       issueApi.middleware,
     ),
 });
