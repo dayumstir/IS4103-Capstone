@@ -5,11 +5,13 @@ import { Sorting } from "../sortingInterface";
 export enum IssueStatus {
   PENDING_OUTCOME = "PENDING_OUTCOME",
   RESOLVED = "RESOLVED",
+  CANCELLED = "CANCELLED",
 }
 
 export const statusColorMap: Record<IssueStatus, string> = {
   [IssueStatus.PENDING_OUTCOME]: "orange",
   [IssueStatus.RESOLVED]: "green",
+  [IssueStatus.CANCELLED]: "red",
 };
 
 export interface IIssue {

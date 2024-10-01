@@ -14,7 +14,6 @@ import {
 } from "antd";
 import Dragger from "antd/es/upload/Dragger";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { IIssue } from "../interfaces/models/issueInterface";
 import { useCreateIssueMutation } from "../redux/services/issue";
 
@@ -26,16 +25,14 @@ const CreateIssueModal = ({
   isModalOpen,
   setModalOpen,
 }: CreateIssueModalProps) => {
-  const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [isIssueCreated, setIsIssueCreated] = useState(false);
   const [createIssueMutation, { isLoading }] = useCreateIssueMutation();
 
   const [imagesDisplays, setImagesDisplay] = useState<string[]>(
-    Array(6).fill(""),
+    Array(4).fill(""),
   );
   const [images, setImages] = useState<(File | undefined)[]>(
-    new Array(6).fill(undefined),
+    new Array(4).fill(undefined),
   ); // Initialize with 6 undefined values
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
@@ -60,6 +57,11 @@ const CreateIssueModal = ({
   type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
   const beforeUpload = (file: FileType) => {
+    if (!images.includes(undefined)) {
+      message.error("Maximum of 4 photos is allowed");
+      return;
+    }
+
     const isJpgOrPng = file.type === "image/png";
     if (!isJpgOrPng) {
       message.error("You can only upload PNG file!");
@@ -71,10 +73,6 @@ const CreateIssueModal = ({
 
     return isJpgOrPng && isLt2M;
   };
-
-  function sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 
   const handleChange: UploadProps["onChange"] = async ({ file: newFile }) => {
     if (newFile && newFile.originFileObj) {
@@ -143,7 +141,6 @@ const CreateIssueModal = ({
     await createIssueMutation(formData)
       .unwrap()
       .then(() => {
-        setIsIssueCreated(true);
         setModalOpen(false);
         message.success(
           "Your issue has been created. Please expect at least 3 working days for us to get back. Thank you!",
@@ -157,7 +154,7 @@ const CreateIssueModal = ({
       title="Create Issue"
       open={isModalOpen}
       onOk={() => form.submit()}
-      //   okButtonProps={{ style: { display: "none" } }}
+      // okButtonProps={{ style: { display: "none" } }}
       cancelText="Cancel"
       okText="Create"
       onCancel={() => setModalOpen(false)}
@@ -194,7 +191,7 @@ const CreateIssueModal = ({
               Click or drag file to this area to upload
             </p>
             <p className="ant-upload-hint">
-              Support for a single or bulk upload. Maximum of 6 photos is
+              Support for a single or bulk upload. Maximum of 4 photos is
               allowed.
             </p>
           </Dragger>

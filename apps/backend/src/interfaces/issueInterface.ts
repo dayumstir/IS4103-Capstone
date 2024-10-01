@@ -3,6 +3,7 @@ import { Sorting } from "./sortingInterface";
 export enum IssueStatus {
     PENDING_OUTCOME = "PENDING_OUTCOME",
     RESOLVED = "RESOLVED",
+    CANCELLED = "CANCELLED",
 }
 
 export interface IIssue {

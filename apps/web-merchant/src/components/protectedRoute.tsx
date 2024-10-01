@@ -10,7 +10,7 @@ const ProtectedRoute: React.FC = () => {
     return (
       <div>
         <Header />
-        <div className="mb-16 mt-16 flex h-[calc(100vh-120px)] flex-col">
+        <div className="mb-16 mt-16 flex h-[calc(100vh-130px)] flex-col">
           <Outlet />
         </div>
       </div>
