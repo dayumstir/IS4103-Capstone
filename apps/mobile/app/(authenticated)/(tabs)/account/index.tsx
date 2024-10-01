@@ -120,7 +120,7 @@ export default function AccountPage() {
 
         <Button type="primary" onPress={() => router.push("/account/issue")}>
           <AntDesign
-            name="exclamationcircleo"
+            name="warning"
             size={20}
             color="white"
             className="mr-2"

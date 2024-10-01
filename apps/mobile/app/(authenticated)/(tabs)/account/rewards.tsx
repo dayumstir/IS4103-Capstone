@@ -2,6 +2,7 @@ import { View, Text, ScrollView, Dimensions } from "react-native";
 import { Button } from "@ant-design/react-native";
 import { router } from "expo-router";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function Rewards() {
   const Tab = createMaterialTopTabNavigator();
@@ -117,7 +118,12 @@ export default function Rewards() {
 
   return (
     <View className="m-4 flex-1 rounded-lg bg-white p-8">
-      <Text className="mb-4 text-2xl font-bold">Rewards</Text>
+      <View className="mb-4 flex flex-row items-center gap-3">
+        <View className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500">
+          <AntDesign name="gift" size={20} color="white" />
+        </View>
+        <Text className="text-2xl font-bold">Rewards</Text>
+      </View>
 
       <Tab.Navigator
         screenOptions={{
@@ -125,7 +131,7 @@ export default function Rewards() {
             fontWeight: "600",
             textTransform: "none",
             textAlign: "center",
-            fontSize: 16,
+            fontSize: 14,
           },
           tabBarItemStyle: {
             width: (Dimensions.get("window").width - 80) / 2,

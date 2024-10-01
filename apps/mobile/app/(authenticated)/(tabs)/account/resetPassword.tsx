@@ -95,14 +95,15 @@ export default function ResetPassword() {
 
   return (
     <ScrollView>
-      <View className="flex w-screen px-12 pt-8">
-        {/* ===== Password Field ===== */}
-        <Text className="mb-2 text-gray-600">Old Password</Text>
+      <View className="m-4 flex rounded-lg bg-white p-8">
+        <Text className="mb-4 text-2xl font-bold">Reset Password</Text>
+
+        <Text className="mb-2 font-semibold">Old Password</Text>
         <Controller
           control={control}
           name="oldPassword"
           render={({ field: { onChange, onBlur, value } }) => (
-            <View className="mb-4">
+            <View className="mb-4 w-full">
               <TextInput
                 className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
                 onChangeText={onChange}
@@ -130,13 +131,12 @@ export default function ResetPassword() {
           )}
         />
 
-        {/* ===== Password Field ===== */}
-        <Text className="mb-2 text-gray-600">New Password</Text>
+        <Text className="mb-2 font-semibold">New Password</Text>
         <Controller
           control={control}
           name="newPassword"
           render={({ field: { onChange, onBlur, value } }) => (
-            <View className="mb-4">
+            <View className="mb-4 w-full">
               <TextInput
                 className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
                 onChangeText={onChange}
@@ -164,13 +164,12 @@ export default function ResetPassword() {
           )}
         />
 
-        {/* ===== Confirm New Password Field ===== */}
-        <Text className="mb-2 text-gray-600">Confirm New Password</Text>
+        <Text className="mb-2 font-semibold">Confirm New Password</Text>
         <Controller
           control={control}
           name="confirmPassword"
           render={({ field: { onChange, onBlur, value } }) => (
-            <View className="mb-4">
+            <View className="mb-4 w-full">
               <TextInput
                 className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
                 onChangeText={onChange}
@@ -203,8 +202,8 @@ export default function ResetPassword() {
           <Text className="mb-4 text-red-500">{customErrorMessage}</Text>
         )}
 
-        {/* Buttons */}
-        <View className="mt-8 w-full gap-4">
+        {/* ===== Save and Cancel Buttons ===== */}
+        <View className="mt-4 w-full gap-4">
           <Button
             onPress={handleSubmit(onSubmit)}
             type="primary"
