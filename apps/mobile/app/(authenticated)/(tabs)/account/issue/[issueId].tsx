@@ -51,14 +51,20 @@ export default function IssueDetailsPage() {
 
   return (
     <ScrollView>
-      <View className="m-4 flex-1 gap-4 rounded-lg bg-white p-4">
+      <View className="m-4 flex-1 gap-4 rounded-lg bg-white p-8">
         <View className="border-b border-gray-200 pb-4">
           <Text className="text-2xl font-bold">Issue Details</Text>
         </View>
 
-        <View className="flex-row items-center justify-between">
-          <Text className="text-2xl font-semibold">{issue.title}</Text>
-          <IssueStatusBadge status={issue.status} />
+        <View className="flex flex-row items-center justify-between">
+          <View className="flex-1">
+            <Text className="break-words text-2xl font-semibold">
+              {issue.title}
+            </Text>
+          </View>
+          <View className="ml-4">
+            <IssueStatusBadge status={issue.status} />
+          </View>
         </View>
 
         <Text className="text-sm text-gray-500">

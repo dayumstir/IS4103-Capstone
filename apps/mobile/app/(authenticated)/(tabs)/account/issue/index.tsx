@@ -64,7 +64,7 @@ export default function AllIssuesPage() {
                 }`}
               >
                 {/* ===== Issue Details ===== */}
-                <View className="mr-2 flex-1 gap-1">
+                <View className="flex-1 gap-1">
                   <Text className="text-lg font-semibold">{issue.title}</Text>
                   <Text className="pb-1 text-sm text-gray-600">
                     {format(issue.create_time, "dd MMM yyyy")}
@@ -74,7 +74,7 @@ export default function AllIssuesPage() {
 
                 {/* ===== View Details Button ===== */}
                 <TouchableOpacity
-                  className="flex-row items-center gap-1 rounded-md border border-blue-500 px-4 py-2"
+                  className="ml-4 flex-row items-center gap-1 rounded-md border border-blue-500 px-4 py-2"
                   onPress={() =>
                     router.push(`/account/issue/${issue.issue_id}`)
                   }
