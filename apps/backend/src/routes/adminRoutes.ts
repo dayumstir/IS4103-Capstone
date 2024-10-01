@@ -1,16 +1,24 @@
 // Defines routes related to admin actions
 import { Router } from "express";
-import { get, edit, getAll, deactivateAdmin, activateAdmin, getAdminProfile } from "../controllers/adminController";
+import {
+    get,
+    edit,
+    getAll,
+    deactivateAdmin,
+    activateAdmin,
+    getAdminProfile,
+    getAdminByPathVariable,
+} from "../controllers/adminController";
 import { add } from "../controllers/adminAuthController";
 import {
-  listAllCustomers,
-  getCustomerProfile,
-  editCustomerProfile,
+    listAllCustomers,
+    getCustomerProfile,
+    editCustomerProfile,
 } from "../controllers/customerController";
 import {
-  listAllMerchants,
-  getMerchantProfile,
-  editMerchantProfile,
+    listAllMerchants,
+    getMerchantProfile,
+    editMerchantProfile,
 } from "../controllers/merchantController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { superAdminAuthMiddleware } from "../middlewares/superAdminAuthMiddleware";
@@ -18,6 +26,7 @@ import { superAdminAuthMiddleware } from "../middlewares/superAdminAuthMiddlewar
 const router = Router();
 
 router.get("/profile", authMiddleware, get);
+router.get("/profile/:admin_id", authMiddleware, getAdminByPathVariable);
 router.put("/profile", authMiddleware, edit);
 
 router.get("/allCustomers", authMiddleware, listAllCustomers);

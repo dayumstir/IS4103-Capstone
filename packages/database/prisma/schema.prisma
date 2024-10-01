@@ -36,12 +36,8 @@ model Customer {
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
   passwordResetTokens     PasswordResetToken[]
-<<<<<<< HEAD
-  issues Issue[]
-=======
   issues                  Issue[]
   vouchersAssigned        VoucherAssigned[]
->>>>>>> 067e0e7c0e43e96b71499a31bb0c65f20d29702d
 }
 
 // Utility Schemas
@@ -123,15 +119,9 @@ model Admin {
   contact_number  String
   address         String
   date_of_birth   DateTime
-<<<<<<< HEAD
   admin_type      AdminType // TODO: Implement as enum
-  issues Issue[]
-=======
-  admin_type      AdminType
-
   issues          Issue[]
   vouchersCreated Voucher[]
->>>>>>> 067e0e7c0e43e96b71499a31bb0c65f20d29702d
 }
 
 
@@ -147,12 +137,7 @@ model Merchant {
   profile_picture Bytes? @db.ByteA
 
   emailVerificationTokens MerchantEmailVerificationToken[]
-<<<<<<< HEAD
-  issues Issue[]
-
-=======
   issues                  Issue[]
->>>>>>> 067e0e7c0e43e96b71499a31bb0c65f20d29702d
 }
 
 // Merchant Sign Up Use Case: Store phone number OTPs
@@ -195,6 +180,7 @@ model Transaction {
   merchant_id         String
   merchant_payment_id String
   installment_plan_id String
+  issues              Issue[]
 }
 
 model InstalmentPlan {
@@ -286,4 +272,3 @@ model VoucherAssigned {
 
   used_installment_payment_id String // TODO: Associate with installment plan
 }
->>>>>>> 067e0e7c0e43e96b71499a31bb0c65f20d29702d
