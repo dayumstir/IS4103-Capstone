@@ -14,6 +14,7 @@ import {
 } from "../controllers/merchantController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { superAdminAuthMiddleware } from "../middlewares/superAdminAuthMiddleware";
+import { editIssue, getIssue, getIssues } from "../controllers/issueController";
 
 const router = Router();
 
@@ -26,6 +27,10 @@ router.put("/customer/:customer_id", authMiddleware, editCustomerProfile);
 router.get("/allMerchants", authMiddleware, listAllMerchants);
 router.get("/merchant/:merchant_id", authMiddleware, getMerchantProfile);
 router.put("/merchant/:merchant_id", authMiddleware, editMerchantProfile);
+router.get("/allIssues", getIssues);
+router.get("/issue/:issue_id", getIssue);
+router.put("/issue/:issue_id", editIssue);
+
 
 router.post("/add", add);
 router.get("/get-all", authMiddleware, superAdminAuthMiddleware, getAll);

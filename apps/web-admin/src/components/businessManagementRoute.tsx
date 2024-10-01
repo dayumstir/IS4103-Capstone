@@ -25,6 +25,10 @@ export default function BusinessManagementRoute() {
           key: "Voucher",
           label: <Link to="/business-management/voucher">Voucher</Link>,
         },
+        {
+          key: "Issues",
+          label: <Link to="/business-management/issues">Issues</Link>,
+        },
       ],
     },
   ];
