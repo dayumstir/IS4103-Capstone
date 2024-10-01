@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import logo from "../assets/pandapay_logo.png";
 import { Button, Form, Input, message, Modal } from "antd";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useConfirmEmailMutation,
@@ -36,7 +35,7 @@ const PendingEmailConfirmationModal = ({
         confirmEmailMutation({ email: email, token: token })
           .unwrap()
           .then(() => {
-            message.info("Email verified successfully!");
+            message.success("Email verified successfully!");
             setModalOpen(false);
             navigate("/login");
           })
