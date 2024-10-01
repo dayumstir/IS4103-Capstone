@@ -23,7 +23,7 @@ export default function BusinessManagementRoute() {
       <Sider style={{ backgroundColor: "#fff" }}>
         <Menu items={items} defaultSelectedKeys={["Issues"]} />
       </Sider>
-      <div className="flex-grow p-5">
+      <div className="flex-grow p-2">
         <Outlet />
       </div>
     </Layout>

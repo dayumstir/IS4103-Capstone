@@ -1,7 +1,11 @@
 // Need to use the React-specific entry point to import createApi
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-import { IIssue, IssueFilter } from "../../interfaces/models/issueInterface";
+import {
+  IIssue,
+  IssueFilter,
+  IssueStatus,
+} from "../../interfaces/models/issueInterface";
 
 // Define a service using a base URL and expected endpoints
 export const issueApi = createApi({
@@ -37,6 +41,25 @@ export const issueApi = createApi({
         body: body,
       }),
     }),
+    cancelIssue: builder.mutation<IIssue, string>({
+      query: (id) => ({
+        url: `/${id}`,
+        method: "PUT",
+        body: { status: IssueStatus.CANCELLED },
+      }),
+    }),
+    searchIssues: builder.mutation<IIssue[], string>({
+      query: (search) => {
+        const queryString = search
+          ? `?search=${encodeURIComponent(search)}`
+          : "";
+        return {
+          url: `/list${queryString}`,
+          method: "POST",
+          body: {}, // If you need to send any body, you can modify this accordingly
+        };
+      },
+    }),
   }),
 });
 
@@ -46,4 +69,6 @@ export const {
   useCreateIssueMutation,
   useGetIssueQuery,
   useGetIssuesMutation,
+  useCancelIssueMutation,
+  useSearchIssuesMutation,
 } = issueApi;
