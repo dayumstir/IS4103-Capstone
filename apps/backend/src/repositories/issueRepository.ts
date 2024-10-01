@@ -8,7 +8,14 @@ export const createIssue = async (issueData: IIssue) => {
 };
 
 export const getIssues = async (issueFilter: IssueFilter) => {
-    const { sorting, create_from, create_to, update_from, update_to, ...filter } = issueFilter;
+    const {
+        sorting,
+        create_from,
+        create_to,
+        update_from,
+        update_to,
+        ...filter
+    } = issueFilter;
     const whereClause = {
         ...filter,
         ...(create_from && { create_time: { gte: create_from } }),
@@ -18,11 +25,20 @@ export const getIssues = async (issueFilter: IssueFilter) => {
     };
     return prisma.issue.findMany({
         where: whereClause,
-        orderBy: sorting ? { [sorting.sortBy]: sorting.sortDirection } : { updated_at: "desc" },
-        include: {
-            merchant: true, // Fetch associated merchant
-            customer: true, // Fetch associated customer
-            admin: true, // Fetch associated admin
+        orderBy: sorting
+            ? { [sorting.sortBy]: sorting.sortDirection }
+            : { updated_at: "desc" },
+        select: {
+            issue_id: true,
+            title: true,
+            description: true,
+            outcome: true,
+            status: true,
+            create_time: true,
+            updated_at: true,
+            merchant_id: true,
+            customer_id: true,
+            admin_id: true,
         },
     });
 };

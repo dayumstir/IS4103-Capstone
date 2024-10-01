@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { Button, DatePicker } from "@ant-design/react-native";
 import { Controller, useForm } from "react-hook-form";
 import { format, setMonth } from "date-fns";
@@ -88,113 +94,117 @@ export default function EditProfile() {
   };
 
   return (
-    <View className="flex px-12 pt-8">
-      <Text className="mb-2 text-gray-600">Name</Text>
-      <Controller
-        control={control}
-        name="name"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <View className="mb-4 w-full">
-            <TextInput
-              className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-              placeholder="Name"
-            />
-            {errors.name && (
-              <Text className="mt-1 text-red-500">{errors.name.message}</Text>
-            )}
-          </View>
-        )}
-      />
+    <ScrollView>
+      <View className="m-4 flex rounded-lg bg-white p-8">
+        <Text className="mb-4 text-2xl font-bold">Edit Profile</Text>
+        
+        <Text className="mb-2 font-semibold">Name</Text>
+        <Controller
+          control={control}
+          name="name"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <View className="mb-4 w-full">
+              <TextInput
+                className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+                placeholder="Name"
+              />
+              {errors.name && (
+                <Text className="mt-1 text-red-500">{errors.name.message}</Text>
+              )}
+            </View>
+          )}
+        />
 
-      <Text className="mb-2 text-gray-600">Address</Text>
-      <Controller
-        control={control}
-        name="address"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <View className="mb-4">
-            <TextInput
-              className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-              placeholder="Address"
-              multiline
-            />
-            {errors.address && (
-              <Text className="mt-1 text-red-500">
-                {errors.address.message}
-              </Text>
-            )}
-          </View>
-        )}
-      />
-
-      <Text className="mb-2 text-gray-600">Date of Birth</Text>
-      <Controller
-        control={control}
-        name="date_of_birth"
-        render={({ field: { onChange, value } }) => (
-          <View className="mb-4">
-            <DatePicker
-              value={value ? new Date(value) : new Date()}
-              minDate={new Date(1900, 0, 1)}
-              maxDate={new Date()}
-              onChange={(date) => {
-                if (date) {
-                  onChange(date);
-                }
-              }}
-              okText="Confirm"
-              dismissText="Cancel"
-              format="DD MMMM YYYY"
-              renderLabel={(type, data) => {
-                if (type === "month") {
-                  const date = setMonth(new Date(2000, 0, 1), data - 1);
-                  return <Text>{format(date, "MMMM")}</Text>;
-                } else {
-                  return data;
-                }
-              }}
-            >
-              <TouchableOpacity className="rounded-md border border-gray-300 p-4 focus:border-blue-500">
-                <Text>
-                  {value
-                    ? format(new Date(value), "dd MMMM yyyy")
-                    : "Select Date of Birth"}
+        <Text className="mb-2 font-semibold">Address</Text>
+        <Controller
+          control={control}
+          name="address"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <View className="mb-4">
+              <TextInput
+                className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+                placeholder="Address"
+                multiline
+              />
+              {errors.address && (
+                <Text className="mt-1 text-red-500">
+                  {errors.address.message}
                 </Text>
-              </TouchableOpacity>
-            </DatePicker>
-            {errors.date_of_birth && (
-              <Text className="mt-1 text-red-500">
-                {errors.date_of_birth.message}
-              </Text>
-            )}
-          </View>
+              )}
+            </View>
+          )}
+        />
+
+        <Text className="mb-2 font-semibold">Date of Birth</Text>
+        <Controller
+          control={control}
+          name="date_of_birth"
+          render={({ field: { onChange, value } }) => (
+            <View className="mb-4">
+              <DatePicker
+                value={value ? new Date(value) : new Date()}
+                minDate={new Date(1900, 0, 1)}
+                maxDate={new Date()}
+                onChange={(date) => {
+                  if (date) {
+                    onChange(date);
+                  }
+                }}
+                okText="Confirm"
+                dismissText="Cancel"
+                format="DD MMMM YYYY"
+                renderLabel={(type, data) => {
+                  if (type === "month") {
+                    const date = setMonth(new Date(2000, 0, 1), data - 1);
+                    return <Text>{format(date, "MMMM")}</Text>;
+                  } else {
+                    return data;
+                  }
+                }}
+              >
+                <TouchableOpacity className="rounded-md border border-gray-300 p-4 focus:border-blue-500">
+                  <Text>
+                    {value
+                      ? format(new Date(value), "dd MMMM yyyy")
+                      : "Select Date of Birth"}
+                  </Text>
+                </TouchableOpacity>
+              </DatePicker>
+              {errors.date_of_birth && (
+                <Text className="mt-1 text-red-500">
+                  {errors.date_of_birth.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+
+        {/* ===== Error Message ===== */}
+        {customErrorMessage && (
+          <Text className="mb-4 text-red-500">{customErrorMessage}</Text>
         )}
-      />
 
-      {/* ===== Error Message ===== */}
-      {customErrorMessage && (
-        <Text className="mb-4 text-red-500">{customErrorMessage}</Text>
-      )}
-
-      {/* ===== Save and Cancel Buttons ===== */}
-      <View className="mt-8 w-full gap-4">
-        <Button
-          type="primary"
-          onPress={handleSubmit(onSubmit)}
-          loading={isLoading}
-          disabled={isLoading}
-        >
-          <Text className="font-semibold text-white">Save</Text>
-        </Button>
-        <Button type="ghost" onPress={handleCancel}>
-          <Text className="font-semibold text-blue-500">Cancel</Text>
-        </Button>
+        {/* ===== Save and Cancel Buttons ===== */}
+        <View className="mt-4 w-full gap-4">
+          <Button
+            type="primary"
+            onPress={handleSubmit(onSubmit)}
+            loading={isLoading}
+            disabled={isLoading}
+          >
+            <Text className="font-semibold text-white">Save</Text>
+          </Button>
+          <Button type="ghost" onPress={handleCancel}>
+            <Text className="font-semibold text-blue-500">Cancel</Text>
+          </Button>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }

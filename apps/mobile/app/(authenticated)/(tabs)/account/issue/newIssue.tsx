@@ -75,7 +75,7 @@ export default function NewIssue() {
 
   return (
     <ScrollView>
-      <View className="m-4 rounded-lg bg-white p-4">
+      <View className="m-4 rounded-lg bg-white p-8">
         <Text className="mb-4 text-2xl font-bold">Raise an Issue</Text>
 
         <Text className="mb-2 font-semibold">Title</Text>
