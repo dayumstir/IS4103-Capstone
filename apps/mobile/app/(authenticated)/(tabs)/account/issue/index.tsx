@@ -53,7 +53,7 @@ export default function AllIssuesPage() {
 
       {/* ===== List of Issues ===== */}
       <ScrollView className="mt-4">
-        <View className="rounded-lg bg-white px-4">
+        <View className="rounded-lg bg-white px-8 py-4">
           {issues &&
             issues.length > 0 &&
             issues.map((issue, index) => (
