@@ -57,7 +57,15 @@ export const deactivateVoucher = async (req: Request, res: Response) => {
 export const getAllVouchers = async (req: Request, res: Response) => {
     logger.info("Executing getAllVouchers...");
     try {
-        const vouchers = await voucherService.getAllVouchers();
+        const { search } = req.query;
+
+        let vouchers;
+        if (search) {
+            vouchers = await voucherService.searchVoucher(search as string);
+        } else {
+            vouchers = await voucherService.getAllVouchers();
+        }
+
         res.status(200).json(vouchers);
     } catch (error: any) {
         logger.error("An error occurred:", error);

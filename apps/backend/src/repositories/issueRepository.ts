@@ -37,3 +37,35 @@ export const getIssues = async (issueFilter: IssueFilter) => {
 export const findIssueById = async (issue_id: string) => {
     return prisma.issue.findUnique({ where: { issue_id } });
 };
+
+
+// update issue
+export const updateIssue = async (issue_id: string, updateData: Partial<IIssue>) => {
+    return prisma.issue.update({
+        where: { issue_id: issue_id },
+        data: updateData,
+    });
+};
+
+// Search Issues
+export const listAllIssuesWithSearch = async (search) => {
+    return prisma.issue.findMany({
+      where: {
+        OR: [
+          {
+            title: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            description: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
+  };
+  

@@ -26,3 +26,24 @@ export const getIssueById = async (issue_id: string) => {
     }
     return issue;
 };
+
+
+export const updateIssue = async (issue_id: string, updateData: Partial<IIssue>) => {
+    logger.info('Executing updateIssue...');
+
+    const issue = await issueRepository.updateIssue(issue_id, updateData);
+    if (!issue) {
+        throw new Error("Issue not found");
+    }
+    return issue;
+};
+
+export const searchIssues = async (searchQuery) => {
+    logger.info(`Searching for issues with query: ${searchQuery}`);
+    const issues = await issueRepository.listAllIssuesWithSearch(searchQuery);
+    if (!issues.length) {
+        logger.warn("No issues found matching the search criteria");
+        return [];
+    }
+    return issues;
+};
