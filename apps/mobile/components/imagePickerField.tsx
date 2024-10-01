@@ -59,7 +59,7 @@ export default function ImagePickerField({
       aspect: [4, 3],
       quality: 1,
       allowsMultipleSelection: true,
-      selectionLimit: 6,
+      selectionLimit: 4,
     });
     setIsLoading(true);
 
@@ -105,7 +105,7 @@ export default function ImagePickerField({
             <View key={index} className="m-2">
               <Image
                 source={{ uri: image.uri }}
-                className="h-24 w-24 rounded-md border border-gray-300"
+                className="h-36 w-36 rounded-md border border-gray-300"
               />
               <TouchableOpacity
                 className="mt-1"

@@ -159,7 +159,7 @@ export default function NewIssue() {
         />
 
         <Text className="mb-2 font-semibold">
-          Upload Images (optional: max 6)
+          Upload Images (optional: max 4)
         </Text>
         <Controller
           control={control}

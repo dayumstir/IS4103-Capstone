@@ -30,7 +30,7 @@ export const issueApi = createApi({
       invalidatesTags: ["IssueList"],
     }),
 
-    // Get All Issues
+    // Get All Customer Issues
     getAllIssues: builder.query<IIssue[], { customer_id: string }>({
       query: ({ customer_id }) => ({
         url: "/list",
