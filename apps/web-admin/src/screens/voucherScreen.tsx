@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Form,
   Input,
@@ -11,26 +11,50 @@ import {
   InputNumber,
   DatePicker,
   FormInstance,
+  Modal,
+  Descriptions,
+  Divider,
+  AutoComplete
 } from "antd";
 import { PlusOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
 
-import { useGetVouchersQuery, useCreateVoucherMutation, useDeactivateVoucherMutation } from "../redux/services/voucherService";
-import { useNavigate } from "react-router-dom";
+import { 
+  useGetVouchersQuery, 
+  useCreateVoucherMutation, 
+  useDeactivateVoucherMutation,
+  useGetVoucherDetailsQuery, 
+  useAssignVoucherMutation
+} from "../redux/services/voucherService";
+import { useGetAllCustomersQuery } from "../redux/services/customerService";
 import { IVoucher } from "../interfaces/voucherInterface";
-
 
 const { Search } = Input;
 
 export default function VoucherScreen() {
   const [form] = Form.useForm();
+  const [assignForm] = Form.useForm();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedVoucherId, setSelectedVoucherId] = useState<string | null>(null);
+  const [customerSearch, setCustomerSearch] = useState(""); // State for customer search input
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null); // For storing selected customer ID
+
+  // Fetch customer data based on search
+  const { data: customerOptions, refetch: fetchCustomers } = useGetAllCustomersQuery(customerSearch, {
+    skip: !customerSearch, // Don't fetch if the search is empty
+  });
 
   const { data: vouchers, isLoading } = useGetVouchersQuery(searchTerm);
   const [createVoucher] = useCreateVoucherMutation();
   const [deactivateVoucher] = useDeactivateVoucherMutation();
+  const [assignVoucher] = useAssignVoucherMutation();
+
+  // Fetch the voucher details
+  const { data: voucherDetails, refetch: fetchVoucherDetails } = useGetVoucherDetailsQuery(selectedVoucherId ?? "", {
+    skip: !selectedVoucherId, // Only fetch when a voucher is selected
+  });
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -61,6 +85,55 @@ export default function VoucherScreen() {
     } catch (error) {
       console.error("Error deactivating voucher:", error);
       message.error("Failed to deactivate voucher");
+    }
+  };
+
+  // Handle assign voucher to customer
+  const handleAssignVoucher = async (values: { customer_name: string }) => {
+    if (!selectedVoucherId || !selectedCustomerId) {
+      message.error("Customer name is required.");
+      return;
+    }
+    try {
+      await assignVoucher({ customer_id: selectedCustomerId, voucher_id: selectedVoucherId }).unwrap();
+      message.success(`Voucher assigned to customer "${values.customer_name}".`);
+      assignForm.resetFields(); // Clear the form
+      fetchVoucherDetails(); // Refetch the voucher details
+    } catch (error) {
+      console.error("Error assigning voucher:", error);
+      message.error("Failed to assign voucher");
+    }
+  };
+
+
+  // Open modal and fetch voucher details
+  const handleViewDetails = (voucher_id: string) => {
+    setSelectedVoucherId(voucher_id);
+    setIsModalOpen(true);
+    fetchVoucherDetails();
+  };
+
+  // Close the modal
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedVoucherId(null);
+    setCustomerSearch(""); // Clear the customer search on close
+    setSelectedCustomerId(null); // Reset selected customer ID
+    assignForm.resetFields(); // Clear the assign form fields
+  };
+
+  // When customer search term changes, refetch the customer list
+  useEffect(() => {
+    if (customerSearch) {
+      fetchCustomers();
+    }
+  }, [customerSearch]);
+
+  // Handle customer selection from AutoComplete
+  const handleCustomerSelect = (customerName: string) => {
+    const selectedCustomer = customerOptions?.find((customer) => customer.name === customerName);
+    if (selectedCustomer) {
+      setSelectedCustomerId(selectedCustomer.customer_id);
     }
   };
 
@@ -113,7 +186,7 @@ export default function VoucherScreen() {
         <div className="flex flex-col gap-2">
           <Button
             icon={<EyeOutlined />}
-            onClick={() => navigate(`/voucher/${record.voucher_id}`)}
+            onClick={() => handleViewDetails(record.voucher_id)}
           >
             View Voucher Details
           </Button>
@@ -130,7 +203,30 @@ export default function VoucherScreen() {
         </div>
       ),
     },
+  ];
 
+  const assignedVoucherColumns = [
+    {
+      title: "Customer Name",
+      dataIndex: ["customer", "name"],
+      key: "customerName",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+    },
+    {
+      title: "Date Issued",
+      dataIndex: "date_time_issued",
+      key: "date_time_issued",
+      render: (date: string) => new Date(date).toLocaleDateString(),
+    },
+    {
+      title: "Remaining Uses",
+      dataIndex: "remaining_uses",
+      key: "remaining_uses",
+    },
   ];
 
   const renderForm = (formInstance: FormInstance) => (
@@ -270,6 +366,76 @@ export default function VoucherScreen() {
           }}
         />
       </Card>
+
+      <Modal
+        title="Voucher Details"
+        open={isModalOpen}
+        onCancel={handleModalClose}
+        width={1000}
+        centered
+        footer={false}
+      >
+        {voucherDetails ? (
+          <>
+            <Descriptions bordered column={2}>
+              <Descriptions.Item label="Title">{voucherDetails.title}</Descriptions.Item>
+              <Descriptions.Item label="Description">{voucherDetails.description}</Descriptions.Item>
+              <Descriptions.Item label="Percentage Discount">{voucherDetails.percentage_discount}%</Descriptions.Item>
+              <Descriptions.Item label="Amount Discount">${voucherDetails.amount_discount}</Descriptions.Item>
+              <Descriptions.Item label="Expiry Date">{new Date(voucherDetails.expiry_date).toLocaleDateString()}</Descriptions.Item>
+              <Descriptions.Item label="Usage Limit">{voucherDetails.usage_limit}</Descriptions.Item>
+              <Descriptions.Item label="Terms">{voucherDetails.terms}</Descriptions.Item>
+            </Descriptions>
+
+            <Divider />
+
+            {/* Assigned Vouchers Table */}
+            <Table
+              columns={assignedVoucherColumns}
+              dataSource={voucherDetails.vouchersAssigned}
+              rowKey="voucher_assigned_id"
+              pagination={false}
+              locale={{
+                emptyText: <Empty description="No assigned vouchers found" />,
+              }}
+            />
+
+            <Divider />
+
+            {/* Assign Voucher */}
+            {voucherDetails.is_active && (
+              <Card className="mb-8 border border-gray-300" title="Assign Voucher">
+                <Form
+                  form={assignForm}
+                  layout="vertical"
+                  onFinish={handleAssignVoucher}
+                >
+                  <Form.Item
+                    name="customer_name"
+                    label="Customer Name"
+                    rules={[{ required: true, message: "Please input the customer name!" }]}
+                  >
+                    <AutoComplete
+                      options={customerOptions?.map((customer) => ({ value: customer.name }))}
+                      onSearch={(value) => setCustomerSearch(value)}
+                      onSelect={handleCustomerSelect}
+                      placeholder="Search customer by name"
+                      allowClear
+                    />
+                  </Form.Item>
+                  <Form.Item>
+                    <Button type="primary" htmlType="submit">
+                      Assign Voucher
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </Card>
+            )}
+          </>
+        ) : (
+          <p>Loading...</p>
+        )}
+      </Modal>
     </div>
   )
 }
