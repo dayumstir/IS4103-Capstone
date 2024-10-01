@@ -1,4 +1,4 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Dimensions } from "react-native";
 import { Button } from "@ant-design/react-native";
 import { router } from "expo-router";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
@@ -128,7 +128,7 @@ export default function Rewards() {
             fontSize: 16,
           },
           tabBarItemStyle: {
-            width: 155,
+            width: (Dimensions.get("window").width - 80) / 2,
           },
         }}
       >
