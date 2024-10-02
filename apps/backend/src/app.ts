@@ -1,10 +1,12 @@
-// Main application file where Express is configured, middleware is applied, and routes are registered
+// src/app.ts
 
 import express from "express";
 import cors from "cors";
 import { json, urlencoded } from "body-parser";
 import morgan from "morgan";
 import dotenv from "dotenv";
+
+import { errorHandler } from "./middlewares/errorHandler";
 
 import adminAuthRoutes from "./routes/adminAuthRoutes";
 import adminRoutes from "./routes/adminRoutes";
@@ -43,5 +45,7 @@ app.use("/voucher", voucherRoutes);
 app.get("/", (req, res) => {
     res.status(200).json({ message: "Backend server is running!" });
 });
+
+app.use(errorHandler);
 
 export default app;

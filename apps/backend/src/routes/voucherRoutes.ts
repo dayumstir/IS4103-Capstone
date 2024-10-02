@@ -4,7 +4,6 @@ import {
     assignVoucher,
     deactivateVoucher,
     getAllVouchers,
-    searchVoucher,
     getVoucherDetails,
     getCustomerVouchers,
 } from "../controllers/voucherController";
@@ -16,7 +15,6 @@ router.post("/create", authMiddleware, createVoucher);
 router.post("/assign", authMiddleware, assignVoucher);
 router.put("/deactivate/:voucher_id", authMiddleware, deactivateVoucher);
 router.get("/", authMiddleware, getAllVouchers);
-router.get("/search", authMiddleware, searchVoucher);
 router.get("/details/:voucher_id", authMiddleware, getVoucherDetails);
 router.get("/customer/:customer_id", authMiddleware, getCustomerVouchers);
 
