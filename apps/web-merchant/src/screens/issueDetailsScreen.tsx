@@ -69,10 +69,16 @@ const IssueDetailsScreen: React.FC = () => {
           </Tag>
         )}
         <p className="mt-10 text-base font-semibold">Outcome</p>
-        <p>{issue?.outcome ? issue.outcome : "No outcome yet"}</p>
+        <p>
+          {issue?.outcome ? (
+            issue.outcome
+          ) : (
+            <span style={{ color: "#9d9d9d" }}>No outcome yet</span>
+          )}
+        </p>
         <p className="mt-10 text-base font-semibold">Images</p>
         <div className="flex flex-wrap gap-5">
-          {issue?.images &&
+          {issue?.images && issue.images.length > 0 ? (
             issue?.images.map((image, index) => {
               const base64String = `data:image/png;base64,${Buffer.from(image).toString("base64")}`;
               return (
@@ -83,7 +89,10 @@ const IssueDetailsScreen: React.FC = () => {
                   height={100}
                 />
               );
-            })}
+            })
+          ) : (
+            <span style={{ color: "#9d9d9d" }}>No images</span>
+          )}
         </div>
       </Card>
     </div>
