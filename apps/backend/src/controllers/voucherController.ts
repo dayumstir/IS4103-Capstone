@@ -1,104 +1,126 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import * as voucherService from '../services/voucherService';
 import logger from "../utils/logger";
+import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from "../utils/error";
 
 
 // Create Voucher
-export const createVoucher = async (req: Request, res: Response) => {
+export const createVoucher = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("Executing createVoucher...");
-    try {
-        // Extract admin_id from req.admin (populated by the middleware)
-        const admin_id = req.admin_id;
-        if (!admin_id) {
-            return res.status(401).json({ error: "admin_id is required" });
-        }
+    const admin_id = req.admin_id;  // Extract admin_id from req (populated by middleware)
+    if (!admin_id) {
+        return next(new UnauthorizedError("Unauthorized: admin_id is missing"));
+    }
 
-        // Create the voucher using the admin_id
+    try {
         const voucher = await voucherService.createVoucher(req.body, admin_id);
         res.status(201).json(voucher);
-    } catch (error: any) {
-        logger.error("An error occurred:", error);
-        res.status(500).json({ error: error.message });
+    } catch (error) {
+        logger.error("An error occurred during voucher creation:", error);
+        next(error);
     }
 };
 
 
-// Assign Voucher to a customer
-export const assignVoucher = async (req: Request, res: Response) => {
+// Assign Voucher to a Customer
+export const assignVoucher = async (req: Request, res: Response, next: NextFunction) => {
     logger.info('Executing assignVoucher...');
-    try {
-        const { voucher_id, customer_id } = req.body;
+    const { voucher_id, customer_id } = req.body;
+    
+    if (!voucher_id || !customer_id) {
+        return next(new BadRequestError("Bad Request: voucher_id and customer_id are required"));
+    }
 
-        const voucherAssignment = await voucherService.assignVoucher(voucher_id, customer_id);
-        res.status(200).json(voucherAssignment);
+    try {
+        const voucherAssigned = await voucherService.assignVoucher(voucher_id, customer_id);
+        res.status(201).json(voucherAssigned);
     } catch (error: any) {
-        logger.error("An error occurred:", error);
-        res.status(500).json({ error: error.message });
+        logger.error("An error occurred during voucher assignment:", error);
+        if (error.name === "VoucherAlreadyAssigned") {
+            return next(new ConflictError("Conflict: Voucher is already assigned to this customer"));
+        }
+        next(error);
     }
 };
 
 
 // Deactivate Voucher
-export const deactivateVoucher = async (req: Request, res: Response) => {
+export const deactivateVoucher = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("Executing deactivateVoucher...");
-    try {
-        const { voucher_id } = req.params;
+    const { voucher_id } = req.params;
 
+    if (!voucher_id) {
+        return next(new BadRequestError("Bad Request: voucher_id is required"));
+    }
+
+    try {
         const voucher = await voucherService.deactivateVoucher(voucher_id);
         res.status(200).json({ message: "Voucher deactivated successfully", voucher });
     } catch (error: any) {
-        logger.error("An error occurred:", error);
-        res.status(500).json({ error: error.message });
+        logger.error("An error occurred during voucher deactivation:", error);
+        if (error.name === "VoucherNotFound") {
+            return next(new NotFoundError("Not Found: Voucher does not exist"));
+        }
+        next(error);
     }
 };
 
 
-// View All Vouchers
-export const getAllVouchers = async (req: Request, res: Response) => {
+// Get All Vouchers
+export const getAllVouchers = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("Executing getAllVouchers...");
     try {
         const { search } = req.query;
 
-        let vouchers;
-        if (search) {
-            vouchers = await voucherService.searchVoucher(search as string);
-        } else {
-            vouchers = await voucherService.getAllVouchers();
-        }
+        const vouchers = search 
+            ? await voucherService.searchVoucher(search as string) 
+            : await voucherService.getAllVouchers();
 
         res.status(200).json(vouchers);
-    } catch (error: any) {
-        logger.error("An error occurred:", error);
-        res.status(500).json({ error: error.message });
-    }
-};
-
-
-// Search Voucher
-export const searchVoucher = async (req: Request, res: Response) => {
-    logger.info("Executing searchVoucher...");
-    try {
-        const { searchTerm } = req.query;
-
-        const vouchers = await voucherService.searchVoucher(searchTerm as string);
-        res.status(200).json(vouchers);
-    } catch (error: any) {
-        logger.error("An error occurred:", error);
-        res.status(500).json({ error: error.message });
+    } catch (error) {
+        logger.error("An error occurred while retrieving vouchers:", error);
+        next(error); 
     }
 };
 
 
 // View Voucher Details
-export const getVoucherDetails = async (req: Request, res: Response) => {
+export const getVoucherDetails = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("Executing getVoucherDetails...");
-    try {
-        const { voucher_id } = req.params;
+    const { voucher_id } = req.params;
 
+    if (!voucher_id) {
+        return next(new BadRequestError("Bad Request: voucher_id is required"));
+    }
+
+    try {
         const voucher = await voucherService.getVoucherDetails(voucher_id);
+        if (!voucher) {
+            return next(new NotFoundError("Not Found: Voucher does not exist"));
+        }
+
         res.status(200).json(voucher);
-    } catch (error: any) {
-        logger.error("An error occurred:", error);
-        res.status(500).json({ error: error.message });
+    } catch (error) {
+        logger.error("An error occurred while retrieving voucher details:", error);
+        next(error);
+    }
+};
+
+
+// Get Vouchers Assigned to a Customer
+export const getCustomerVouchers = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("Executing getCustomerVouchers...");
+    const { customer_id } = req.params;
+
+    if (!customer_id) {
+        return next(new BadRequestError("Bad Request: customer_id is required"));
+    }
+
+    try {
+        const vouchers = await voucherService.getCustomerVouchers(customer_id);
+        res.status(200).json(vouchers);
+    } catch (error) {
+        logger.error("An error occurred while retrieving customer vouchers:", error);
+        next(error);
     }
 };

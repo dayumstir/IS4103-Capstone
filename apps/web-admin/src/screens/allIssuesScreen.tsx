@@ -48,7 +48,6 @@ const AllIssuesScreen = () => {
     setCurrentIssue(issue);
     form.setFieldsValue(issue);
     setIsModalVisible(true);
-    console.log("Image data:", currentIssue?.images);
   };
 
   const onValuesChange = (_, allValues) => {
@@ -98,7 +97,7 @@ const AllIssuesScreen = () => {
             whiteSpace: 'nowrap', 
             overflow: 'hidden', 
             textOverflow: 'ellipsis', 
-            maxWidth: '400px'
+            maxWidth: '400px' // Ensure this matches the column width
           }}
         >
           {text}
@@ -173,9 +172,8 @@ const AllIssuesScreen = () => {
             color = "green";
             break;
           case "CANCELLED":
-            color = "volcano";  // Choose an appropriate color
+            color = "volcano";
             break;
-          // Add more cases as necessary
         }
         return <Tag color={color}>{formattedStatus}</Tag>;
       },

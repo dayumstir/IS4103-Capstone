@@ -10,7 +10,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLoginMutation } from "../redux/services/customerAuth";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { Button } from "@ant-design/react-native";
 
 // Define your Zod schema
@@ -49,22 +48,9 @@ export default function Login() {
       // Delete the history to prevent user from swiping back to the login page
       router.replace("/home");
     } catch (err: any) {
-      let errorMessage = "An error occurred. Please try again.";
-
-      // Check if the error is of type FetchBaseQueryError
-      if ("data" in err) {
-        const fetchError = err as FetchBaseQueryError;
-        if (
-          fetchError.data &&
-          typeof fetchError.data === "object" &&
-          "error" in fetchError.data
-        ) {
-          errorMessage = fetchError.data.error as string;
-        }
-      }
-
+      console.error(err);
       // Set the error message in local state to be displayed
-      setCustomErrorMessage(errorMessage);
+      setCustomErrorMessage("An error occurred. Please try again.");
     }
   };
 

@@ -1,4 +1,4 @@
-import { Redirect, router, Stack, Tabs } from "expo-router";
+import { Redirect, router, Stack } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
@@ -49,8 +49,10 @@ export default function AuthenticatedLayout() {
           },
         }}
       />
-      <Stack.Screen name="resetPassword" options={{ title: 'Reset Password' }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Back" }} />
+      <Stack.Screen
+        name="(tabs)"
+        options={{ headerShown: false, title: "Back" }}
+      />
     </Stack>
   );
 }
