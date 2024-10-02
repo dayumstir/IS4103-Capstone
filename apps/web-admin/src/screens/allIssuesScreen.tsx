@@ -47,12 +47,6 @@ const AllIssuesScreen = () => {
     setCurrentIssue(issue);
     form.setFieldsValue(issue);
     setIsModalVisible(true);
-    if (issue && issue.customer_id) {
-      setCurrentCustomerId(issue.customer_id);
-    }
-    if (issue && issue.merchant_id) {
-      setCurrentMerchantId(issue.merchant_id);
-    }
     console.log("Image data:", currentIssue?.images);
   };
 
@@ -72,7 +66,6 @@ const AllIssuesScreen = () => {
       status,
     };
 
-    console.log("Issue to update:", updatedIssue);
     try {
       await updateIssue(updatedIssue).unwrap();
       setIsModalVisible(false);
@@ -104,7 +97,7 @@ const AllIssuesScreen = () => {
             whiteSpace: 'nowrap', 
             overflow: 'hidden', 
             textOverflow: 'ellipsis', 
-            maxWidth: '400px' // Ensure this matches the column width
+            maxWidth: '400px'
           }}
         >
           {text}
@@ -121,15 +114,18 @@ const AllIssuesScreen = () => {
         { text: 'Merchant', value: 'merchant' }
     ],
       onFilter: (value, record: IIssue) => {
-        // Treat as customer if customer_id is present regardless of merchant_id when filtering for 'customer'
         if (value === 'customer') {
             return !!record.customer_id;
         }
-        // Treat as merchant only if customer_id is absent when filtering for 'merchant'
         return value === 'merchant' && !record.customer_id && !!record.merchant_id;
       },
       render: (text, record: IIssue) => {
-        // Check if both customer and merchant IDs exist
+        if (record && record.customer_id) {
+          setCurrentCustomerId(record.customer_id);
+        }
+        if (record && record.merchant_id) {
+          setCurrentMerchantId(record.merchant_id);
+        }
         if (record.customer_id && record.merchant_id) {
           return (
             <>
@@ -144,14 +140,14 @@ const AllIssuesScreen = () => {
                 <Tag>Customer</Tag>
                 {currentCustomer?.email}
             </>
-          ); // Return customer if only customer ID exists
+          );
         } else if (record.merchant_id) {
           return (
             <>
                 <Tag>Merchant</Tag>
                 {currentMerchant?.email}
             </>
-          ); // Return merchant if only merchant ID exists
+          );
         }
         return null;
         
