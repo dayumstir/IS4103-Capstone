@@ -1,9 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { LoginFormValues } from "../../app/login";
 import { RegisterFormValues } from "../../app/register";
-import { ResetPasswordFormValues } from "../../app/(authenticated)/resetPassword";
+import { ResetPasswordFormValues } from "../../app/(authenticated)/(tabs)/account/resetPassword";
 import { RootState } from "../store";
-import { login } from "../features/customerAuthSlice";
 import { ConfirmEmailFormValues } from "../../app/confirmation";
 import { PhoneVerificationFormValues } from "../../app/phoneVerification";
 
@@ -11,15 +10,15 @@ import { PhoneVerificationFormValues } from "../../app/phoneVerification";
 export const customerAuthApi = createApi({
   reducerPath: "customerAuthApi",
 
-  baseQuery: fetchBaseQuery({ 
+  baseQuery: fetchBaseQuery({
     baseUrl: "http://localhost:3000/customerAuth",
-    prepareHeaders: (headers, { getState} ) => {
+    prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).customerAuth.token;
       if (token) {
-        headers.set('authorization', `Bearer ${token}`);
+        headers.set("authorization", `Bearer ${token}`);
       }
       return headers;
-    }
+    },
   }),
 
   endpoints: (builder) => ({
@@ -58,13 +57,15 @@ export const customerAuthApi = createApi({
         body,
       }),
     }),
-    verifyPhoneNumberOTP: builder.mutation<string, PhoneVerificationFormValues>({
-      query: (body) => ({
-        url: "/verify-phone-number-otp",
-        method: "POST",
-        body,
-      }),
-    }),
+    verifyPhoneNumberOTP: builder.mutation<string, PhoneVerificationFormValues>(
+      {
+        query: (body) => ({
+          url: "/verify-phone-number-otp",
+          method: "POST",
+          body,
+        }),
+      },
+    ),
     resendEmailVerification: builder.mutation<void, { email: string }>({
       query: (body) => ({
         url: "/resend-email",
@@ -77,4 +78,12 @@ export const customerAuthApi = createApi({
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useLoginMutation, useRegisterMutation, useResetPasswordMutation, useConfirmEmailMutation, useSendPhoneNumberOTPMutation, useVerifyPhoneNumberOTPMutation, useResendEmailVerificationMutation } = customerAuthApi;
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useResetPasswordMutation,
+  useConfirmEmailMutation,
+  useSendPhoneNumberOTPMutation,
+  useVerifyPhoneNumberOTPMutation,
+  useResendEmailVerificationMutation,
+} = customerAuthApi;

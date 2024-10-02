@@ -16,6 +16,7 @@ export const transactionApi = createApi({
     },
   }),
   endpoints: (builder) => ({
+    // Create Transaction
     createTransaction: builder.mutation<
       ITransaction,
       Omit<ITransaction, "transaction_id">
@@ -26,6 +27,8 @@ export const transactionApi = createApi({
         body: newTransaction,
       }),
     }),
+
+    // Get User Transactions
     getUserTransactions: builder.query<ITransaction[], void>({
       query: () => "/user",
     }),

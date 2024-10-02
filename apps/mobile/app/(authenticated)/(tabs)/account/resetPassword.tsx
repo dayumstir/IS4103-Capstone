@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -11,10 +11,9 @@ import { Button } from "@ant-design/react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useResetPasswordMutation } from "../../redux/services/customerAuth";
+import { useResetPasswordMutation } from "../../../../redux/services/customerAuth";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import Toast from "react-native-toast-message";
 
 // Zod schema for validation
@@ -71,38 +70,23 @@ export default function ResetPassword() {
       reset(); // Reset the form
       router.back(); // Navigate back to the account page
     } catch (err: any) {
-      // If there is an error, handle it (error is already handled via RTK)
-      // console.error("Reset Password failed:", err);
-
-      let errorMessage = "An error occurred. Please try again.";
-
-      // Check if the error is of type FetchBaseQueryError
-      if ("data" in err) {
-        const fetchError = err as FetchBaseQueryError;
-        if (
-          fetchError.data &&
-          typeof fetchError.data === "object" &&
-          "error" in fetchError.data
-        ) {
-          errorMessage = fetchError.data.error as string;
-        }
-      }
-
+      console.error(err);
       // Set the error message in local state to be displayed
-      setCustomErrorMessage(errorMessage);
+      setCustomErrorMessage("An error occurred. Please try again.");
     }
   };
 
   return (
     <ScrollView>
-      <View className="flex h-screen w-screen px-8 pt-8">
-        {/* ===== Password Field ===== */}
-        <Text className="mb-1 text-gray-600">Old Password</Text>
+      <View className="m-4 flex rounded-lg bg-white p-8">
+        <Text className="mb-4 text-2xl font-bold">Reset Password</Text>
+
+        <Text className="mb-2 font-semibold">Old Password</Text>
         <Controller
           control={control}
           name="oldPassword"
           render={({ field: { onChange, onBlur, value } }) => (
-            <View className="mb-4">
+            <View className="mb-4 w-full">
               <TextInput
                 className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
                 onChangeText={onChange}
@@ -130,13 +114,12 @@ export default function ResetPassword() {
           )}
         />
 
-        {/* ===== Password Field ===== */}
-        <Text className="mb-1 text-gray-600">New Password</Text>
+        <Text className="mb-2 font-semibold">New Password</Text>
         <Controller
           control={control}
           name="newPassword"
           render={({ field: { onChange, onBlur, value } }) => (
-            <View className="mb-4">
+            <View className="mb-4 w-full">
               <TextInput
                 className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
                 onChangeText={onChange}
@@ -164,13 +147,12 @@ export default function ResetPassword() {
           )}
         />
 
-        {/* ===== Confirm New Password Field ===== */}
-        <Text className="mb-1 text-gray-600">Confirm New Password</Text>
+        <Text className="mb-2 font-semibold">Confirm New Password</Text>
         <Controller
           control={control}
           name="confirmPassword"
           render={({ field: { onChange, onBlur, value } }) => (
-            <View className="mb-4">
+            <View className="mb-4 w-full">
               <TextInput
                 className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
                 onChangeText={onChange}
@@ -203,8 +185,8 @@ export default function ResetPassword() {
           <Text className="mb-4 text-red-500">{customErrorMessage}</Text>
         )}
 
-        {/* Buttons */}
-        <View className="mt-10 w-full gap-4 px-10">
+        {/* ===== Save and Cancel Buttons ===== */}
+        <View className="mt-4 w-full gap-4">
           <Button
             onPress={handleSubmit(onSubmit)}
             type="primary"

@@ -43,7 +43,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="account"
         options={{
-          headerTitle: "Account",
+          headerShown: false,
           title: "Account",
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="user" size={size} color={color} />

@@ -59,7 +59,7 @@ export default function RootLayout() {
           />
           <Stack.Screen
             name="(authenticated)"
-            options={{ headerShown: false }}
+            options={{ headerShown: false, title: "Back" }}
           />
         </Stack>
         <Toast config={toastConfig} topOffset={60} visibilityTime={2000} />
