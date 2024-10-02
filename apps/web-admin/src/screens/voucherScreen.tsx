@@ -73,7 +73,7 @@ export default function VoucherScreen() {
   };
 
   // Handle voucher deactivation
-  const handleDeactivateVoucher = async (voucher: any) => {
+  const handleDeactivateVoucher = async (voucher: IVoucher) => {
     if (!voucher.is_active) {
       message.warning(`The voucher "${voucher.title}" is already deactivated.`);
       return;
@@ -89,14 +89,14 @@ export default function VoucherScreen() {
   };
 
   // Handle assign voucher to customer
-  const handleAssignVoucher = async (values: { customer_name: string }) => {
+  const handleAssignVoucher = async (values: { customer_email: string }) => {
     if (!selectedVoucherId || !selectedCustomerId) {
-      message.error("Customer name is required.");
+      message.error("Customer email is required.");
       return;
     }
     try {
       await assignVoucher({ customer_id: selectedCustomerId, voucher_id: selectedVoucherId }).unwrap();
-      message.success(`Voucher assigned to customer "${values.customer_name}".`);
+      message.success(`Voucher assigned to customer "${values.customer_email}".`);
       assignForm.resetFields(); // Clear the form
       fetchVoucherDetails(); // Refetch the voucher details
     } catch (error) {
@@ -130,8 +130,8 @@ export default function VoucherScreen() {
   }, [customerSearch]);
 
   // Handle customer selection from AutoComplete
-  const handleCustomerSelect = (customerName: string) => {
-    const selectedCustomer = customerOptions?.find((customer) => customer.name === customerName);
+  const handleCustomerSelect = (customerEmail: string) => {
+    const selectedCustomer = customerOptions?.find((customer) => customer.email === customerEmail);
     if (selectedCustomer) {
       setSelectedCustomerId(selectedCustomer.customer_id);
     }
@@ -182,7 +182,7 @@ export default function VoucherScreen() {
       key: "actions",
       width: 1,
       sorter: (a: IVoucher, b: IVoucher) => (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1),
-      render: (text: string, record: any) => (
+      render: (text: string, record: IVoucher) => (
         <div className="flex flex-col gap-2">
           <Button
             icon={<EyeOutlined />}
@@ -207,9 +207,9 @@ export default function VoucherScreen() {
 
   const assignedVoucherColumns = [
     {
-      title: "Customer Name",
-      dataIndex: ["customer", "name"],
-      key: "customerName",
+      title: "Customer Email",
+      dataIndex: ["customer", "email"],
+      key: "customerEmail",
     },
     {
       title: "Status",
@@ -233,9 +233,16 @@ export default function VoucherScreen() {
     <Form
       form={formInstance}
       name="voucher"
-      onFinish={handleCreateVoucher}
+      onFinish={(values) => {
+        // Automatically set the filled value and enforce that one field is filled
+        const voucherData = {
+          ...values,
+          percentage_discount: values.percentage_discount || 0,
+          amount_discount: values.amount_discount || 0,
+        };
+        handleCreateVoucher(voucherData);
+      }}
       layout="vertical"
-      validateTrigger={['onBlur', 'onSubmit']}
     >
       <div className="grid grid-cols-2 gap-x-8">
         <Form.Item
@@ -243,7 +250,7 @@ export default function VoucherScreen() {
           label="Voucher Title"
           rules={[{ required: true, message: "Please input the voucher title!" }]}
         >
-          <Input />
+          <Input placeholder="Enter voucher title" />
         </Form.Item>
 
         <Form.Item
@@ -251,38 +258,55 @@ export default function VoucherScreen() {
           label="Description"
           rules={[{ required: true, message: "Please input the description!" }]}
         >
-          <Input />
+          <Input placeholder="Enter description" />
         </Form.Item>
 
         <Form.Item
           name="percentage_discount"
-          label="Percentage Discount"
+          label="Percentage Discount (Choose 1)"
           rules={[
-            { required: true, message: "Please input the percentage discount!" },
             {
-              type: 'number',
-              min: 0,
-              max: 100,
-              message: "Percentage discount must be between 0 and 100",
+              validator: (_, value) => {
+                const amountDiscount = formInstance.getFieldValue("amount_discount");
+                if (value && amountDiscount) {
+                  return Promise.reject(new Error("Only one discount type can be applied (either percentage or amount)"));
+                }
+                if (!value && !amountDiscount) {
+                  return Promise.reject(new Error("Please input either percentage discount or amount discount"));
+                }
+                if (value < 0 || value > 100) {
+                  return Promise.reject(new Error("Percentage discount must be between 0 and 100"));
+                }
+                return Promise.resolve();
+              },
             },
           ]}
         >
-          <InputNumber className="w-full" step={1} />
+          <InputNumber className="w-full" step={1} placeholder="Enter percentage discount (0-100)" />
         </Form.Item>
 
         <Form.Item
           name="amount_discount"
-          label="Amount Discount"
+          label="Amount Discount (Choose 1)"
           rules={[
-            { required: true, message: "Please input the amount discount!" },
             {
-              type: 'number',
-              min: 0,
-              message: "Amount discount must be greater than 0",
+              validator: (_, value) => {
+                const percentageDiscount = formInstance.getFieldValue("percentage_discount");
+                if (value && percentageDiscount) {
+                  return Promise.reject(new Error("Only one discount type can be applied (either percentage or amount)"));
+                }
+                if (!value && !percentageDiscount) {
+                  return Promise.reject(new Error("Please input either percentage discount or amount discount"));
+                }
+                if (value < 0) {
+                  return Promise.reject(new Error("Amount discount must be greater than or equal to 0"));
+                }
+                return Promise.resolve();
+              },
             },
           ]}
         >
-          <InputNumber className="w-full" step={1} />
+          <InputNumber className="w-full" step={1} placeholder="Enter amount discount (>= 0)" />
         </Form.Item>
 
         <Form.Item
@@ -305,7 +329,7 @@ export default function VoucherScreen() {
             },
           ]}
         >
-          <InputNumber className="w-full" step={1} />
+          <InputNumber className="w-full" step={1} placeholder="Enter usage limit (>= 1)" />
         </Form.Item>
 
         <Form.Item
@@ -313,7 +337,7 @@ export default function VoucherScreen() {
           label="Terms"
           rules={[{ required: true, message: "Please input the terms!" }]}
         >
-          <Input />
+          <Input placeholder="Enter terms" />
         </Form.Item>
       </div>
 
@@ -340,7 +364,7 @@ export default function VoucherScreen() {
       {/* ===== View and Manage Vouchers ===== */}
       <Card className="mb-8 border border-gray-300" title="View and Manage Vouchers">
         <Search
-          placeholder="Search by title or description"
+          placeholder="Search by title"
           onChange={handleSearchChange}
           value={searchTerm}
           style={{ marginBottom: 16 }}
@@ -411,15 +435,15 @@ export default function VoucherScreen() {
                   onFinish={handleAssignVoucher}
                 >
                   <Form.Item
-                    name="customer_name"
-                    label="Customer Name"
-                    rules={[{ required: true, message: "Please input the customer name!" }]}
+                    name="customer_email"
+                    label="Customer Email"
+                    rules={[{ required: true, message: "Please input the customer email!" }]}
                   >
                     <AutoComplete
-                      options={customerOptions?.map((customer) => ({ value: customer.name }))}
+                      options={customerOptions?.map((customer) => ({ value: customer.email }))}
                       onSearch={(value) => setCustomerSearch(value)}
                       onSelect={handleCustomerSelect}
-                      placeholder="Search customer by name"
+                      placeholder="Search customer by email"
                       allowClear
                     />
                   </Form.Item>
