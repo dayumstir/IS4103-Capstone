@@ -68,13 +68,14 @@ const AllCustomersScreen = () => {
       ],
       onFilter: (value: string, record: ICustomer) => record.status === value,
       render: (text: string) => {
+        const formattedStatus = text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         let color = "geekblue";
         if (text === "ACTIVE") {
           color = "green";
         } else if (text === "SUSPENDED") {
           color = "volcano";
         }
-        return <Tag color={color}>{text}</Tag>;
+        return <Tag color={color}>{formattedStatus}</Tag>;
       },
     },
     {
