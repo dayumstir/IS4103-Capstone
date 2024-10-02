@@ -4,6 +4,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  RefreshControl,
 } from "react-native";
 import { router } from "expo-router";
 import { useGetAllIssuesQuery } from "../../../../../redux/services/issueService";
@@ -16,6 +17,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { IIssue, IssueStatus } from "../../../../../interfaces/issueInterface";
+import { useState } from "react";
 
 export default function AllIssuesPage() {
   const Tab = createMaterialTopTabNavigator();
@@ -26,6 +28,13 @@ export default function AllIssuesPage() {
     error,
     refetch,
   } = useGetAllIssuesQuery({ customer_id: profile!.customer_id.toString() });
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    refetch().then(() => setRefreshing(false));
+  };
 
   if (isLoading) {
     return (
@@ -47,7 +56,12 @@ export default function AllIssuesPage() {
   }
 
   const PendingIssuesView = () => (
-    <ScrollView className="bg-white">
+    <ScrollView
+      className="bg-white"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <IssueList
         issues={
           issues
@@ -63,7 +77,12 @@ export default function AllIssuesPage() {
   );
 
   const ClosedIssuesView = () => (
-    <ScrollView className="bg-white">
+    <ScrollView
+      className="bg-white"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <IssueList
         issues={
           issues

@@ -1,11 +1,24 @@
-import { View, Text, ScrollView, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Dimensions,
+  RefreshControl,
+} from "react-native";
 import { Button } from "@ant-design/react-native";
 import { router } from "expo-router";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { AntDesign } from "@expo/vector-icons";
+import { useState } from "react";
 
 export default function Rewards() {
   const Tab = createMaterialTopTabNavigator();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setRefreshing(false);
+  };
 
   const cashbackList = [
     { id: 1, amount: 5.5, merchant: "SuperMart", date: "2023-09-25" },
@@ -71,7 +84,12 @@ export default function Rewards() {
   ];
 
   const CashbackView = () => (
-    <ScrollView className="bg-white">
+    <ScrollView
+      className="bg-white"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       {cashbackList.map((cashback, index) => (
         <View
           key={cashback.id}
@@ -94,7 +112,12 @@ export default function Rewards() {
   );
 
   const VoucherView = () => (
-    <ScrollView className="bg-white">
+    <ScrollView
+      className="bg-white"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       {vouchers.map((voucher, index) => (
         <View
           key={voucher.id}
