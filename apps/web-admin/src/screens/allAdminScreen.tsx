@@ -199,6 +199,7 @@ export default function AllAdminScreen() {
               <Select.Option value="">All</Select.Option>
               <Select.Option value="NORMAL">ACTIVE</Select.Option>
               <Select.Option value="DEACTIVATED">DEACTIVATED</Select.Option>
+              <Select.Option value="UNVERIFIED">UNVERIFIED</Select.Option>
             </Select>
           </div>
           <Link to="/admin/add">
