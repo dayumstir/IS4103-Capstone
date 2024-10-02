@@ -143,7 +143,7 @@ export default function Rewards() {
       </Tab.Navigator>
 
       <View className="mt-4">
-        <Button type="primary" onPress={() => router.back()}>
+        <Button type="primary" onPress={() => router.navigate("/account")}>
           <Text className="text-center font-semibold text-white">
             Back to Account
           </Text>

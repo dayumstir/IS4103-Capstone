@@ -43,9 +43,9 @@ export default function NewIssue() {
 
       formData.append("title", data.title);
       formData.append("description", data.description);
-      if (data.merchantId) formData.append("merchantId", data.merchantId);
+      if (data.merchantId) formData.append("merchant_id", data.merchantId);
       if (data.transactionId)
-        formData.append("transactionId", data.transactionId);
+        formData.append("transaction_id", data.transactionId);
 
       if (data.image) {
         data.image.forEach((img, index) => {

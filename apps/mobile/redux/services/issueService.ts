@@ -20,7 +20,6 @@ export const issueApi = createApi({
     // Create Issue
     createIssue: builder.mutation<IIssue, FormData>({
       query: (newIssue) => {
-        console.log("Issue creation body:", newIssue);
         return {
           url: "/",
           method: "POST",

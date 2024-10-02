@@ -24,6 +24,7 @@ export default function AllIssuesPage() {
     data: issues,
     isLoading,
     error,
+    refetch,
   } = useGetAllIssuesQuery({ customer_id: profile!.customer_id.toString() });
 
   if (isLoading) {
@@ -35,6 +36,7 @@ export default function AllIssuesPage() {
   }
 
   if (error) {
+    console.error(error);
     return (
       <View className="flex-1 items-center justify-center">
         <Text className="px-16 text-center text-lg font-semibold text-red-500">

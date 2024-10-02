@@ -18,6 +18,13 @@ export const IssueStatusBadge = ({ status }: { status: IssueStatus }) => {
           <Text className="text-xs font-semibold text-green-500">Resolved</Text>
         </View>
       );
+    case IssueStatus.CANCELLED:
+      return (
+        <View className="flex-row items-center gap-1 self-start rounded-full border border-red-500 bg-red-100 px-2 py-1">
+          <AntDesign name="closecircleo" size={12} color="#ef4444" />
+          <Text className="text-xs font-semibold text-red-500">Cancelled</Text>
+        </View>
+      );
     default:
       return (
         <View className="self-start rounded-full border border-black bg-gray-100 px-2 py-1">
