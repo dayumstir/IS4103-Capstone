@@ -102,3 +102,17 @@ export const getVoucherDetails = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// Get Customer Vouchers
+export const getCustomerVouchers = async (req: Request, res: Response) => {
+    logger.info("Executing getCustomerVouchers...");
+    try {
+        const { customer_id } = req.params;
+
+        const vouchers = await voucherService.getCustomerVouchers(customer_id);
+        res.status(200).json(vouchers);
+    } catch (error: any) {
+        logger.error("An error occurred:", error);
+        res.status(500).json({ error: error.message });
+    }
+};

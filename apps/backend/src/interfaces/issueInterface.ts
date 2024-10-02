@@ -13,8 +13,9 @@ export interface IIssue {
     outcome: string;
     status: IssueStatus;
     images?: Buffer[];
-    createTime: Date;
-
+    create_time: Date;
+    updated_at: Date;
+    
     merchant_id?: string; // Optional foreign key to Merchant
     customer_id?: string; // Optional foreign key to Customer
     admin_id?: string; // Optional foreign key to Admin

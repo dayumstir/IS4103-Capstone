@@ -47,6 +47,7 @@ export default function LoginScreen() {
         navigate("/login");
       }
       else if (admin_type === "UNVERIFIED") {
+        setError("");
         setIsModalOpen(true);
       } else {
         navigate("/");
@@ -180,7 +181,7 @@ export default function LoginScreen() {
                     return Promise.reject(
                       new Error(
                         "New password must have at least 1 lowercase letter, 1 uppercase letter, 1 digit, 1 special character, and be at least 8 characters long.",
-                      ),
+                        ),
                     );
                   }
 

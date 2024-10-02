@@ -57,12 +57,12 @@ export const adminApi = createApi({
             method: "PUT",
             body: { admin_id: updatedAdminId },
           };
-        }
+        } else if (admin_type == "ACTIVATE") {
         return {
           url: "/activate-admin",
           method: "PUT",
           body: { admin_id: updatedAdminId },
-        };
+        };}
       },
       invalidatesTags: ["AdminProfile"],
     }),

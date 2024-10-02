@@ -8,28 +8,36 @@ import {
   Empty,
   Tag,
   Input,
+  Image,
   Form,
   Modal,
   Descriptions,
   message,
 } from "antd";
-import { useNavigate } from "react-router-dom";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useGetAllIssuesQuery, useUpdateIssueOutcomeMutation } from '../redux/services/issueService';
 import { IIssue, IssueStatus } from "../interfaces/issueInterface";
+import TextArea from "antd/es/input/TextArea";
+import { useViewCustomerProfileQuery } from "../redux/services/customerService";
+import { useViewMerchantProfileQuery } from "../redux/services/merchantService";
+import { Link } from "react-router-dom";
+
 
 const { Search } = Input;
 
 
 const AllIssuesScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: issues, isLoading } = useGetAllIssuesQuery(searchTerm);
   const [updateIssue] = useUpdateIssueOutcomeMutation();
-  const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentIssue, setCurrentIssue] = useState<IIssue | null>(null);
   const [form] = Form.useForm();
   const [isModified, setIsModified] = useState(false);
+  const [currentIssue, setCurrentIssue] = useState<IIssue | null>(null);
+  const { data: issues } = useGetAllIssuesQuery(searchTerm);
+  const [currentCustomerId, setCurrentCustomerId] = useState('');
+  const { data: currentCustomer } = useViewCustomerProfileQuery(currentCustomerId, { skip: !currentCustomerId });
+  const [currentMerchantId, setCurrentMerchantId] = useState('');
+  const { data: currentMerchant } = useViewMerchantProfileQuery(currentMerchantId, { skip: !currentMerchantId });
+
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -39,6 +47,13 @@ const AllIssuesScreen = () => {
     setCurrentIssue(issue);
     form.setFieldsValue(issue);
     setIsModalVisible(true);
+    if (issue && issue.customer_id) {
+      setCurrentCustomerId(issue.customer_id);
+    }
+    if (issue && issue.merchant_id) {
+      setCurrentMerchantId(issue.merchant_id);
+    }
+    console.log("Image data:", currentIssue?.images);
   };
 
   const onValuesChange = (_, allValues) => {
@@ -69,7 +84,6 @@ const AllIssuesScreen = () => {
     }
     
   };
-  
 
   const columns = [
     {
@@ -77,38 +91,93 @@ const AllIssuesScreen = () => {
       dataIndex: "title",
       key: "title",
       sorter: (a: IIssue, b: IIssue) => a.title.localeCompare(b.title),
+      width: 350,
     },
     {
       title: "Description",
       dataIndex: "description",
       key: "description",
       width: 500,
+      render: (text: string) => (
+        <div 
+          style={{ 
+            whiteSpace: 'nowrap', 
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            maxWidth: '400px' // Ensure this matches the column width
+          }}
+        >
+          {text}
+        </div>
+      ),
     },
     {
-      title: "Outcome",
-      dataIndex: "outcome",
-      key: "outcome",
-      width: 400,
-      render: (outcome: string | null) => outcome || <Tag color="volcano">PENDING</Tag>,
+      title: "User Email",
+      dataIndex: "user",
+      key: "user",
+      width: 350,
       filters: [
-        { text: 'Pending', value: 'Pending' },
-      ],
-      onFilter: (value, record) => !record.outcome
+        { text: 'Customer', value: 'customer' },
+        { text: 'Merchant', value: 'merchant' }
+    ],
+      onFilter: (value, record: IIssue) => {
+        // Treat as customer if customer_id is present regardless of merchant_id when filtering for 'customer'
+        if (value === 'customer') {
+            return !!record.customer_id;
+        }
+        // Treat as merchant only if customer_id is absent when filtering for 'merchant'
+        return value === 'merchant' && !record.customer_id && !!record.merchant_id;
+      },
+      render: (text, record: IIssue) => {
+        // Check if both customer and merchant IDs exist
+        if (record.customer_id && record.merchant_id) {
+          return (
+            <>
+                <Tag>Customer</Tag>
+                {currentCustomer?.email}
+            </>
+          );
+           // Return only customer if both exist
+        } else if (record.customer_id) {
+          return (
+            <>
+                <Tag>Customer</Tag>
+                {currentCustomer?.email}
+            </>
+          ); // Return customer if only customer ID exists
+        } else if (record.merchant_id) {
+          return (
+            <>
+                <Tag>Merchant</Tag>
+                {currentMerchant?.email}
+            </>
+          ); // Return merchant if only merchant ID exists
+        }
+        return null;
+        
+      }
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 250,
+      width: 200,
       filters: [
         { text: 'Pending Outcome', value: 'PENDING_OUTCOME' },
         { text: 'Resolved', value: 'RESOLVED' },
+        { text: 'Cancelled', value: 'CANCELLED' }
       ],
       onFilter: (value: string, record: IIssue) => record.status === value,
       render: (text: string) => {
         let color = "geekblue";
-        if (text === "RESOLVED") {
-          color = "green";
+        switch (text) {
+          case "RESOLVED":
+            color = "green";
+            break;
+          case "CANCELLED":
+            color = "volcano";  // Choose an appropriate color
+            break;
+          // Add more cases as necessary
         }
         return <Tag color={color}>{text}</Tag>;
       },
@@ -117,7 +186,7 @@ const AllIssuesScreen = () => {
         key: "actions",
         width: 1,
         render: (text: string, record: IIssue) => (
-          <div className="whitespace-nowrap">
+          <div className="whitespace-nowrap" >
             <Button onClick={() => showIssueModal(record)}>View Issue</Button>
             </div>
       ),
@@ -160,17 +229,32 @@ const AllIssuesScreen = () => {
         <Descriptions bordered column={2}>
           <Descriptions.Item label="Title" span={2}>{currentIssue?.title}</Descriptions.Item>
           <Descriptions.Item label="Description" span={2}>{currentIssue?.description}</Descriptions.Item>
-          <Descriptions.Item label="Status">{currentIssue?.status}</Descriptions.Item>
-          <Descriptions.Item label="Time Created">{currentIssue?.createTime ? new Date(currentIssue.createTime).toLocaleString() : 'Not available'}</Descriptions.Item>
-          {currentIssue?.merchant_id && <Descriptions.Item label="Merchant ID" span={2}>{currentIssue.merchant_id}</Descriptions.Item>}
-    {currentIssue?.customer_id && <Descriptions.Item label="Customer ID" span={2}>{currentIssue.customer_id}</Descriptions.Item>}
-    {currentIssue?.admin_id && <Descriptions.Item label="Admin ID" span={2}>{currentIssue.admin_id}</Descriptions.Item>}
-    {currentIssue?.images && (
-  <Descriptions.Item label="Images" span={2}>
-    {currentIssue.images.map((img, index) => (
-      <img key={index} src={`data:image/jpeg;base64,${img.toString('base64')}`} alt="Issue Image" style={{ width: "100px", height: "100px", marginRight: "10px" }} />
-    ))}
-  </Descriptions.Item>
+          <Descriptions.Item label="Status" span={2}>{currentIssue?.status}</Descriptions.Item>
+          <Descriptions.Item label="Time Created">{currentIssue?.create_time &&
+                new Date(currentIssue?.create_time).toDateString()},{" "}{currentIssue?.create_time &&
+                new Date(currentIssue?.create_time).toLocaleTimeString()}</Descriptions.Item>
+          <Descriptions.Item label="Updated At">{currentIssue?.updated_at &&
+                new Date(currentIssue?.updated_at).toDateString()},{" "} {currentIssue?.updated_at &&
+                new Date(currentIssue?.updated_at).toLocaleTimeString()}</Descriptions.Item>
+          {currentMerchant?.merchant_id && <Descriptions.Item label="Merchant" span={2}><Link to={`/admin/merchant/${currentMerchant.merchant_id}`}>{currentMerchant.name}</Link></Descriptions.Item>}
+          {currentCustomer?.customer_id && <Descriptions.Item label="Customer" span={2}><Link to={`/admin/customer/${currentCustomer.customer_id}`}>{currentCustomer.name}</Link></Descriptions.Item>}
+          {currentIssue?.admin_id && <Descriptions.Item label="Admin ID" span={2}>{currentIssue.admin_id}</Descriptions.Item>}
+          {currentIssue?.images && (
+        <Descriptions.Item label="Images">
+          {currentIssue?.images &&
+            currentIssue.images.map((image, index) => {
+              const base64String = `data:image/png;base64,${Buffer.from(image).toString("base64")}`;
+              return (
+                <img
+                  key={index}
+                  src={base64String}
+                  alt={`Image ${index + 1}`}
+                  style={{ height: '100px' }}
+                />
+              );
+          })}
+      </Descriptions.Item>
+      
 )}
         </Descriptions>
         <Form
@@ -180,8 +264,8 @@ const AllIssuesScreen = () => {
           onFinish={handleUpdateIssue}
           onFieldsChange={() => form.setFieldsValue(form.getFieldsValue())}
         >
-          <Form.Item name="outcome" label="Outcome">
-            <Input />
+          <Form.Item name="outcome" label="Outcome" style={{ padding: '25px' }}>
+            <TextArea rows={2} />
           </Form.Item>
         </Form>
       </Modal>

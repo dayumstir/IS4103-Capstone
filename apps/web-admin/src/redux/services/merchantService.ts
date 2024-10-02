@@ -29,8 +29,8 @@ export const merchantApi = createApi({
     }),
 
     // View Merchant Profile
-    viewMerchantProfile: builder.query<IMerchant, IMerchant>({
-      query: ({ merchant_id }) => ({
+    viewMerchantProfile: builder.query<IMerchant, string>({
+      query: (merchant_id) => ({
         url: `/merchant/${merchant_id}`,
         method: "GET",
       }),
@@ -51,5 +51,6 @@ export const merchantApi = createApi({
 
 export const {
   useGetAllMerchantsQuery,
+  useViewMerchantProfileQuery,
   useUpdateMerchantStatusMutation,
 } = merchantApi;

@@ -17,10 +17,13 @@ export const customerApi = createApi({
     },
   }),
 
+  tagTypes: ["CustomerProfile"],
+
   endpoints: (builder) => ({
     // View profile API call
     getProfile: builder.query<ICustomer, void>({
       query: () => "/profile", // API endpoint for fetching profile
+      providesTags: ["CustomerProfile"],
     }),
 
     // Edit profile API call
@@ -30,6 +33,7 @@ export const customerApi = createApi({
         method: "PUT",
         body: body,
       }),
+      invalidatesTags: ["CustomerProfile"],
     }),
   }),
 });

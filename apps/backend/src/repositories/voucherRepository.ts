@@ -79,3 +79,14 @@ export const deactivateVoucher = async (voucher_id: string) => {
         data: { status: VoucherStatus.UNAVAILABLE}  // Set all assigned vouchers to UNAVAILABLE
     });
 };
+
+
+// Get Customer Vouchers
+export const getCustomerVouchers = async (customer_id: string) => {
+    return await prisma.voucherAssigned.findMany({
+        where: { customer_id },
+        include: {
+            voucher: true, // Include voucher details
+        },
+    });
+};
