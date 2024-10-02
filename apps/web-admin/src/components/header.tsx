@@ -10,7 +10,7 @@ export default function Header({ isSuperAdmin }: { isSuperAdmin: boolean }) {
     { label: <a href="/">Home</a>, key: "Home" },
     { label: <a href="/admin/profile">Profile</a>, key: "Profile" },
     ...(isSuperAdmin
-      ? [{ label: <a href="/admin/all">View Admins</a>, key: "View Admin" }]
+      ? [{ label: <a href="/admin/all">Admins</a>, key: "Admin" }]
       : []),
     { label: <a href="/admin/customers">Customers</a>, key: "Customers" },
     { label: <a href="/admin/merchants">Merchants</a>, key: "Merchants" },
