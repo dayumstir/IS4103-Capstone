@@ -148,7 +148,6 @@ const AllIssuesScreen = () => {
                 {currentCustomer?.email}
             </>
           );
-           // Return only customer if both exist
         } else if (record.customer_id) {
           return (
             <>

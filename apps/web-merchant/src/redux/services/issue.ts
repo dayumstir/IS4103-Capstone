@@ -48,15 +48,18 @@ export const issueApi = createApi({
         body: { status: IssueStatus.CANCELLED },
       }),
     }),
-    searchIssues: builder.mutation<IIssue[], string>({
-      query: (search) => {
+    searchIssues: builder.mutation<
+      IIssue[],
+      { search: string; merchant_id: string }
+    >({
+      query: ({ search, merchant_id }) => {
         const queryString = search
           ? `?search=${encodeURIComponent(search)}`
           : "";
         return {
           url: `/list${queryString}`,
           method: "POST",
-          body: {}, // If you need to send any body, you can modify this accordingly
+          body: { merchant_id: merchant_id },
         };
       },
     }),

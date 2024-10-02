@@ -43,7 +43,7 @@ export const voucherApi = createApi({
                 url: `/deactivate/${voucher_id}`,
                 method: "PUT",
             }),
-            invalidatesTags: ["VoucherList", "VoucherAssigned"],
+            invalidatesTags: ["VoucherList", "VoucherAssigned", "VoucherDetails"],
         }),
 
         // Fetch all vouchers

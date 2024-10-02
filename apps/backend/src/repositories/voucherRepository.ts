@@ -28,12 +28,7 @@ export const getVoucherById = async(voucher_id: string) => {
 // Search for voucher by title or description
 export const searchVoucher = async (searchTerm: string) => {
     return await prisma.voucher.findMany({
-        where: {
-            OR: [
-                { title: { contains: searchTerm, mode: "insensitive" } },
-                { description: { contains: searchTerm, mode: "insensitive" } },
-            ],
-        },
+        where: { title: { contains: searchTerm, mode: "insensitive"} },
     });
 };
 
