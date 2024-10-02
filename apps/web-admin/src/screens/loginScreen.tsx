@@ -12,6 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
 import { useLoginMutation } from "../redux/services/adminAuthService";
+import { useLogoutMutation } from "../redux/services/adminAuthService";
 import { useResetPasswordMutation } from "../redux/services/adminAuthService";
 
 export default function LoginScreen() {
@@ -21,6 +22,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [login, { isLoading }] = useLoginMutation();
+  const [logout] = useLogoutMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [resetPassword, { isLoading: isResetting }] =
@@ -38,7 +40,13 @@ export default function LoginScreen() {
       setEmail(response.email);
       setPassword(values.password);
       const admin_type = response.admin_type;
-      if (admin_type === "UNVERIFIED") {
+      if (admin_type === "DEACTIVATED") {
+        setError("Account Deactivated");
+        await logout(response.token).unwrap();
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+      else if (admin_type === "UNVERIFIED") {
         setIsModalOpen(true);
       } else {
         navigate("/");
@@ -57,6 +65,10 @@ export default function LoginScreen() {
       return;
     }
     console.log(password);
+    if(newPassword==password) {
+      message.error("Please key in a new password");
+      return;
+    }
     try {
       await resetPassword({
         email: email,

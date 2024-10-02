@@ -1,11 +1,8 @@
-import React, { useState } from "react";
-import logo from "../assets/pandapay_logo.png";
 import { Button, Form, Input, message } from "antd";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  useCheckEmailInUseMutation,
-  useConfirmEmailMutation,
-} from "../redux/services/auth";
+import logo from "../assets/pandapay_logo.png";
+import { useConfirmEmailMutation } from "../redux/services/auth";
 const RegisterConfirmScreen: React.FC = () => {
   const [confirmEmailMutation] = useConfirmEmailMutation();
   const navigate = useNavigate();
@@ -44,7 +41,7 @@ const RegisterConfirmScreen: React.FC = () => {
           confirmEmailMutation({ email: email, token: token })
             .unwrap()
             .then(() => {
-              message.info("Email verified successfully!");
+              message.success("Email verified successfully!");
               navigate("/login");
             })
             .catch((error) => message.error(error.data.error))

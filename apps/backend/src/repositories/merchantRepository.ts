@@ -29,3 +29,31 @@ export const updateMerchant = async (merchant_id: string, updateData: Partial<IM
 export const listAllMerchants = async () => {
     return prisma.merchant.findMany();
 };
+
+// Search Merchants
+export const listAllMerchantsWithSearch = async (search) => {
+    return prisma.merchant.findMany({
+        where: {
+            OR: [
+                {
+                    name: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+                {
+                    email: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+                {
+                    contact_number: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+            ],
+        },
+    });
+};

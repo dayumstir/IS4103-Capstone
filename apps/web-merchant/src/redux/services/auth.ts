@@ -1,8 +1,8 @@
 // Need to use the React-specific entry point to import createApi
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { LoginFormValues } from "../../screens/loginScreen";
-import { IMerchant } from "../../interfaces/merchantInterface";
-import { ResetPasswordValues } from "../../interfaces/resetPasswordInterface";
+import { IMerchant } from "../../interfaces/models/merchantInterface";
+import { ResetPasswordValues } from "../../interfaces/screens/resetPasswordInterface";
 
 // Define a service using a base URL and expected endpoints
 export const authApi = createApi({

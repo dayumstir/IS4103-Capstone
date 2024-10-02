@@ -11,13 +11,22 @@ const Header: React.FC = () => {
   const { Header } = Layout;
   enum HeaderTitles {
     Home = "Home",
+    BusinessManagement = "Business Management",
   }
 
-  const items = [{ label: HeaderTitles.Home, key: HeaderTitles.Home }];
+  const items = [
+    { label: HeaderTitles.Home, key: HeaderTitles.Home },
+    {
+      label: HeaderTitles.BusinessManagement,
+      key: HeaderTitles.BusinessManagement,
+    },
+  ];
 
   const navigateToScreen = (key: string) => {
     if (key == HeaderTitles.Home) {
       navigate("/");
+    } else if (key == HeaderTitles.BusinessManagement) {
+      navigate("/business-management/issues");
     }
   };
 
@@ -29,7 +38,7 @@ const Header: React.FC = () => {
       .then(() => {
         localStorage.removeItem("token");
         localStorage.removeItem("merchantId");
-        message.info("Logout Successful!");
+        message.success("Logout Successful!");
       })
       .catch((error) => message.error(error));
     navigate("/login");

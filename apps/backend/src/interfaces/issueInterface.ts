@@ -1,9 +1,9 @@
-// Defines the structure of a instalment plan object
 import { Sorting } from "./sortingInterface";
 
 export enum IssueStatus {
     PENDING_OUTCOME = "PENDING_OUTCOME",
     RESOLVED = "RESOLVED",
+    CANCELLED = "CANCELLED",
 }
 
 export interface IIssue {

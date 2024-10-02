@@ -4,6 +4,10 @@ import { adminAuthApi } from "./services/adminAuthService";
 import { adminApi } from "./services/adminService";
 import { creditTierApi } from "./services/creditTierService";
 import { instalmentPlanApi } from "./services/instalmentPlanService";
+import { customerApi } from "./services/customerService";
+import { merchantApi } from "./services/merchantService";
+import { voucherApi } from "./services/voucherService";
+import { issueApi } from "./services/issueService";
 
 const customSerializableCheck = {
   isSerializable: () => true,
@@ -16,6 +20,10 @@ export const store = configureStore({
     [adminApi.reducerPath]: adminApi.reducer,
     [creditTierApi.reducerPath]: creditTierApi.reducer,
     [instalmentPlanApi.reducerPath]: instalmentPlanApi.reducer,
+    [customerApi.reducerPath]: customerApi.reducer,
+    [merchantApi.reducerPath]: merchantApi.reducer,
+    [voucherApi.reducerPath]: voucherApi.reducer,
+    [issueApi.reducerPath]: issueApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: customSerializableCheck }).concat(
@@ -23,6 +31,10 @@ export const store = configureStore({
       adminApi.middleware,
       creditTierApi.middleware,
       instalmentPlanApi.middleware,
+      customerApi.middleware,
+      merchantApi.middleware,
+      voucherApi.middleware,
+      issueApi.middleware,
     ),
 });
 

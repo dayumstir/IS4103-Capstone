@@ -1,7 +1,7 @@
 // Defines routes related to instalment plan actions
 import { Router } from "express";
-import { createIssue, getIssue, getIssues } from "../controllers/issueController";
-import { authMiddleware } from "../middlewares/merchantAuthMiddleware";
+import { createIssue, editIssue, getIssue, getIssues } from "../controllers/issueController";
+import { authMiddleware } from "../middlewares/authMiddleware";
 import multer from "multer";
 
 const router = Router();
@@ -13,4 +13,5 @@ const upload = multer({
 router.post("/", authMiddleware, upload.array("images"), createIssue);
 router.post("/list", authMiddleware, getIssues);
 router.get("/:issue_id", authMiddleware, getIssue);
+router.put("/:issue_id", authMiddleware, editIssue);
 export default router;

@@ -1,6 +1,4 @@
-// Defines the structure of a customer object
-import { CustomerStatus } from "./customerStatus";
-
+import { CustomerStatus } from "./customerStatusInterface";
 
 export interface ICustomer {
     customer_id: string;
