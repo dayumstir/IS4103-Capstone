@@ -47,12 +47,12 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <Header className="fixed top-0 z-10 flex w-full items-center bg-gray-100">
+    <Header className="fixed top-0 z-10 flex w-full items-center bg-gray-100 shadow-sm">
       <Menu
         mode="horizontal"
         defaultSelectedKeys={["2"]}
         items={items}
-        style={{ flex: 1, minWidth: 0, backgroundColor: "#F5F5F5" }}
+        style={{ flex: 1, backgroundColor: "#F5F5F5", border: "none" }}
         onClick={(menuInfo) => navigateToScreen(menuInfo.key)}
       />
       {isAuthenticated ? (

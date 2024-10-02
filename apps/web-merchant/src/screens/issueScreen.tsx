@@ -1,5 +1,15 @@
-import { Breadcrumb, Button, message, Table, Tag } from "antd";
-import { TableRowSelection } from "antd/es/table/interface";
+import { LoadingOutlined } from "@ant-design/icons";
+import {
+  Breadcrumb,
+  Button,
+  Card,
+  Empty,
+  Input,
+  message,
+  Popconfirm,
+  Table,
+  Tag,
+} from "antd";
 import { Buffer } from "buffer";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -17,8 +27,7 @@ import {
   useGetIssuesMutation,
   useSearchIssuesMutation,
 } from "../redux/services/issue";
-import { LoadingOutlined } from "@ant-design/icons";
-import { Input } from "antd";
+import { EyeOutlined, StopOutlined } from "@ant-design/icons";
 interface IssueTableInterface {
   key: string;
   title: string;
@@ -63,16 +72,21 @@ const IssueScreen: React.FC = () => {
   const fetchIssues = async () => {
     // if (debouncedSearchTerm) {
     try {
-      const data = await searchIssues(debouncedSearchTerm).unwrap();
-      const mappedData: IssueTableInterface[] = data.map((issue) => ({
-        key: issue.issue_id,
-        title: issue.title,
-        description: issue.description,
-        outcome: issue.outcome,
-        status: issue.status,
-        images: issue.images,
-      }));
-      setIssues(mappedData);
+      if (merchantId) {
+        const data = await searchIssues({
+          search: debouncedSearchTerm,
+          merchant_id: merchantId,
+        }).unwrap();
+        const mappedData: IssueTableInterface[] = data.map((issue) => ({
+          key: issue.issue_id,
+          title: issue.title,
+          description: issue.description,
+          outcome: issue.outcome,
+          status: issue.status,
+          images: issue.images,
+        }));
+        setIssues(mappedData);
+      }
     } catch (error) {
       const err = error as ApiError;
       message.error(
@@ -151,8 +165,6 @@ const IssueScreen: React.FC = () => {
       title: "Status",
       dataIndex: "status",
       showSorterTooltip: { target: "full-header" },
-      sorter: (a: IIssue, b: IIssue) => a.status.localeCompare(b.status),
-      sortDirections: ["ascend", "descend"],
       key: "status",
       render: (status: IssueStatus) => (
         <Tag color={statusColorMap[status] || "default"} key={status}>
@@ -190,16 +202,18 @@ const IssueScreen: React.FC = () => {
       key: "action",
       render: (issue: IssueTableInterface) => (
         <div>
-          <Button onClick={() => navigate(`${location.pathname}/${issue.key}`)}>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => navigate(`${location.pathname}/${issue.key}`)}
+          >
             View Details
           </Button>
           {isLoading && issue.key == issueKeyCancelled ? (
             <LoadingOutlined />
           ) : issue.status == IssueStatus.PENDING_OUTCOME ? (
-            <Button
-              type="primary"
-              danger
-              onClick={() => {
+            <Popconfirm
+              title={"Are you sure you would like to cancel the issue?"}
+              onConfirm={() => {
                 setIssueKeyCancelled(issue.key);
                 cancelIssue(issue.key)
                   .unwrap()
@@ -210,12 +224,26 @@ const IssueScreen: React.FC = () => {
                   .catch((error: ApiError) => message.error(error.data?.error))
                   .finally(() => setIssueKeyCancelled(""));
               }}
-              className="ml-5"
+              okText="Yes"
+              cancelText="No"
             >
-              Cancel
-            </Button>
+              <Button
+                type="primary"
+                danger
+                className="ml-5"
+                icon={<StopOutlined />}
+              >
+                Cancel
+              </Button>
+            </Popconfirm>
           ) : (
-            <Button type="primary" danger disabled className="ml-5">
+            <Button
+              type="primary"
+              danger
+              disabled
+              className="ml-5"
+              icon={<StopOutlined />}
+            >
               Cancel
             </Button>
           )}
@@ -226,7 +254,7 @@ const IssueScreen: React.FC = () => {
   ];
 
   return (
-    <>
+    <Card>
       {isCreateIssueModalOpen && (
         <CreateIssueModal
           isModalOpen={isCreateIssueModalOpen}
@@ -234,7 +262,7 @@ const IssueScreen: React.FC = () => {
         />
       )}
 
-      <div className="mb-1 flex items-center justify-between">
+      <div className="flex justify-between">
         <Breadcrumb items={[{ title: "Issues" }]} />
         <Button type="primary" onClick={() => setIsCreateIssueModalOpen(true)}>
           Create
@@ -245,14 +273,17 @@ const IssueScreen: React.FC = () => {
         placeholder="Search by title or description"
         onChange={handleSearchChange}
         value={searchTerm}
-        className="mb-1"
+        className="my-3"
       />
       <Table<IssueTableInterface>
         columns={columns}
         dataSource={issues}
         style={{ tableLayout: "fixed" }}
+        locale={{
+          emptyText: <Empty description="No issues found"></Empty>,
+        }}
       />
-    </>
+    </Card>
   );
 };
 
