@@ -26,6 +26,7 @@ const { Search } = Input;
 
 
 const AllIssuesScreen = () => {
+  const adminId = localStorage.getItem("adminId");
   const [searchTerm, setSearchTerm] = useState('');
   const [updateIssue] = useUpdateIssueOutcomeMutation();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -166,6 +167,7 @@ const AllIssuesScreen = () => {
       onFilter: (value: string, record: IIssue) => record.status === value,
       render: (text: string) => {
         let color = "geekblue";
+        const formattedStatus = text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         switch (text) {
           case "RESOLVED":
             color = "green";
@@ -175,7 +177,7 @@ const AllIssuesScreen = () => {
             break;
           // Add more cases as necessary
         }
-        return <Tag color={color}>{text}</Tag>;
+        return <Tag color={color}>{formattedStatus}</Tag>;
       },
     },
     {
@@ -212,14 +214,21 @@ const AllIssuesScreen = () => {
         onCancel={() => setIsModalVisible(false)}
         width={1000}
         footer={[
-          <Button
-            key="submit"
-            type="primary"
-            onClick={() => form.submit()}
-            disabled={!isModified}
+          <Popconfirm
+            title="Updating the outcome will resolve the issue and cannot be changed."
+            onConfirm={() => form.submit()}
+            okText="Confirm"
+            cancelText="Cancel"
+            disabled={!isModified || (currentIssue && currentIssue.status === IssueStatus.CANCELLED)}
           >
-            Save Changes
-          </Button>
+            <Button
+              key="submit"
+              type="primary"
+              disabled={!isModified || (currentIssue && currentIssue.status === IssueStatus.CANCELLED || currentIssue?.status === IssueStatus.RESOLVED)}
+            >
+              Resolve Issue
+            </Button>
+          </Popconfirm>
         ]}
       >
         <Descriptions bordered column={2}>
@@ -260,8 +269,18 @@ const AllIssuesScreen = () => {
           onFinish={handleUpdateIssue}
           onFieldsChange={() => form.setFieldsValue(form.getFieldsValue())}
         >
-          <Form.Item name="outcome" label="Outcome" style={{ padding: '25px' }}>
-            <TextArea rows={2} />
+          <Form.Item 
+          name="outcome" 
+          label="Outcome" 
+          style={{ padding: '25px' }} 
+          rules={[
+            {
+              required: true,
+              message: 'Outcome should be at least 5 characters!',
+              min: 5
+            }
+          ]}>
+            <TextArea rows={2} disabled={currentIssue?.status === IssueStatus.CANCELLED  || currentIssue?.status === IssueStatus.RESOLVED}/>
           </Form.Item>
         </Form>
       </Modal>
