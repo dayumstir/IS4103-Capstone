@@ -6,20 +6,7 @@ import { IssueStatusBadge } from "../../../../../components/issueStatusBadge";
 import { format } from "date-fns";
 import { Buffer } from "buffer";
 import { useGetMerchantByIdQuery } from "../../../../../redux/services/merchantService";
-
-function getImageMimeType(buffer: Buffer): string {
-  const signature = buffer.toString("hex", 0, 4);
-  switch (signature) {
-    case "ffd8ffe0":
-    case "ffd8ffe1":
-    case "ffd8ffe2":
-      return "image/jpeg";
-    case "89504e47":
-      return "image/png";
-    default:
-      return "image/jpeg";
-  }
-}
+import { AntDesign } from "@expo/vector-icons";
 
 export default function IssueDetailsPage() {
   const router = useRouter();
@@ -31,6 +18,20 @@ export default function IssueDetailsPage() {
     skip: !issue?.merchant_id,
   });
 
+  const getImageMimeType = (buffer: Buffer) => {
+    const signature = buffer.toString("hex", 0, 4);
+    switch (signature) {
+      case "ffd8ffe0":
+      case "ffd8ffe1":
+      case "ffd8ffe2":
+        return "image/jpeg";
+      case "89504e47":
+        return "image/png";
+      default:
+        return "image/jpeg";
+    }
+  };
+
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -40,6 +41,7 @@ export default function IssueDetailsPage() {
   }
 
   if (error) {
+    console.error(error);
     return (
       <View className="flex-1 items-center justify-center">
         <Text>Error loading issue details</Text>
@@ -60,6 +62,23 @@ export default function IssueDetailsPage() {
       <View className="m-4 flex-1 gap-2 rounded-lg bg-white p-8">
         <View className="border-b border-gray-200 pb-4">
           <Text className="text-2xl font-bold">Issue Details</Text>
+
+          {/* ===== Outcome (if any)  ===== */}
+          {issue.outcome && (
+            <View className="mt-4 rounded-md border-l-4 border-blue-500 bg-blue-100 p-4">
+              <View className="mb-2 flex-row items-center">
+                <AntDesign
+                  name="infocirlceo"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-2"
+                />
+                <Text className="text-xl font-semibold">Outcome</Text>
+              </View>
+
+              <Text className="text-gray-700">{issue.outcome}</Text>
+            </View>
+          )}
         </View>
 
         <View className="mt-2 flex flex-row items-center justify-between">

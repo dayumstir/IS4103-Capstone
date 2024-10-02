@@ -1,4 +1,4 @@
-// Defines the structure of a instalment plan object
+// Defines the structure of an issue object
 import { Sorting } from "./sortingInterface";
 
 export enum IssueStatus {

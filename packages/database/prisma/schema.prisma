@@ -207,7 +207,6 @@ enum IssueStatus {
 
 model Issue {
   issue_id    String      @id @default(cuid())
-  issue_id    String      @id @default(cuid())
   title       String
   description String
   outcome     String?

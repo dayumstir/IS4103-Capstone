@@ -50,19 +50,33 @@ export default function AllIssuesPage() {
     <ScrollView className="bg-white">
       <IssueList
         issues={
-          issues?.filter(
-            (issue) => issue.status === IssueStatus.PENDING_OUTCOME,
-          ) || []
+          issues
+            ?.filter((issue) => issue.status === IssueStatus.PENDING_OUTCOME)
+            .sort(
+              (a, b) =>
+                new Date(b.create_time).getTime() -
+                new Date(a.create_time).getTime(),
+            ) || []
         }
       />
     </ScrollView>
   );
 
-  const ResolvedIssuesView = () => (
+  const ClosedIssuesView = () => (
     <ScrollView className="bg-white">
       <IssueList
         issues={
-          issues?.filter((issue) => issue.status === IssueStatus.RESOLVED) || []
+          issues
+            ?.filter(
+              (issue) =>
+                issue.status === IssueStatus.RESOLVED ||
+                issue.status === IssueStatus.CANCELLED,
+            )
+            .sort(
+              (a, b) =>
+                new Date(b.create_time).getTime() -
+                new Date(a.create_time).getTime(),
+            ) || []
         }
       />
     </ScrollView>
@@ -129,7 +143,7 @@ export default function AllIssuesPage() {
           }}
         >
           <Tab.Screen name="Pending" component={PendingIssuesView} />
-          <Tab.Screen name="Resolved" component={ResolvedIssuesView} />
+          <Tab.Screen name="Closed" component={ClosedIssuesView} />
         </Tab.Navigator>
       </View>
 
