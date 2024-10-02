@@ -8,9 +8,9 @@ const ProtectedRoute: React.FC = () => {
 
   if (isAuthenticated) {
     return (
-      <div>
+      <div className="flex flex-grow">
         <Header />
-        <div className="mb-16 mt-16 flex h-[calc(100vh-130px)] flex-col">
+        <div className="mb-16 mt-16 flex flex-grow">
           <Outlet />
         </div>
       </div>

@@ -1,4 +1,11 @@
-import { Breadcrumb, Card, Image, Tag } from "antd";
+import {
+  Breadcrumb,
+  Card,
+  Descriptions,
+  DescriptionsProps,
+  Image,
+  Tag,
+} from "antd";
 import { Buffer } from "buffer";
 import React from "react";
 import { useParams } from "react-router-dom";
@@ -18,51 +25,52 @@ const IssueDetailsScreen: React.FC = () => {
   });
   const basePath = location.pathname.replace(`/${issueId}`, "");
 
+  const items: DescriptionsProps["items"] = [
+    {
+      key: "1",
+      label: "Created At",
+      children:
+        issue?.create_time &&
+        new Date(issue?.create_time).toDateString() +
+          ", " +
+          issue?.create_time &&
+        new Date(issue?.create_time).toLocaleTimeString(),
+    },
+    {
+      key: "2",
+      label: "Updated At",
+      children:
+        issue?.updated_at &&
+        new Date(issue?.updated_at).toDateString() + ", " + issue?.updated_at &&
+        new Date(issue?.updated_at).toLocaleTimeString(),
+    },
+  ];
+
   return (
     <div>
-      <div className="mb-5">
+      <Card>
         <Breadcrumb
-          items={[{ title: "Issues", href: basePath }, { title: issue?.title }]}
+          items={[
+            { title: "Issues", href: basePath },
+            { title: "Issue Details" },
+          ]}
         />
-      </div>
-
-      <Card title={issue?.title}>
-        <div className="grid grid-cols-2 gap-10">
-          <div>
-            <p>
-              Created At:{" "}
-              {issue?.create_time &&
-                new Date(issue?.create_time).toDateString()}
-              ,{" "}
-              {issue?.create_time &&
-                new Date(issue?.create_time).toLocaleTimeString()}
-            </p>
-            <p>
-              Updated At:{" "}
-              {issue?.updated_at && new Date(issue?.updated_at).toDateString()},{" "}
-              {issue?.updated_at &&
-                new Date(issue?.updated_at).toLocaleTimeString()}
-            </p>
-          </div>
-
-          <div>
-            {admin && <p>Admin Name: {admin.name}</p>}
-            {customer && <p>Customer Name: {customer.name}</p>}
-          </div>
+        <div className="mt-5 grid grid-cols-2 gap-10">
+          <Descriptions title={issue?.title} items={items} />;
         </div>
       </Card>
       <Card className="mt-10">
-        <p className="text-lg font-semibold">Description</p>
+        <p className="text-base font-semibold">Description</p>
         <p>{issue?.description}</p>
-        <p className="mt-10 text-lg font-semibold">Status</p>
+        <p className="mt-10 text-base font-semibold">Status</p>
         {issue && (
           <Tag color={statusColorMap[issue?.status] || "default"} key={status}>
             {issue?.status.toUpperCase()}
           </Tag>
         )}
-        <p className="mt-10 text-lg font-semibold">Outcome</p>
+        <p className="mt-10 text-base font-semibold">Outcome</p>
         <p>{issue?.outcome ? issue.outcome : "No outcome yet"}</p>
-        <p className="mt-10 text-lg font-semibold">Images</p>
+        <p className="mt-10 text-base font-semibold">Images</p>
         <div className="flex flex-wrap gap-5">
           {issue?.images &&
             issue?.images.map((image, index) => {
