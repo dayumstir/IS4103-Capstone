@@ -70,3 +70,10 @@ export const getVoucherDetails = async (voucher_id: string) => {
     }
     return voucher;
 };
+
+// Get Customer Vouchers
+export const getCustomerVouchers = async (customer_id: string) => {
+    logger.info("Executing getCustomerVouchers...");
+    const vouchers = await voucherRepository.getCustomerVouchers(customer_id);
+    return vouchers;
+};

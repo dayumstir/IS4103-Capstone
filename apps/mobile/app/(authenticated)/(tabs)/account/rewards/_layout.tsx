@@ -9,7 +9,7 @@ export default function IssuesLayout() {
       <Stack.Screen
         name="index"
         options={{
-          headerTitle: "Issues",
+          headerTitle: "Rewards",
           headerLeft: () => (
             <TouchableOpacity
               className="flex-row gap-1"
@@ -21,12 +21,10 @@ export default function IssuesLayout() {
           ),
         }}
       />
-      <Stack.Screen name="newIssue" options={{ headerTitle: "New Issue" }} />
       <Stack.Screen
-        name="[issueId]"
-        options={{ headerTitle: "Issue Details" }}
+        name="[voucherId]"
+        options={{ headerTitle: "Voucher Details" }}
       />
-      <Stack.Screen name="imageViewer" options={{ headerTitle: "Image" }} />
     </Stack>
   );
 }
