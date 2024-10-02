@@ -21,7 +21,8 @@ export const login = async (req: Request, res: Response) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
         const admin_type = decoded.admin_type;
         const email = decoded.email;
-        res.status(200).json({ token, admin_type ,email });
+        const admin_id = decoded.admin_id;
+        res.status(200).json({ token, admin_type ,email, admin_id });
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }

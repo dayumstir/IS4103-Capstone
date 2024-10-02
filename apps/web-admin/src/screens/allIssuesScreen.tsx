@@ -14,19 +14,21 @@ import {
   Descriptions,
   message,
 } from "antd";
-import { useGetAllIssuesQuery, useUpdateIssueOutcomeMutation } from '../redux/services/issueService';
+import { useGetAllIssuesQuery, useUpdateIssueOutcomeMutation, useViewIssueDetailsQuery } from '../redux/services/issueService';
 import { IIssue, IssueStatus } from "../interfaces/issueInterface";
 import TextArea from "antd/es/input/TextArea";
 import { useViewCustomerProfileQuery } from "../redux/services/customerService";
 import { useViewMerchantProfileQuery } from "../redux/services/merchantService";
+import { useViewAdminProfileQuery } from "../redux/services/adminService";
 import { Link } from "react-router-dom";
+import { Buffer } from "buffer";
 
 
 const { Search } = Input;
 
 
 const AllIssuesScreen = () => {
-  const adminId = localStorage.getItem("adminId");
+  const adminId = localStorage.getItem("adminId") as string;
   const [searchTerm, setSearchTerm] = useState('');
   const [updateIssue] = useUpdateIssueOutcomeMutation();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -38,6 +40,11 @@ const AllIssuesScreen = () => {
   const { data: currentCustomer } = useViewCustomerProfileQuery(currentCustomerId, { skip: !currentCustomerId });
   const [currentMerchantId, setCurrentMerchantId] = useState('');
   const { data: currentMerchant } = useViewMerchantProfileQuery(currentMerchantId, { skip: !currentMerchantId });
+  const [currentIssueId, setCurrentIssueId] = useState('');
+  const { data: issue } = useViewIssueDetailsQuery(currentIssueId, { skip: !currentIssueId });
+  const [currentAdminId, setCurrentAdminId] = useState('');
+  const { data: currentAdmin } = useViewAdminProfileQuery(currentAdminId, { skip: !currentAdminId });
+
 
 
   const handleSearchChange = (e) => {
@@ -46,6 +53,7 @@ const AllIssuesScreen = () => {
 
   const showIssueModal = (issue: IIssue) => {
     setCurrentIssue(issue);
+    setCurrentIssueId(issue.issue_id);
     form.setFieldsValue(issue);
     setIsModalVisible(true);
   };
@@ -59,13 +67,17 @@ const AllIssuesScreen = () => {
       message.error("No issue selected");
       return;
     }
+    if (!adminId) {
+      message.error("Unauthorized");
+      return;
+    }
     const status = values.outcome && values.outcome.trim() !== '' ? IssueStatus.RESOLVED : currentIssue.status;
     const updatedIssue: IIssue = {
       ...values,
       issue_id: currentIssue.issue_id,
       status,
+      admin_id: adminId,
     };
-
     try {
       await updateIssue(updatedIssue).unwrap();
       setIsModalVisible(false);
@@ -125,6 +137,9 @@ const AllIssuesScreen = () => {
         }
         if (record && record.merchant_id) {
           setCurrentMerchantId(record.merchant_id);
+        }
+        if (record && record.admin_id) {
+          setCurrentAdminId(record.admin_id);
         }
         if (record.customer_id && record.merchant_id) {
           return (
@@ -241,24 +256,25 @@ const AllIssuesScreen = () => {
                 new Date(currentIssue?.updated_at).toLocaleTimeString()}</Descriptions.Item>
           {currentMerchant?.merchant_id && <Descriptions.Item label="Merchant" span={2}><Link to={`/admin/merchant/${currentMerchant.merchant_id}`}>{currentMerchant.name}</Link></Descriptions.Item>}
           {currentCustomer?.customer_id && <Descriptions.Item label="Customer" span={2}><Link to={`/admin/customer/${currentCustomer.customer_id}`}>{currentCustomer.name}</Link></Descriptions.Item>}
-          {currentIssue?.admin_id && <Descriptions.Item label="Admin ID" span={2}>{currentIssue.admin_id}</Descriptions.Item>}
-          {currentIssue?.images && (
-        <Descriptions.Item label="Images">
-          {currentIssue?.images &&
-            currentIssue.images.map((image, index) => {
+          {currentAdmin?.admin_id && <Descriptions.Item label="Admin" span={2}>{currentAdmin.name}</Descriptions.Item>}
+          {issue?.images && (
+          <Descriptions.Item label="Images">
+            {issue?.images &&
+              issue?.images.map((image, index) => {
               const base64String = `data:image/png;base64,${Buffer.from(image).toString("base64")}`;
               return (
-                <img
+                <Image
                   key={index}
                   src={base64String}
                   alt={`Image ${index + 1}`}
-                  style={{ height: '100px' }}
+                  height={100}
+                  style={{ padding: '10px' }}
                 />
               );
-          })}
-      </Descriptions.Item>
-      
-)}
+            })}
+          </Descriptions.Item>
+          
+          )}
         </Descriptions>
         <Form
           form={form}

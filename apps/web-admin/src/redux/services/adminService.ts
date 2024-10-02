@@ -75,8 +75,20 @@ export const adminApi = createApi({
         body: newAdmin,
       }),
     }),
+
+    // Get Admin with ID
+    viewAdminProfile: builder.query<IAdmin, string>({
+      query: (admin_id) => ({
+        url: `/profile/${admin_id}`,
+        method: "GET",
+      }),
+      providesTags: ["AdminProfile"],
+    }),
   }),
 });
+
+
+
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
@@ -86,4 +98,5 @@ export const {
   useViewAllAdminQuery,
   useUpdateStatusMutation,
   useAddAdminMutation,
+  useViewAdminProfileQuery
 } = adminApi;
