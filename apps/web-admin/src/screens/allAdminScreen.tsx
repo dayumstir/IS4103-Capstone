@@ -25,6 +25,7 @@ import { IAdmin } from "../interfaces/adminInterface";
 import { Buffer } from "buffer";
 import { Link } from "react-router-dom";
 import { Descriptions } from 'antd';
+import { EyeOutlined } from '@ant-design/icons';
 
 export default function AllAdminScreen() {
   const { Title } = Typography;
@@ -74,7 +75,8 @@ export default function AllAdminScreen() {
 
   const filteredAdmins = admins?.filter(admin => {
     const matchesSearch = admin.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          admin.email.toLowerCase().includes(searchTerm.toLowerCase());
+                          admin.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          admin.username.toLowerCase().includes(searchTerm.toLowerCase());
                           const matchesAdminType = selectedAdminType ? (selectedAdminType === "" || admin.admin_type === selectedAdminType) : true; // Adjusted line
     return matchesSearch && matchesAdminType;
   }) || [];
@@ -117,7 +119,7 @@ export default function AllAdminScreen() {
       render: (text: string, admin: IAdmin) => (
         <Button
           className="mr-2"
-          icon={<EditOutlined />}
+          icon={<EyeOutlined />}
           onClick={() => handleEditAdmin(admin)}
         >
           View
@@ -183,7 +185,7 @@ export default function AllAdminScreen() {
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center">
             <Input
-              placeholder="Search by name or email"
+              placeholder="Search by name, username or email"
               value={searchTerm}
               onChange={handleSearchChange}
               style={{ marginRight: 16 }}
