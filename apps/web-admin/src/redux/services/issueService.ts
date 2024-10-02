@@ -38,11 +38,11 @@ export const issueApi = createApi({
     }),
 
     // Update Issue Outcome
-    updateIssueOutcome: builder.mutation<IIssue, { issue_id: string; outcome: string; status: IssueStatus}>({
-      query: ({ issue_id, outcome, status }) => ({
+    updateIssueOutcome: builder.mutation<IIssue, { issue_id: string; outcome: string; status: IssueStatus, admin_id: string}>({
+      query: ({ issue_id, outcome, status, admin_id}) => ({
         url: `issue/${issue_id}`,
         method: 'PUT',
-        body: { outcome, status },
+        body: { outcome, status, admin_id},
       }),
       invalidatesTags: ['Issue']
     }),
