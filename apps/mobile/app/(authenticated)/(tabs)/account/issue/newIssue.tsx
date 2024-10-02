@@ -13,10 +13,16 @@ import { RootState } from "../../../../../redux/store";
 
 // Define your Zod schema
 const issueSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-  merchantId: z.string().optional(),
-  transactionId: z.string().optional(),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(50, "Title must be 50 characters or less"),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .max(200, "Description must be 200 characters or less"),
+  merchant_id: z.string().optional(),
+  transaction_id: z.string().optional(),
   image: z.array(z.custom<ImagePicker.ImagePickerAsset>()).optional(),
 });
 
@@ -43,9 +49,11 @@ export default function NewIssue() {
 
       formData.append("title", data.title);
       formData.append("description", data.description);
-      if (data.merchantId) formData.append("merchant_id", data.merchantId);
-      if (data.transactionId)
-        formData.append("transaction_id", data.transactionId);
+
+      // TODO: Auto populate merchant_id and transaction_id if issue is raised from a transaction
+      // if (data.merchant_id) formData.append("merchant_id", data.merchant_id);
+      // if (data.transaction_id)
+      //   formData.append("transaction_id", data.transaction_id);
 
       if (data.image) {
         data.image.forEach((img, index) => {
@@ -120,40 +128,6 @@ export default function NewIssue() {
                   {errors.description.message}
                 </Text>
               )}
-            </View>
-          )}
-        />
-
-        <Text className="mb-2 font-semibold">Merchant (optional)</Text>
-        <Controller
-          control={control}
-          name="merchantId"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <View className="mb-4">
-              <TextInput
-                className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
-                onChangeText={onChange}
-                onBlur={onBlur}
-                value={value}
-                placeholder="Select a merchant"
-              />
-            </View>
-          )}
-        />
-
-        <Text className="mb-2 font-semibold">Transaction (optional)</Text>
-        <Controller
-          control={control}
-          name="transactionId"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <View className="mb-4">
-              <TextInput
-                className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
-                onChangeText={onChange}
-                onBlur={onBlur}
-                value={value}
-                placeholder="Select a transaction"
-              />
             </View>
           )}
         />
