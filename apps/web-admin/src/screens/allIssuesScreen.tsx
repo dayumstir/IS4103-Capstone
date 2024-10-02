@@ -26,6 +26,7 @@ const { Search } = Input;
 
 
 const AllIssuesScreen = () => {
+  const adminId = localStorage.getItem("adminId");
   const [searchTerm, setSearchTerm] = useState('');
   const [updateIssue] = useUpdateIssueOutcomeMutation();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -47,13 +48,6 @@ const AllIssuesScreen = () => {
     setCurrentIssue(issue);
     form.setFieldsValue(issue);
     setIsModalVisible(true);
-    if (issue && issue.customer_id) {
-      setCurrentCustomerId(issue.customer_id);
-    }
-    if (issue && issue.merchant_id) {
-      setCurrentMerchantId(issue.merchant_id);
-    }
-    console.log("Image data:", currentIssue?.images);
   };
 
   const onValuesChange = (_, allValues) => {
@@ -72,7 +66,6 @@ const AllIssuesScreen = () => {
       status,
     };
 
-    console.log("Issue to update:", updatedIssue);
     try {
       await updateIssue(updatedIssue).unwrap();
       setIsModalVisible(false);
@@ -121,15 +114,18 @@ const AllIssuesScreen = () => {
         { text: 'Merchant', value: 'merchant' }
     ],
       onFilter: (value, record: IIssue) => {
-        // Treat as customer if customer_id is present regardless of merchant_id when filtering for 'customer'
         if (value === 'customer') {
             return !!record.customer_id;
         }
-        // Treat as merchant only if customer_id is absent when filtering for 'merchant'
         return value === 'merchant' && !record.customer_id && !!record.merchant_id;
       },
       render: (text, record: IIssue) => {
-        // Check if both customer and merchant IDs exist
+        if (record && record.customer_id) {
+          setCurrentCustomerId(record.customer_id);
+        }
+        if (record && record.merchant_id) {
+          setCurrentMerchantId(record.merchant_id);
+        }
         if (record.customer_id && record.merchant_id) {
           return (
             <>
@@ -144,14 +140,14 @@ const AllIssuesScreen = () => {
                 <Tag>Customer</Tag>
                 {currentCustomer?.email}
             </>
-          ); // Return customer if only customer ID exists
+          );
         } else if (record.merchant_id) {
           return (
             <>
                 <Tag>Merchant</Tag>
                 {currentMerchant?.email}
             </>
-          ); // Return merchant if only merchant ID exists
+          );
         }
         return null;
         
@@ -170,16 +166,16 @@ const AllIssuesScreen = () => {
       onFilter: (value: string, record: IIssue) => record.status === value,
       render: (text: string) => {
         let color = "geekblue";
+        const formattedStatus = text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         switch (text) {
           case "RESOLVED":
             color = "green";
             break;
           case "CANCELLED":
-            color = "volcano";  // Choose an appropriate color
+            color = "volcano";
             break;
-          // Add more cases as necessary
         }
-        return <Tag color={color}>{text}</Tag>;
+        return <Tag color={color}>{formattedStatus}</Tag>;
       },
     },
     {
@@ -216,14 +212,21 @@ const AllIssuesScreen = () => {
         onCancel={() => setIsModalVisible(false)}
         width={1000}
         footer={[
-          <Button
-            key="submit"
-            type="primary"
-            onClick={() => form.submit()}
-            disabled={!isModified}
+          <Popconfirm
+            title="Updating the outcome will resolve the issue and cannot be changed."
+            onConfirm={() => form.submit()}
+            okText="Confirm"
+            cancelText="Cancel"
+            disabled={!isModified || (currentIssue && currentIssue.status === IssueStatus.CANCELLED)}
           >
-            Save Changes
-          </Button>
+            <Button
+              key="submit"
+              type="primary"
+              disabled={!isModified || (currentIssue && currentIssue.status === IssueStatus.CANCELLED || currentIssue?.status === IssueStatus.RESOLVED)}
+            >
+              Resolve Issue
+            </Button>
+          </Popconfirm>
         ]}
       >
         <Descriptions bordered column={2}>
@@ -264,8 +267,18 @@ const AllIssuesScreen = () => {
           onFinish={handleUpdateIssue}
           onFieldsChange={() => form.setFieldsValue(form.getFieldsValue())}
         >
-          <Form.Item name="outcome" label="Outcome" style={{ padding: '25px' }}>
-            <TextArea rows={2} />
+          <Form.Item 
+          name="outcome" 
+          label="Outcome" 
+          style={{ padding: '25px' }} 
+          rules={[
+            {
+              required: true,
+              message: 'Outcome should be at least 5 characters!',
+              min: 5
+            }
+          ]}>
+            <TextArea rows={2} disabled={currentIssue?.status === IssueStatus.CANCELLED  || currentIssue?.status === IssueStatus.RESOLVED}/>
           </Form.Item>
         </Form>
       </Modal>
