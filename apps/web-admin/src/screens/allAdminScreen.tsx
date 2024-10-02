@@ -24,6 +24,7 @@ import {
 import { IAdmin } from "../interfaces/adminInterface";
 import { Buffer } from "buffer";
 import { Link } from "react-router-dom";
+import { Descriptions } from 'antd';
 
 export default function AllAdminScreen() {
   const { Title } = Typography;
@@ -139,12 +140,16 @@ export default function AllAdminScreen() {
           ) : (
             <Avatar className="h-36 w-36 object-cover" icon={<UserOutlined />} />
           )}
-          <h3>{`Admin Name: ${editingAdmin.name}`}</h3>
-          <p>{`Email: ${editingAdmin.email}`}</p>
-          <h3>{`Username: ${editingAdmin.username}`}</h3>
-          <p>{`Contact Number: ${editingAdmin.contact_number}`}</p>
-          <h3>{`Address: ${editingAdmin.address}`}</h3>
-          <p>{`Date of Birth: ${new Date(editingAdmin.date_of_birth).toLocaleDateString()}`}</p>
+          <Descriptions title="Admin Details" bordered size="small" column={1} className="admin-details">
+      <Descriptions.Item label="Admin Name">{editingAdmin.name}</Descriptions.Item>
+      <Descriptions.Item label="Email">{editingAdmin.email}</Descriptions.Item>
+      <Descriptions.Item label="Username">{editingAdmin.username}</Descriptions.Item>
+      <Descriptions.Item label="Contact Number">{editingAdmin.contact_number}</Descriptions.Item>
+      <Descriptions.Item label="Address">{editingAdmin.address}</Descriptions.Item>
+      <Descriptions.Item label="Date of Birth">
+        {new Date(editingAdmin.date_of_birth).toLocaleDateString()}
+      </Descriptions.Item>
+    </Descriptions>
         </div>
       )}
       <Form
