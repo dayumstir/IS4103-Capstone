@@ -160,30 +160,30 @@ export default function IssueDetailsPage() {
         {issue.status === IssueStatus.PENDING_OUTCOME && (
           <View className="mt-6">
             <Button
-            type="warning"
-            onPress={() => {
-              Alert.alert(
-                "Cancel Issue",
-                "Are you sure you want to cancel this issue?",
-                [
-                  {
-                    text: "No",
-                  },
-                  {
-                    text: "Yes",
-                    style: "destructive",
-                    onPress: () => {
-                      cancelIssue({ issue_id: issueId });
-                      router.navigate("/account/issue");
+              type="warning"
+              onPress={() => {
+                Alert.alert(
+                  "Cancel Issue",
+                  "Are you sure you want to cancel this issue? \n\n Note: This action cannot be undone.",
+                  [
+                    {
+                      text: "No",
                     },
-                  },
-                ],
-              );
-            }}
-          >
-            <Text className="text-center font-semibold text-white">
-              Cancel Issue
-            </Text>
+                    {
+                      text: "Yes",
+                      style: "destructive",
+                      onPress: () => {
+                        cancelIssue({ issue_id: issueId });
+                        router.navigate("/account/issue");
+                      },
+                    },
+                  ],
+                );
+              }}
+            >
+              <Text className="text-center font-semibold text-white">
+                Cancel Issue
+              </Text>
             </Button>
           </View>
         )}
