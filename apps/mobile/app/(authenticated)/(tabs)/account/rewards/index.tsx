@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
 import { IVoucher } from "../../../../../interfaces/voucherInterface";
 import { format } from "date-fns";
+import EmptyPlaceholder from "../../../../../components/emptyPlaceholder";
 
 export default function RewardsPage() {
   const Tab = createMaterialTopTabNavigator();
@@ -68,24 +69,30 @@ export default function RewardsPage() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      {cashbackList.map((cashback, index) => (
-        <View
-          key={cashback.id}
-          className={`mb-4 rounded-lg border border-gray-300 p-4 ${index === 0 ? "mt-4" : ""}`}
-        >
-          <View className="flex-row items-center justify-between">
-            <View>
-              <Text className="text-base font-bold">
-                ${cashback.amount.toFixed(2)} Cashback
-              </Text>
+      {cashbackList.length > 0 ? (
+        cashbackList.map((cashback, index) => (
+          <View
+            key={cashback.id}
+            className={`mb-4 rounded-lg border border-gray-300 p-4 ${index === 0 ? "mt-4" : ""}`}
+          >
+            <View className="flex-row items-center justify-between">
+              <View>
+                <Text className="text-base font-bold">
+                  ${cashback.amount.toFixed(2)} Cashback
+                </Text>
+                <Text className="text-sm text-gray-500">
+                  From: {cashback.merchant}
+                </Text>
+              </View>
               <Text className="text-sm text-gray-500">
-                From: {cashback.merchant}
+                Date: {cashback.date}
               </Text>
             </View>
-            <Text className="text-sm text-gray-500">Date: {cashback.date}</Text>
           </View>
-        </View>
-      ))}
+        ))
+      ) : (
+        <EmptyPlaceholder message="No cashback found" />
+      )}
     </ScrollView>
   );
 
@@ -134,7 +141,7 @@ export default function RewardsPage() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      {vouchers &&
+      {vouchers && vouchers.length > 0 ? (
         vouchers.map((voucherAssigned, index) => (
           <TouchableOpacity
             key={voucherAssigned.voucher_assigned_id}
@@ -147,7 +154,10 @@ export default function RewardsPage() {
           >
             <VoucherCard voucher={voucherAssigned.voucher} />
           </TouchableOpacity>
-        ))}
+        ))
+      ) : (
+        <EmptyPlaceholder message="No vouchers found" />
+      )}
     </ScrollView>
   );
 
