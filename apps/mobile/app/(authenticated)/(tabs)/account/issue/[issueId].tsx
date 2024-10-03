@@ -1,17 +1,29 @@
-import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
-import { ActivityIndicator } from "@ant-design/react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import { ActivityIndicator, Button } from "@ant-design/react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useGetIssueByIdQuery } from "../../../../../redux/services/issueService";
+import {
+  useCancelIssueMutation,
+  useGetIssueByIdQuery,
+} from "../../../../../redux/services/issueService";
 import { IssueStatusBadge } from "../../../../../components/issueStatusBadge";
 import { format } from "date-fns";
 import { Buffer } from "buffer";
 import { useGetMerchantByIdQuery } from "../../../../../redux/services/merchantService";
 import { AntDesign } from "@expo/vector-icons";
+import { IssueStatus } from "../../../../../interfaces/issueInterface";
 
 export default function IssueDetailsPage() {
   const router = useRouter();
   const { issueId } = useLocalSearchParams<{ issueId: string }>();
   const { data: issue, isLoading, error } = useGetIssueByIdQuery(issueId);
+  const [cancelIssue] = useCancelIssueMutation();
 
   // Skip if issue.merchant_id doesn't exist
   const { data: merchant } = useGetMerchantByIdQuery(issue?.merchant_id ?? "", {
@@ -118,11 +130,10 @@ export default function IssueDetailsPage() {
         {issue.images && issue.images.length > 0 && (
           <View className="mt-4">
             <Text className="mb-2 font-semibold">Supporting Images:</Text>
-            <View className="flex flex-row flex-wrap">
+            <View className="flex flex-row flex-wrap gap-6">
               {issue.images.map((image, index) => (
                 <TouchableOpacity
                   key={index}
-                  className="m-2"
                   onPress={() => {
                     // Open full-screen image viewer
                     router.push({
@@ -142,6 +153,38 @@ export default function IssueDetailsPage() {
                 </TouchableOpacity>
               ))}
             </View>
+          </View>
+        )}
+
+        {/* ===== Cancel Issue Button ===== */}
+        {issue.status === IssueStatus.PENDING_OUTCOME && (
+          <View className="mt-6">
+            <Button
+            type="warning"
+            onPress={() => {
+              Alert.alert(
+                "Cancel Issue",
+                "Are you sure you want to cancel this issue?",
+                [
+                  {
+                    text: "No",
+                  },
+                  {
+                    text: "Yes",
+                    style: "destructive",
+                    onPress: () => {
+                      cancelIssue({ issue_id: issueId });
+                      router.navigate("/account/issue");
+                    },
+                  },
+                ],
+              );
+            }}
+          >
+            <Text className="text-center font-semibold text-white">
+              Cancel Issue
+            </Text>
+            </Button>
           </View>
         )}
       </View>

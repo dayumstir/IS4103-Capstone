@@ -1,5 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IIssue, IssueFilter } from "../../interfaces/issueInterface";
+import {
+  IIssue,
+  IssueFilter,
+  IssueStatus,
+} from "../../interfaces/issueInterface";
 import { RootState } from "../store"; // Make sure this import path is correct
 
 // Define a service using a base URL and expected endpoints
@@ -15,7 +19,7 @@ export const issueApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["IssueList"],
+  tagTypes: ["IssueList", "IssueDetails"],
   endpoints: (builder) => ({
     // Create Issue
     createIssue: builder.mutation<IIssue, FormData>({
@@ -54,6 +58,17 @@ export const issueApi = createApi({
         url: `/${id}`,
         method: "GET",
       }),
+      providesTags: ["IssueDetails"],
+    }),
+
+    // Cancel Issue
+    cancelIssue: builder.mutation<IIssue, { issue_id: string }>({
+      query: ({ issue_id }) => ({
+        url: `/${issue_id}`,
+        method: "PUT",
+        body: { status: IssueStatus.CANCELLED },
+      }),
+      invalidatesTags: ["IssueList", "IssueDetails"],
     }),
   }),
 });
@@ -65,4 +80,5 @@ export const {
   useGetAllIssuesQuery,
   useGetAllIssuesWithFilterMutation,
   useGetIssueByIdQuery,
+  useCancelIssueMutation,
 } = issueApi;
