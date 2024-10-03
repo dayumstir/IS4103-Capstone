@@ -5,6 +5,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as FileSystem from "expo-file-system";
 import { useState } from "react";
+import { router } from "expo-router";
 
 interface ImagePickerFieldProps {
   value: ImagePicker.ImagePickerAsset[] | undefined;
@@ -100,18 +101,33 @@ export default function ImagePickerField({
 
       {/* ===== Image preview ===== */}
       {value && value.length > 0 && (
-        <View className="flex-row flex-wrap">
+        <View className="flex-row flex-wrap gap-6">
           {value.map((image, index) => (
-            <View key={index} className="m-2">
-              <Image
-                source={{ uri: image.uri }}
-                className="h-36 w-36 rounded-md border border-gray-300"
-              />
+            <View key={index}>
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  // Open full-screen image viewer
+                  router.push({
+                    pathname: "/account/issue/imageViewer",
+                    params: {
+                      imageUri: image.uri,
+                    },
+                  });
+                }}
+              >
+                <Image
+                  source={{ uri: image.uri }}
+                  className="h-36 w-36 rounded-md border border-gray-300"
+                />
+              </TouchableOpacity>
               <TouchableOpacity
                 className="mt-1"
                 onPress={() => removeImage(index)}
               >
-                <Text className="text-sm text-blue-500">Remove</Text>
+                <Text className="text-center text-sm font-semibold text-blue-500">
+                  Remove
+                </Text>
               </TouchableOpacity>
             </View>
           ))}

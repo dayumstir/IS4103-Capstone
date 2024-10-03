@@ -3,7 +3,10 @@ import { IIssue, IssueFilter, IssueStatus } from "../interfaces/issueInterface";
 import * as issueRepository from "../repositories/issueRepository";
 import logger from "../utils/logger";
 
-export const createIssue = async (issueData: IIssue, issueImages?: Buffer[]) => {
+export const createIssue = async (
+    issueData: IIssue,
+    issueImages?: Buffer[]
+) => {
     logger.info("Executing createIssue...");
     const issue = await issueRepository.createIssue({
         ...issueData,
@@ -27,9 +30,11 @@ export const getIssueById = async (issue_id: string) => {
     return issue;
 };
 
-
-export const updateIssue = async (issue_id: string, updateData: Partial<IIssue>) => {
-    logger.info('Executing updateIssue...');
+export const updateIssue = async (
+    issue_id: string,
+    updateData: Partial<IIssue>
+) => {
+    logger.info("Executing updateIssue...");
 
     const issue = await issueRepository.updateIssue(issue_id, updateData);
     if (!issue) {
@@ -38,7 +43,7 @@ export const updateIssue = async (issue_id: string, updateData: Partial<IIssue>)
     return issue;
 };
 
-export const searchIssues = async (searchQuery) => {
+export const searchIssues = async (searchQuery: string) => {
     logger.info(`Searching for issues with query: ${searchQuery}`);
     const issues = await issueRepository.listAllIssuesWithSearch(searchQuery);
     if (!issues.length) {
