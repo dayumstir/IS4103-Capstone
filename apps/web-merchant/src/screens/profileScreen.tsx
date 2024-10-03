@@ -61,7 +61,7 @@ const ProfileScreen: React.FC = () => {
   });
 
   return (
-    <div className="px-16 py-2">
+    <div className="flex-grow px-16 py-2">
       <div className="flex items-center">
         {profilePictureDisplay ? (
           <img
