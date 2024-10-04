@@ -63,10 +63,6 @@ export default function App() {
           </Route>
         </Route>
       </Routes>
-
-      <Layout.Footer className="flex items-center justify-center bg-gray-200">
-        PandaPay ©{new Date().getFullYear()}
-      </Layout.Footer>
     </Layout>
   );
 }
