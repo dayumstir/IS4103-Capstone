@@ -6,7 +6,16 @@ import { IInstalmentPlan } from "../interfaces/instalmentPlanInterface";
 export const createInstalmentPlan = async (
     instalmentPlanData: IInstalmentPlan
 ) => {
-    return prisma.instalmentPlan.create({ data: instalmentPlanData });
+    return prisma.instalmentPlan.create({
+        data: {
+            ...instalmentPlanData,
+            credit_tiers: {
+                connect: instalmentPlanData.credit_tiers.map((tier) => ({
+                    credit_tier_id: tier.credit_tier_id,
+                })),
+            },
+        },
+    });
 };
 
 // Find all instalment plans in db
@@ -14,6 +23,13 @@ export const findAllInstalmentPlans = async () => {
     return prisma.instalmentPlan.findMany({
         orderBy: {
             name: "asc",
+        },
+        include: {
+            credit_tiers: {
+                orderBy: {
+                    min_credit_score: "asc",
+                },
+            },
         },
     });
 };
@@ -32,6 +48,13 @@ export const updateInstalmentPlan = async (
 ) => {
     return prisma.instalmentPlan.update({
         where: { instalment_plan_id: instalment_plan_id },
-        data: updateData,
+        data: {
+            ...updateData,
+            credit_tiers: {
+                set: updateData.credit_tiers?.map((tier) => ({
+                    credit_tier_id: tier.credit_tier_id,
+                })),
+            },
+        },
     });
 };
