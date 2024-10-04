@@ -190,13 +190,17 @@ model InstalmentPlan {
   minimum_amount        Decimal @db.Decimal(10, 2)
   maximum_amount        Decimal @db.Decimal(10, 2)
   status                String // TODO: Implement as enum
+
+  credit_tiers CreditTier[]
 }
 
 model CreditTier {
   credit_tier_id   String @id @default(cuid())
-  name             String
+  name             String @unique
   min_credit_score Int
   max_credit_score Int
+
+  instalment_plans InstalmentPlan[]
 }
 
 enum IssueStatus {
@@ -244,22 +248,22 @@ model Voucher {
   expiry_date         DateTime
   terms               String
   usage_limit         Int
-  is_active           Boolean           @default(true)
+  is_active           Boolean  @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relationships
-  admin               Admin             @relation(fields: [created_by_admin], references: [admin_id])
-  created_by_admin    String
-  vouchersAssigned    VoucherAssigned[] 
+  admin            Admin             @relation(fields: [created_by_admin], references: [admin_id])
+  created_by_admin String
+  vouchersAssigned VoucherAssigned[]
 }
 
 model VoucherAssigned {
-  voucher_assigned_id         String          @id @default(cuid())
-  status                      VoucherStatus
-  date_time_issued            DateTime        @default(now())
-  remaining_uses              Int             
+  voucher_assigned_id String        @id @default(cuid())
+  status              VoucherStatus
+  date_time_issued    DateTime      @default(now())
+  remaining_uses      Int
 
   // Relationships
   voucher     Voucher  @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)

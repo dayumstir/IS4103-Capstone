@@ -1,3 +1,5 @@
+import { ICreditTier } from "./creditTierInterface";
+
 export interface IInstalmentPlan {
   instalment_plan_id: string;
   name: string;
@@ -8,4 +10,6 @@ export interface IInstalmentPlan {
   minimum_amount: number;
   maximum_amount: number;
   status: string; // TODO: Change to enum
+
+  credit_tiers: ICreditTier[];
 }

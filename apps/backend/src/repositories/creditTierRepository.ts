@@ -3,8 +3,14 @@ import { prisma } from "./db";
 import { ICreditTier } from "../interfaces/creditTierInterface";
 
 // Create a new credit tier in db
-export const createCreditTier = async (creditTierData: ICreditTier) => {
-    return prisma.creditTier.create({ data: creditTierData });
+export const createCreditTier = async (
+    creditTierData: Omit<ICreditTier, "instalment_plans">
+) => {
+    return prisma.creditTier.create({
+        data: {
+            ...creditTierData,
+        },
+    });
 };
 
 // Find all credit tiers in db
@@ -12,6 +18,13 @@ export const findAllCreditTiers = async () => {
     return prisma.creditTier.findMany({
         orderBy: {
             min_credit_score: "asc",
+        },
+        include: {
+            instalment_plans: {
+                orderBy: {
+                    name: "asc",
+                },
+            },
         },
     });
 };
@@ -26,10 +39,12 @@ export const findCreditTierById = async (credit_tier_id: string) => {
 // Update credit tier in db
 export const updateCreditTier = async (
     credit_tier_id: string,
-    updateData: Partial<ICreditTier>
+    updateData: Omit<ICreditTier, "instalment_plans">
 ) => {
     return prisma.creditTier.update({
         where: { credit_tier_id: credit_tier_id },
-        data: updateData,
+        data: {
+            ...updateData,
+        },
     });
 };

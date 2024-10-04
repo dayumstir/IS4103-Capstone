@@ -18,6 +18,7 @@ import { RootState } from "../../../../../redux/store";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { IIssue, IssueStatus } from "../../../../../interfaces/issueInterface";
 import { useState } from "react";
+import EmptyPlaceholder from "../../../../../components/emptyPlaceholder";
 
 export default function AllIssuesPage() {
   const Tab = createMaterialTopTabNavigator();
@@ -103,8 +104,7 @@ export default function AllIssuesPage() {
 
   const IssueList = ({ issues }: { issues: IIssue[] }) => (
     <View className="rounded-lg">
-      {issues &&
-        issues.length > 0 &&
+      {issues && issues.length > 0 ? (
         issues.map((issue, index) => (
           <View
             key={issue.issue_id}
@@ -132,7 +132,10 @@ export default function AllIssuesPage() {
               <AntDesign name="right" size={12} color="#3b82f6" />
             </TouchableOpacity>
           </View>
-        ))}
+        ))
+      ) : (
+        <EmptyPlaceholder message="No issues found" />
+      )}
     </View>
   );
 

@@ -22,6 +22,7 @@ import {
   useUpdateInstalmentPlanMutation,
 } from "../redux/services/instalmentPlanService";
 import { formatCurrency } from "../utils/formatCurrency";
+import { useGetCreditTiersQuery } from "../redux/services/creditTierService";
 
 export default function InstalmentPlanScreen() {
   const [form] = Form.useForm();
@@ -32,12 +33,27 @@ export default function InstalmentPlanScreen() {
   const { data: instalmentPlans, isLoading } = useGetInstalmentPlansQuery();
   const [createInstalmentPlan] = useCreateInstalmentPlanMutation();
   const [updateInstalmentPlan] = useUpdateInstalmentPlanMutation();
+  const { data: creditTiers } = useGetCreditTiersQuery();
 
   const handleCreatePlan = async (
-    newInstalmentPlan: Omit<IInstalmentPlan, "instalment_plan_id">,
+    values: Omit<IInstalmentPlan, "instalment_plan_id" | "credit_tiers"> & {
+      credit_tier_ids: string[];
+    },
   ) => {
     try {
-      const result = await createInstalmentPlan(newInstalmentPlan).unwrap();
+      const selectedCreditTiers =
+        creditTiers?.filter((tier) =>
+          values.credit_tier_ids?.includes(tier.credit_tier_id),
+        ) || [];
+
+      const { credit_tier_ids, ...newPlanWithoutCreditTierIds } = values;
+
+      const newPlan = {
+        ...newPlanWithoutCreditTierIds,
+        credit_tiers: selectedCreditTiers,
+      };
+
+      const result = await createInstalmentPlan(newPlan).unwrap();
       message.success(`New instalment plan "${result.name}" has been created.`);
       form.resetFields();
     } catch (error) {
@@ -48,33 +64,48 @@ export default function InstalmentPlanScreen() {
 
   const handleEditPlan = (plan: IInstalmentPlan) => {
     setEditingPlan(plan);
+    editForm.resetFields();
+
     // Data from db is string, need to convert them back to number
     editForm.setFieldsValue({
       ...plan,
       interest_rate: Number(plan.interest_rate),
       minimum_amount: Number(plan.minimum_amount),
       maximum_amount: Number(plan.maximum_amount),
+      credit_tier_ids: plan.credit_tiers?.map((tier) => tier.credit_tier_id),
     });
     setIsModalOpen(true);
   };
 
   const handleUpdatePlan = async (
-    values: Omit<IInstalmentPlan, "instalment_plan_id">,
+    values: Omit<IInstalmentPlan, "instalment_plan_id" | "credit_tiers"> & {
+      credit_tier_ids: string[];
+    },
   ) => {
     if (!editingPlan) {
       message.error("No instalment plan selected for editing");
       return;
     }
 
-    const updatedPlan: IInstalmentPlan = {
-      ...values,
-      instalment_plan_id: editingPlan.instalment_plan_id,
-    };
-
     try {
+      const selectedCreditTiers =
+        creditTiers?.filter((tier) =>
+          values.credit_tier_ids?.includes(tier.credit_tier_id),
+        ) || [];
+
+      const { credit_tier_ids, ...updatedPlanWithoutCreditTierIds } = values;
+
+      const updatedPlan = {
+        ...updatedPlanWithoutCreditTierIds,
+        instalment_plan_id: editingPlan.instalment_plan_id,
+        credit_tiers: selectedCreditTiers,
+      };
+
       await updateInstalmentPlan(updatedPlan).unwrap();
       setIsModalOpen(false);
       setEditingPlan(null);
+      editForm.resetFields();
+
       message.success(
         `Instalment plan "${updatedPlan.name}" has been updated.`,
       );
@@ -96,7 +127,7 @@ export default function InstalmentPlanScreen() {
       key: "name",
     },
     {
-      title: "Instalments",
+      title: "Number of Instalments",
       dataIndex: "number_of_instalments",
       key: "number_of_instalments",
     },
@@ -145,6 +176,17 @@ export default function InstalmentPlanScreen() {
       title: "Description",
       dataIndex: "description",
       key: "description",
+    },
+    {
+      title: "Credit Tiers",
+      dataIndex: "credit_tiers",
+      key: "credit_tiers",
+      render: (text: string, record: IInstalmentPlan) =>
+        record.credit_tiers.length > 0 ? (
+          record.credit_tiers.map((tier) => tier.name).join(", ")
+        ) : (
+          <span className="text-gray-500">None</span>
+        ),
     },
     {
       title: "Actions",
@@ -293,6 +335,22 @@ export default function InstalmentPlanScreen() {
           <Input />
         </Form.Item>
       </div>
+
+      <Form.Item name="credit_tier_ids" label="Credit Tiers">
+        <Select mode="multiple" placeholder="Select credit tiers">
+          {creditTiers?.map((tier) => (
+            <Select.Option
+              key={tier.credit_tier_id}
+              value={tier.credit_tier_id}
+            >
+              <div className="flex flex-col">
+                <span>{`Name: ${tier.name}`}</span>
+                <span>{`Range: ${tier.min_credit_score} - ${tier.max_credit_score}`}</span>
+              </div>
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
 
       <Form.Item>
         <Button
