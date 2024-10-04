@@ -1,8 +1,11 @@
 import { Layout, Menu, MenuProps } from "antd";
 import Sider from "antd/es/layout/Sider";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
 export default function BusinessManagementRoute() {
+  const location = useLocation();
+  const currentPath = location.pathname.split("/").pop();
+
   const items: MenuProps["items"] = [
     {
       key: "Business Management",
@@ -10,7 +13,7 @@ export default function BusinessManagementRoute() {
       type: "group",
       children: [
         {
-          key: "InstalmentPlan",
+          key: "instalment-plan",
           label: (
             <Link to="/business-management/instalment-plan">
               Instalment Plan
@@ -18,15 +21,15 @@ export default function BusinessManagementRoute() {
           ),
         },
         {
-          key: "CreditTier",
+          key: "credit-tier",
           label: <Link to="/business-management/credit-tier">Credit Tier</Link>,
         },
         {
-          key: "Voucher",
+          key: "voucher",
           label: <Link to="/business-management/voucher">Voucher</Link>,
         },
         {
-          key: "Issues",
+          key: "issues",
           label: <Link to="/business-management/issues">Issues</Link>,
         },
       ],
@@ -37,7 +40,7 @@ export default function BusinessManagementRoute() {
     <Layout>
       {/* Tailwind not supported */}
       <Sider style={{ backgroundColor: "#fff" }}>
-        <Menu items={items} defaultSelectedKeys={["InstalmentPlan"]} />
+        <Menu items={items} selectedKeys={[currentPath || "instalment-plan"]} />
       </Sider>
       <Outlet />
     </Layout>

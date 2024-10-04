@@ -28,20 +28,19 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           {/* ===== Protected routes ===== */}
           <Route path="/" element={<HomeScreen />} />
-          <Route path="/admin/profile" element={<ProfileScreen />} />
-          <Route path="/admin/editprofile" element={<EditProfileScreen />} />
-          <Route path="/admin/add" element={<AddAdminScreen />} />
-          <Route path="/admin/customers" element={<AllCustomersScreen />} />
-          <Route path="/admin/all" element={<AllAdminScreen />} />
-          <Route
-            path="/admin/customer/:id"
-            element={<CustomerProfileScreen />}
-          />
-          <Route path="/admin/merchants" element={<AllMerchantsScreen />} />
-          <Route
-            path="/admin/merchant/:id"
-            element={<MerchantProfileScreen />}
-          />
+
+          <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="/editprofile" element={<EditProfileScreen />} />
+
+          <Route path="/admins/add" element={<AddAdminScreen />} />
+          <Route path="/admins" element={<AllAdminScreen />} />
+
+          <Route path="/customers" element={<AllCustomersScreen />} />
+          <Route path="/customer/:id" element={<CustomerProfileScreen />} />
+
+          <Route path="/merchants" element={<AllMerchantsScreen />} />
+          <Route path="/merchant/:id" element={<MerchantProfileScreen />} />
+
           <Route element={<BusinessManagementRoute />}>
             {/* ===== Business Management ===== */}
             <Route
