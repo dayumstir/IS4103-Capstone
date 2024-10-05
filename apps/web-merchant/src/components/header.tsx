@@ -1,13 +1,15 @@
-import React from "react";
-import { Button, Layout, Menu, message } from "antd";
-import { useNavigate } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
+import { Avatar, Layout, Menu, message, Popover } from "antd";
+import { Buffer } from "buffer";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { clearMerchant } from "../redux/features/profileSlice";
 import { useLogoutMutation } from "../redux/services/auth";
+import { RootState } from "../redux/store";
+import GlobalSearchBar from "./globalSearchBar";
 
 const Header: React.FC = () => {
-  const jwt_token = localStorage.getItem("token");
-  const isAuthenticated = !!jwt_token;
-
   const { Header } = Layout;
   enum HeaderTitles {
     Home = "Home",
@@ -21,6 +23,8 @@ const Header: React.FC = () => {
       key: HeaderTitles.BusinessManagement,
     },
   ];
+  const navigate = useNavigate();
+  const merchant = useSelector((state: RootState) => state.profile.merchant);
 
   const navigateToScreen = (key: string) => {
     if (key == HeaderTitles.Home) {
@@ -44,7 +48,49 @@ const Header: React.FC = () => {
     navigate("/login");
   };
 
-  const navigate = useNavigate();
+  const merchantId = localStorage.getItem("merchantId");
+  if (!merchantId) {
+    navigate("/login");
+    return null;
+  }
+
+  const [profilePictureDisplay, setProfilePictureDisplay] = useState(() => {
+    if (merchant?.profile_picture) {
+      const profilePictureBase64 = `data:image/png;base64,${Buffer.from(merchant.profile_picture).toString("base64")}`;
+      return profilePictureBase64;
+    }
+    return "";
+  });
+
+  useEffect(() => {
+    if (merchant?.profile_picture) {
+      const profilePictureBase64 = `data:image/png;base64,${Buffer.from(merchant.profile_picture).toString("base64")}`;
+      setProfilePictureDisplay(profilePictureBase64);
+    }
+  }, [merchant]);
+
+  const dispatch = useDispatch();
+
+  const popoverContent = (
+    <div className="flex flex-col">
+      <button
+        onClick={() => navigate("/profile")}
+        className="rounded p-2 hover:bg-gray-300"
+      >
+        Profile
+      </button>
+      <div className="my-2 border-t"></div>
+      <button
+        onClick={() => {
+          submitLogout();
+          dispatch(clearMerchant());
+        }}
+        className="rounded p-2 hover:bg-gray-300"
+      >
+        Logout
+      </button>
+    </div>
+  );
 
   return (
     <Header className="fixed top-0 z-10 flex w-full items-center bg-gray-100 shadow-sm">
@@ -55,16 +101,26 @@ const Header: React.FC = () => {
         style={{ flex: 1, backgroundColor: "#F5F5F5", border: "none" }}
         onClick={(menuInfo) => navigateToScreen(menuInfo.key)}
       />
-      {isAuthenticated ? (
-        <div>
-          <Button onClick={() => submitLogout()} className="m-10">
-            Logout
-          </Button>
-          <UserOutlined onClick={() => navigate("/profile")} />
-        </div>
-      ) : (
-        <Button onClick={() => navigate("/login")}>Login</Button>
-      )}
+      <GlobalSearchBar />
+      <Popover
+        placement="bottomRight"
+        content={popoverContent}
+        arrow={false}
+        trigger={"click"}
+      >
+        {profilePictureDisplay ? (
+          <img
+            src={profilePictureDisplay}
+            alt="avatar1"
+            className="group h-10 w-10 rounded-full object-cover transition-transform duration-300 ease-in-out hover:scale-110 hover:shadow-lg"
+          />
+        ) : (
+          <Avatar
+            icon={<UserOutlined />}
+            className="group transition-transform duration-300 ease-in-out hover:scale-110 hover:shadow-lg"
+          />
+        )}
+      </Popover>
     </Header>
   );
 };

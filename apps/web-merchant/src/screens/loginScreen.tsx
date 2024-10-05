@@ -13,8 +13,8 @@ import {
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
-import { useLoginMutation } from "../redux/services/auth";
 import PendingEmailConfirmationModal from "../components/pendingEmailConfirmationModal";
+import { useLoginMutation } from "../redux/services/auth";
 
 export type LoginFormValues = {
   email?: string;
