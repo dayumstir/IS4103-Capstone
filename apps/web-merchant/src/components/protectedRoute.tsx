@@ -7,33 +7,29 @@ import { setMerchant } from "../redux/features/profileSlice";
 
 const ProtectedRoute: React.FC = () => {
   const jwt_token = localStorage.getItem("token");
-  const isAuthenticated = !!jwt_token;
-
   const merchantId = localStorage.getItem("merchantId");
-  const dispatch = useDispatch();
-  if (!merchantId) {
-    return null;
-  }
-  const { data: profile } = useGetProfileQuery(merchantId);
+  const isAuthenticated = !!jwt_token && !!merchantId;
 
+  const dispatch = useDispatch();
+  if (!isAuthenticated) {
+    return <Navigate to={"/login"} />;
+  }
+
+  const { data: profile } = useGetProfileQuery(merchantId);
   useEffect(() => {
     if (profile) {
       dispatch(setMerchant(profile));
     }
   });
 
-  if (isAuthenticated) {
-    return (
-      <div className="flex flex-grow">
-        <Header />
-        <div className="mt-16 flex flex-grow">
-          <Outlet />
-        </div>
+  return (
+    <div className="flex flex-grow">
+      <Header />
+      <div className="mt-16 flex flex-grow">
+        <Outlet />
       </div>
-    );
-  } else {
-    return <Navigate to={"/login"} />;
-  }
+    </div>
+  );
 };
 
 export default ProtectedRoute;
