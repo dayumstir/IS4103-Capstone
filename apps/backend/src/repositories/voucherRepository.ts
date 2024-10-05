@@ -1,7 +1,7 @@
+// src/repositories/voucherRepository.ts
 import { prisma } from "./db";
 import { IVoucher } from "../interfaces/voucherInterface";
-import { VoucherStatus } from "../interfaces/voucherStatusInterface";
-
+import { VoucherAssignedStatus } from "../interfaces/voucherAssignedStatusInterface";
 
 // Create Voucher
 export const createVoucher = async (voucherData: IVoucher) => {
@@ -10,12 +10,45 @@ export const createVoucher = async (voucherData: IVoucher) => {
     });
 }; 
 
+// Assign Voucher to Customer
+export const assignVoucher = async (voucher_id: string, customer_id: string, usage_limit: number) => {
+    return await prisma.voucherAssigned.create({
+        data: {
+            status: VoucherAssignedStatus.AVAILABLE,
+            voucher_id,
+            customer_id,
+            remaining_uses: usage_limit,
+            used_installment_payment_id: null,
+        }
+    });
+};
+
+// Deactivate Voucher
+export const deactivateVoucher = async (voucher_id: string) => {
+    const deactivateVoucher = await prisma.voucher.update({
+        where: { voucher_id },
+        data: { is_active: false }
+    });
+
+    await prisma.voucherAssigned.updateMany({
+        where: { voucher_id },
+        data: { status: VoucherAssignedStatus.UNAVAILABLE }
+    });
+
+    return deactivateVoucher;
+};
 
 // Get all vouchers
 export const getAllVouchers = async () => {
     return await prisma.voucher.findMany();
 };
 
+// Search for voucher by title
+export const searchVoucher = async (searchTerm: string) => {
+    return await prisma.voucher.findMany({
+        where: { title: { contains: searchTerm, mode: "insensitive"} },
+    });
+};
 
 // Get voucher by id
 export const getVoucherById = async(voucher_id: string) => {
@@ -23,15 +56,6 @@ export const getVoucherById = async(voucher_id: string) => {
         where: { voucher_id },
     });
 };
-
-
-// Search for voucher by title or description
-export const searchVoucher = async (searchTerm: string) => {
-    return await prisma.voucher.findMany({
-        where: { title: { contains: searchTerm, mode: "insensitive"} },
-    });
-};
-
 
 // Get voucher details, including all customers assigned to the voucher
 export const getVoucherDetails = async (voucher_id: string) => {
@@ -47,41 +71,12 @@ export const getVoucherDetails = async (voucher_id: string) => {
     });
 };
 
-
-// Assign Voucher to Customer
-export const assignVoucher = async (voucher_id: string, customer_id: string, usage_limit: number) => {
-    return await prisma.voucherAssigned.create({
-        data: {
-            status: VoucherStatus.AVAILABLE,
-            voucher_id,
-            customer_id,
-            remaining_uses: usage_limit,
-            used_installment_payment_id: "Placeholder"
-        }
-    });
-};
-
-
-// Deactivate Voucher
-export const deactivateVoucher = async (voucher_id: string) => {
-    await prisma.voucher.update({
-        where: { voucher_id },
-        data: { is_active: false }  // Deactivate the voucher
-    });
-
-    return await prisma.voucherAssigned.updateMany({
-        where: { voucher_id },
-        data: { status: VoucherStatus.UNAVAILABLE}  // Set all assigned vouchers to UNAVAILABLE
-    });
-};
-
-
 // Get Customer Vouchers
 export const getCustomerVouchers = async (customer_id: string) => {
     return await prisma.voucherAssigned.findMany({
         where: { customer_id },
         include: {
-            voucher: true, // Include voucher details
+            voucher: true,
         },
     });
 };

@@ -1,12 +1,12 @@
-// Contains the business logic related to vouchers
+// src/services/voucherService.ts
 import { IVoucher } from "../interfaces/voucherInterface";
 import * as voucherRepository from "../repositories/voucherRepository";
 import logger from "../utils/logger";
-
+import { NotFoundError, BadRequestError } from "../utils/error";
 
 // Create Voucher
 export const createVoucher = async (voucherData: IVoucher, admin_id: string) => {
-    logger.info('Executing createVoucher...');
+    logger.info(`Creating voucher by admin: ${admin_id}`, admin_id);
 
     const voucher = await voucherRepository.createVoucher({
         ...voucherData,
@@ -16,64 +16,60 @@ export const createVoucher = async (voucherData: IVoucher, admin_id: string) => 
     return voucher;
 };
 
-
 // Assign Voucher
 export const assignVoucher = async (voucher_id: string, customer_id: string) => {
-    logger.info('Executing assignVoucher...');
+    logger.info(`Assigning voucher: ${voucher_id} to customer: ${customer_id}`, voucher_id, customer_id);
+
     const voucher = await voucherRepository.getVoucherById(voucher_id);
     if (!voucher) {
-        throw new Error('Voucher not found');
+        throw new NotFoundError("Voucher not found");
     }
 
     if (!voucher.is_active) {
-        throw new Error('Voucher is inactive');
+        throw new BadRequestError("Voucher is inactive");
     }
 
-    const voucherAssigned = await voucherRepository.assignVoucher(voucher_id, customer_id, voucher.usage_limit);
-    return voucherAssigned;
+    return await voucherRepository.assignVoucher(voucher_id, customer_id, voucher.usage_limit);
 };
-
 
 // Deactivate Voucher
 export const deactivateVoucher = async (voucher_id: string) => {
-    logger.info("Executing deactivateVoucher...");
+    logger.info(`Deactivating voucher: ${voucher_id}`, voucher_id);
+
     const voucher = await voucherRepository.deactivateVoucher(voucher_id);
     if (!voucher) {
-        throw new Error("Voucher not found");
+        throw new NotFoundError("Voucher not found");
     }
+
     return voucher;
 };
 
-
 // View All Vouchers
 export const getAllVouchers = async () => {
-    logger.info("Executing getAllVouchers...");
-    const vouchers = await voucherRepository.getAllVouchers();
-    return vouchers;
+    logger.info("Fetching all vouchers");
+    return await voucherRepository.getAllVouchers();;
 };
-
 
 // Search Voucher
 export const searchVoucher = async (searchTerm: string) => {
-    logger.info("Executing searchVoucher...");
-    const vouchers = await voucherRepository.searchVoucher(searchTerm);
-    return vouchers;
+    logger.info(`Searching vouchers with term: ${searchTerm}`, searchTerm);
+    return await voucherRepository.searchVoucher(searchTerm);
 };
-
 
 // View Voucher Details
 export const getVoucherDetails = async (voucher_id: string) => {
-    logger.info("Executing getVoucherDetails...");
+    logger.info(`Fetching voucher details for: ${voucher_id}`, voucher_id);
+
     const voucher = await voucherRepository.getVoucherDetails(voucher_id);
     if (!voucher) {
-        throw new Error("Voucher not found");
+        throw new NotFoundError("Voucher not found");
     }
+
     return voucher;
 };
 
 // Get Customer Vouchers
 export const getCustomerVouchers = async (customer_id: string) => {
-    logger.info("Executing getCustomerVouchers...");
-    const vouchers = await voucherRepository.getCustomerVouchers(customer_id);
-    return vouchers;
+    logger.info(`Fetching vouchers for customer: ${customer_id}`, customer_id);
+    return await voucherRepository.getCustomerVouchers(customer_id);
 };

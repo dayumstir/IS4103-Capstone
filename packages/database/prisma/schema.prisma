@@ -232,13 +232,6 @@ model Issue {
 }
 
 // Voucher Management Module
-enum VoucherStatus {
-  AVAILABLE
-  EXPIRED
-  USED
-  UNAVAILABLE
-}
-
 model Voucher {
   voucher_id          String   @id @default(cuid())
   title               String
@@ -259,17 +252,24 @@ model Voucher {
   vouchersAssigned VoucherAssigned[]
 }
 
+enum VoucherAssignedStatus {
+  AVAILABLE
+  EXPIRED
+  USED
+  UNAVAILABLE
+}
+
 model VoucherAssigned {
-  voucher_assigned_id String        @id @default(cuid())
-  status              VoucherStatus
-  date_time_issued    DateTime      @default(now())
-  remaining_uses      Int
+  voucher_assigned_id        String        @id @default(cuid())
+  status                     VoucherAssignedStatus
+  date_time_issued           DateTime      @default(now())
+  remaining_uses             Int
 
   // Relationships
-  voucher     Voucher  @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
-  voucher_id  String
-  customer    Customer @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
-  customer_id String
+  voucher                    Voucher  @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
+  voucher_id                 String
+  customer                   Customer @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  customer_id                String
 
-  used_installment_payment_id String // TODO: Associate with installment plan
+  used_installment_payment_id String? // TODO: Associate with installment plan
 }
