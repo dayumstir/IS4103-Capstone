@@ -93,7 +93,9 @@ const GlobalSearchBar: React.FC = () => {
           <button
             className="rounded-md border border-gray-300 bg-white px-2 text-gray-700 shadow-sm transition hover:border-gray-400 hover:bg-gray-100 focus:outline-none"
             onClick={() => {
-              navigate("/business-management/issues");
+              navigate("/business-management/issues", {
+                state: { search: searchTerm, filteredIssues: issues },
+              });
               setIsOpen(false);
               setSearchTerm("");
             }}

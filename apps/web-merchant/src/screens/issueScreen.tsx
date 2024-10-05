@@ -40,22 +40,35 @@ const IssueScreen: React.FC = () => {
   if (!merchantId) {
     message.error("Merchant ID not found!");
   }
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { search, filteredIssues } = location.state || {};
 
   const [isCreateIssueModalOpen, setIsCreateIssueModalOpen] = useState(false);
-  const [issues, setIssues] = useState<IssueTableInterface[]>([]);
+  const [issues, setIssues] = useState<IssueTableInterface[]>(
+    filteredIssues || [],
+  );
   const [getIssues] = useGetIssuesMutation();
   const [cancelIssue, { isLoading }] = useCancelIssueMutation();
   const { Search } = Input;
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(search || "");
   const [filter, setFilter] = useState<IssueFilter>({
     merchant_id: merchantId ? merchantId : "",
     search_term: searchTerm,
     sorting: { sortBy: "updated_at", sortDirection: sortDirection.DESC },
   });
   const [issueKeyCancelled, setIssueKeyCancelled] = useState("");
+
+  useEffect(() => {
+    if (search) {
+      setSearchTerm(search);
+    }
+    if (filteredIssues) {
+      setIssues(filteredIssues);
+    }
+  }, [search, filteredIssues]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
