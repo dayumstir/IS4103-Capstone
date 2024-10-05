@@ -26,6 +26,8 @@ import {
 } from "../interfaces/screens/resetPasswordInterface";
 import { useResetPasswordMutation } from "../redux/services/auth";
 import { useNavigate } from "react-router-dom";
+import { setMerchant } from "../redux/features/profileSlice";
+import { useDispatch } from "react-redux";
 
 const ProfileScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -61,7 +63,7 @@ const ProfileScreen: React.FC = () => {
   });
 
   return (
-    <div className="flex-grow px-16 py-2">
+    <div className="flex-grow px-16 py-5 sm:px-32 md:px-96">
       <div className="flex items-center">
         {profilePictureDisplay ? (
           <img
@@ -164,12 +166,19 @@ const EditProfileModal = ({
   const [form] = Form.useForm();
   const formData = new FormData();
 
+  const dispatch = useDispatch();
+
   const onFinish: FormProps<RegisterFormValues>["onFinish"] = async (data) => {
     formData.set("name", data.name);
     // formData.set("contact_number", data.contact_number);
     formData.set("address", data.address);
     profilePicture && formData.set("profile_picture", profilePicture);
-    await editProfileMutation({ id: merchantId, body: formData });
+    await editProfileMutation({ id: merchantId, body: formData })
+      .unwrap()
+      .then((data) => {
+        dispatch(setMerchant(data));
+      })
+      .catch((error) => console.log(error));
     if (!isLoading) {
       setModalOpen(false);
     }
