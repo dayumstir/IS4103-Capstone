@@ -1,3 +1,4 @@
+// src/routes/voucherRoutes.ts
 import { Router } from "express";
 import {
     createVoucher,
@@ -11,11 +12,13 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.post("/create", authMiddleware, createVoucher);
-router.post("/assign", authMiddleware, assignVoucher);
-router.put("/deactivate/:voucher_id", authMiddleware, deactivateVoucher);
-router.get("/", authMiddleware, getAllVouchers);
-router.get("/details/:voucher_id", authMiddleware, getVoucherDetails);
-router.get("/customer/:customer_id", authMiddleware, getCustomerVouchers);
+router.use(authMiddleware); // Apply authMiddleware to all routes
+
+router.post("/create", createVoucher);
+router.post("/assign", assignVoucher);
+router.put("/deactivate/:voucher_id", deactivateVoucher);
+router.get("/", getAllVouchers);
+router.get("/:voucher_id", getVoucherDetails);
+router.get("/customer/:customer_id", getCustomerVouchers);
 
 export default router;

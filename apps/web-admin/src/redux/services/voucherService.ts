@@ -61,7 +61,7 @@ export const voucherApi = createApi({
         // Fetch voucher details
         getVoucherDetails: builder.query<IVoucher, string>({
             query: (voucher_id) => ({
-                url: `/details/${voucher_id}`,
+                url: `/${voucher_id}`,
             }),
             providesTags: (result, error, voucher_id) => [
                 { type: "VoucherDetails", id: voucher_id },

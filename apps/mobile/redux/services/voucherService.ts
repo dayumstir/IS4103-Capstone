@@ -29,7 +29,7 @@ export const voucherApi = createApi({
     // Get Voucher by ID
     getVoucherById: builder.query<IVoucher, string>({
       query: (id) => ({
-        url: `/details/${id}`,
+        url: `/${id}`,
         method: "GET",
       }),
     }),
