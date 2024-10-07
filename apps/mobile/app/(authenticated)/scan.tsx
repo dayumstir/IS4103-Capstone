@@ -4,15 +4,15 @@ import { useCameraPermissions } from "expo-camera";
 import { useDispatch, useSelector } from "react-redux";
 import { setPaymentStage } from "../../redux/features/paymentStageSlice";
 import { RootState } from "../../redux/store";
-import { formatCurrency } from "../../utils/formatCurrency";
 import { router } from "expo-router";
 import { useCreateTransactionMutation } from "../../redux/services/transactionService";
-import { ITransaction } from "../../interfaces/transactionInterface";
+import { ITransaction } from "@repo/interfaces";
 import ScanQrCodeScreen from "../../components/scan/scanQrCodeScreen";
 import VerifyPurchaseScreen from "../../components/scan/verifyPurchaseScreen";
-import SelectPaymentPlanScreen from "../../components/scan/selectPaymentPlanScreen";
 import PaymentCompleteScreen from "../../components/scan/paymentCompleteScreen";
 import { useGetMerchantByIdQuery } from "../../redux/services/merchantService";
+import { useGetInstalmentPlansQuery } from "../../redux/services/customerService";
+import SelectInstalmentPlanScreen from "../../components/scan/selectInstalmentPlanScreen";
 
 export default function ScanScreen() {
   const [status, requestPermission] = useCameraPermissions();
@@ -38,6 +38,12 @@ export default function ScanScreen() {
   } = useGetMerchantByIdQuery(scannedMerchantId ?? "", {
     skip: !scannedMerchantId,
   });
+
+  const {
+    data: instalmentPlans,
+    isLoading: isInstalmentPlansLoading,
+    error: instalmentPlansError,
+  } = useGetInstalmentPlansQuery();
 
   useEffect(() => {
     if (merchant) {
@@ -67,6 +73,7 @@ export default function ScanScreen() {
     );
   }
 
+  // Merchant ID invalid
   if (merchantError) {
     console.error(merchantError);
     dispatch(setPaymentStage("Error"));
@@ -120,26 +127,12 @@ export default function ScanScreen() {
     }
   };
 
-  // TODO: Replace with actual payment plans from admin
-  const paymentPlans = [
-    {
-      name: "Pay in Full",
-      price: formatCurrency(purchase.price),
-    },
-    {
-      name: "3 Month Plan",
-      price: formatCurrency(purchase.price / 3),
-    },
-    {
-      name: "6 Month Plan",
-      price: formatCurrency(purchase.price / 6),
-    },
-    {
-      name: "12 Month Plan",
-      price: formatCurrency(purchase.price / 12),
-    },
-  ];
+  const handleCancel = () => {
+    setScannedMerchantId(null);
+    dispatch(setPaymentStage("Scan QR Code"));
+  };
 
+  // Display the appropriate screen based on the payment stage
   const displayScreen = () => {
     switch (paymentStage) {
       case "Scan QR Code":
@@ -151,25 +144,25 @@ export default function ScanScreen() {
               merchantName={purchase.merchantName}
               price={purchase.price}
               isLoading={isMerchantLoading}
-              onCancel={() => {
-                setScannedMerchantId(null);
-                dispatch(setPaymentStage("Scan QR Code"));
-              }}
+              onCancel={handleCancel}
               onNext={() => {
-                dispatch(setPaymentStage("Select Payment Plan"));
+                dispatch(setPaymentStage("Select Instalment Plan"));
               }}
             />
           )
         );
-      case "Select Payment Plan":
+      case "Select Instalment Plan":
         return (
-          <SelectPaymentPlanScreen
-            paymentPlans={paymentPlans}
-            selectedPlan={selectedPlan}
-            setSelectedPlan={setSelectedPlan}
-            onCancel={() => dispatch(setPaymentStage("Scan QR Code"))}
-            onConfirm={handleCreateTransaction}
-          />
+          instalmentPlans && (
+            <SelectInstalmentPlanScreen
+              instalmentPlans={instalmentPlans}
+              price={purchase.price}
+              selectedPlan={selectedPlan}
+              setSelectedPlan={setSelectedPlan}
+              onCancel={handleCancel}
+              onConfirm={handleCreateTransaction}
+            />
+          )
         );
       case "Payment Complete":
         return (

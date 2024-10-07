@@ -17,10 +17,13 @@ export default function VerifyPurchaseScreen({
   onCancel: () => void;
 }) {
   return (
-    <View className="flex-1 items-center justify-center gap-4 bg-blue-600 p-12">
-      <Feather name="credit-card" size={64} color="white" />
-      <Text className="text-lg text-white">You are paying</Text>
-      <View className="flex flex-col items-center justify-center gap-8 py-12">
+    <View className="flex-1 items-center justify-center gap-16 bg-blue-600 px-12">
+      <View className="flex flex-col items-center justify-center gap-4">
+        <Feather name="credit-card" size={64} color="white" />
+        <Text className="text-lg font-semibold text-white">You are paying</Text>
+      </View>
+
+      <View className="flex flex-col items-center justify-center gap-8 pb-12">
         {isLoading ? (
           <View className="my-4">
             <ActivityIndicator size="large" color="white" />
@@ -30,7 +33,7 @@ export default function VerifyPurchaseScreen({
             <Text className="text-3xl font-bold text-white">
               {merchantName}
             </Text>
-            <Text className="text-5xl font-bold text-white">
+            <Text className="text-6xl font-bold text-white">
               {formatCurrency(price)}
             </Text>
           </>
