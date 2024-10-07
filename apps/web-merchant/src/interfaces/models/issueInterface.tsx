@@ -44,4 +44,5 @@ export interface IssueFilter {
   createTo?: Date;
   updateFrom?: Date;
   updateTo?: Date;
+  search_term?: string;
 }

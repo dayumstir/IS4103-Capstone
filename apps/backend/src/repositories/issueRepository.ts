@@ -8,26 +8,23 @@ export const createIssue = async (issueData: IIssue) => {
 };
 
 export const getIssues = async (issueFilter: IssueFilter) => {
-    const {
-        sorting,
-        create_from,
-        create_to,
-        update_from,
-        update_to,
-        ...filter
-    } = issueFilter;
-    const whereClause = {
-        ...filter,
-        ...(create_from && { create_time: { gte: create_from } }),
-        ...(create_to && { create_time: { lte: create_to } }),
-        ...(update_from && { updated_at: { gte: update_from } }),
-        ...(update_to && { updated_at: { lte: update_to } }),
-    };
+    const { sorting, create_from, create_to, update_from, update_to, search_term, ...filter } =
+        issueFilter;
     return prisma.issue.findMany({
-        where: whereClause,
-        orderBy: sorting
-            ? { [sorting.sortBy]: sorting.sortDirection }
-            : { updated_at: "desc" },
+        where: {
+            ...filter,
+            ...(create_from && { create_time: { gte: create_from } }),
+            ...(create_to && { create_time: { lte: create_to } }),
+            ...(update_from && { updated_at: { gte: update_from } }),
+            ...(update_to && { updated_at: { lte: update_to } }),
+            ...(search_term && {
+                OR: [
+                    { title: { contains: search_term, mode: "insensitive" } },
+                    { description: { contains: search_term, mode: "insensitive" } },
+                ],
+            }),
+        },
+        orderBy: sorting ? { [sorting.sortBy]: sorting.sortDirection } : { updated_at: "desc" },
         select: {
             issue_id: true,
             title: true,
