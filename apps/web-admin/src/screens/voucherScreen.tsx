@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Form,
   Input,
@@ -17,7 +17,6 @@ import {
   AutoComplete
 } from "antd";
 import { PlusOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
-
 import { 
   useGetVouchersQuery, 
   useCreateVoucherMutation, 
@@ -31,41 +30,26 @@ import { IVoucher } from "../interfaces/voucherInterface";
 const { Search } = Input;
 
 export default function VoucherScreen() {
-  const [form] = Form.useForm();
-  const [assignForm] = Form.useForm();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [createVoucherForm] = Form.useForm();
+  const [assignVoucherForm] = Form.useForm();
+  const [voucherSearchTerm, setVoucherSearchTerm] = useState("");
+  const [customerSearch, setCustomerSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVoucherId, setSelectedVoucherId] = useState<string | null>(null);
-  const [customerSearch, setCustomerSearch] = useState(""); // State for customer search input
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null); // For storing selected customer ID
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
-  // Fetch customer data based on search
-  const { data: customerOptions, refetch: fetchCustomers } = useGetAllCustomersQuery(customerSearch, {
-    skip: !customerSearch, // Don't fetch if the search is empty
-  });
-
-  const { data: vouchers, isLoading } = useGetVouchersQuery(searchTerm);
   const [createVoucher] = useCreateVoucherMutation();
   const [deactivateVoucher] = useDeactivateVoucherMutation();
   const [assignVoucher] = useAssignVoucherMutation();
-
-  // Fetch the voucher details
-  const { data: voucherDetails, refetch: fetchVoucherDetails } = useGetVoucherDetailsQuery(selectedVoucherId ?? "", {
-    skip: !selectedVoucherId, // Only fetch when a voucher is selected
-  });
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
+  
   // Handle voucher creation
-  const handleCreateVoucher = async (newVoucher: Omit<IVoucher, "voucher_id">) => {
+  const handleCreateVoucher = async (newVoucher: Partial<IVoucher>) => {
     try {
       const result = await createVoucher(newVoucher).unwrap();
       message.success(`New voucher "${result.title}" has been created.`);
-      form.resetFields();
+      createVoucherForm.resetFields();
     } catch (error) {
       console.error("Error creating voucher:", error);
       message.error("Failed to create voucher");
@@ -88,16 +72,44 @@ export default function VoucherScreen() {
     }
   };
 
+  // Handle assigning voucher to customer
+  // Fetch customer data based on search
+  const { data: customerOptions } = useGetAllCustomersQuery(customerSearch, {
+    skip: !customerSearch, // Don't fetch if the search is empty
+  });
+
+  // Handle customer search and selection
+  const handleCustomerSearch = (value: string) => {
+    setCustomerSearch(value); // Update the search term
+    setSelectedCustomerId(null); // Reset selectedCustomerId if user manually types
+  };
+
+  // Handle customer selection from AutoComplete
+  const handleCustomerSelect = (customerEmail: string) => {
+    const selectedCustomer = customerOptions?.find((customer) => customer.email === customerEmail);
+    if (selectedCustomer) {
+      setSelectedCustomerId(selectedCustomer.customer_id); // Set selected customer ID
+    } else {
+      setSelectedCustomerId(null); // Reset if no valid customer found
+    }
+  };
+
   // Handle assign voucher to customer
   const handleAssignVoucher = async (values: { customer_email: string }) => {
-    if (!selectedVoucherId || !selectedCustomerId) {
-      message.error("Customer email is required.");
+    if (!selectedVoucherId) {
+      message.error("No voucher selected.");
       return;
     }
+  
+    if (!selectedCustomerId) {
+      message.error("Invalid customer email. Please select a valid customer from the list.");
+      return;
+    }
+
     try {
       await assignVoucher({ customer_id: selectedCustomerId, voucher_id: selectedVoucherId }).unwrap();
       message.success(`Voucher assigned to customer "${values.customer_email}".`);
-      assignForm.resetFields(); // Clear the form
+      assignVoucherForm.resetFields(); // Clear the form
       fetchVoucherDetails(); // Refetch the voucher details
     } catch (error) {
       console.error("Error assigning voucher:", error);
@@ -105,6 +117,17 @@ export default function VoucherScreen() {
     }
   };
 
+  // Handle search/get vouchers
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVoucherSearchTerm(e.target.value);
+  };
+
+  const { data: vouchers, isLoading } = useGetVouchersQuery(voucherSearchTerm);
+  
+  // Fetch the voucher details
+  const { data: voucherDetails, refetch: fetchVoucherDetails } = useGetVoucherDetailsQuery(selectedVoucherId ?? "", {
+    skip: !selectedVoucherId, // Only fetch when a voucher is selected
+  });
 
   // Open modal and fetch voucher details
   const handleViewDetails = (voucher_id: string) => {
@@ -119,85 +142,37 @@ export default function VoucherScreen() {
     setSelectedVoucherId(null);
     setCustomerSearch(""); // Clear the customer search on close
     setSelectedCustomerId(null); // Reset selected customer ID
-    assignForm.resetFields(); // Clear the assign form fields
+    assignVoucherForm.resetFields(); // Clear the assign form fields
   };
 
-  // When customer search term changes, refetch the customer list
-  useEffect(() => {
-    if (customerSearch) {
-      fetchCustomers();
-    }
-  }, [customerSearch]);
-
-  // Handle customer selection from AutoComplete
-  const handleCustomerSelect = (customerEmail: string) => {
-    const selectedCustomer = customerOptions?.find((customer) => customer.email === customerEmail);
-    if (selectedCustomer) {
-      setSelectedCustomerId(selectedCustomer.customer_id);
-    }
-  };
-
-  const tableColumns = [
-    {
-      title: "Title",
-      dataIndex: "title",
-      key: "title",
-      sorter: (a: IVoucher, b: IVoucher) => a.title.localeCompare(b.title),
-    },
-    {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
-    },
-    {
-      title: "Percentage Discount",
-      dataIndex: "percentage_discount",
-      key: "percentage_discount",
-      render: (discount: number) => `${discount}%`,
-      sorter: (a: IVoucher, b: IVoucher) => a.percentage_discount - b.percentage_discount,
-    },
-    {
-      title: "Amount Discount",
-      dataIndex: "amount_discount",
-      key: "amount_discount",
-      render: (amount: number) => `$${amount}`,
-      sorter: (a: IVoucher, b: IVoucher) => a.amount_discount - b.amount_discount,
-    },
-    {
-      title: "Expiry Date",
-      dataIndex: "expiry_date",
-      key: "expiry_date",
-      render: (date: string) => new Date(date).toLocaleDateString(),
-      sorter: (a: IVoucher, b: IVoucher) => new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime(),
-    },
-    {
-      title: "Usage Limit",
-      dataIndex: "usage_limit",
-      key: "usage_limit",
-      sorter: (a: IVoucher, b: IVoucher) => a.usage_limit - b.usage_limit,
-    },
-
+  const voucherColumns = [
+    { title: "Title", dataIndex: "title", key: "title", sorter: (a: IVoucher, b: IVoucher) => a.title.localeCompare(b.title) },
+    { title: "Description", dataIndex: "description", key: "description" },
+    { title: "Percentage Discount", dataIndex: "percentage_discount", key: "percentage_discount", render: (discount: number) => `${discount}%`, sorter: (a: IVoucher, b: IVoucher) => a.percentage_discount - b.percentage_discount },
+    { title: "Amount Discount", dataIndex: "amount_discount", key: "amount_discount", render: (amount: number) => `$${amount}`, sorter: (a: IVoucher, b: IVoucher) => a.amount_discount - b.amount_discount },
+    { title: "Expiry Date", dataIndex: "expiry_date", key: "expiry_date", render: (date: string) => new Date(date).toLocaleDateString(), sorter: (a: IVoucher, b: IVoucher) => new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime() },
+    { title: "Usage Limit", dataIndex: "usage_limit", key: "usage_limit", sorter: (a: IVoucher, b: IVoucher) => a.usage_limit - b.usage_limit },
     {
       title: "Actions",
       key: "actions",
       width: 1,
       sorter: (a: IVoucher, b: IVoucher) => (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1),
-      render: (text: string, record: IVoucher) => (
+      render: (_: string, voucher: IVoucher) => (
         <div className="flex flex-col gap-2">
           <Button
             icon={<EyeOutlined />}
-            onClick={() => handleViewDetails(record.voucher_id)}
+            onClick={() => handleViewDetails(voucher.voucher_id)}
           >
             View Voucher Details
           </Button>
           <Popconfirm
             title={`Are you sure you want to deactivate this voucher?`}
-            onConfirm={() => handleDeactivateVoucher(record)}
+            onConfirm={() => handleDeactivateVoucher(voucher)}
             okText="Yes"
             cancelText="No"
           >
-            <Button icon={<StopOutlined />} danger disabled={!record.is_active}>
-              {record.is_active ? "Deactivate" : "Not In Use"}
+            <Button icon={<StopOutlined />} danger disabled={!voucher.is_active}>
+              {voucher.is_active ? "Deactivate" : "Not In Use"}
             </Button>
           </Popconfirm>
         </div>
@@ -206,27 +181,10 @@ export default function VoucherScreen() {
   ];
 
   const assignedVoucherColumns = [
-    {
-      title: "Customer Email",
-      dataIndex: ["customer", "email"],
-      key: "customerEmail",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-    },
-    {
-      title: "Date Issued",
-      dataIndex: "date_time_issued",
-      key: "date_time_issued",
-      render: (date: string) => new Date(date).toLocaleDateString(),
-    },
-    {
-      title: "Remaining Uses",
-      dataIndex: "remaining_uses",
-      key: "remaining_uses",
-    },
+    { title: "Customer Email", dataIndex: ["customer", "email"], key: "customerEmail" },
+    { title: "Status", dataIndex: "status", key: "status" },
+    { title: "Date Issued", dataIndex: "date_time_issued", key: "date_time_issued", render: (date: string) => new Date(date).toLocaleDateString() },
+    { title: "Remaining Uses", dataIndex: "remaining_uses", key: "remaining_uses" },
   ];
 
   const renderForm = (formInstance: FormInstance) => (
@@ -358,7 +316,7 @@ export default function VoucherScreen() {
     <div className="w-full px-8 py-4">
       {/* ===== Create Voucher ===== */}
       <Card className="mb-8 border border-gray-300" title="Create Voucher">
-        {renderForm(form)}
+        {renderForm(createVoucherForm)}
       </Card>
 
       {/* ===== View and Manage Vouchers ===== */}
@@ -366,12 +324,12 @@ export default function VoucherScreen() {
         <Search
           placeholder="Search by title"
           onChange={handleSearchChange}
-          value={searchTerm}
+          value={voucherSearchTerm}
           style={{ marginBottom: 16 }}
         />
         <Table
           dataSource={vouchers}
-          columns={tableColumns}
+          columns={voucherColumns}
           rowKey="voucher_id"
           pagination={{
             current: currentPage,
@@ -430,7 +388,7 @@ export default function VoucherScreen() {
             {voucherDetails.is_active && (
               <Card className="mb-8 border border-gray-300" title="Assign Voucher">
                 <Form
-                  form={assignForm}
+                  form={assignVoucherForm}
                   layout="vertical"
                   onFinish={handleAssignVoucher}
                 >
@@ -441,7 +399,7 @@ export default function VoucherScreen() {
                   >
                     <AutoComplete
                       options={customerOptions?.map((customer) => ({ value: customer.email }))}
-                      onSearch={(value) => setCustomerSearch(value)}
+                      onSearch={handleCustomerSearch}
                       onSelect={handleCustomerSelect}
                       placeholder="Search customer by email"
                       allowClear

@@ -18,7 +18,7 @@ export const voucherApi = createApi({
     tagTypes: ["Voucher"] as const,
     endpoints: (builder) => ({
         // Create voucher
-        createVoucher: builder.mutation<IVoucher, Omit<IVoucher, "voucher_id">>({
+        createVoucher: builder.mutation<IVoucher, Partial<IVoucher>>({
             query: (voucher) => ({
                 url: "/create",
                 method: "POST",
