@@ -1,4 +1,4 @@
-import { LoadingOutlined } from "@ant-design/icons";
+import { EyeOutlined, LoadingOutlined, StopOutlined } from "@ant-design/icons";
 import {
   Breadcrumb,
   Button,
@@ -10,13 +10,13 @@ import {
   Table,
   Tag,
 } from "antd";
+import { SortOrder } from "antd/es/table/interface";
 import { Buffer } from "buffer";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CreateIssueModal from "../components/createIssueModal";
 import { ApiError } from "../interfaces/errorInterface";
 import {
-  IIssue,
   IssueFilter,
   IssueStatus,
   statusColorMap,
@@ -25,9 +25,7 @@ import { sortDirection } from "../interfaces/sortingInterface";
 import {
   useCancelIssueMutation,
   useGetIssuesMutation,
-  useSearchIssuesMutation,
 } from "../redux/services/issue";
-import { EyeOutlined, StopOutlined } from "@ant-design/icons";
 interface IssueTableInterface {
   key: string;
   title: string;
@@ -42,27 +40,43 @@ const IssueScreen: React.FC = () => {
   if (!merchantId) {
     message.error("Merchant ID not found!");
   }
-  const [filter, setFilter] = useState<IssueFilter>({
-    merchant_id: merchantId ? merchantId : "",
-    sorting: { sortBy: "updated_at", sortDirection: sortDirection.DESC },
-  });
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { search, filteredIssues } = location.state || {};
+
   const [isCreateIssueModalOpen, setIsCreateIssueModalOpen] = useState(false);
-  const [issues, setIssues] = useState<IssueTableInterface[]>([]);
+  const [issues, setIssues] = useState<IssueTableInterface[]>(
+    filteredIssues || [],
+  );
   const [getIssues] = useGetIssuesMutation();
   const [cancelIssue, { isLoading }] = useCancelIssueMutation();
-  const [searchIssues] = useSearchIssuesMutation();
   const { Search } = Input;
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(search || "");
+  const [filter, setFilter] = useState<IssueFilter>({
+    merchant_id: merchantId ? merchantId : "",
+    search_term: searchTerm,
+    sorting: { sortBy: "updated_at", sortDirection: sortDirection.DESC },
+  });
   const [issueKeyCancelled, setIssueKeyCancelled] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
+  useEffect(() => {
+    if (search) {
+      setSearchTerm(search);
+    }
+    if (filteredIssues) {
+      setIssues(filteredIssues);
+    }
+  }, [search, filteredIssues]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 1000); // 1 second delay
+      setFilter((currentFilter) => ({
+        ...currentFilter,
+        search_term: searchTerm,
+      }));
+    }, 1000); // 1 second delay for debounce search term
 
     return () => {
       clearTimeout(handler);
@@ -70,13 +84,9 @@ const IssueScreen: React.FC = () => {
   }, [searchTerm]);
 
   const fetchIssues = async () => {
-    // if (debouncedSearchTerm) {
     try {
       if (merchantId) {
-        const data = await searchIssues({
-          search: debouncedSearchTerm,
-          merchant_id: merchantId,
-        }).unwrap();
+        const data = await getIssues(filter).unwrap();
         const mappedData: IssueTableInterface[] = data.map((issue) => ({
           key: issue.issue_id,
           title: issue.title,
@@ -93,51 +103,26 @@ const IssueScreen: React.FC = () => {
         err.data?.error || "Unable to fetch issues based on filter",
       );
     }
-    // }
   };
 
   useEffect(() => {
-    fetchIssues();
-  }, [debouncedSearchTerm]);
+    if (!isCreateIssueModalOpen) {
+      fetchIssues();
+    }
+  }, [filter, isCreateIssueModalOpen]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  const fetchIssuesBasedOnFilter = async () => {
-    try {
-      const data = await getIssues(filter).unwrap();
-      const mappedData: IssueTableInterface[] = data.map((issue) => ({
-        key: issue.issue_id,
-        title: issue.title,
-        description: issue.description,
-        outcome: issue.outcome,
-        status: issue.status,
-        images: issue.images,
-      }));
-
-      setIssues(mappedData);
-    } catch (error) {
-      const err = error as ApiError;
-      message.error(
-        err.data?.error || "Unable to fetch issues based on filter",
-      );
-    }
-  };
-
-  useEffect(() => {
-    if (!isCreateIssueModalOpen) {
-      fetchIssuesBasedOnFilter(); // Fetch issues when the component mounts or filter changes
-    }
-  }, [filter, getIssues, isCreateIssueModalOpen]);
-
   const columns = [
     {
       title: "Title",
       dataIndex: "title",
-      showSorterTooltip: { target: "full-header" },
-      sorter: (a: IIssue, b: IIssue) => a.title.localeCompare(b.title),
-      sortDirections: ["ascend", "descend"],
+      showSorterTooltip: true,
+      sorter: (a: IssueTableInterface, b: IssueTableInterface) =>
+        a.title.localeCompare(b.title),
+      sortDirections: ["ascend", "descend"] as SortOrder[],
       key: "title",
       render: (text: string) => (
         <div className="truncate" style={{ maxWidth: "200px" }}>
@@ -149,10 +134,10 @@ const IssueScreen: React.FC = () => {
     {
       title: "Description",
       dataIndex: "description",
-      showSorterTooltip: { target: "full-header" },
-      sorter: (a: IIssue, b: IIssue) =>
+      showSorterTooltip: true,
+      sorter: (a: IssueTableInterface, b: IssueTableInterface) =>
         a.description.localeCompare(b.description),
-      sortDirections: ["ascend", "descend"],
+      sortDirections: ["ascend", "descend"] as SortOrder[],
       key: "description",
       render: (text: string) => (
         <div className="truncate" style={{ maxWidth: "200px" }}>
@@ -164,7 +149,7 @@ const IssueScreen: React.FC = () => {
     {
       title: "Status",
       dataIndex: "status",
-      showSorterTooltip: { target: "full-header" },
+      showSorterTooltip: true,
       key: "status",
       render: (status: IssueStatus) => (
         <Tag color={statusColorMap[status] || "default"} key={status}>
@@ -187,8 +172,8 @@ const IssueScreen: React.FC = () => {
           value: IssueStatus.CANCELLED,
         },
       ],
-      onFilter: (value: IssueStatus, issue: IIssue) =>
-        issue.status.indexOf(value as string) === 0,
+      onFilter: (value: string, record: IssueTableInterface) =>
+        record.status === value,
       className: "w-1/5 md:w-1/4 lg:w-1/5",
     },
     {

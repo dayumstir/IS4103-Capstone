@@ -1,20 +1,12 @@
 // Need to use the React-specific entry point to import createApi
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { ICustomer } from "../../interfaces/models/customerInterface";
+import BaseQueryWithAuthCheck from "../utils.tsx/baseQuery";
 
 // Define a service using a base URL and expected endpoints
 export const customerApi = createApi({
   reducerPath: "customerApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/admin/customer",
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: BaseQueryWithAuthCheck("http://localhost:3000/admin/customer"),
   endpoints: (builder) => ({
     getCustomer: builder.query<ICustomer, string>({
       query: (id) => ({

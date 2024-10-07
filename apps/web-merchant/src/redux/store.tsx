@@ -5,6 +5,7 @@ import { profileApi } from "./services/profile";
 import { issueApi } from "./services/issue";
 import { adminApi } from "./services/admin";
 import { customerApi } from "./services/customer";
+import profileReducer from "./features/profileSlice";
 
 const customSerializableCheck = {
   isSerializable: () => true,
@@ -18,6 +19,7 @@ export const store = configureStore({
     [issueApi.reducerPath]: issueApi.reducer,
     [adminApi.reducerPath]: adminApi.reducer,
     [customerApi.reducerPath]: customerApi.reducer,
+    profile: profileReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: customSerializableCheck }).concat(
