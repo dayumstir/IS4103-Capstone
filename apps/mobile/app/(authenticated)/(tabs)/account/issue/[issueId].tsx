@@ -17,7 +17,7 @@ import { format } from "date-fns";
 import { Buffer } from "buffer";
 import { useGetMerchantByIdQuery } from "../../../../../redux/services/merchantService";
 import { AntDesign } from "@expo/vector-icons";
-import { IssueStatus } from "../../../../../interfaces/issueInterface";
+import { IssueStatus } from "@repo/interfaces";
 
 export default function IssueDetailsPage() {
   const router = useRouter();

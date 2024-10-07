@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store"; // Make sure this import path is correct
-import { IVoucher, IVoucherAssigned } from "../../interfaces/voucherInterface";
+import { IVoucher, IVoucherAssigned } from "@repo/interfaces";
 import { API_URL } from "../../config/apiConfig";
 
 // Define a service using a base URL and expected endpoints

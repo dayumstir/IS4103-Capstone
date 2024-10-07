@@ -1,9 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import {
-  IIssue,
-  IssueFilter,
-  IssueStatus,
-} from "../../interfaces/issueInterface";
+import { IIssue, IssueFilter, IssueStatus } from "@repo/interfaces";
 import { RootState } from "../store"; // Make sure this import path is correct
 import { API_URL } from "../../config/apiConfig";
 
