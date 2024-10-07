@@ -1,24 +1,25 @@
 import { Button, Layout, Menu, message } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useLogoutMutation } from "../redux/services/adminAuthService";
 
 export default function Header({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [logout] = useLogoutMutation();
 
   const items = [
-    { label: <a href="/">Home</a>, key: "Home" },
-    { label: <a href="/admin/profile">Profile</a>, key: "Profile" },
+    { label: <a href="/">Home</a>, key: "/" },
+    { label: <a href="/profile">Profile</a>, key: "/profile" },
     ...(isSuperAdmin
-      ? [{ label: <a href="/admin/all">Admins</a>, key: "Admin" }]
+      ? [{ label: <a href="/admins">Admins</a>, key: "/admins" }]
       : []),
-    { label: <a href="/admin/customers">Customers</a>, key: "Customers" },
-    { label: <a href="/admin/merchants">Merchants</a>, key: "Merchants" },
+    { label: <a href="/customers">Customers</a>, key: "/customers" },
+    { label: <a href="/merchants">Merchants</a>, key: "/merchants" },
     {
       label: (
         <a href="/business-management/instalment-plan">Business Management</a>
       ),
-      key: "Business Management",
+      key: "/business-management/instalment-plan",
     },
   ];
 
@@ -38,7 +39,12 @@ export default function Header({ isSuperAdmin }: { isSuperAdmin: boolean }) {
 
   return (
     <Layout.Header className="fixed top-0 z-10 flex w-full items-center bg-gray-200">
-      <Menu className="flex-1 bg-gray-200" mode="horizontal" items={items} />
+      <Menu
+        className="flex-1 bg-gray-200"
+        mode="horizontal"
+        items={items}
+        selectedKeys={[location.pathname]}
+      />
       <Button onClick={handleLogout}>Logout</Button>
     </Layout.Header>
   );

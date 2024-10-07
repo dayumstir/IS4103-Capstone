@@ -1,3 +1,4 @@
+// src/interfaces/voucherInterface.ts
 export interface IVoucher {
     voucher_id: string;          
     title: string;

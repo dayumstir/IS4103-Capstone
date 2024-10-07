@@ -1,17 +1,29 @@
-// Configuration specific to AWS RDS
+// src/config/database.config.ts
+
 import { PrismaClient } from "@prisma/client";
+import logger from "../utils/logger";
 
 const prisma = new PrismaClient();
 
-export const connectDatabase = async() => {
+export const connectDatabase = async () => {
     try {
         // Test the connection to the db by making a query
         await prisma.$connect();
-        console.log("Connected to AWS RDS successfully");
+        logger.info("Connected to AWS RDS successfully");
     } catch (error) {
-        console.log("Error connecting to the database: ", error);
-        throw error;  // Caught in index.ts
+        logger.error("Error connecting to the database: ", error);
+        throw error;
     }
-}
+};
 
-export default prisma;  // Export the Prisma client for use in other files
+// Close the connection when the application terminates
+export const closeDatabaseConnection = async () => {
+    try {
+        await prisma.$disconnect();
+        logger.info("Disconnected from AWS RDS");
+    } catch (error) {
+        logger.error("Error disconnecting from the database: ", error);
+    }
+};
+
+export default prisma;

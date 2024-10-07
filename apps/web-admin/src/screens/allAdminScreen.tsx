@@ -15,7 +15,6 @@ import {
   Input,
   Pagination,
 } from "antd";
-import { EditOutlined } from "@ant-design/icons";
 import { UserOutlined } from "@ant-design/icons";
 import {
   useViewAllAdminQuery,
@@ -24,8 +23,8 @@ import {
 import { IAdmin } from "../interfaces/adminInterface";
 import { Buffer } from "buffer";
 import { Link } from "react-router-dom";
-import { Descriptions } from 'antd';
-import { EyeOutlined } from '@ant-design/icons';
+import { Descriptions } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 
 export default function AllAdminScreen() {
   const { Title } = Typography;
@@ -34,7 +33,9 @@ export default function AllAdminScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<IAdmin | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedAdminType, setSelectedAdminType] = useState<string | undefined>(undefined);
+  const [selectedAdminType, setSelectedAdminType] = useState<
+    string | undefined
+  >(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -57,7 +58,7 @@ export default function AllAdminScreen() {
       message.error("No admin selected for editing");
       return;
     }
-    
+
     try {
       await updateAdminStatus({
         updatedAdminId: editingAdmin.admin_id,
@@ -73,19 +74,26 @@ export default function AllAdminScreen() {
     }
   };
 
-  const filteredAdmins = admins?.filter(admin => {
-    const matchesSearch = admin.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          admin.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          admin.username.toLowerCase().includes(searchTerm.toLowerCase());
-                          const matchesAdminType = selectedAdminType ? (selectedAdminType === "" || admin.admin_type === selectedAdminType) : true; // Adjusted line
-    return matchesSearch && matchesAdminType;
-  }) || [];
+  const filteredAdmins =
+    admins?.filter((admin) => {
+      const matchesSearch =
+        admin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        admin.username.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesAdminType = selectedAdminType
+        ? selectedAdminType === "" || admin.admin_type === selectedAdminType
+        : true; // Adjusted line
+      return matchesSearch && matchesAdminType;
+    }) || [];
 
-  const paginatedAdmins = filteredAdmins.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paginatedAdmins = filteredAdmins.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
 
-  const handleSearchChange = e => setSearchTerm(e.target.value);
-  const handleAdminTypeChange = value => setSelectedAdminType(value);
-  const handlePageChange = page => setCurrentPage(page);
+  const handleSearchChange = (e) => setSearchTerm(e.target.value);
+  const handleAdminTypeChange = (value) => setSelectedAdminType(value);
+  const handlePageChange = (page) => setCurrentPage(page);
 
   const tableColumns = [
     {
@@ -108,7 +116,15 @@ export default function AllAdminScreen() {
       dataIndex: "admin_type",
       key: "admin_type",
       render: (text: string) => (
-      <Tag color={text === "NORMAL" ? "green" : text === "UNVERIFIED" ? "orange" : "volcano"}>
+        <Tag
+          color={
+            text === "NORMAL"
+              ? "green"
+              : text === "UNVERIFIED"
+                ? "orange"
+                : "volcano"
+          }
+        >
           {text === "NORMAL" ? "ACTIVE" : text}
         </Tag>
       ),
@@ -140,18 +156,37 @@ export default function AllAdminScreen() {
               className="h-36 w-36 object-cover"
             />
           ) : (
-            <Avatar className="h-36 w-36 object-cover" icon={<UserOutlined />} />
+            <Avatar
+              className="h-36 w-36 object-cover"
+              icon={<UserOutlined />}
+            />
           )}
-          <Descriptions title="Admin Details" bordered size="small" column={1} className="admin-details">
-      <Descriptions.Item label="Admin Name">{editingAdmin.name}</Descriptions.Item>
-      <Descriptions.Item label="Email">{editingAdmin.email}</Descriptions.Item>
-      <Descriptions.Item label="Username">{editingAdmin.username}</Descriptions.Item>
-      <Descriptions.Item label="Contact Number">{editingAdmin.contact_number}</Descriptions.Item>
-      <Descriptions.Item label="Address">{editingAdmin.address}</Descriptions.Item>
-      <Descriptions.Item label="Date of Birth">
-        {new Date(editingAdmin.date_of_birth).toLocaleDateString()}
-      </Descriptions.Item>
-    </Descriptions>
+          <Descriptions
+            title="Admin Details"
+            bordered
+            size="small"
+            column={1}
+            className="admin-details"
+          >
+            <Descriptions.Item label="Admin Name">
+              {editingAdmin.name}
+            </Descriptions.Item>
+            <Descriptions.Item label="Email">
+              {editingAdmin.email}
+            </Descriptions.Item>
+            <Descriptions.Item label="Username">
+              {editingAdmin.username}
+            </Descriptions.Item>
+            <Descriptions.Item label="Contact Number">
+              {editingAdmin.contact_number}
+            </Descriptions.Item>
+            <Descriptions.Item label="Address">
+              {editingAdmin.address}
+            </Descriptions.Item>
+            <Descriptions.Item label="Date of Birth">
+              {new Date(editingAdmin.date_of_birth).toLocaleDateString()}
+            </Descriptions.Item>
+          </Descriptions>
         </div>
       )}
       <Form
@@ -181,7 +216,10 @@ export default function AllAdminScreen() {
 
   return (
     <div className="w-full px-8 py-4">
-      <Card className="mb-8 border border-gray-300" title="View and Manage Admins">
+      <Card
+        className="mb-8 border border-gray-300"
+        title="View and Manage Admins"
+      >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center">
             <Input
@@ -202,7 +240,7 @@ export default function AllAdminScreen() {
               <Select.Option value="UNVERIFIED">UNVERIFIED</Select.Option>
             </Select>
           </div>
-          <Link to="/admin/add">
+          <Link to="/admins/add">
             <Button type="primary">Add Admin</Button>
           </Link>
         </div>
@@ -222,7 +260,7 @@ export default function AllAdminScreen() {
           total={filteredAdmins.length}
           onChange={handlePageChange}
           showSizeChanger={false}
-          style={{ marginTop: 16, textAlign: 'right' }}
+          style={{ marginTop: 16, textAlign: "right" }}
         />
       </Card>
 
