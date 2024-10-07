@@ -6,7 +6,7 @@ import { setPaymentStage } from "../../redux/features/paymentStageSlice";
 import { RootState } from "../../redux/store";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { router } from "expo-router";
-import { useCreateTransactionMutation } from "../../redux/services/transaction";
+import { useCreateTransactionMutation } from "../../redux/services/transactionService";
 import { ITransaction } from "../../interfaces/transactionInterface";
 import ScanQrCodeScreen from "../../components/scan/scanQrCodeScreen";
 import VerifyPurchaseScreen from "../../components/scan/verifyPurchaseScreen";

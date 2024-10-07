@@ -12,7 +12,7 @@ import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRegisterMutation } from "../redux/services/customerAuth";
+import { useRegisterMutation } from "../redux/services/customerAuthService";
 import { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { format, setMonth } from "date-fns";

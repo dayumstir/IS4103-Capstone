@@ -6,7 +6,7 @@ import {
   useConfirmEmailMutation,
   useSendPhoneNumberOTPMutation,
   useResendEmailVerificationMutation,
-} from "../redux/services/customerAuth";
+} from "../redux/services/customerAuthService";
 import { useForm, Controller } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";

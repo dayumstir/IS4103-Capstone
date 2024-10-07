@@ -5,21 +5,25 @@ import {
   IssueStatus,
 } from "../../interfaces/issueInterface";
 import { RootState } from "../store"; // Make sure this import path is correct
+import { API_URL } from "../../config/apiConfig";
 
 // Define a service using a base URL and expected endpoints
 export const issueApi = createApi({
   reducerPath: "issueApi",
+
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/issue",
+    baseUrl: `${API_URL}/issue`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).customerAuth.token;
       if (token) {
-        headers.set("authorization", `Bearer ${token}`);
+        headers.set("Authorization", `Bearer ${token}`);
       }
       return headers;
     },
   }),
+
   tagTypes: ["IssueList", "IssueDetails"],
+
   endpoints: (builder) => ({
     // Create Issue
     createIssue: builder.mutation<IIssue, FormData>({
