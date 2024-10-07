@@ -1,4 +1,4 @@
-import { IssueStatus } from "../interfaces/issueInterface";
+import { IssueStatus } from "@repo/interfaces";
 import { View, Text } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 

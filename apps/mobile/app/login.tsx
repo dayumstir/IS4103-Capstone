@@ -8,7 +8,7 @@ import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLoginMutation } from "../redux/services/customerAuth";
+import { useLoginMutation } from "../redux/services/customerAuthService";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Button } from "@ant-design/react-native";
 

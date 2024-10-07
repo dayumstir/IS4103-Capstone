@@ -1,3 +1,4 @@
+import { ICustomer } from "./customerInterface";
 import { IInstalmentPlan } from "./instalmentPlanInterface";
 
 export interface ICreditTier {
@@ -7,4 +8,5 @@ export interface ICreditTier {
     max_credit_score: number;
 
     instalment_plans: IInstalmentPlan[];
+    customers: ICustomer[];
 }

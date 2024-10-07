@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 import { Text, View, Image, Linking, TouchableOpacity } from "react-native";
 import { ActivityIndicator, Button } from "@ant-design/react-native";
 import { useDispatch } from "react-redux";
-import { useGetProfileQuery } from "../../../../redux/services/customer";
+import { useGetProfileQuery } from "../../../../redux/services/customerService";
 import { logout } from "../../../../redux/features/customerAuthSlice";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
@@ -119,12 +119,7 @@ export default function AccountPage() {
         </Button>
 
         <Button type="primary" onPress={() => router.push("/account/issue")}>
-          <AntDesign
-            name="warning"
-            size={20}
-            color="white"
-            className="mr-2"
-          />
+          <AntDesign name="warning" size={20} color="white" className="mr-2" />
           <Text className="my-auto font-semibold text-white">My Issues</Text>
         </Button>
 

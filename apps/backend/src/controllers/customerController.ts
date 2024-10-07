@@ -2,17 +2,16 @@
 import { Request, Response } from "express";
 import * as customerService from "../services/customerService";
 import logger from "../utils/logger";
-import upload from '../config/multerConfig';
-
+import upload from "../config/multerConfig";
 
 // Customer View Profile
 export const getCustomerProfile = async (req: Request, res: Response) => {
     logger.info("Executing getProfile...");
     try {
-        const customer_id = req.params.customer_id || req.customer_id; 
+        const customer_id = req.params.customer_id || req.customer_id;
 
         if (!customer_id) {
-          return res.status(400).json({ error: "customer_id is required" });
+            return res.status(400).json({ error: "customer_id is required" });
         }
 
         const customer = await customerService.getCustomerById(customer_id);
@@ -23,15 +22,14 @@ export const getCustomerProfile = async (req: Request, res: Response) => {
     }
 };
 
-
 // Customer Edit Profile
 export const editCustomerProfile = async (req: Request, res: Response) => {
     logger.info("Executing editProfile...");
     try {
-        const customer_id = req.params.customer_id || req.customer_id; 
+        const customer_id = req.params.customer_id || req.customer_id;
 
         if (!customer_id) {
-          return res.status(400).json({ error: "customer_id is required" });
+            return res.status(400).json({ error: "customer_id is required" });
         }
 
         const updatedCustomer = await customerService.updateCustomer(
@@ -45,7 +43,6 @@ export const editCustomerProfile = async (req: Request, res: Response) => {
     }
 };
 
-
 // List All Customers
 export const listAllCustomers = async (req: Request, res: Response) => {
     logger.info("Executing listAllCustomers...");
@@ -53,10 +50,10 @@ export const listAllCustomers = async (req: Request, res: Response) => {
     try {
         let customers;
         if (search) {
-          customers = await customerService.searchCustomers(search as string);
+            customers = await customerService.searchCustomers(search as string);
         } else {
-          // Get all customers if no search term is provided
-          customers = await customerService.getAllCustomers();
+            // Get all customers if no search term is provided
+            customers = await customerService.getAllCustomers();
         }
         res.status(200).json(customers);
     } catch (error: any) {
@@ -65,24 +62,46 @@ export const listAllCustomers = async (req: Request, res: Response) => {
     }
 };
 
-
 // Endpoint to update customer profile picture
 export const updateProfilePicture = [
-  upload.single('profile_picture'), // Handle image upload
-  async (req: Request, res: Response) => {
-      const customerId = req.params.customerId;
+    upload.single("profile_picture"), // Handle image upload
+    async (req: Request, res: Response) => {
+        const customerId = req.params.customerId;
 
-      if (!req.file) {
-          return res.status(400).json({ error: "No file uploaded." });
-      }
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded." });
+        }
 
-      try {
-          // Pass the image buffer to the service to update the profile picture
-          await customerService.updateProfilePicture(customerId, req.file.buffer);
+        try {
+            // Pass the image buffer to the service to update the profile picture
+            await customerService.updateProfilePicture(
+                customerId,
+                req.file.buffer
+            );
 
-          res.status(200).json({ message: "Profile picture updated successfully" });
-      } catch (error: any) {
-          res.status(500).json({ error: error.message });
-      }
-  }
+            res.status(200).json({
+                message: "Profile picture updated successfully",
+            });
+        } catch (error: any) {
+            res.status(500).json({ error: error.message });
+        }
+    },
 ];
+
+export const getInstalmentPlans = async (req: Request, res: Response) => {
+    logger.info("Executing getInstalmentPlans...");
+    try {
+        const customerId = req.customer_id;
+
+        if (!customerId) {
+            return res.status(400).json({ error: "customer_id is required" });
+        }
+
+        const instalmentPlans =
+            await customerService.getInstalmentPlans(customerId);
+        res.status(200).json(instalmentPlans);
+    } catch (error: any) {
+        logger.error("An error occurred:", error);
+        res.status(400).json({ error: error.message });
+    }
+};
