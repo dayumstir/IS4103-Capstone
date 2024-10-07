@@ -1,7 +1,6 @@
 import { Layout } from "antd";
 import { Route, Routes } from "react-router-dom";
 import BusinessManagementRoute from "./components/businessManagementRoute";
-import Footer from "./components/footer";
 import ProtectedRoute from "./components/protectedRoute";
 import HomeScreen from "./screens/homeScreen";
 import IssueDetailsScreen from "./screens/issueDetailsScreen";
@@ -10,6 +9,7 @@ import LoginScreen from "./screens/loginScreen";
 import ProfileScreen from "./screens/profileScreen";
 import RegisterConfirmScreen from "./screens/registerConfirmScreen";
 import RegisterScreen from "./screens/registerScreen";
+import ViewQRCodeScreen from "./screens/viewQRCodeScreen";
 
 // import "./App.css";
 
@@ -24,6 +24,7 @@ const App = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="/qrcode" element={<ViewQRCodeScreen />} />
           <Route element={<BusinessManagementRoute />}>
             <Route
               path="/business-management/issues"
