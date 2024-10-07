@@ -1,13 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store";
-import { ICustomer } from "../../interfaces/customerInterface";
+import { ICustomer, IInstalmentPlan } from "@repo/interfaces";
+import { API_URL } from "../../config/apiConfig";
 
 // Define the base URL for customer API interactions
 export const customerApi = createApi({
   reducerPath: "customerApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/customer",
+    baseUrl: `${API_URL}/customer`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).customerAuth.token;
       if (token) {
@@ -17,7 +18,7 @@ export const customerApi = createApi({
     },
   }),
 
-  tagTypes: ["CustomerProfile"],
+  tagTypes: ["CustomerProfile", "InstalmentPlans"],
 
   endpoints: (builder) => ({
     // View profile API call
@@ -35,7 +36,17 @@ export const customerApi = createApi({
       }),
       invalidatesTags: ["CustomerProfile"],
     }),
+
+    // Get eligible instalment plans
+    getInstalmentPlans: builder.query<IInstalmentPlan[], void>({
+      query: () => "/instalment-plans",
+      providesTags: ["InstalmentPlans"],
+    }),
   }),
 });
 
-export const { useGetProfileQuery, useEditProfileMutation } = customerApi;
+export const {
+  useGetProfileQuery,
+  useEditProfileMutation,
+  useGetInstalmentPlansQuery,
+} = customerApi;

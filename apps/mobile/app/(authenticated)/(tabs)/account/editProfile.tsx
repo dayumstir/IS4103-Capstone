@@ -11,7 +11,7 @@ import { Controller, useForm } from "react-hook-form";
 import { format, setMonth } from "date-fns";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEditProfileMutation } from "../../../../redux/services/customer";
+import { useEditProfileMutation } from "../../../../redux/services/customerService";
 import { useSelector } from "react-redux";
 import Toast from "react-native-toast-message";
 import { useRouter } from "expo-router";

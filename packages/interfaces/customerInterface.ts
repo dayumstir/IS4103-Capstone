@@ -1,5 +1,7 @@
 // Defines the structure of a customer object
 
+import { ICreditTier } from "./creditTierInterface";
+
 export interface ICustomer {
   customer_id: number;
   name: string;
@@ -11,5 +13,7 @@ export interface ICustomer {
   date_of_birth: Date;
   status: string;
   credit_score: number;
-  credit_tier_id: number;
+
+  credit_tier_id: string;
+  credit_tier: ICreditTier;
 }

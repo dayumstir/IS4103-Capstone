@@ -16,7 +16,7 @@ import { IssueStatusBadge } from "../../../../../components/issueStatusBadge";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { IIssue, IssueStatus } from "../../../../../interfaces/issueInterface";
+import { IIssue, IssueStatus } from "@repo/interfaces";
 import { useState } from "react";
 import EmptyPlaceholder from "../../../../../components/emptyPlaceholder";
 
