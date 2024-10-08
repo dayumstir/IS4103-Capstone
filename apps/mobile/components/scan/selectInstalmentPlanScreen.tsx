@@ -6,15 +6,15 @@ import { Button } from "@ant-design/react-native";
 export default function SelectInstalmentPlanScreen({
   instalmentPlans,
   price,
-  selectedPlan,
-  setSelectedPlan,
+  selectedPlanId,
+  setSelectedPlanId,
   onCancel,
   onConfirm,
 }: {
   instalmentPlans: IInstalmentPlan[];
   price: number;
-  selectedPlan: string;
-  setSelectedPlan: (plan: string) => void;
+  selectedPlanId: string | null;
+  setSelectedPlanId: (planId: string) => void;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
@@ -35,16 +35,16 @@ export default function SelectInstalmentPlanScreen({
           return (
             <TouchableOpacity
               className={`mb-4 flex-row items-center rounded-md border p-4 ${
-                selectedPlan === plan.instalment_plan_id
+                selectedPlanId === plan.instalment_plan_id
                   ? "border-blue-500"
                   : "border-gray-300"
               }`}
-              onPress={() => setSelectedPlan(plan.instalment_plan_id)}
+              onPress={() => setSelectedPlanId(plan.instalment_plan_id)}
               key={plan.instalment_plan_id}
             >
               <View className="mr-4 h-6 w-6 items-center justify-center rounded-full border border-blue-500">
                 <View
-                  className={`h-4 w-4 rounded-full ${selectedPlan === plan.instalment_plan_id ? "bg-blue-500" : "bg-white"}`}
+                  className={`h-4 w-4 rounded-full ${selectedPlanId === plan.instalment_plan_id ? "bg-blue-500" : "bg-white"}`}
                 />
               </View>
 
@@ -68,7 +68,7 @@ export default function SelectInstalmentPlanScreen({
 
       {/* ===== Confirm & Cancel Buttons ===== */}
       <View className="flex w-full gap-4">
-        <Button type="primary" onPress={onConfirm}>
+        <Button type="primary" onPress={onConfirm} disabled={!selectedPlanId}>
           <Text className="font-semibold text-white">Confirm</Text>
         </Button>
 

@@ -22,7 +22,10 @@ export const transactionApi = createApi({
     // Create Transaction
     createTransaction: builder.mutation<
       ITransaction,
-      Omit<ITransaction, "transaction_id">
+      Omit<
+        ITransaction,
+        "transaction_id" | "customer" | "merchant" | "instalment_plan"
+      >
     >({
       query: (newTransaction) => ({
         url: "/",
