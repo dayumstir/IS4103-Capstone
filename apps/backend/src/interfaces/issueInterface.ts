@@ -15,7 +15,7 @@ export interface IIssue {
     images?: Buffer[];
     create_time: Date;
     updated_at: Date;
-    
+
     merchant_id?: string; // Optional foreign key to Merchant
     customer_id?: string; // Optional foreign key to Customer
     admin_id?: string; // Optional foreign key to Admin
@@ -36,4 +36,5 @@ export interface IssueFilter {
     create_to?: Date;
     update_from?: Date;
     update_to?: Date;
+    search_term?: string;
 }

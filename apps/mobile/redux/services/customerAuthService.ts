@@ -5,17 +5,18 @@ import { ResetPasswordFormValues } from "../../app/(authenticated)/(tabs)/accoun
 import { RootState } from "../store";
 import { ConfirmEmailFormValues } from "../../app/confirmation";
 import { PhoneVerificationFormValues } from "../../app/phoneVerification";
+import { API_URL } from "../../config/apiConfig";
 
 // Define the API service for authentication
 export const customerAuthApi = createApi({
   reducerPath: "customerAuthApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/customerAuth",
+    baseUrl: `${API_URL}/customerAuth`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).customerAuth.token;
       if (token) {
-        headers.set("authorization", `Bearer ${token}`);
+        headers.set("Authorization", `Bearer ${token}`);
       }
       return headers;
     },
@@ -29,6 +30,7 @@ export const customerAuthApi = createApi({
         body,
       }),
     }),
+
     register: builder.mutation<string, RegisterFormValues>({
       query: (body) => ({
         url: "/register",
@@ -36,6 +38,7 @@ export const customerAuthApi = createApi({
         body,
       }),
     }),
+
     resetPassword: builder.mutation<string, ResetPasswordFormValues>({
       query: (body) => ({
         url: "/reset-password",
@@ -43,6 +46,7 @@ export const customerAuthApi = createApi({
         body,
       }),
     }),
+
     confirmEmail: builder.mutation<string, ConfirmEmailFormValues>({
       query: (body) => ({
         url: "/confirm-email",
@@ -50,6 +54,7 @@ export const customerAuthApi = createApi({
         body,
       }),
     }),
+
     sendPhoneNumberOTP: builder.mutation<string, { contact_number: string }>({
       query: (body) => ({
         url: "/send-phone-number-otp",
@@ -57,6 +62,7 @@ export const customerAuthApi = createApi({
         body,
       }),
     }),
+
     verifyPhoneNumberOTP: builder.mutation<string, PhoneVerificationFormValues>(
       {
         query: (body) => ({
@@ -66,6 +72,7 @@ export const customerAuthApi = createApi({
         }),
       },
     ),
+    
     resendEmailVerification: builder.mutation<void, { email: string }>({
       query: (body) => ({
         url: "/resend-email",

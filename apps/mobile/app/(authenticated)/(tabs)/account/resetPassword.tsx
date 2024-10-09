@@ -11,7 +11,7 @@ import { Button } from "@ant-design/react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useResetPasswordMutation } from "../../../../redux/services/customerAuth";
+import { useResetPasswordMutation } from "../../../../redux/services/customerAuthService";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Toast from "react-native-toast-message";

@@ -31,7 +31,9 @@ model Customer {
   date_of_birth   DateTime
   status          Status
   credit_score    Int      @default(0)
-  credit_tier_id  String   @default("tier_1")
+
+  credit_tier_id String     @default("tier_1")
+  credit_tier    CreditTier @relation(fields: [credit_tier_id], references: [credit_tier_id])
 
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
@@ -201,6 +203,7 @@ model CreditTier {
   max_credit_score Int
 
   instalment_plans InstalmentPlan[]
+  customers        Customer[]
 }
 
 enum IssueStatus {
@@ -260,16 +263,16 @@ enum VoucherAssignedStatus {
 }
 
 model VoucherAssigned {
-  voucher_assigned_id        String        @id @default(cuid())
-  status                     VoucherAssignedStatus
-  date_time_issued           DateTime      @default(now())
-  remaining_uses             Int
+  voucher_assigned_id String                @id @default(cuid())
+  status              VoucherAssignedStatus
+  date_time_issued    DateTime              @default(now())
+  remaining_uses      Int
 
   // Relationships
-  voucher                    Voucher  @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
-  voucher_id                 String
-  customer                   Customer @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
-  customer_id                String
+  voucher     Voucher  @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
+  voucher_id  String
+  customer    Customer @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  customer_id String
 
   used_installment_payment_id String? // TODO: Associate with installment plan
 }
