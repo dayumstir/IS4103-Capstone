@@ -40,6 +40,7 @@ model Customer {
   passwordResetTokens     PasswordResetToken[]
   issues                  Issue[]
   vouchersAssigned        VoucherAssigned[]
+  Transaction             Transaction[]
 }
 
 // Utility Schemas
@@ -126,18 +127,19 @@ model Admin {
 }
 
 model Merchant {
-  merchant_id     String @id @default(cuid())
-  name            String
-  email           String @unique
-  password        String
-  contact_number  String
-  address         String
-  qr_code         String
-  status          Status
-  profile_picture Bytes? @db.ByteA
-  cashback        Decimal @db.Decimal(5, 2)
+  merchant_id             String                           @id @default(cuid())
+  name                    String
+  email                   String                           @unique
+  password                String
+  contact_number          String
+  address                 String
+  qr_code                 String
+  status                  Status
+  profile_picture         Bytes?                           @db.ByteA
+  cashback                Float
   emailVerificationTokens MerchantEmailVerificationToken[]
   issues                  Issue[]
+  Transaction             Transaction[]
 }
 
 // Merchant Sign Up Use Case: Store phone number OTPs
@@ -171,29 +173,80 @@ model MerchantEmailVerificationToken {
 }
 
 model Transaction {
-  transaction_id      String   @id @default(cuid())
-  amount              Decimal  @db.Decimal(10, 2)
-  date                DateTime
-  status              String
-  customer_id         String
-  merchant_id         String
-  merchant_payment_id String
-  installment_plan_id String
-  issues              Issue[]
+  transaction_id       String            @id @default(cuid())
+  amount               Float
+  date_of_transaction  DateTime
+  status               TransactionStatus
+  fully_paid_date      DateTime?
+  reference_no         String            @default("")
+  cash_back_percentage Float             @default(0)
+
+  customer_id String
+  customer    Customer @relation(fields: [customer_id], references: [customer_id])
+
+  merchant_id String
+  merchant    Merchant @relation(fields: [merchant_id], references: [merchant_id])
+
+  instalment_plan_id String
+  instalment_plan    InstalmentPlan @relation(fields: [instalment_plan_id], references: [instalment_plan_id])
+
+  issues Issue[]
+
+  instalment_payments InstalmentPayment[]
+}
+
+enum TransactionStatus {
+  IN_PROGRESS
+  FULLY_PAID
 }
 
 model InstalmentPlan {
-  instalment_plan_id    String  @id @default(cuid())
+  instalment_plan_id    String @id @default(cuid())
   name                  String
   description           String
   number_of_instalments Int
   time_period           Int // in weeks
-  interest_rate         Decimal @db.Decimal(5, 2)
-  minimum_amount        Decimal @db.Decimal(10, 2)
-  maximum_amount        Decimal @db.Decimal(10, 2)
-  status                String // TODO: Implement as enum
+  interest_rate         Float
+  minimum_amount        Float
+  maximum_amount        Float
+  status                String // active/inactive
 
   credit_tiers CreditTier[]
+  transactions Transaction[]
+}
+
+model InstalmentPayment {
+  instalment_payment_id   String                  @id @default(cuid())
+  amount_due              Float
+  late_payment_amount_due Float
+  status                  InstalmentPaymentStatus
+  due_date                DateTime
+  paid_date               DateTime?
+  instalment_number       Int // depends on frequency of instalment plan
+
+  transaction_id String
+  transaction    Transaction @relation(fields: [transaction_id], references: [transaction_id])
+
+  voucher_assigned_id          String?
+  voucher_assigned             VoucherAssigned? @relation(fields: [voucher_assigned_id], references: [voucher_assigned_id])
+  amount_discount_from_voucher Float?
+
+  amount_deducted_from_wallet Float
+
+  cashback_wallet_id                   String?
+  cashback_wallet                      CashbackWallet? @relation(fields: [cashback_wallet_id], references: [cashback_wallet_id])
+  amount_deducted_from_cashback_wallet Float?
+}
+
+enum InstalmentPaymentStatus {
+  PAID
+  UNPAID
+}
+
+model CashbackWallet {
+  cashback_wallet_id String              @id @default(cuid())
+  amount             Float
+  InstalmentPayment  InstalmentPayment[]
 }
 
 model CreditTier {
@@ -202,8 +255,8 @@ model CreditTier {
   min_credit_score Int
   max_credit_score Int
 
-  instalment_plans InstalmentPlan[]
   customers        Customer[]
+  instalment_plans InstalmentPlan[]
 }
 
 enum IssueStatus {
@@ -275,4 +328,5 @@ model VoucherAssigned {
   customer_id String
 
   used_installment_payment_id String? // TODO: Associate with installment plan
+  InstalmentPayment           InstalmentPayment[]
 }
