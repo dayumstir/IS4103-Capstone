@@ -1,6 +1,6 @@
 // Handles database operations related to instalment plans
 import { prisma } from "./db";
-import { IInstalmentPlan } from "../interfaces/instalmentPlanInterface";
+import { IInstalmentPlan } from "@repo/interfaces/instalmentPlanInterface";
 
 // Create a new instalment plan in db
 export const createInstalmentPlan = async (

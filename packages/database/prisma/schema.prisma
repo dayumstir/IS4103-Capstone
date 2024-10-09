@@ -172,26 +172,14 @@ model MerchantEmailVerificationToken {
   @@index([merchant_id])
 }
 
-model MerchantPayment {
-  merchant_payment_id String @id @default(cuid())
-  from_bank_id        String
-  evidence            String
-  amount              Float
-
-  merchant_bank_id String
-  merchant_id      String
-
-  transactions Transaction[]
-}
-
 model Transaction {
-  transaction_id       String    @id @default(cuid())
+  transaction_id       String            @id @default(cuid())
   amount               Float
   date_of_transaction  DateTime
-  status               String    @default("In Progress") // fully paid / in progress
+  status               TransactionStatus
   fully_paid_date      DateTime?
-  reference_no         String    @default("")
-  cash_back_percentage Float     @default(0)
+  reference_no         String            @default("")
+  cash_back_percentage Float             @default(0)
 
   customer_id String
   customer    Customer @relation(fields: [customer_id], references: [customer_id])
@@ -202,11 +190,14 @@ model Transaction {
   instalment_plan_id String
   instalment_plan    InstalmentPlan @relation(fields: [instalment_plan_id], references: [instalment_plan_id])
 
-  issues              Issue[]
-  instalment_payments InstalmentPayment[]
+  issues Issue[]
 
-  merchant_payment_id String?
-  merchant_payment    MerchantPayment? @relation(fields: [merchant_payment_id], references: [merchant_payment_id])
+  instalment_payments InstalmentPayment[]
+}
+
+enum TransactionStatus {
+  IN_PROGRESS
+  FULLY_PAID
 }
 
 model InstalmentPlan {
@@ -220,17 +211,15 @@ model InstalmentPlan {
   maximum_amount        Float
   status                String // active/inactive
 
-  credit_tiers        CreditTier[]
-  transactions        Transaction[]
-  instalment_payments InstalmentPayment[]
+  credit_tiers CreditTier[]
+  transactions Transaction[]
 }
 
 model InstalmentPayment {
-  instalment_payment_id   String    @id @default(cuid())
-  amount                  Float
+  instalment_payment_id   String                  @id @default(cuid())
   amount_due              Float
   late_payment_amount_due Float
-  status                  String // paid/unpaid
+  status                  InstalmentPaymentStatus
   due_date                DateTime
   paid_date               DateTime?
   instalment_number       Int // depends on frequency of instalment plan
@@ -240,16 +229,18 @@ model InstalmentPayment {
 
   voucher_assigned_id          String?
   voucher_assigned             VoucherAssigned? @relation(fields: [voucher_assigned_id], references: [voucher_assigned_id])
-  amount_discount_from_voucher Float
+  amount_discount_from_voucher Float?
 
   amount_deducted_from_wallet Float
 
   cashback_wallet_id                   String?
   cashback_wallet                      CashbackWallet? @relation(fields: [cashback_wallet_id], references: [cashback_wallet_id])
-  amount_deducted_from_cashback_wallet Float
+  amount_deducted_from_cashback_wallet Float?
+}
 
-  instalment_plan_id String
-  instalment_plan    InstalmentPlan @relation(fields: [instalment_plan_id], references: [instalment_plan_id])
+enum InstalmentPaymentStatus {
+  PAID
+  UNPAID
 }
 
 model CashbackWallet {

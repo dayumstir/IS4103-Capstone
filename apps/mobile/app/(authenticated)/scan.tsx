@@ -6,7 +6,7 @@ import { setPaymentStage } from "../../redux/features/paymentStageSlice";
 import { RootState } from "../../redux/store";
 import { router } from "expo-router";
 import { useCreateTransactionMutation } from "../../redux/services/transactionService";
-import { ITransaction } from "@repo/interfaces";
+import { ITransaction, TransactionStatus } from "@repo/interfaces";
 import ScanQrCodeScreen from "../../components/scan/scanQrCodeScreen";
 import VerifyPurchaseScreen from "../../components/scan/verifyPurchaseScreen";
 import PaymentCompleteScreen from "../../components/scan/paymentCompleteScreen";
@@ -22,11 +22,13 @@ export default function ScanScreen() {
   const [purchase, setPurchase] = useState({
     merchantName: "",
     price: 0,
+    referenceNo: "",
   });
-  const [selectedPlan, setSelectedPlan] = useState("Pay in Full");
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const paymentStage = useSelector(
     (state: RootState) => state.paymentStage.paymentStage,
   );
+  const customer = useSelector((state: RootState) => state.customer.profile);
   const dispatch = useDispatch();
   const [createTransaction] = useCreateTransactionMutation();
   const [transaction, setTransaction] = useState<ITransaction | null>(null);
@@ -86,35 +88,50 @@ export default function ScanScreen() {
     type: string;
     data: string;
   }) => {
-    if (data.includes("|")) {
-      // QR Code data is in the format "MerchantId|Price"
-      const [rawMerchantId, rawPrice] = data.split("|");
+    if (data.includes(":")) {
+      // QR Code data is in the format "MerchantId:Price:ReferenceNo"
+      const [rawMerchantId, rawPrice, rawReferenceNo] = data.split(":");
 
-      // Sanitize the merchant ID and price
+      // Sanitize the merchant ID, price and reference number
       const merchantId = rawMerchantId.trim();
       const price = parseFloat(rawPrice.trim());
+      const referenceNo = rawReferenceNo.trim();
 
       if (merchantId === "" || isNaN(price) || price <= 0) {
         dispatch(setPaymentStage("Error"));
         return;
-      } else {
-        setScannedMerchantId(merchantId);
-        setPurchase((prev) => ({ ...prev, price }));
-        dispatch(setPaymentStage("Verify Purchase"));
       }
+
+      setScannedMerchantId(merchantId);
+      setPurchase((prev) => ({ ...prev, price, referenceNo }));
+      dispatch(setPaymentStage("Verify Purchase"));
     }
   };
 
-  const handleCreateTransaction = async () => {
-    // TODO: Replace with actual id values
-    const newTransaction: Omit<ITransaction, "transaction_id"> = {
+  const handleCreateTransactionAndInstalmentPayments = async () => {
+    if (!customer || !scannedMerchantId || !selectedPlanId) {
+      dispatch(setPaymentStage("Error"));
+      return;
+    }
+
+    const newTransaction: Omit<
+      ITransaction,
+      | "transaction_id"
+      | "customer"
+      | "merchant"
+      | "instalment_plan"
+      | "instalment_payments" // created in transactionRepository.ts
+    > = {
       amount: purchase.price,
-      date: new Date(),
-      status: "In Progress",
-      customer_id: 1,
-      merchant_id: 2,
-      merchant_payment_id: 3,
-      installment_plan_id: 4,
+      date_of_transaction: new Date(),
+      status: TransactionStatus.IN_PROGRESS,
+      fully_paid_date: null,
+      reference_no: purchase.referenceNo,
+      cash_back_percentage: 0,
+
+      customer_id: customer.customer_id,
+      merchant_id: scannedMerchantId,
+      instalment_plan_id: selectedPlanId,
     };
 
     try {
@@ -157,10 +174,10 @@ export default function ScanScreen() {
             <SelectInstalmentPlanScreen
               instalmentPlans={instalmentPlans}
               price={purchase.price}
-              selectedPlan={selectedPlan}
-              setSelectedPlan={setSelectedPlan}
+              selectedPlanId={selectedPlanId}
+              setSelectedPlanId={setSelectedPlanId}
               onCancel={handleCancel}
-              onConfirm={handleCreateTransaction}
+              onConfirm={handleCreateTransactionAndInstalmentPayments}
             />
           )
         );

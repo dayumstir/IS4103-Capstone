@@ -24,7 +24,11 @@ export const transactionApi = createApi({
       ITransaction,
       Omit<
         ITransaction,
-        "transaction_id" | "customer" | "merchant" | "instalment_plan"
+        | "transaction_id"
+        | "customer"
+        | "merchant"
+        | "instalment_plan"
+        | "instalment_payments"
       >
     >({
       query: (newTransaction) => ({

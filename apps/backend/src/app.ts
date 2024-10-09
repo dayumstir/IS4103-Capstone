@@ -4,7 +4,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
-import logger from "./utils/logger"; 
+import logger from "./utils/logger";
 
 // Import routes
 import adminAuthRoutes from "./routes/adminAuthRoutes";
@@ -17,6 +17,7 @@ import issueRoutes from "./routes/issueRoutes";
 import merchantRoutes from "./routes/merchantRoutes";
 import transactionRoutes from "./routes/transactionRoutes";
 import voucherRoutes from "./routes/voucherRoutes";
+import instalmentPaymentRoutes from "./routes/instalmentPaymentRoutes";
 
 // Import error handler middleware
 import { errorHandler } from "./middlewares/errorHandler";
@@ -32,11 +33,13 @@ app.use(express.json()); // Built-in body-parser in Express
 app.use(express.urlencoded({ extended: true }));
 
 // Use morgan for HTTP request logging, and integrate with winston logger
-app.use(morgan("dev", {
-    stream: {
-        write: (message) => logger.http(message.trim()),  // Use logger for HTTP logging
-    },
-}));
+app.use(
+    morgan("dev", {
+        stream: {
+            write: (message) => logger.http(message.trim()), // Use logger for HTTP logging
+        },
+    })
+);
 
 // Route setup
 app.use("/adminAuth", adminAuthRoutes);
@@ -49,6 +52,7 @@ app.use("/issue", issueRoutes);
 app.use("/merchant", merchantRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/voucher", voucherRoutes);
+app.use("/instalmentPayment", instalmentPaymentRoutes);
 
 // Health check or root route
 app.get("/", (req, res) => {

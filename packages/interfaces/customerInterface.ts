@@ -11,9 +11,16 @@ export interface ICustomer {
     contact_number: string;
     address: string;
     date_of_birth: Date;
-    status: string;
+    status: CustomerStatus;
     credit_score: number;
 
     credit_tier_id: string;
     credit_tier: ICreditTier;
+}
+
+export enum CustomerStatus {
+    PENDING_EMAIL_VERIFICATION = "PENDING_EMAIL_VERIFICATION",
+    PENDING_PHONE_VERIFICATION = "PENDING_PHONE_VERIFICATION",
+    ACTIVE = "ACTIVE",
+    SUSPENDED = "SUSPENDED",
 }
