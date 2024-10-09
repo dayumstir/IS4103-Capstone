@@ -14,10 +14,12 @@ const Header: React.FC = () => {
   enum HeaderTitles {
     Home = "Home",
     BusinessManagement = "Business Management",
+    QRCode = "View QR Code",
   }
 
   const items = [
     { label: HeaderTitles.Home, key: HeaderTitles.Home },
+    { label: HeaderTitles.QRCode, key: HeaderTitles.QRCode },
     {
       label: HeaderTitles.BusinessManagement,
       key: HeaderTitles.BusinessManagement,
@@ -31,6 +33,8 @@ const Header: React.FC = () => {
       navigate("/");
     } else if (key == HeaderTitles.BusinessManagement) {
       navigate("/business-management/issues");
+    } else if (key == HeaderTitles.QRCode) {
+      navigate("/qrcode");
     }
   };
 

@@ -136,7 +136,7 @@ model Merchant {
   qr_code         String
   status          Status
   profile_picture Bytes? @db.ByteA
-
+  cashback        Decimal @db.Decimal(5, 2)
   emailVerificationTokens MerchantEmailVerificationToken[]
   issues                  Issue[]
   Transaction             Transaction[]
@@ -257,6 +257,7 @@ model CreditTier {
 
   customers        Customer[]
   instalment_plans InstalmentPlan[]
+  customers        Customer[]
 }
 
 enum IssueStatus {

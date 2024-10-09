@@ -1,6 +1,7 @@
 // src/controllers/voucherController.ts
 import { Request, Response, NextFunction } from "express";
 import * as voucherService from '../services/voucherService';
+import * as customerService from '../services/customerService';
 import logger from "../utils/logger";
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from "../utils/error";
 
@@ -25,14 +26,19 @@ export const createVoucher = async (req: Request, res: Response, next: NextFunct
 // Assign Voucher to a Customer
 export const assignVoucher = async (req: Request, res: Response, next: NextFunction) => {
     logger.info('Executing assignVoucher...');
-    const { voucher_id, customer_id } = req.body;
-    
-    if (!voucher_id || !customer_id) {
-        return next(new BadRequestError("voucher_id and customer_id are required"));
-    }
 
     try {
-        const voucherAssigned = await voucherService.assignVoucher(voucher_id, customer_id);
+        const { voucher_id, email } = req.body;
+        if (!voucher_id || !email) {
+            return next(new BadRequestError("voucher_id and customer_email are required"));
+        }
+
+        const customer = await customerService.getCustomerByEmail(email);
+        if (!customer) {
+            return next(new NotFoundError("Customer not found"));
+        }
+
+        const voucherAssigned = await voucherService.assignVoucher(voucher_id, customer.customer_id);
         res.status(201).json(voucherAssigned);
     } catch (error: any) {
         logger.error("Error during voucher assignment:", error);
