@@ -1,3 +1,6 @@
+// src/interfaces/customerInterface.ts
+import { ICreditTier } from "./creditTierInterface";
+
 enum CustomerStatus {
     PENDING_EMAIL_VERIFICATION = "PENDING_EMAIL_VERIFICATION",
     PENDING_PHONE_VERIFICATION = "PENDING_PHONE_VERIFICATION",
@@ -15,6 +18,9 @@ export interface ICustomer {
     address: string;
     date_of_birth: Date;
     status: CustomerStatus;   
+    wallet_balance: number;
     credit_score: number;
+
     credit_tier_id: string;
+    credit_tier: ICreditTier;
 }
