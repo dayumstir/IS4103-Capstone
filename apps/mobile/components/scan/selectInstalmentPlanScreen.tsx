@@ -31,39 +31,44 @@ export default function SelectInstalmentPlanScreen({
 
       {/* ===== Instalment Plans Radio Group ===== */}
       <ScrollView className="w-full">
-        {instalmentPlans.map((plan) => {
-          return (
-            <TouchableOpacity
-              className={`mb-4 flex-row items-center rounded-md border p-4 ${
-                selectedPlanId === plan.instalment_plan_id
-                  ? "border-blue-500"
-                  : "border-gray-300"
-              }`}
-              onPress={() => setSelectedPlanId(plan.instalment_plan_id)}
-              key={plan.instalment_plan_id}
-            >
-              <View className="mr-4 h-6 w-6 items-center justify-center rounded-full border border-blue-500">
-                <View
-                  className={`h-4 w-4 rounded-full ${selectedPlanId === plan.instalment_plan_id ? "bg-blue-500" : "bg-white"}`}
-                />
-              </View>
+        {instalmentPlans
+          .filter(
+            (plan) =>
+              price >= plan.minimum_amount && price <= plan.maximum_amount, // purchase price is within the instalment plan's range
+          )
+          .map((plan) => {
+            return (
+              <TouchableOpacity
+                className={`mb-4 flex-row items-center rounded-md border p-4 ${
+                  selectedPlanId === plan.instalment_plan_id
+                    ? "border-blue-500"
+                    : "border-gray-300"
+                }`}
+                onPress={() => setSelectedPlanId(plan.instalment_plan_id)}
+                key={plan.instalment_plan_id}
+              >
+                <View className="mr-4 h-6 w-6 items-center justify-center rounded-full border border-blue-500">
+                  <View
+                    className={`h-4 w-4 rounded-full ${selectedPlanId === plan.instalment_plan_id ? "bg-blue-500" : "bg-white"}`}
+                  />
+                </View>
 
-              <View>
-                <Text className="text-lg font-semibold">{plan.name}</Text>
-                {/* ===== eg. 4 payments of $25 ===== */}
-                <Text className="text-sm text-gray-600">
-                  {`${plan.number_of_instalments} payments of ${formatCurrency(
-                    price / plan.number_of_instalments,
-                  )} over ${plan.time_period} weeks`}
-                </Text>
-                {/* ===== eg. Once every 4.5 days ===== */}
-                <Text className="text-sm text-gray-600">
-                  {`Once every ${((plan.time_period * 7) / plan.number_of_instalments).toFixed(1)} days`}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
+                <View>
+                  <Text className="text-lg font-semibold">{plan.name}</Text>
+                  {/* ===== eg. 4 payments of $25 ===== */}
+                  <Text className="text-sm text-gray-600">
+                    {`${plan.number_of_instalments} payments of ${formatCurrency(
+                      price / plan.number_of_instalments,
+                    )} over ${plan.time_period} weeks`}
+                  </Text>
+                  {/* ===== eg. Once every 4.5 days ===== */}
+                  <Text className="text-sm text-gray-600">
+                    {`Once every ${((plan.time_period * 7) / plan.number_of_instalments).toFixed(1)} days`}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
       </ScrollView>
 
       {/* ===== Confirm & Cancel Buttons ===== */}
