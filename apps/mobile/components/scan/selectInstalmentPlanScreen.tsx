@@ -54,7 +54,7 @@ export default function SelectInstalmentPlanScreen({
                 <Text className="text-sm text-gray-600">
                   {`${plan.number_of_instalments} payments of ${formatCurrency(
                     price / plan.number_of_instalments,
-                  )} `}
+                  )} over ${plan.time_period} weeks`}
                 </Text>
                 {/* ===== eg. Once every 4.5 days ===== */}
                 <Text className="text-sm text-gray-600">

@@ -9,7 +9,7 @@ import { useCreateTransactionMutation } from "../../redux/services/transactionSe
 import { ITransaction, TransactionStatus } from "@repo/interfaces";
 import ScanQrCodeScreen from "../../components/scan/scanQrCodeScreen";
 import VerifyPurchaseScreen from "../../components/scan/verifyPurchaseScreen";
-import PaymentCompleteScreen from "../../components/scan/paymentCompleteScreen";
+import TransactionCompleteScreen from "../../components/scan/transactionCompleteScreen";
 import { useGetMerchantByIdQuery } from "../../redux/services/merchantService";
 import { useGetInstalmentPlansQuery } from "../../redux/services/customerService";
 import SelectInstalmentPlanScreen from "../../components/scan/selectInstalmentPlanScreen";
@@ -184,7 +184,7 @@ export default function ScanScreen() {
       case "Payment Complete":
         return (
           transaction && (
-            <PaymentCompleteScreen
+            <TransactionCompleteScreen
               transaction={transaction}
               merchantName={purchase.merchantName}
               onViewPaymentHistory={() => {

@@ -41,7 +41,7 @@ export const createTransaction = async (transactionData: ITransaction) => {
         currentDueDate = addPartialDays(currentDueDate, frequency);
     }
 
-    // Create all instances of instalment payments
+    // Initialise all instances of instalment payments
     const instalmentPayments: Omit<
         IInstalmentPayment,
         "instalment_payment_id" | "transaction"
@@ -55,7 +55,7 @@ export const createTransaction = async (transactionData: ITransaction) => {
             paid_date: null,
             instalment_number: i,
             amount_deducted_from_wallet: 0,
-            
+
             transaction_id: transactionData.transaction_id,
         });
     }
@@ -81,6 +81,10 @@ export const createTransaction = async (transactionData: ITransaction) => {
             instalment_payments: {
                 createMany: { data: instalmentPayments },
             },
+        },
+        include: {
+            instalment_plan: true,
+            instalment_payments: true,
         },
     });
 };
