@@ -34,7 +34,7 @@ const { Search } = Input;
 export default function VoucherScreen() {
   const [createVoucherForm] = Form.useForm();
   const [assignVoucherForm] = Form.useForm();
-  const [voucherSearchTerm, setVoucherSearchTerm] = useState("");
+  const [voucherSearch, setVoucherSearch] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -108,11 +108,11 @@ export default function VoucherScreen() {
   };
 
   // Handle search/get vouchers
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVoucherSearchTerm(e.target.value);
-  };
+  const handleSearchChange = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+    setVoucherSearch(e.target.value);
+  }, 300);
 
-  const { data: vouchers, isLoading } = useGetVouchersQuery(voucherSearchTerm);
+  const { data: vouchers, isLoading } = useGetVouchersQuery(voucherSearch);
   
   // Fetch the voucher details
   const { data: voucherDetails, refetch: fetchVoucherDetails } = useGetVoucherDetailsQuery(selectedVoucherId ?? "", {
@@ -311,7 +311,7 @@ export default function VoucherScreen() {
         <Search
           placeholder="Search by title"
           onChange={handleSearchChange}
-          value={voucherSearchTerm}
+          value={voucherSearch}
           style={{ marginBottom: 16 }}
         />
         <Table

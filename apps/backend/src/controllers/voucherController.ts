@@ -26,13 +26,12 @@ export const createVoucher = async (req: Request, res: Response, next: NextFunct
 // Assign Voucher to a Customer
 export const assignVoucher = async (req: Request, res: Response, next: NextFunction) => {
     logger.info('Executing assignVoucher...');
+    const { voucher_id, email } = req.body;
+    if (!voucher_id || !email) {
+        return next(new BadRequestError("voucher_id and customer_email are required"));
+    }
 
     try {
-        const { voucher_id, email } = req.body;
-        if (!voucher_id || !email) {
-            return next(new BadRequestError("voucher_id and customer_email are required"));
-        }
-
         const customer = await customerService.getCustomerByEmail(email);
         if (!customer) {
             return next(new NotFoundError("Customer not found"));
