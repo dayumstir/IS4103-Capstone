@@ -13,6 +13,14 @@ export const getCustomerById = async (customer_id: string) => {
     return customer;
 };
 
+export const getCustomerByEmail = async (email: string) => {
+    logger.info('Executing getCustomerByEmail...');
+    const customer = await customerRepository.findCustomerByEmail(email);
+    if (!customer) {
+        throw new Error("Customer not found");
+    }
+    return customer;
+};
 
 export const updateCustomer = async (customer_id: string, updateData: Partial<ICustomer>) => {
     logger.info('Executing updateCustomer...');

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import debounce from "debounce";
 import {
   Form,
   Input,
@@ -14,7 +15,8 @@ import {
   Modal,
   Descriptions,
   Divider,
-  AutoComplete
+  AutoComplete,
+  Spin,
 } from "antd";
 import { PlusOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
 import { 
@@ -38,7 +40,6 @@ export default function VoucherScreen() {
   const [pageSize, setPageSize] = useState(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVoucherId, setSelectedVoucherId] = useState<string | null>(null);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
   const [createVoucher] = useCreateVoucherMutation();
   const [deactivateVoucher] = useDeactivateVoucherMutation();
@@ -78,20 +79,14 @@ export default function VoucherScreen() {
     skip: !customerSearch, // Don't fetch if the search is empty
   });
 
-  // Handle customer search and selection
-  const handleCustomerSearch = (value: string) => {
-    setCustomerSearch(value); // Update the search term
-    setSelectedCustomerId(null); // Reset selectedCustomerId if user manually types
-  };
+  // Handle customer search and selection with debounced search
+  const handleCustomerSearch = debounce((value: string) => {
+    setCustomerSearch(value);
+  }, 300);
 
   // Handle customer selection from AutoComplete
   const handleCustomerSelect = (customerEmail: string) => {
-    const selectedCustomer = customerOptions?.find((customer) => customer.email === customerEmail);
-    if (selectedCustomer) {
-      setSelectedCustomerId(selectedCustomer.customer_id); // Set selected customer ID
-    } else {
-      setSelectedCustomerId(null); // Reset if no valid customer found
-    }
+    assignVoucherForm.setFieldsValue({ customer_email: customerEmail });
   };
 
   // Handle assign voucher to customer
@@ -100,14 +95,9 @@ export default function VoucherScreen() {
       message.error("No voucher selected.");
       return;
     }
-  
-    if (!selectedCustomerId) {
-      message.error("Invalid customer email. Please select a valid customer from the list.");
-      return;
-    }
 
     try {
-      await assignVoucher({ customer_id: selectedCustomerId, voucher_id: selectedVoucherId }).unwrap();
+      await assignVoucher({ voucher_id: selectedVoucherId, email: values.customer_email }).unwrap();
       message.success(`Voucher assigned to customer "${values.customer_email}".`);
       assignVoucherForm.resetFields(); // Clear the form
       fetchVoucherDetails(); // Refetch the voucher details
@@ -141,13 +131,12 @@ export default function VoucherScreen() {
     setIsModalOpen(false);
     setSelectedVoucherId(null);
     setCustomerSearch(""); // Clear the customer search on close
-    setSelectedCustomerId(null); // Reset selected customer ID
     assignVoucherForm.resetFields(); // Clear the assign form fields
   };
 
   const voucherColumns = [
     { title: "Title", dataIndex: "title", key: "title", sorter: (a: IVoucher, b: IVoucher) => a.title.localeCompare(b.title) },
-    { title: "Description", dataIndex: "description", key: "description" },
+    { title: "Description", dataIndex: "description", key: "description", sorter: (a: IVoucher, b: IVoucher) => a.description.localeCompare(b.description) },
     { title: "Percentage Discount", dataIndex: "percentage_discount", key: "percentage_discount", render: (discount: number) => `${discount}%`, sorter: (a: IVoucher, b: IVoucher) => a.percentage_discount - b.percentage_discount },
     { title: "Amount Discount", dataIndex: "amount_discount", key: "amount_discount", render: (amount: number) => `$${amount}`, sorter: (a: IVoucher, b: IVoucher) => a.amount_discount - b.amount_discount },
     { title: "Expiry Date", dataIndex: "expiry_date", key: "expiry_date", render: (date: string) => new Date(date).toLocaleDateString(), sorter: (a: IVoucher, b: IVoucher) => new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime() },
@@ -155,7 +144,6 @@ export default function VoucherScreen() {
     {
       title: "Actions",
       key: "actions",
-      width: 1,
       sorter: (a: IVoucher, b: IVoucher) => (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1),
       render: (_: string, voucher: IVoucher) => (
         <div className="flex flex-col gap-2">
@@ -187,7 +175,7 @@ export default function VoucherScreen() {
     { title: "Remaining Uses", dataIndex: "remaining_uses", key: "remaining_uses" },
   ];
 
-  const renderForm = (formInstance: FormInstance) => (
+  const renderCreateVoucherForm = (formInstance: FormInstance) => (
     <Form
       form={formInstance}
       name="voucher"
@@ -308,7 +296,6 @@ export default function VoucherScreen() {
           Create Voucher
         </Button>
       </Form.Item>
-
     </Form>
   );
 
@@ -316,7 +303,7 @@ export default function VoucherScreen() {
     <div className="w-full px-8 py-4">
       {/* ===== Create Voucher ===== */}
       <Card className="mb-8 border border-gray-300" title="Create Voucher">
-        {renderForm(createVoucherForm)}
+        {renderCreateVoucherForm(createVoucherForm)}
       </Card>
 
       {/* ===== View and Manage Vouchers ===== */}
@@ -415,7 +402,7 @@ export default function VoucherScreen() {
             )}
           </>
         ) : (
-          <p>Loading...</p>
+          <Spin />
         )}
       </Modal>
     </div>

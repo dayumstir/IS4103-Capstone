@@ -28,11 +28,11 @@ export const voucherApi = createApi({
         }),
 
         // Assign voucher to customer
-        assignVoucher: builder.mutation<IVoucherAssigned, { customer_id: string; voucher_id: string }>({
-            query: ({ customer_id, voucher_id }) => ({
+        assignVoucher: builder.mutation<IVoucherAssigned, { email: string; voucher_id: string }>({
+            query: ({ email, voucher_id }) => ({
                 url: "/assign",
                 method: "POST",
-                body: { customer_id, voucher_id },
+                body: { email, voucher_id },
             }),
             invalidatesTags: (_, __, arg) => [{ type: 'Voucher', id: arg.voucher_id }] // Invalidate the specific voucher by ID
         }),
