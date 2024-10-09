@@ -108,9 +108,9 @@ export default function VoucherScreen() {
   };
 
   // Handle search/get vouchers
-  const handleSearchChange = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setVoucherSearch(e.target.value);
-  }, 300);
+  };
 
   const { data: vouchers, isLoading } = useGetVouchersQuery(voucherSearch);
   
