@@ -135,7 +135,7 @@ model Merchant {
   qr_code         String
   status          Status
   profile_picture Bytes? @db.ByteA
-
+  cashback        Decimal @db.Decimal(5, 2)
   emailVerificationTokens MerchantEmailVerificationToken[]
   issues                  Issue[]
 }
