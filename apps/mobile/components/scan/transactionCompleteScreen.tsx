@@ -39,15 +39,39 @@ export default function TransactionCompleteScreen({
             <Text className="w-1/2 pb-3 font-medium">
               {formatCurrency(transaction.amount)}
             </Text>
-            
-            <Text className="w-1/2 pb-3 text-gray-600">To:</Text>
+
+            <Text className="w-1/2 pb-3 text-gray-600">Merchant:</Text>
             <Text className="w-1/2 pb-3 font-medium">{merchantName}</Text>
-            
-            <Text className="w-1/2 pb-3 text-gray-600">Date:</Text>
+
+            <Text className="w-1/2 text-gray-600">Date:</Text>
             <Text className="w-1/2 font-medium">
               {format(new Date(transaction.date_of_transaction), "dd MMM yyyy")}
             </Text>
-            
+
+            {/* ===== Divider ===== */}
+            <View className="my-3 h-px w-full bg-gray-300" />
+
+            <Text className="w-1/2 pb-3 text-gray-600">Instalments:</Text>
+            <Text className="w-1/2 font-medium">
+              {transaction.instalment_plan.number_of_instalments}
+            </Text>
+
+            <Text className="w-1/2 pb-3 text-gray-600">Payment Freq:</Text>
+            <Text className="w-1/2 font-medium">
+              {`${(
+                (transaction.instalment_plan.time_period * 7) /
+                transaction.instalment_plan.number_of_instalments
+              ).toFixed(1)} days`}
+            </Text>
+
+            <Text className="w-1/2 pb-3 text-gray-600">First Payment Due:</Text>
+            <Text className="w-1/2 font-medium">
+              {format(
+                new Date(transaction.instalment_payments[0].due_date),
+                "dd MMM yyyy",
+              )}
+            </Text>
+
             <Text className="w-1/2 pb-3 text-gray-600">Transaction ID:</Text>
             <Text className="w-1/2 pb-3 font-medium">
               {transaction.transaction_id}

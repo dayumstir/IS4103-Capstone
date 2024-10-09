@@ -46,6 +46,7 @@ export default function ScanScreen() {
     isLoading: isInstalmentPlansLoading,
     error: instalmentPlansError,
   } = useGetInstalmentPlansQuery();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (merchant) {
@@ -78,6 +79,7 @@ export default function ScanScreen() {
   // Merchant ID invalid
   if (merchantError) {
     console.error(merchantError);
+    setError("Merchant ID invalid");
     dispatch(setPaymentStage("Error"));
   }
 
@@ -98,6 +100,7 @@ export default function ScanScreen() {
       const referenceNo = rawReferenceNo.trim();
 
       if (merchantId === "" || isNaN(price) || price <= 0) {
+        setError("Invalid QR code");
         dispatch(setPaymentStage("Error"));
         return;
       }
@@ -109,7 +112,20 @@ export default function ScanScreen() {
   };
 
   const handleCreateTransactionAndInstalmentPayments = async () => {
-    if (!customer || !scannedMerchantId || !selectedPlanId) {
+    if (!customer) {
+      setError("Invalid customer");
+      dispatch(setPaymentStage("Error"));
+      return;
+    }
+
+    if (!scannedMerchantId) {
+      setError("Invalid merchant");
+      dispatch(setPaymentStage("Error"));
+      return;
+    }
+
+    if (!selectedPlanId) {
+      setError("Invalid instalment plan");
       dispatch(setPaymentStage("Error"));
       return;
     }
@@ -137,9 +153,10 @@ export default function ScanScreen() {
     try {
       const transaction = await createTransaction(newTransaction).unwrap();
       setTransaction(transaction);
-      dispatch(setPaymentStage("Payment Complete"));
+      dispatch(setPaymentStage("Transaction Complete"));
     } catch (err) {
       console.error(err);
+      setError("Error creating transaction");
       dispatch(setPaymentStage("Error"));
     }
   };
@@ -181,7 +198,7 @@ export default function ScanScreen() {
             />
           )
         );
-      case "Payment Complete":
+      case "Transaction Complete":
         return (
           transaction && (
             <TransactionCompleteScreen
@@ -205,6 +222,7 @@ export default function ScanScreen() {
           <View className="flex-1 items-center justify-center p-16">
             <Text className="text-center text-xl font-semibold text-red-500">
               There has been an error. Please close this window and try again.
+              Error: {error}
             </Text>
           </View>
         );

@@ -3,8 +3,23 @@ import { AntDesign } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { router } from "expo-router";
 import { formatCurrency } from "../../../utils/formatCurrency";
+import { useGetProfileQuery } from "../../../redux/services/customerService";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { setProfile } from "../../../redux/features/customerSlice";
 
 export default function HomePage() {
+  const dispatch = useDispatch();
+  // Fetch the profile using the API call
+  const { data: profile, isLoading } = useGetProfileQuery();
+
+  // Update Redux store when profile data is fetched
+  useEffect(() => {
+    if (profile && !isLoading) {
+      dispatch(setProfile(profile));
+    }
+  }, [profile, isLoading, dispatch]);
+
   const name = "John";
   const walletBalance = 1200;
 
@@ -58,7 +73,7 @@ export default function HomePage() {
         <View className="flex w-full flex-row justify-between">
           <View className="flex max-w-[200px]">
             <Text className="text-3xl">
-              Hello 
+              Hello
               {/* <Text className="font-bold">{name}</Text> */}
             </Text>
             <Text className="text-base">

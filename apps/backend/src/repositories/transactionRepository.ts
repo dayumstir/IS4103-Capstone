@@ -31,14 +31,14 @@ export const createTransaction = async (transactionData: ITransaction) => {
 
     // Calculate due dates for all instalment payments
     const dueDates = [];
-    let currentDueDate = new Date(transactionData.date_of_transaction);
+    let dueDate = new Date(transactionData.date_of_transaction);
     for (let i = 0; i < instalmentPlan.number_of_instalments; i++) {
-        // Round the current due date to the end of the day
-        const roundedDueDate = endOfDay(currentDueDate); // 23:59:59
-        dueDates.push(roundedDueDate);
-
         // Calculate the next due date using the current non-rounded due date
-        currentDueDate = addPartialDays(currentDueDate, frequency);
+        dueDate = addPartialDays(dueDate, frequency);
+
+        // Round the current due date to the end of the day
+        const roundedDueDate = endOfDay(dueDate); // 23:59:59
+        dueDates.push(roundedDueDate);
     }
 
     // Initialise all instances of instalment payments

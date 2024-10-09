@@ -127,16 +127,16 @@ model Admin {
 }
 
 model Merchant {
-  merchant_id     String @id @default(cuid())
-  name            String
-  email           String @unique
-  password        String
-  contact_number  String
-  address         String
-  qr_code         String
-  status          Status
-  profile_picture Bytes? @db.ByteA
-  cashback        Decimal @db.Decimal(5, 2)
+  merchant_id             String                           @id @default(cuid())
+  name                    String
+  email                   String                           @unique
+  password                String
+  contact_number          String
+  address                 String
+  qr_code                 String
+  status                  Status
+  profile_picture         Bytes?                           @db.ByteA
+  cashback                Float
   emailVerificationTokens MerchantEmailVerificationToken[]
   issues                  Issue[]
   Transaction             Transaction[]
@@ -257,7 +257,6 @@ model CreditTier {
 
   customers        Customer[]
   instalment_plans InstalmentPlan[]
-  customers        Customer[]
 }
 
 enum IssueStatus {
