@@ -15,26 +15,26 @@ export const voucherApi = createApi({
             return headers;
         },
     }),
-    tagTypes: ["VoucherList", "VoucherDetails", "VoucherAssigned"],
+    tagTypes: ["Voucher"] as const,
     endpoints: (builder) => ({
         // Create voucher
-        createVoucher: builder.mutation<IVoucher, Omit<IVoucher, "voucher_id">>({
+        createVoucher: builder.mutation<IVoucher, Partial<IVoucher>>({
             query: (voucher) => ({
                 url: "/create",
                 method: "POST",
                 body: voucher,
             }),
-            invalidatesTags: ["VoucherList"],
+            invalidatesTags: [{ type: 'Voucher', id: 'LIST' }] // Invalidate the entire voucher list
         }),
 
         // Assign voucher to customer
-        assignVoucher: builder.mutation<IVoucherAssigned, { customer_id: string; voucher_id: string }>({
-            query: ({ customer_id, voucher_id }) => ({
+        assignVoucher: builder.mutation<IVoucherAssigned, { email: string; voucher_id: string }>({
+            query: ({ email, voucher_id }) => ({
                 url: "/assign",
                 method: "POST",
-                body: { customer_id, voucher_id },
+                body: { email, voucher_id },
             }),
-            invalidatesTags: ["VoucherAssigned"],
+            invalidatesTags: (_, __, arg) => [{ type: 'Voucher', id: arg.voucher_id }] // Invalidate the specific voucher by ID
         }),
 
         // Deactivate voucher
@@ -43,7 +43,7 @@ export const voucherApi = createApi({
                 url: `/deactivate/${voucher_id}`,
                 method: "PUT",
             }),
-            invalidatesTags: ["VoucherList", "VoucherAssigned", "VoucherDetails"],
+            invalidatesTags: (_, __, arg) => [{ type: 'Voucher', id: arg }] // Invalidate the specific voucher by ID
         }),
 
         // Fetch all vouchers
@@ -55,7 +55,13 @@ export const voucherApi = createApi({
                     method: 'GET',
                 };
             },
-            providesTags: ["VoucherList"]
+            providesTags: (result) =>
+                result
+                    ? [
+                        { type: 'Voucher', id: 'LIST' }, // Tag for the entire list
+                        ...result.map((voucher) => ({ type: 'Voucher', id: voucher.voucher_id } as const)), // Tag for each individual voucher
+                    ]
+                    : [{ type: 'Voucher', id: 'LIST' }] // If result is undefined, still provide the 'LIST' tag
         }),
 
         // Fetch voucher details
@@ -63,9 +69,7 @@ export const voucherApi = createApi({
             query: (voucher_id) => ({
                 url: `/${voucher_id}`,
             }),
-            providesTags: (result, error, voucher_id) => [
-                { type: "VoucherDetails", id: voucher_id },
-            ],
+            providesTags: (_, __, arg) => [{ type: 'Voucher', id: arg }] // Provide a tag for the specific voucher by ID
         }),
     }),
 });
