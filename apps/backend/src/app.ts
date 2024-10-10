@@ -1,10 +1,8 @@
 // src/app.ts
-
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import dotenv from "dotenv";
-import logger from "./utils/logger";
 
 // Import routes
 import adminAuthRoutes from "./routes/adminAuthRoutes";
@@ -21,6 +19,7 @@ import instalmentPaymentRoutes from "./routes/instalmentPaymentRoutes";
 
 // Import error handler middleware
 import { errorHandler } from "./middlewares/errorHandler";
+import logger from "./utils/logger"; 
 
 // Load environment variables at the start
 dotenv.config();

@@ -12,7 +12,9 @@ import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useDispatch } from "react-redux";
 import { useRegisterMutation } from "../redux/services/customerAuthService";
+import { setCustomer } from "../redux/features/customerAuthSlice";
 import { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { format, setMonth } from "date-fns";
@@ -40,6 +42,7 @@ const registerSchema = z.object({
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function Register() {
+  const dispatch = useDispatch();
   const [registerMutation, { isLoading, error }] = useRegisterMutation();
   const [showPassword, setShowPassword] = useState(false);
   const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(
@@ -65,10 +68,12 @@ export default function Register() {
       credit_tier_id: 3,
     };
     try {
-      await registerMutation(registrationData).unwrap();
+      const result = await registerMutation(registrationData).unwrap();
+
+      // Sore customer data in redux
+      dispatch(setCustomer(result))
 
       router.replace("/confirmation");
-      console.log("Register success:", data);
     } catch (err: any) {
       console.error(err);
       // Set the error message in local state to be displayed

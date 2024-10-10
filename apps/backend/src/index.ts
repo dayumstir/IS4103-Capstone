@@ -1,5 +1,4 @@
 // src/index.ts
-
 import app from "./app";
 import { connectDatabase } from "./config/database.config";
 import { cleanupExpiredTokens } from "./utils/tokenCleanup";

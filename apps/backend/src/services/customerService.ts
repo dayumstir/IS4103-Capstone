@@ -2,6 +2,7 @@
 import { ICustomer } from "../interfaces/customerInterface";
 import * as customerRepository from "../repositories/customerRepository";
 import logger from "../utils/logger";
+import { NotFoundError, BadRequestError } from "../utils/error";
 
 export const getCustomerById = async (customer_id: string) => {
     logger.info("Executing getCustomerById...");
@@ -16,7 +17,7 @@ export const getCustomerByEmail = async (email: string) => {
     logger.info("Executing getCustomerByEmail...");
     const customer = await customerRepository.findCustomerByEmail(email);
     if (!customer) {
-        throw new Error("Customer not found");
+        throw new NotFoundError("Customer not found");
     }
     return customer;
 };
