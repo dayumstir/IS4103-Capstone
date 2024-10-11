@@ -4,12 +4,6 @@ import Stripe from 'stripe'; // Import Stripe types
 import { topUpWallet } from '../services/customerService';
 
 export const handleStripeWebhook = async (req: Request, res: Response) => {
-    console.log('Type of req.body:', typeof req.body);
-    console.log('Is req.body a Buffer?', req.body instanceof Buffer);
-    console.log('Headers:', req.headers);
-    console.log(req.body);
-
-
     const sig = req.headers['stripe-signature'];
 
     if (!sig) {
