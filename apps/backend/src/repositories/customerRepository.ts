@@ -93,3 +93,15 @@ export const getInstalmentPlans = async (customer_id: string) => {
 
     return customer.credit_tier.instalment_plans;
 };
+
+// Update the customer's wallet balance
+export const topUpWallet = async (customer_id: string, amount: number) => {
+    return await prisma.customer.update({
+        where: { customer_id },
+        data: { 
+            wallet_balance: {
+                increment: amount,
+            },
+        },
+    });
+};

@@ -30,6 +30,7 @@ model Customer {
   address         String
   date_of_birth   DateTime
   status          Status
+  wallet_balance  Float    @default(0)
   credit_score    Int      @default(0)
 
   credit_tier_id String     @default("tier_1")
