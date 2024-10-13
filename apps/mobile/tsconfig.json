@@ -9,5 +9,5 @@
       ]
     }
   },
-  "include": ["**/*", "node_modules/nativewind"]
+  "include": ["**/*", "node_modules/nativewind", "env.d.ts"]
 }
