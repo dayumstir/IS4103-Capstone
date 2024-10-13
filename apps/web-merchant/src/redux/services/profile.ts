@@ -6,7 +6,7 @@ import BaseQueryWithAuthCheck from "../utils.tsx/baseQuery";
 // Define a service using a base URL and expected endpoints
 export const profileApi = createApi({
   reducerPath: "profileApi",
-  baseQuery: BaseQueryWithAuthCheck("http://localhost:3000/merchant/profile"),
+  baseQuery: BaseQueryWithAuthCheck("/merchant/profile"),
   endpoints: (builder) => ({
     getProfile: builder.query<IMerchant, string>({
       query: (id) => ({

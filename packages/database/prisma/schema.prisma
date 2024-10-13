@@ -31,6 +31,7 @@ model Customer {
   date_of_birth   DateTime
   status          Status
   credit_score    Int      @default(0)
+  wallet_balance  Float
 
   credit_tier_id String     @default("tier_1")
   credit_tier    CreditTier @relation(fields: [credit_tier_id], references: [credit_tier_id])
@@ -40,7 +41,7 @@ model Customer {
   passwordResetTokens     PasswordResetToken[]
   issues                  Issue[]
   vouchersAssigned        VoucherAssigned[]
-  Transaction             Transaction[]
+  transactions            Transaction[]
 }
 
 // Utility Schemas
@@ -172,6 +173,11 @@ model MerchantEmailVerificationToken {
   @@index([merchant_id])
 }
 
+enum TransactionStatus {
+  FULLY_PAID
+  IN_PROGRESS
+}
+
 model Transaction {
   transaction_id       String            @id @default(cuid())
   amount               Float
@@ -179,7 +185,7 @@ model Transaction {
   status               TransactionStatus
   fully_paid_date      DateTime?
   reference_no         String            @default("")
-  cash_back_percentage Float             @default(0)
+  cashback_percentage Float             @default(0)
 
   customer_id String
   customer    Customer @relation(fields: [customer_id], references: [customer_id])
@@ -190,14 +196,11 @@ model Transaction {
   instalment_plan_id String
   instalment_plan    InstalmentPlan @relation(fields: [instalment_plan_id], references: [instalment_plan_id])
 
+  merchant_payment_id String?
+
   issues Issue[]
 
   instalment_payments InstalmentPayment[]
-}
-
-enum TransactionStatus {
-  IN_PROGRESS
-  FULLY_PAID
 }
 
 model InstalmentPlan {
@@ -265,10 +268,17 @@ enum IssueStatus {
   CANCELLED
 }
 
+enum IssueCategory {
+  ACCOUNT
+  TRANSACTION
+  OTHERS
+}
+
 model Issue {
   issue_id    String      @id @default(cuid())
   title       String
   description String
+  category    IssueCategory
   outcome     String?
   status      IssueStatus
   images      Bytes[]     @db.ByteA

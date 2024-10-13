@@ -8,6 +8,7 @@ import {
   message,
   Popconfirm,
   Table,
+  TableProps,
   Tag,
 } from "antd";
 import { SortOrder } from "antd/es/table/interface";
@@ -17,10 +18,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import CreateIssueModal from "../components/createIssueModal";
 import { ApiError } from "../interfaces/errorInterface";
 import {
+  IssueCategory,
   IssueFilter,
   IssueStatus,
   statusColorMap,
-} from "../interfaces/models/issueInterface";
+} from "../../../../packages/interfaces/issueInterface";
 import { sortDirection } from "../interfaces/sortingInterface";
 import {
   useCancelIssueMutation,
@@ -28,6 +30,7 @@ import {
 } from "../redux/services/issue";
 interface IssueTableInterface {
   key: string;
+  category: IssueCategory;
   title: string;
   description: string;
   outcome: string;
@@ -89,6 +92,7 @@ const IssueScreen: React.FC = () => {
         const data = await getIssues(filter).unwrap();
         const mappedData: IssueTableInterface[] = data.map((issue) => ({
           key: issue.issue_id,
+          category: issue.category,
           title: issue.title,
           description: issue.description,
           outcome: issue.outcome,
@@ -115,7 +119,34 @@ const IssueScreen: React.FC = () => {
     setSearchTerm(event.target.value);
   };
 
-  const columns = [
+  const columns: TableProps<IssueTableInterface>["columns"] = [
+    {
+      title: "Category",
+      dataIndex: "category",
+      showSorterTooltip: true,
+      key: "category",
+      render: (category: IssueCategory) => (
+        <div className="truncate" style={{ maxWidth: "200px" }}>
+          {category}
+        </div>
+      ),
+      filters: [
+        {
+          text: IssueCategory.ACCOUNT,
+          value: IssueCategory.ACCOUNT,
+        },
+        {
+          text: IssueCategory.TRANSACTION,
+          value: IssueCategory.TRANSACTION,
+        },
+        {
+          text: IssueCategory.OTHERS,
+          value: IssueCategory.OTHERS,
+        },
+      ],
+      onFilter: (value, record) => record.category === value,
+      className: "w-1/5 md:w-1/4 lg:w-1/5",
+    },
     {
       title: "Title",
       dataIndex: "title",
@@ -172,8 +203,7 @@ const IssueScreen: React.FC = () => {
           value: IssueStatus.CANCELLED,
         },
       ],
-      onFilter: (value: string, record: IssueTableInterface) =>
-        record.status === value,
+      onFilter: (value, record) => record.status === value,
       className: "w-1/5 md:w-1/4 lg:w-1/5",
     },
     {
@@ -250,7 +280,7 @@ const IssueScreen: React.FC = () => {
       <div className="flex justify-between">
         <Breadcrumb items={[{ title: "Issues" }]} />
         <Button type="primary" onClick={() => setIsCreateIssueModalOpen(true)}>
-          Create
+          Raise an Issue
         </Button>
       </div>
 

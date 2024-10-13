@@ -42,6 +42,7 @@ export const register = async (merchantData: IMerchant, merchantProfilePicture?:
         password: hashedPassword,
         status: MerchantStatus.PENDING_EMAIL_VERIFICATION,
         profile_picture: merchantProfilePicture,
+        cashback: 0,
         qr_code: "qr_code",
     });
 

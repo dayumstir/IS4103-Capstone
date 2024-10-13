@@ -13,8 +13,10 @@ const createBaseQuery = (baseUrl: string) => {
   });
 };
 
-const BaseQueryWithAuthCheck = (baseUrl: string) => {
-  const baseQuery = createBaseQuery(baseUrl);
+const BaseQueryWithAuthCheck = (path: string) => {
+  // FOR LOCAL
+  const baseUrl = "http://localhost:3000";
+  const baseQuery = createBaseQuery(baseUrl + path);
 
   return async (args: any, api: any, extraOptions: any) => {
     const result = await baseQuery(args, api, extraOptions);
