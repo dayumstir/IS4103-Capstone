@@ -10,6 +10,9 @@ import ProfileScreen from "./screens/profileScreen";
 import RegisterConfirmScreen from "./screens/registerConfirmScreen";
 import RegisterScreen from "./screens/registerScreen";
 import ViewQRCodeScreen from "./screens/viewQRCodeScreen";
+import TransactionScreen from "./screens/transactionScreen";
+import FinancialManagementRoute from "./components/financialManagementRoute";
+import TransactionDetailsScreen from "./screens/transactionDetailsScreen";
 
 // import "./App.css";
 
@@ -33,6 +36,16 @@ const App = () => {
             <Route
               path="/business-management/issues/:issueId"
               element={<IssueDetailsScreen />}
+            />
+          </Route>
+          <Route element={<FinancialManagementRoute />}>
+            <Route
+              path="/financial-management/transactions"
+              element={<TransactionScreen />}
+            />
+            <Route
+              path="/financial-management/transactions/:transactionId"
+              element={<TransactionDetailsScreen />}
             />
           </Route>
         </Route>

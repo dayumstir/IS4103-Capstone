@@ -9,7 +9,10 @@ import {
 } from "antd";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { IIssue, IssueFilter } from "../interfaces/models/issueInterface";
+import {
+  IssueFilter,
+  IIssue,
+} from "../../../../packages/interfaces/issueInterface";
 import { sortDirection } from "../interfaces/sortingInterface";
 import { useGetIssuesMutation } from "../redux/services/issue";
 

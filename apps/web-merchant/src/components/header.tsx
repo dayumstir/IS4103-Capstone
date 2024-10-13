@@ -15,11 +15,16 @@ const Header: React.FC = () => {
     Home = "Home",
     BusinessManagement = "Business Management",
     QRCode = "View QR Code",
+    FinancialManagement = "Financial Management",
   }
 
   const items = [
     { label: HeaderTitles.Home, key: HeaderTitles.Home },
     { label: HeaderTitles.QRCode, key: HeaderTitles.QRCode },
+    {
+      label: HeaderTitles.FinancialManagement,
+      key: HeaderTitles.FinancialManagement,
+    },
     {
       label: HeaderTitles.BusinessManagement,
       key: HeaderTitles.BusinessManagement,
@@ -35,6 +40,8 @@ const Header: React.FC = () => {
       navigate("/business-management/issues");
     } else if (key == HeaderTitles.QRCode) {
       navigate("/qrcode");
+    } else if (key == HeaderTitles.FinancialManagement) {
+      navigate("/financial-management/transactions");
     }
   };
 
@@ -44,11 +51,11 @@ const Header: React.FC = () => {
     logoutMutation()
       .unwrap()
       .then(() => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("merchantId");
         message.success("Logout Successful!");
       })
       .catch((error) => message.error(error));
+    localStorage.removeItem("token");
+    localStorage.removeItem("merchantId");
     navigate("/login");
   };
 

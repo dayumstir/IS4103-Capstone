@@ -6,7 +6,7 @@ import BaseQueryWithAuthCheck from "../utils.tsx/baseQuery";
 // Define a service using a base URL and expected endpoints
 export const customerApi = createApi({
   reducerPath: "customerApi",
-  baseQuery: BaseQueryWithAuthCheck("http://localhost:3000/admin/customer"),
+  baseQuery: BaseQueryWithAuthCheck("/admin/customer"),
   endpoints: (builder) => ({
     getCustomer: builder.query<ICustomer, string>({
       query: (id) => ({
