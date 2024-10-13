@@ -32,7 +32,6 @@ model Customer {
   status          Status
   wallet_balance  Float    @default(0)
   credit_score    Int      @default(0)
-  wallet_balance  Float
 
   credit_tier_id String     @default("tier_1")
   credit_tier    CreditTier @relation(fields: [credit_tier_id], references: [credit_tier_id])
