@@ -1,15 +1,16 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { useGetUserTransactionsQuery } from "../../../../redux/services/transactionService";
+import { useGetCustomerTransactionsQuery } from "../../../../redux/services/transactionService";
 import { Ionicons } from "@expo/vector-icons";
 import { format, isToday } from "date-fns";
 import { formatCurrency } from "../../../../utils/formatCurrency";
 import EmptyPlaceholder from "../../../../components/emptyPlaceholder";
 import { ActivityIndicator } from "@ant-design/react-native";
+import { router } from "expo-router";
 
 export default function AllTransactions() {
   const { data: transactions, isLoading: isTransactionsLoading } =
-    useGetUserTransactionsQuery();
+	useGetCustomerTransactionsQuery();
 
   // Unique dates for all transactions
   const uniqueDates = transactions
@@ -33,34 +34,40 @@ export default function AllTransactions() {
         </Text>
         <View className="flex-1 rounded-xl bg-white p-4">
           {transactionsOnDate?.map((t, index) => (
-            <View
+            <TouchableOpacity
               key={t.transaction_id}
-              className={`flex-row items-center justify-between border-gray-200 ${
-                index === 0 ? "pt-0" : "border-t pt-4"
-              } ${index === transactionsOnDate.length - 1 ? "pb-0" : "pb-4"}`}
+              onPress={() => {
+                router.push(`/payments/${t.transaction_id}`);
+              }}
             >
-              <View className="flex-row items-center gap-4">
-                <View className="h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                  {/* TODO: Replace with merchant profile picture */}
-                  <Text className="text-center font-bold text-blue-500">
-                    {t.merchant.name.slice(0, 1).toUpperCase()}
-                  </Text>
+              <View
+                className={`flex-row items-center justify-between border-gray-200 ${
+                  index === 0 ? "pt-0" : "border-t pt-4"
+                } ${index === transactionsOnDate.length - 1 ? "pb-0" : "pb-4"}`}
+              >
+                <View className="flex-row items-center gap-4">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                    {/* TODO: Replace with merchant profile picture */}
+                    <Text className="text-center font-bold text-blue-500">
+                      {t.merchant.name.slice(0, 1).toUpperCase()}
+                    </Text>
+                  </View>
+                  <View>
+                    <Text className="font-semibold">
+                      {t.merchant.name.length > 20
+                        ? `${t.merchant.name.slice(0, 20)}...`
+                        : t.merchant.name}
+                    </Text>
+                    <Text className="text-sm text-gray-500">
+                      {format(t.date_of_transaction, "dd MMM yyyy")}
+                    </Text>
+                  </View>
                 </View>
-                <View>
-                  <Text className="font-semibold">
-                    {t.merchant.name.length > 20
-                      ? `${t.merchant.name.slice(0, 20)}...`
-                      : t.merchant.name}
-                  </Text>
-                  <Text className="text-sm text-gray-500">
-                    {format(t.date_of_transaction, "dd MMM yyyy")}
-                  </Text>
-                </View>
+                <Text className="text-base font-medium text-red-600">
+                  -{formatCurrency(t.amount)}
+                </Text>
               </View>
-              <Text className="text-base font-medium text-red-600">
-                -{formatCurrency(t.amount)}
-              </Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </View>

@@ -8,7 +8,7 @@ export const createTransaction = async (transactionData: ITransaction) => {
     return transaction;
 };
 
-export const getUserTransactions = async (customer_id: string) => {
+export const getCustomerTransactions = async (customer_id: string) => {
     const transactions =
         await transactionRepository.findTransactionsByCustomerId(customer_id);
     return transactions;

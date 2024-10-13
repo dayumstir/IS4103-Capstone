@@ -14,8 +14,8 @@ export const createTransaction = async (req: Request, res: Response) => {
     }
 };
 
-// Get User Transactions
-export const getUserTransactions = async (req: Request, res: Response) => {
+// Get Customer Transactions
+export const getCustomerTransactions = async (req: Request, res: Response) => {
     try {
         const customer_id = req.customer_id; // from authMiddleware
         if (!customer_id) {
@@ -24,7 +24,7 @@ export const getUserTransactions = async (req: Request, res: Response) => {
                 .json({ error: "Unauthorized: No customer ID provided" });
         }
         const transactions =
-            await transactionService.getUserTransactions(customer_id);
+            await transactionService.getCustomerTransactions(customer_id);
         res.status(200).json(transactions);
     } catch (error: any) {
         res.status(400).json({ error: error.message });

@@ -2,7 +2,7 @@
 import { Router } from "express";
 import {
     getTransaction,
-    getUserTransactions,
+    getCustomerTransactions,
     createTransaction,
 } from "../controllers/transactionController";
 import { authMiddleware } from "../middlewares/authMiddleware";
@@ -10,7 +10,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 const router = Router();
 
 router.post("/", authMiddleware, createTransaction);
-router.get("/user", authMiddleware, getUserTransactions);
+router.get("/customer", authMiddleware, getCustomerTransactions);
 router.get("/:transaction_id", authMiddleware, getTransaction);
 
 export default router;

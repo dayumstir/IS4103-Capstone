@@ -143,7 +143,7 @@ export default function ScanScreen() {
       status: TransactionStatus.IN_PROGRESS,
       fully_paid_date: null,
       reference_no: purchase.referenceNo,
-      cash_back_percentage: 0,
+      cashback_percentage: 0,
 
       customer_id: customer.customer_id,
       merchant_id: scannedMerchantId,

@@ -41,15 +41,23 @@ export const transactionApi = createApi({
       invalidatesTags: ["TransactionsList"],
     }),
 
-    // Get User Transactions
-    getUserTransactions: builder.query<ITransaction[], void>({
-      query: () => "/user",
+    // Get Customer Transactions
+    getCustomerTransactions: builder.query<ITransaction[], void>({
+      query: () => "/customer",
       providesTags: ["TransactionsList"],
+    }),
+
+    // Get Transaction by Id
+    getTransactionById: builder.query<ITransaction, string>({
+      query: (transactionId) => `/${transactionId}`,
     }),
   }),
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useCreateTransactionMutation, useGetUserTransactionsQuery } =
-  transactionApi;
+export const {
+  useCreateTransactionMutation,
+  useGetCustomerTransactionsQuery,
+  useGetTransactionByIdQuery,
+} = transactionApi;
