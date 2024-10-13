@@ -91,7 +91,14 @@ export const createTransaction = async (transactionData: ITransaction) => {
 
 // Find transactions by customer_id in db
 export const findTransactionsByCustomerId = async (customer_id: string) => {
-    return prisma.transaction.findMany({ where: { customer_id } });
+    return prisma.transaction.findMany({
+        where: { customer_id },
+        include: {
+            merchant: true,
+            instalment_plan: true,
+            instalment_payments: true,
+        },
+    });
 };
 
 // Find transaction by id (unique attribute) in db

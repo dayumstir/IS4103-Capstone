@@ -3,7 +3,7 @@
 import { ICustomer } from "./customerInterface";
 import { IInstalmentPayment } from "./instalmentPaymentInterface";
 import { IInstalmentPlan } from "./instalmentPlanInterface";
-import { IMerchant, IMerchantPayment } from "./merchantInterface";
+import { IMerchant } from "./merchantInterface";
 
 export interface ITransaction {
     transaction_id: string;
@@ -12,7 +12,7 @@ export interface ITransaction {
     status: TransactionStatus;
     fully_paid_date: Date | null;
     reference_no: string;
-    cash_back_percentage: number;
+    cashback_percentage: number;
 
     customer_id: string;
     customer: ICustomer;

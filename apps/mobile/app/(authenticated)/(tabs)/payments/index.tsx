@@ -6,11 +6,16 @@ import { Button } from "@ant-design/react-native";
 import Toast from "react-native-toast-message";
 import { LinearGradient } from "expo-linear-gradient";
 import { formatCurrency } from "../../../../utils/formatCurrency";
+import { format } from "date-fns";
+import { useGetUserTransactionsQuery } from "../../../../redux/services/transactionService";
 
 export default function PaymentsPage() {
   const [isInstalmentsExpanded, setIsInstalmentsExpanded] = useState(true);
   const [isTransactionsExpanded, setIsTransactionsExpanded] = useState(true);
   const router = useRouter();
+
+  const { data: transactions, isLoading: isTransactionsLoading } =
+    useGetUserTransactionsQuery();
 
   const outstandingPayments = [
     {
@@ -18,21 +23,6 @@ export default function PaymentsPage() {
       merchant: "APPLE SG PTE LTD",
       amount: 500,
       dueDate: "15 Oct 2024",
-    },
-  ];
-
-  const transactions = [
-    {
-      id: 1,
-      date: "29 Aug 2024",
-      merchant: "APPLE SG PTE LTD",
-      amount: -500,
-    },
-    {
-      id: 3,
-      date: "27 Aug 2024",
-      merchant: "Grocery Store",
-      amount: -75.5,
     },
   ];
 
@@ -57,21 +47,12 @@ export default function PaymentsPage() {
   };
 
   return (
-    <ScrollView className="p-4">
-      <View className="mb-4 flex-row items-center justify-between">
-        <Text className="text-3xl font-bold">Payments</Text>
-        <View className="flex-row items-center space-x-4">
-          <TouchableOpacity
-          // onPress={() => navigation.navigate("Search")}
-          >
-            <Ionicons name="search-outline" size={24} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity
-          // onPress={() => navigation.navigate("Notifications")}
-          >
-            <Ionicons name="notifications-outline" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
+    <ScrollView>
+      <View className="m-4 flex-row items-center justify-between">
+        <Text className="text-4xl font-bold">Payments</Text>
+        <TouchableOpacity className="p-2">
+          <Ionicons name="notifications-outline" size={24} color="black" />
+        </TouchableOpacity>
       </View>
 
       {/* ===== Available Balance & Outstanding Payments ===== */}
@@ -80,9 +61,9 @@ export default function PaymentsPage() {
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
         style={{
-          borderRadius: 8,
+          borderRadius: 12,
           padding: 24,
-          marginBottom: 16,
+          marginHorizontal: 16,
         }}
       >
         <View className="mb-4 flex-row items-center justify-between">
@@ -117,10 +98,10 @@ export default function PaymentsPage() {
         </View>
       </LinearGradient>
 
-      {/* ===== Instalment Payments ===== */}
-      <View className="mb-4 rounded-lg bg-white p-8">
+      {/* ===== Upcoming Instalment Payments ===== */}
+      <View className="m-4 rounded-xl bg-white p-8">
         <View className="mb-2 flex-row items-center justify-between">
-          <Text className="text-lg font-semibold">Installment Payments</Text>
+          <Text className="text-lg font-semibold">Upcoming Payments</Text>
           <TouchableOpacity
             onPress={() => setIsInstalmentsExpanded(!isInstalmentsExpanded)}
           >
@@ -140,17 +121,19 @@ export default function PaymentsPage() {
               >
                 <View>
                   <Text className="text-base font-medium">
-                    {payment.merchant}
+                    {payment.merchant.length > 20
+                      ? `${payment.merchant.slice(0, 20)}...`
+                      : payment.merchant}
                   </Text>
                   <Text className="text-sm text-gray-500">
                     Due: {payment.dueDate}
                   </Text>
                 </View>
-                <View className="flex-row items-center space-x-2">
+                <View className="flex-row items-center gap-4">
                   <Text className="text-base font-medium">
                     {formatCurrency(payment.amount)}
                   </Text>
-                  <TouchableOpacity className="ml-4 rounded-md border border-blue-500 bg-white px-4 py-2">
+                  <TouchableOpacity className="rounded-md border border-blue-500 bg-white px-4 py-2">
                     <Text className="text-sm font-semibold text-blue-500">
                       Pay
                     </Text>
@@ -163,7 +146,7 @@ export default function PaymentsPage() {
       </View>
 
       {/* ===== Recent Transactions ===== */}
-      <View className="mb-4 rounded-lg bg-white p-8">
+      <View className="mx-4 mb-4 rounded-xl bg-white p-8">
         <View className="mb-2 flex-row items-center justify-between">
           <Text className="text-lg font-semibold">Recent Transactions</Text>
           <TouchableOpacity
@@ -176,36 +159,41 @@ export default function PaymentsPage() {
             />
           </TouchableOpacity>
         </View>
-        {isTransactionsExpanded && (
+        {isTransactionsExpanded && transactions && (
           <View>
-            {transactions.map((transaction) => (
+            {transactions.slice(0, 3).map((transaction) => (
               <View
-                key={transaction.id}
+                key={transaction.transaction_id}
                 className="flex-row items-center justify-between border-t border-gray-200 py-4"
               >
-                <View className="flex-row items-center space-x-3">
-                  <View className="rounded-full bg-red-100 p-2">
-                    <Ionicons name="arrow-down" size={16} color="#dc2626" />
+                <View className="flex-row items-center gap-2">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                    {/* TODO: Replace with merchant profile picture */}
+                    <Text className="text-center font-bold text-blue-500">
+                      {transaction.merchant.name.slice(0, 1).toUpperCase()}
+                    </Text>
                   </View>
                   <View>
                     <Text className="text-base font-medium">
-                      {transaction.merchant}
+                      {transaction.merchant.name.length > 20
+                        ? `${transaction.merchant.name.slice(0, 20)}...`
+                        : transaction.merchant.name}
                     </Text>
                     <Text className="text-sm text-gray-500">
-                      {transaction.date}
+                      {format(transaction.date_of_transaction, "dd MMM yyyy")}
                     </Text>
                   </View>
                 </View>
                 <Text className="text-base font-medium text-red-600">
-                  {formatCurrency(transaction.amount)}
+                  -{formatCurrency(transaction.amount)}
                 </Text>
               </View>
             ))}
             <Button
-              type="ghost"
+              type="primary"
               onPress={() => router.push("/payments/allTransactions")}
             >
-              <Text className="font-semibold text-blue-500">
+              <Text className="font-semibold text-white">
                 View All Transactions
               </Text>
             </Button>

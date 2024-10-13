@@ -18,6 +18,8 @@ export const transactionApi = createApi({
     },
   }),
 
+  tagTypes: ["TransactionsList"],
+
   endpoints: (builder) => ({
     // Create Transaction
     createTransaction: builder.mutation<
@@ -36,11 +38,13 @@ export const transactionApi = createApi({
         method: "POST",
         body: newTransaction,
       }),
+      invalidatesTags: ["TransactionsList"],
     }),
 
     // Get User Transactions
     getUserTransactions: builder.query<ITransaction[], void>({
       query: () => "/user",
+      providesTags: ["TransactionsList"],
     }),
   }),
 });
