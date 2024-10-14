@@ -42,6 +42,7 @@ export default function TransactionDetails() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
+      {/* ===== Progress Bar ===== */}
       <View className="m-4 flex-1">
         <View className="rounded-xl bg-blue-500 p-8">
           <Text className="text-3xl font-bold text-white">
@@ -165,50 +166,8 @@ export default function TransactionDetails() {
           </View>
         </View>
 
-        {/* ===== Instalment Plan Details ===== */}
-        {transaction.instalment_plan && (
-          <View className="rounded-xl bg-white p-8">
-            <Text className="mb-4 text-xl font-bold">Instalment Plan</Text>
-            <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-gray-500">Plan Name</Text>
-              <Text className="font-medium">
-                {transaction.instalment_plan.name}
-              </Text>
-            </View>
-            <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-gray-500">Number of Instalments</Text>
-              <Text className="font-medium">
-                {transaction.instalment_plan.number_of_instalments}
-              </Text>
-            </View>
-            <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-gray-500">Time Period</Text>
-              <Text className="font-medium">
-                {transaction.instalment_plan.time_period} weeks
-              </Text>
-            </View>
-            <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-gray-500">Payment Frequency</Text>
-              <Text className="font-medium">
-                Every{" "}
-                {(
-                  (transaction.instalment_plan.time_period * 7) /
-                  transaction.instalment_plan.number_of_instalments
-                ).toFixed(1)}{" "}
-                days
-              </Text>
-            </View>
-            <View className="flex-row items-center justify-between">
-              <Text className="text-gray-500">Interest Rate</Text>
-              <Text className="font-medium">
-                {transaction.instalment_plan.interest_rate}%
-              </Text>
-            </View>
-          </View>
-        )}
-
         {/* ===== Payment History ===== */}
-        <View className="mt-4 rounded-xl bg-white p-8">
+        <View className="rounded-xl bg-white p-8">
           <Text className="mb-4 text-xl font-bold">Payment History</Text>
           {transaction.instalment_payments.map((payment, index) => (
             <View
@@ -251,6 +210,48 @@ export default function TransactionDetails() {
             </View>
           ))}
         </View>
+
+        {/* ===== Instalment Plan Details ===== */}
+        {transaction.instalment_plan && (
+          <View className="mt-4 rounded-xl bg-white p-8">
+            <Text className="mb-4 text-xl font-bold">Instalment Plan</Text>
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-gray-500">Plan Name</Text>
+              <Text className="font-medium">
+                {transaction.instalment_plan.name}
+              </Text>
+            </View>
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-gray-500">Number of Instalments</Text>
+              <Text className="font-medium">
+                {transaction.instalment_plan.number_of_instalments}
+              </Text>
+            </View>
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-gray-500">Time Period</Text>
+              <Text className="font-medium">
+                {transaction.instalment_plan.time_period} weeks
+              </Text>
+            </View>
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-gray-500">Payment Frequency</Text>
+              <Text className="font-medium">
+                Every{" "}
+                {(
+                  (transaction.instalment_plan.time_period * 7) /
+                  transaction.instalment_plan.number_of_instalments
+                ).toFixed(1)}{" "}
+                days
+              </Text>
+            </View>
+            <View className="flex-row items-center justify-between">
+              <Text className="text-gray-500">Interest Rate</Text>
+              <Text className="font-medium">
+                {transaction.instalment_plan.interest_rate}%
+              </Text>
+            </View>
+          </View>
+        )}
       </View>
     </ScrollView>
   );

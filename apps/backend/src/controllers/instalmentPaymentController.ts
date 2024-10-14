@@ -13,20 +13,27 @@ export const getAllInstalmentPayments = async (req: Request, res: Response) => {
     }
 };
 
-export const getInstalmentPaymentsByTransaction = async (
+export const getCustomerOutstandingInstalmentPayments = async (
     req: Request,
     res: Response
 ) => {
     try {
-        const { transaction_id } = req.params;
+        const customer_id = req.customer_id;
+
+        if (!customer_id) {
+            return res
+                .status(401)
+                .json({ error: "Unauthorized: No customer ID provided" });
+        }
+
         const instalmentPayments =
-            await instalmentPaymentService.getInstalmentPaymentsByTransaction(
-                transaction_id
+            await instalmentPaymentService.getCustomerOutstandingInstalmentPayments(
+                customer_id
             );
         res.status(200).json(instalmentPayments);
     } catch (error: any) {
         logger.error(
-            `Error in getInstalmentPaymentsByTransaction: ${error.message}`
+            `Error in getCustomerOutstandingInstalmentPayments: ${error.message}`
         );
         res.status(400).json({ error: error.message });
     }

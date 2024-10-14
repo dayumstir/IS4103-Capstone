@@ -10,6 +10,7 @@ import paymentStageReducer from "./features/paymentStageSlice";
 import { customerAuthApi } from "./services/customerAuthService";
 import { customerApi } from "./services/customerService";
 import { transactionApi } from "./services/transactionService";
+import { instalmentPaymentApi } from "./services/instalmentPaymentService";
 import { issueApi } from "./services/issueService";
 import { merchantApi } from "./services/merchantService";
 import { voucherApi } from "./services/voucherService";
@@ -27,6 +28,7 @@ export const store = configureStore({
     [customerAuthApi.reducerPath]: customerAuthApi.reducer,
     [customerApi.reducerPath]: customerApi.reducer,
     [transactionApi.reducerPath]: transactionApi.reducer,
+    [instalmentPaymentApi.reducerPath]: instalmentPaymentApi.reducer,
     [issueApi.reducerPath]: issueApi.reducer,
     [merchantApi.reducerPath]: merchantApi.reducer,
     [voucherApi.reducerPath]: voucherApi.reducer,
@@ -38,6 +40,7 @@ export const store = configureStore({
       customerAuthApi.middleware,
       customerApi.middleware,
       transactionApi.middleware,
+      instalmentPaymentApi.middleware,
       issueApi.middleware,
       merchantApi.middleware,
       voucherApi.middleware,

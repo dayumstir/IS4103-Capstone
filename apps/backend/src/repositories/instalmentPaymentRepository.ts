@@ -1,6 +1,9 @@
 // Handles database operations related to instalment payments
 import { prisma } from "./db";
-import { IInstalmentPayment } from "@repo/interfaces/instalmentPaymentInterface";
+import {
+    IInstalmentPayment,
+    InstalmentPaymentStatus,
+} from "@repo/interfaces/instalmentPaymentInterface";
 
 // Find all instalment payments in db
 export const findAllInstalmentPayments = async () => {
@@ -20,11 +23,24 @@ export const findInstalmentPaymentById = async (
     });
 };
 
-export const findInstalmentPaymentsByTransaction = async (
-    transaction_id: string
+export const findCustomerOutstandingInstalmentPayments = async (
+    customer_id: string
 ) => {
     return prisma.instalmentPayment.findMany({
-        where: { transaction_id: transaction_id },
+        where: {
+            status: InstalmentPaymentStatus.UNPAID,
+            transaction: { customer_id: customer_id },
+        },
+        orderBy: {
+            due_date: "asc",
+        },
+        include: {
+            transaction: {
+                include: {
+                    merchant: true,
+                },
+            },
+        },
     });
 };
 

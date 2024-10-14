@@ -10,13 +10,11 @@ export const getAllInstalmentPayments = async () => {
     return instalmentPayments;
 };
 
-export const getInstalmentPaymentsByTransaction = async (
-    transaction_id: string
-) => {
-    logger.info("Executing getInstalmentPaymentsByTransaction...");
+export const getCustomerOutstandingInstalmentPayments = async (customer_id: string) => {
+    logger.info("Executing getCustomerInstalmentPayments...");
     const instalmentPayments =
-        await instalmentPaymentRepository.findInstalmentPaymentsByTransaction(
-            transaction_id
+        await instalmentPaymentRepository.findCustomerOutstandingInstalmentPayments(
+            customer_id
         );
     return instalmentPayments;
 };

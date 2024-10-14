@@ -19,7 +19,7 @@ import instalmentPaymentRoutes from "./routes/instalmentPaymentRoutes";
 
 // Import error handler middleware
 import { errorHandler } from "./middlewares/errorHandler";
-import logger from "./utils/logger"; 
+import logger from "./utils/logger";
 
 // Load environment variables at the start
 dotenv.config();
@@ -51,7 +51,7 @@ app.use("/issue", issueRoutes);
 app.use("/merchant", merchantRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/voucher", voucherRoutes);
-app.use("/instalmentPayment", instalmentPaymentRoutes);
+app.use("/instalment-payment", instalmentPaymentRoutes);
 
 // Health check or root route
 app.get("/", (req, res) => {
