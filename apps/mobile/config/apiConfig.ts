@@ -1,11 +1,11 @@
-import Constants from "expo-constants";
+import * as Device from "expo-device";
 
 // Ensure mobile app and expo go server are on the same network
 const yourIpAddress = process.env.EXPO_PUBLIC_YOUR_IP_ADDRESS;
 
 const getApiUrl = () => {
   if (__DEV__) {
-    return Constants.isDevice
+    return Device.isDevice
       ? `http://${yourIpAddress}:3000`
       : `http://localhost:3000`;
   } else {
