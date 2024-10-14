@@ -1,21 +1,36 @@
 import { useState } from "react";
-import { ScrollView, View, Text, TouchableOpacity } from "react-native";
+import {
+  ScrollView,
+  View,
+  Text,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "@ant-design/react-native";
-import Toast from "react-native-toast-message";
 import { LinearGradient } from "expo-linear-gradient";
 import { formatCurrency } from "../../../../utils/formatCurrency";
 import { format } from "date-fns";
-import { useGetUserTransactionsQuery } from "../../../../redux/services/transactionService";
+import { useGetCustomerTransactionsQuery } from "../../../../redux/services/transactionService";
 
 export default function PaymentsPage() {
   const [isInstalmentsExpanded, setIsInstalmentsExpanded] = useState(true);
   const [isTransactionsExpanded, setIsTransactionsExpanded] = useState(true);
   const router = useRouter();
 
-  const { data: transactions, isLoading: isTransactionsLoading } =
-    useGetUserTransactionsQuery();
+  const {
+    data: transactions,
+    isLoading: isTransactionsLoading,
+    refetch,
+  } = useGetCustomerTransactionsQuery();
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    refetch().then(() => setRefreshing(false));
+  };
 
   const outstandingPayments = [
     {
@@ -34,11 +49,11 @@ export default function PaymentsPage() {
 
   const handlePayAll = () => {
     // Implement pay all logic
-    Toast.show({
-      type: "success",
-      text1: "All payments processed",
-      text2: "Your outstanding payments have been cleared.",
-    });
+    // Toast.show({
+    //   type: "success",
+    //   text1: "All payments processed",
+    //   text2: "Your outstanding payments have been cleared.",
+    // });
   };
 
   const handleAddMoney = () => {
@@ -47,7 +62,11 @@ export default function PaymentsPage() {
   };
 
   return (
-    <ScrollView>
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View className="m-4 flex-row items-center justify-between">
         <Text className="text-4xl font-bold">Payments</Text>
         <TouchableOpacity className="p-2">

@@ -6,7 +6,13 @@ export default function PaymentsLayout() {
       <Stack.Screen name="index" options={{ headerTitle: "Payments" }} />
       <Stack.Screen
         name="allTransactions"
-        options={{ headerTitle: "All Transactions" }}
+        options={{ headerTitle: "Transactions" }}
+      />
+      <Stack.Screen
+        name="[transactionId]"
+        options={{
+          headerTitle: "Transaction Details",
+        }}
       />
     </Stack>
   );

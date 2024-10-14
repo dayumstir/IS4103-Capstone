@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
 import { useGetCustomerTransactionsQuery } from "../../../../redux/services/transactionService";
 import { Ionicons } from "@expo/vector-icons";
 import { format, isToday } from "date-fns";
@@ -9,8 +15,18 @@ import { ActivityIndicator } from "@ant-design/react-native";
 import { router } from "expo-router";
 
 export default function AllTransactions() {
-  const { data: transactions, isLoading: isTransactionsLoading } =
-	useGetCustomerTransactionsQuery();
+  const {
+    data: transactions,
+    isLoading: isTransactionsLoading,
+    refetch,
+  } = useGetCustomerTransactionsQuery();
+
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    refetch().then(() => setRefreshing(false));
+  };
 
   // Unique dates for all transactions
   const uniqueDates = transactions
@@ -59,7 +75,12 @@ export default function AllTransactions() {
                         : t.merchant.name}
                     </Text>
                     <Text className="text-sm text-gray-500">
-                      {format(t.date_of_transaction, "dd MMM yyyy")}
+                      {t.instalment_plan.number_of_instalments} payments x{" "}
+                      {(
+                        (t.instalment_plan.time_period * 7) /
+                        t.instalment_plan.number_of_instalments
+                      ).toFixed(1)}{" "}
+                      days
                     </Text>
                   </View>
                 </View>
@@ -75,7 +96,11 @@ export default function AllTransactions() {
   };
 
   return (
-    <ScrollView>
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View className="m-4 flex-1">
         <View className="mb-4 flex-row items-center justify-between">
           <Text className="text-4xl font-bold">Transactions</Text>

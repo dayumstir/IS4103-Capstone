@@ -1,5 +1,4 @@
 import { View, Text } from "react-native";
-import Feather from "@expo/vector-icons/Feather";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { ITransaction } from "@repo/interfaces";
 import { formatCurrency } from "../../utils/formatCurrency";
@@ -18,10 +17,10 @@ export default function TransactionCompleteScreen({
   onBackToHome: () => void;
 }) {
   return (
-    <View className="flex-1 items-center justify-center bg-blue-500 p-4">
+    <View className="flex-1 items-center justify-center bg-green-500 p-4">
       <View className="w-full max-w-md rounded-3xl bg-white p-8 shadow">
         <View className="mb-6 items-center justify-center">
-          <Feather name="check-circle" size={60} color="#3b82f6" />
+          <AntDesign name="checkcircle" size={60} color="#22c55e" />
         </View>
 
         <Text className="mb-2 text-center text-3xl font-bold">
@@ -72,8 +71,8 @@ export default function TransactionCompleteScreen({
               )}
             </Text>
 
-            <Text className="w-1/2 pb-3 text-gray-600">Transaction ID:</Text>
-            <Text className="w-1/2 pb-3 font-medium">
+            <Text className="w-1/2 text-gray-600">Transaction ID:</Text>
+            <Text className="w-1/2 font-medium">
               {transaction.transaction_id}
             </Text>
           </View>

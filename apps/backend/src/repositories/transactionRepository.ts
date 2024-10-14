@@ -98,10 +98,24 @@ export const findTransactionsByCustomerId = async (customer_id: string) => {
             instalment_plan: true,
             instalment_payments: true,
         },
+        orderBy: {
+            date_of_transaction: "desc",
+        },
     });
 };
 
 // Find transaction by id (unique attribute) in db
 export const findTransactionById = async (transaction_id: string) => {
-    return prisma.transaction.findUnique({ where: { transaction_id } });
+    return prisma.transaction.findUnique({
+        where: { transaction_id },
+        include: {
+            merchant: true,
+            instalment_plan: true,
+            instalment_payments: {
+                orderBy: {
+                    due_date: "asc",
+                },
+            },
+        },
+    });
 };
