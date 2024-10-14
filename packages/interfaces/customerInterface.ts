@@ -1,7 +1,3 @@
-// Defines the structure of a customer object
-
-import { ICreditTier } from "./creditTierInterface";
-
 export interface ICustomer {
     customer_id: string;
     name: string;
@@ -13,9 +9,7 @@ export interface ICustomer {
     date_of_birth: Date;
     status: CustomerStatus;
     credit_score: number;
-
-    credit_tier_id: string;
-    credit_tier: ICreditTier;
+    wallet_balance: number;
 }
 
 export enum CustomerStatus {
