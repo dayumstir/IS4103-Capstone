@@ -23,8 +23,13 @@ export const getCustomerTransactions = async (req: Request, res: Response) => {
                 .status(401)
                 .json({ error: "Unauthorized: No customer ID provided" });
         }
-        const transactions =
-            await transactionService.getCustomerTransactions(customer_id);
+
+        const { search } = req.query;
+
+        const transactions = await transactionService.getCustomerTransactions(
+            customer_id,
+            search as string
+        );
         res.status(200).json(transactions);
     } catch (error: any) {
         res.status(400).json({ error: error.message });

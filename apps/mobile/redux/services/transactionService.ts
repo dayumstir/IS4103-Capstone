@@ -42,8 +42,8 @@ export const transactionApi = createApi({
     }),
 
     // Get Customer Transactions
-    getCustomerTransactions: builder.query<ITransaction[], void>({
-      query: () => "/customer",
+    getCustomerTransactions: builder.query<ITransaction[], string>({
+      query: (searchQuery = "") => `customer?search=${searchQuery}`,
       providesTags: ["TransactionsList"],
     }),
 

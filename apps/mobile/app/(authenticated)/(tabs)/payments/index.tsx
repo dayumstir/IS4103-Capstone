@@ -26,7 +26,7 @@ export default function PaymentsPage() {
     data: transactions,
     isLoading: isTransactionsLoading,
     refetch: refetchTransactions,
-  } = useGetCustomerTransactionsQuery();
+  } = useGetCustomerTransactionsQuery("");
 
   const {
     data: outstandingInstalmentPayments,

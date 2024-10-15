@@ -42,8 +42,8 @@ export default function TransactionDetails() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      {/* ===== Progress Bar ===== */}
       <View className="m-4 flex-1">
+        {/* ===== Progress Bar ===== */}
         <View className="rounded-xl bg-blue-500 p-8">
           <Text className="text-3xl font-bold text-white">
             {formatCurrency(transaction.amount)}
@@ -75,104 +75,125 @@ export default function TransactionDetails() {
         {/* ===== Transaction Details ===== */}
         <View className="my-4 rounded-xl bg-white p-8">
           <Text className="mb-4 text-xl font-bold">Transaction Details</Text>
-          <View className="mb-4 flex-row items-center">
-            <Ionicons
-              name="wallet-outline"
-              size={20}
-              color="#3b82f6"
-              className="mr-4"
-            />
-            <View>
-              <Text className="text-sm text-gray-500">Amount</Text>
-              <Text className="font-medium">
-                {formatCurrency(transaction.amount)}
-              </Text>
+          <View className="flex-row flex-wrap">
+            <View className="mb-4 w-1/2 pr-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="wallet-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Amount</Text>
+                  <Text className="font-medium">
+                    {formatCurrency(transaction.amount)}
+                  </Text>
+                </View>
+              </View>
             </View>
-          </View>
-          <View className="mb-4 flex-row items-center">
-            <Ionicons
-              name="storefront-outline"
-              size={20}
-              color="#3b82f6"
-              className="mr-4"
-            />
-            <View>
-              <Text className="text-sm text-gray-500">Merchant</Text>
-              <Text className="font-medium">{transaction.merchant.name}</Text>
+            <View className="mb-4 w-1/2 pl-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="storefront-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Merchant</Text>
+                  <Text className="font-medium">
+                    {transaction.merchant.name.length > 14
+                      ? `${transaction.merchant.name.slice(0, 14)}...`
+                      : transaction.merchant.name}
+                  </Text>
+                </View>
+              </View>
             </View>
-          </View>
-          <View className="mb-4 flex-row items-center">
-            <Ionicons
-              name="calendar-outline"
-              size={20}
-              color="#3b82f6"
-              className="mr-4"
-            />
-            <View>
-              <Text className="text-sm text-gray-500">Date</Text>
-              <Text className="font-medium">
-                {format(
-                  new Date(transaction.date_of_transaction),
-                  "dd MMM yyyy",
-                )}
-              </Text>
+            <View className="mb-4 w-1/2 pr-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Date</Text>
+                  <Text className="font-medium">
+                    {format(
+                      new Date(transaction.date_of_transaction),
+                      "dd MMM yyyy",
+                    )}
+                  </Text>
+                </View>
+              </View>
             </View>
-          </View>
-          <View className="mb-4 flex-row items-center">
-            <Ionicons
-              name="trending-up-outline"
-              size={20}
-              color="#3b82f6"
-              className="mr-4"
-            />
-            <View>
-              <Text className="text-sm text-gray-500">Cashback</Text>
-              <Text className="font-medium">
-                {transaction.cashback_percentage}%
-              </Text>
+            <View className="mb-4 w-1/2 pl-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="trending-up-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Cashback</Text>
+                  <Text className="font-medium">
+                    {transaction.cashback_percentage}%
+                  </Text>
+                </View>
+              </View>
             </View>
-          </View>
-          <View className="mb-4 flex-row items-center">
-            <Ionicons
-              name="flag-outline"
-              size={20}
-              color="#3b82f6"
-              className="mr-4"
-            />
-            <View>
-              <Text className="text-sm text-gray-500">Status</Text>
-              <Text className="font-medium">
-                {transaction.status === "FULLY_PAID"
-                  ? "Fully Paid"
-                  : "In Progress"}
-              </Text>
+            <View className="w-1/2 pr-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="flag-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Status</Text>
+                  <Text className="font-medium">
+                    {transaction.status === "FULLY_PAID"
+                      ? "Fully Paid"
+                      : "In Progress"}
+                  </Text>
+                </View>
+              </View>
             </View>
-          </View>
-          <View className="flex-row items-center">
-            <Ionicons
-              name="time-outline"
-              size={20}
-              color="#3b82f6"
-              className="mr-4"
-            />
-            <View>
-              <Text className="text-sm text-gray-500">Fully Paid Date</Text>
-              <Text className="font-medium">
-                {transaction.fully_paid_date
-                  ? format(new Date(transaction.fully_paid_date), "dd MMM yyyy")
-                  : "N/A"}
-              </Text>
+            <View className="w-1/2 pl-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="time-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Fully Paid Date</Text>
+                  <Text className="font-medium">
+                    {transaction.fully_paid_date
+                      ? format(
+                          new Date(transaction.fully_paid_date),
+                          "dd MMM yyyy",
+                        )
+                      : "N/A"}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
         </View>
 
-        {/* ===== Payment History ===== */}
+        {/* ===== Instalment Payments ===== */}
         <View className="rounded-xl bg-white p-8">
-          <Text className="mb-4 text-xl font-bold">Payment History</Text>
+          <Text className="mb-4 text-xl font-bold">Instalment Payments</Text>
           {transaction.instalment_payments.map((payment, index) => (
             <View
               key={payment.instalment_payment_id}
-              className="flex-row items-center justify-between border-t border-gray-200 py-2"
+              className={`flex-row items-center justify-between border-t border-gray-200 ${index === transaction.instalment_payments.length - 1 ? "pt-2" : "py-2"}`}
             >
               <View className="flex-row items-center">
                 <View className="mr-4 h-10 w-10 items-center justify-center rounded-full bg-blue-100">

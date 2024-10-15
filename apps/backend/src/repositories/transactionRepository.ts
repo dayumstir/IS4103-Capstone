@@ -90,9 +90,34 @@ export const createTransaction = async (transactionData: ITransaction) => {
 };
 
 // Find transactions by customer_id in db
-export const findTransactionsByCustomerId = async (customer_id: string) => {
+export const findTransactionsByCustomerId = async (
+    customer_id: string,
+    searchQuery: string
+) => {
+    const whereClause: any = {
+        customer_id,
+    };
+
+    if (searchQuery.length > 0) {
+        whereClause.OR = [
+            {
+                merchant: {
+                    name: {
+                        contains: searchQuery,
+                        mode: "insensitive",
+                    },
+                },
+            },
+            {
+                amount: {
+                    equals: parseFloat(searchQuery) || undefined,
+                },
+            },
+        ];
+    }
+
     return prisma.transaction.findMany({
-        where: { customer_id },
+        where: whereClause,
         include: {
             merchant: true,
             instalment_plan: true,
