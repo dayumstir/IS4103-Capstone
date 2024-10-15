@@ -39,8 +39,10 @@ export const findTransactionsByFilter = async (transactionFilter: TransactionFil
     return prisma.transaction.findMany({
         where: {
             ...filter,
-            ...(create_from && { date_of_transaction: { gte: create_from } }),
-            ...(create_to && { date_of_transaction: { lte: create_to } }),
+            AND: [
+                { date_of_transaction: { lte: create_to } },
+                { date_of_transaction: { gte: create_from } },
+            ],
             ...(search_term && {
                 OR: [
                     { amount: { equals: parsedAmount } },
