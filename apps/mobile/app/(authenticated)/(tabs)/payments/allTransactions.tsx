@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -15,22 +15,36 @@ import EmptyPlaceholder from "../../../../components/emptyPlaceholder";
 import { ActivityIndicator } from "@ant-design/react-native";
 import { router } from "expo-router";
 import { useDebounce } from "use-debounce";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
+import { Button } from "@ant-design/react-native";
 
 export default function AllTransactions() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 
+  const [dateFilter, setDateFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [tempDateFilter, setTempDateFilter] = useState("all");
+  const [tempStatusFilter, setTempStatusFilter] = useState("all");
+
   const {
     data: transactions,
+    isFetching,
     isLoading: isTransactionsLoading,
     refetch,
-  } = useGetCustomerTransactionsQuery(debouncedSearchQuery);
+  } = useGetCustomerTransactionsQuery(
+    debouncedSearchQuery +
+      "&date_filter=" +
+      dateFilter +
+      "&status_filter=" +
+      statusFilter,
+  );
 
   const [refreshing, setRefreshing] = useState(false);
-
-  const handleSearchChange = (text: string) => {
-    setSearchQuery(text);
-  };
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -38,8 +52,12 @@ export default function AllTransactions() {
   };
 
   const transactionList = () => {
-    // While user is typing
-    if (debouncedSearchQuery !== searchQuery) {
+    // While user is typing / fetching / loading
+    if (
+      debouncedSearchQuery !== searchQuery ||
+      isFetching ||
+      isTransactionsLoading
+    ) {
       return (
         <View className="mt-16">
           <ActivityIndicator size="large" />
@@ -125,51 +143,215 @@ export default function AllTransactions() {
     );
   };
 
-  return (
-    <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <View className="m-4 flex-1">
-        <Text className="mb-4 text-4xl font-bold">Transactions</Text>
+  const bottomSheetRef = useRef<BottomSheet>(null);
 
-        {/* ===== Search Bar and Filter Button ===== */}
-        <View className="mb-4 flex-row items-center">
-          <View className="relative flex-1">
-            <TextInput
-              className="h-10 w-full rounded-full border border-gray-300 bg-white pl-12 focus:border-blue-500"
-              value={searchQuery}
-              placeholder="Search"
-              onChangeText={handleSearchChange}
-            />
-            <Ionicons
-              name="search-outline"
-              size={20}
-              color="#d1d5db"
-              className="absolute left-4 top-2"
-            />
-          </View>
-          <TouchableOpacity className="p-2" onPress={() => {}}>
+  const closeFilterMenu = () => {
+    bottomSheetRef.current?.close();
+  };
+
+  const applyFilters = () => {
+    setDateFilter(tempDateFilter);
+    setStatusFilter(tempStatusFilter);
+    closeFilterMenu();
+  };
+
+  const clearFilters = () => {
+    setDateFilter("all");
+    setStatusFilter("all");
+    setTempDateFilter("all");
+    setTempStatusFilter("all");
+    closeFilterMenu();
+  };
+
+  const renderBackdrop = (props: BottomSheetBackdropProps) => (
+    <BottomSheetBackdrop
+      {...props}
+      disappearsOnIndex={-1}
+      appearsOnIndex={0}
+      opacity={0.5}
+      onPress={closeFilterMenu}
+    />
+  );
+
+  const RadioButtonGroup = ({
+    options,
+    selectedValue,
+    onSelect,
+    label,
+  }: {
+    options: { label: string; value: string }[];
+    selectedValue: string;
+    onSelect: (value: string) => void;
+    label: string;
+  }) => (
+    <View className="mb-4">
+      <Text className="mb-2 text-lg font-semibold">{label}</Text>
+      <View className="flex-row flex-wrap">
+        {options.map((option) => (
+          <TouchableOpacity
+            key={option.value}
+            className={`mb-2 mr-2 rounded-full px-4 py-2 ${
+              selectedValue === option.value ? "bg-blue-500" : "bg-gray-200"
+            }`}
+            onPress={() => onSelect(option.value)}
+          >
+            <Text
+              className={`text-sm ${
+                selectedValue === option.value
+                  ? "font-semibold text-white"
+                  : "text-gray-700"
+              }`}
+            >
+              {option.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
+  const renderFilterMenu = () => (
+    <BottomSheetView>
+      <View className="px-8 py-4">
+        <View className="mb-4 flex-row items-center justify-between">
+          <View className="flex-row items-center gap-4">
             <Ionicons name="filter-outline" size={28} color="black" />
+            <Text className="text-2xl font-bold">Filter Transactions</Text>
+          </View>
+          <TouchableOpacity onPress={clearFilters}>
+            <Text className="text-blue-500">Clear All</Text>
           </TouchableOpacity>
         </View>
 
-        {searchQuery.length > 0 && (
-          <Text className="mb-4 font-medium text-gray-500">
-            Search results for: {searchQuery}
-          </Text>
-        )}
+        <RadioButtonGroup
+          label="Date Range"
+          options={[
+            { label: "All Time", value: "all" },
+            { label: "Last 7 Days", value: "7days" },
+            { label: "Last 30 Days", value: "30days" },
+            { label: "Last 3 Months", value: "3months" },
+            { label: "Last 6 Months", value: "6months" },
+            { label: "Last Year", value: "1year" },
+          ]}
+          selectedValue={tempDateFilter}
+          onSelect={setTempDateFilter}
+        />
 
-        {isTransactionsLoading && <ActivityIndicator size="large" />}
+        <RadioButtonGroup
+          label="Transaction Status"
+          options={[
+            { label: "All", value: "all" },
+            { label: "Fully Paid", value: "fullypaid" },
+            { label: "In Progress", value: "inprogress" },
+          ]}
+          selectedValue={tempStatusFilter}
+          onSelect={setTempStatusFilter}
+        />
 
-        {/* ===== Transactions By Unique Date ===== */}
-        {transactionList()}
-
-        {transactions && transactions.length === 0 && (
-          <EmptyPlaceholder message="No transactions found" />
-        )}
+        <Button type="primary" onPress={applyFilters}>
+          <Text className="font-semibold text-white">Apply Filters</Text>
+        </Button>
       </View>
-    </ScrollView>
+    </BottomSheetView>
+  );
+
+  const renderActiveFilters = () => {
+    if (dateFilter === "all" && statusFilter === "all") return null;
+
+    return (
+      <View className="mb-4 flex-row flex-wrap items-center">
+        <Text className="mr-2 text-gray-500">Active Filters:</Text>
+        {dateFilter !== "all" && (
+          <View className="mr-2 rounded-full bg-blue-100 px-2 py-1">
+            <Text className="text-sm font-medium text-blue-700">
+              {dateFilter === "7days"
+                ? "Last 7 Days"
+                : dateFilter === "30days"
+                  ? "Last 30 Days"
+                  : dateFilter === "3months"
+                    ? "Last 3 Months"
+                    : dateFilter === "6months"
+                      ? "Last 6 Months"
+                      : dateFilter === "1year"
+                        ? "Last Year"
+                        : ""}
+            </Text>
+          </View>
+        )}
+        {statusFilter !== "all" && (
+          <View className="mr-2 rounded-full bg-blue-100 px-2 py-1">
+            <Text className="text-sm font-medium text-blue-700">
+              {statusFilter === "fullypaid" ? "Fully Paid" : "In Progress"}
+            </Text>
+          </View>
+        )}
+        <TouchableOpacity onPress={clearFilters}>
+          <Text className="text-blue-500">Clear</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  return (
+    <>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View className="m-4 flex-1">
+          <Text className="mb-4 text-4xl font-bold">Transactions</Text>
+
+          {/* ===== Search Bar and Filter Button ===== */}
+          <View className="mb-4 flex-row items-center">
+            <View className="relative flex-1">
+              <TextInput
+                className="h-10 w-full rounded-full border border-gray-300 bg-white pl-12 focus:border-blue-500"
+                value={searchQuery}
+                placeholder="Search"
+                onChangeText={(text) => setSearchQuery(text)}
+              />
+              <Ionicons
+                name="search-outline"
+                size={20}
+                color="#d1d5db"
+                className="absolute left-4 top-2"
+              />
+            </View>
+            <TouchableOpacity
+              className="p-2"
+              onPress={() => bottomSheetRef.current?.expand()}
+            >
+              <Ionicons name="filter-outline" size={28} color="black" />
+            </TouchableOpacity>
+          </View>
+
+          {searchQuery.length > 0 && (
+            <Text className="mb-4 text-gray-500">
+              Search results for:{" "}
+              <Text className="font-semibold">{searchQuery}</Text>
+            </Text>
+          )}
+
+          {renderActiveFilters()}
+
+          {/* ===== Transactions By Unique Date ===== */}
+          {transactionList()}
+
+          {transactions && transactions.length === 0 && (
+            <EmptyPlaceholder message="No transactions found" />
+          )}
+        </View>
+      </ScrollView>
+
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={-1}
+        enablePanDownToClose={true}
+        backdropComponent={renderBackdrop}
+      >
+        {renderFilterMenu()}
+      </BottomSheet>
+    </>
   );
 }

@@ -45,6 +45,7 @@ export const transactionApi = createApi({
     getCustomerTransactions: builder.query<ITransaction[], string>({
       query: (searchQuery = "") => `customer?search=${searchQuery}`,
       providesTags: ["TransactionsList"],
+      keepUnusedDataFor: 0,
     }),
 
     // Get Transaction by Id

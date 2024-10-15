@@ -10,12 +10,16 @@ export const createTransaction = async (transactionData: ITransaction) => {
 
 export const getCustomerTransactions = async (
     customer_id: string,
-    searchQuery: string
+    searchQuery: string,
+    dateFilter: string,
+    statusFilter: string
 ) => {
     const transactions =
         await transactionRepository.findTransactionsByCustomerId(
             customer_id,
-            searchQuery
+            searchQuery,
+            dateFilter,
+            statusFilter
         );
     return transactions;
 };

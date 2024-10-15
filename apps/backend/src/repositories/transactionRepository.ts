@@ -1,6 +1,9 @@
 import { InstalmentPaymentStatus } from "@repo/interfaces/instalmentPaymentInterface";
 import { prisma } from "./db";
-import { ITransaction } from "@repo/interfaces/transactionInterface";
+import {
+    ITransaction,
+    TransactionStatus,
+} from "@repo/interfaces/transactionInterface";
 import { IInstalmentPayment } from "@repo/interfaces/instalmentPaymentInterface";
 import { addMilliseconds, endOfDay } from "date-fns";
 
@@ -92,7 +95,9 @@ export const createTransaction = async (transactionData: ITransaction) => {
 // Find transactions by customer_id in db
 export const findTransactionsByCustomerId = async (
     customer_id: string,
-    searchQuery: string
+    searchQuery: string,
+    dateFilter: string,
+    statusFilter: string
 ) => {
     const whereClause: any = {
         customer_id,
@@ -114,6 +119,66 @@ export const findTransactionsByCustomerId = async (
                 },
             },
         ];
+    }
+
+    if (dateFilter !== "all") {
+        const currentDate = new Date();
+        let startDate: Date;
+        let endDate: Date;
+
+        switch (dateFilter) {
+            case "7days":
+                startDate = new Date(
+                    currentDate.getTime() - 7 * 24 * 60 * 60 * 1000
+                );
+                endDate = currentDate;
+                break;
+            case "30days":
+                startDate = new Date(
+                    currentDate.getTime() - 30 * 24 * 60 * 60 * 1000
+                );
+                endDate = currentDate;
+                break;
+            case "3months":
+                startDate = new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() - 3,
+                    currentDate.getDate()
+                );
+                endDate = currentDate;
+                break;
+            case "6months":
+                startDate = new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() - 6,
+                    currentDate.getDate()
+                );
+                endDate = currentDate;
+                break;
+            case "1year":
+                startDate = new Date(
+                    currentDate.getFullYear() - 1,
+                    currentDate.getMonth(),
+                    currentDate.getDate()
+                );
+                endDate = currentDate;
+                break;
+            default:
+                startDate = new Date(0); // Beginning of time
+                endDate = currentDate;
+        }
+
+        whereClause.date_of_transaction = {
+            gte: startDate,
+            lte: endDate,
+        };
+    }
+
+    if (statusFilter !== "all") {
+        whereClause.status =
+            statusFilter === "fullypaid"
+                ? TransactionStatus.FULLY_PAID
+                : TransactionStatus.IN_PROGRESS;
     }
 
     return prisma.transaction.findMany({

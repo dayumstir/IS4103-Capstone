@@ -6,6 +6,7 @@ import { Provider as AntProvider, View } from "@ant-design/react-native";
 import enUS from "@ant-design/react-native/lib/locale-provider/en_US";
 import Toast, { SuccessToast, ErrorToast } from "react-native-toast-message";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function RootLayout() {
   const toastConfig = {
@@ -49,20 +50,25 @@ export default function RootLayout() {
       }}
     >
       <ReduxProvider store={store}>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerTitle: "Index" }} />
-          <Stack.Screen name="login" options={{ headerTitle: "Login" }} />
-          <Stack.Screen name="register" options={{ headerTitle: "Register" }} />
-          <Stack.Screen
-            name="confirmation"
-            options={{ headerTitle: "Email Confirmation" }}
-          />
-          <Stack.Screen
-            name="(authenticated)"
-            options={{ headerShown: false, title: "Back" }}
-          />
-        </Stack>
-        <Toast config={toastConfig} topOffset={60} visibilityTime={2000} />
+        <GestureHandlerRootView>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerTitle: "Index" }} />
+            <Stack.Screen name="login" options={{ headerTitle: "Login" }} />
+            <Stack.Screen
+              name="register"
+              options={{ headerTitle: "Register" }}
+            />
+            <Stack.Screen
+              name="confirmation"
+              options={{ headerTitle: "Email Confirmation" }}
+            />
+            <Stack.Screen
+              name="(authenticated)"
+              options={{ headerShown: false, title: "Back" }}
+            />
+          </Stack>
+          <Toast config={toastConfig} topOffset={60} visibilityTime={2000} />
+        </GestureHandlerRootView>
       </ReduxProvider>
     </AntProvider>
   );
