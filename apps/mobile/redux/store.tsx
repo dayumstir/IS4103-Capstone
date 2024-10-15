@@ -1,8 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
-import { authMiddleware } from "./authMiddleware";
-
 import customerAuthReducer from "./features/customerAuthSlice";
 import customerReducer from "./features/customerSlice";
 import paymentStageReducer from "./features/paymentStageSlice";
@@ -36,7 +34,6 @@ export const store = configureStore({
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: customSerializableCheck }).concat(
-      authMiddleware,
       customerAuthApi.middleware,
       customerApi.middleware,
       transactionApi.middleware,
