@@ -63,7 +63,13 @@ const TransactionScreen: React.FC = () => {
 
   useEffect(() => {
     fetchFilteredTransactions();
-  }, [filter]);
+    if (filteredTransactions) {
+      setTransactions(filteredTransactions);
+    }
+    if (search) {
+      setSearchTerm(search);
+    }
+  }, [filter, search, filteredTransactions]);
 
   useEffect(() => {
     if (merchant) {

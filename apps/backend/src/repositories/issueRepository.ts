@@ -13,10 +13,12 @@ export const getIssues = async (issueFilter: IssueFilter) => {
     return prisma.issue.findMany({
         where: {
             ...filter,
-            ...(create_from && { create_time: { gte: create_from } }),
-            ...(create_to && { create_time: { lte: create_to } }),
-            ...(update_from && { updated_at: { gte: update_from } }),
-            ...(update_to && { updated_at: { lte: update_to } }),
+            AND: [
+                { create_time: { lte: create_to } },
+                { create_time: { gte: create_from } },
+                { updated_at: { gte: update_from } },
+                { updated_at: { lte: update_to } },
+            ],
             ...(search_term && {
                 OR: [
                     { title: { contains: search_term, mode: "insensitive" } },
