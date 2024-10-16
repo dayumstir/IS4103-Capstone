@@ -21,6 +21,7 @@ import BottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { Button } from "@ant-design/react-native";
+import { TransactionStatus } from "@repo/interfaces";
 
 export default function AllTransactions() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -118,17 +119,23 @@ export default function AllTransactions() {
                             ? `${t.merchant.name.slice(0, 20)}...`
                             : t.merchant?.name || "Unknown Merchant"}
                         </Text>
-                        <Text className="text-sm text-gray-500">
-                          {t.instalment_plan?.number_of_instalments || "N/A"}{" "}
-                          payments x{" "}
-                          {t.instalment_plan
-                            ? (
-                                (t.instalment_plan.time_period * 7) /
-                                t.instalment_plan.number_of_instalments
-                              ).toFixed(1)
-                            : "N/A"}{" "}
-                          days
-                        </Text>
+                        <View className="mt-1 flex-row items-center gap-2">
+                          <Text className="text-sm text-gray-500">
+                            {t.instalment_plan?.number_of_instalments || "N/A"}{" "}
+                            payments
+                          </Text>
+                          <View
+                            className={`rounded-full px-2 py-1 ${t.status === TransactionStatus.IN_PROGRESS ? "bg-yellow-100" : "bg-emerald-100"}`}
+                          >
+                            <Text
+                              className={`text-xs font-medium ${t.status === TransactionStatus.IN_PROGRESS ? "text-amber-600" : "text-emerald-600"}`}
+                            >
+                              {t.status === TransactionStatus.IN_PROGRESS
+                                ? "In Progress"
+                                : "Fully Paid"}
+                            </Text>
+                          </View>
+                        </View>
                       </View>
                     </View>
                     <Text className="text-base font-medium text-red-600">
