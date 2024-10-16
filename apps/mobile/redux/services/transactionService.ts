@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ITransaction } from "@repo/interfaces";
+import { ITransaction, TransactionResult } from "@repo/interfaces";
 import { RootState } from "../store"; // Make sure this import path is correct
 import { API_URL } from "../../config/apiConfig";
 
@@ -24,14 +24,7 @@ export const transactionApi = createApi({
     // Create Transaction
     createTransaction: builder.mutation<
       ITransaction,
-      Omit<
-        ITransaction,
-        | "transaction_id"
-        | "customer"
-        | "merchant"
-        | "instalment_plan"
-        | "instalment_payments"
-      >
+      Omit<ITransaction, "transaction_id">
     >({
       query: (newTransaction) => ({
         url: "/",
@@ -42,14 +35,14 @@ export const transactionApi = createApi({
     }),
 
     // Get Customer Transactions
-    getCustomerTransactions: builder.query<ITransaction[], string>({
+    getCustomerTransactions: builder.query<TransactionResult[], string>({
       query: (searchQuery = "") => `customer?search=${searchQuery}`,
       providesTags: ["TransactionsList"],
       keepUnusedDataFor: 0,
     }),
 
     // Get Transaction by Id
-    getTransactionById: builder.query<ITransaction, string>({
+    getTransactionById: builder.query<TransactionResult, string>({
       query: (transactionId) => `/${transactionId}`,
     }),
   }),

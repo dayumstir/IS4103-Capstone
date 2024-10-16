@@ -8,7 +8,12 @@ export {
     MerchantStatus,
 } from "./merchantInterface";
 export { sortDirection, Sorting } from "./sortingInterface";
-export { ITransaction, TransactionStatus } from "./transactionInterface";
+export {
+    ITransaction,
+    TransactionFilter,
+    TransactionResult,
+    TransactionStatus,
+} from "./transactionInterface";
 export { IVoucher, IVoucherAssigned, VoucherStatus } from "./voucherInterface";
 export {
     IInstalmentPayment,

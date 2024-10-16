@@ -1,21 +1,16 @@
 // Handles database operations related to transactions
 import { prisma } from "./db";
 import {
-    ITransactionCustomer,
-    ITransactionMerchant,
+    ITransaction,
     TransactionStatus,
     TransactionFilter,
-} from "@repo/interfaces/transactionInterface";
-import {
     IInstalmentPayment,
     InstalmentPaymentStatus,
-} from "@repo/interfaces/instalmentPaymentInterface";
+} from "@repo/interfaces";
 import { addMilliseconds, endOfDay } from "date-fns";
 
 // Create a new transaction in db
-export const createTransaction = async (
-    transactionData: ITransactionCustomer
-) => {
+export const createTransaction = async (transactionData: ITransaction) => {
     // Get the instalment plan by id
     const instalmentPlan = await prisma.instalmentPlan.findUnique({
         where: { instalment_plan_id: transactionData.instalment_plan_id },
@@ -304,8 +299,8 @@ export const findTransactionsByFilter = async (
     });
 };
 
-// Find transaction by id (unique attribute) in db for web-merchant
-export const findTransactionByIdMerchant = async (transaction_id: string) => {
+// Find transaction by id (unique attribute) in db
+export const findTransactionById = async (transaction_id: string) => {
     return prisma.transaction.findUnique({
         where: { transaction_id },
         include: {
@@ -322,6 +317,11 @@ export const findTransactionByIdMerchant = async (transaction_id: string) => {
                     email: true,
                 },
             },
+            instalment_payments: {
+                orderBy: {
+                    due_date: "asc",
+                },
+            },
             issues: {
                 select: {
                     issue_id: true,
@@ -335,26 +335,10 @@ export const findTransactionByIdMerchant = async (transaction_id: string) => {
     });
 };
 
-// Find transaction by id (unique attribute) in db for customer
-export const findTransactionByIdCustomer = async (transaction_id: string) => {
-    return prisma.transaction.findUnique({
-        where: { transaction_id },
-        include: {
-            merchant: true,
-            instalment_plan: true,
-            instalment_payments: {
-                orderBy: {
-                    due_date: "asc",
-                },
-            },
-        },
-    });
-};
-
 // Update transaction in db
 export const updateTransaction = async (
     transaction_id: string,
-    updateData: Partial<ITransactionMerchant>
+    updateData: Partial<ITransaction>
 ) => {
     return prisma.transaction.update({
         where: { transaction_id: transaction_id },

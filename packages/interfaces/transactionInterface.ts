@@ -1,6 +1,3 @@
-// Defines the structure of a transaction object
-
-import { ICustomer } from "./customerInterface";
 import { IInstalmentPayment } from "./instalmentPaymentInterface";
 import { IInstalmentPlan } from "./instalmentPlanInterface";
 import { IMerchant } from "./merchantInterface";
@@ -8,32 +5,11 @@ import { IssueStatus } from "./issueInterface";
 import { Sorting } from "./sortingInterface";
 
 export enum TransactionStatus {
-  FULLY_PAID = "FULLY_PAID",
-  IN_PROGRESS = "IN_PROGRESS",
+    FULLY_PAID = "FULLY_PAID",
+    IN_PROGRESS = "IN_PROGRESS",
 }
 
-export interface ITransactionCustomer {
-  transaction_id: string;
-  amount: number;
-  date_of_transaction: Date;
-  status: TransactionStatus;
-  fully_paid_date: Date | null;
-  reference_no: string;
-  cashback_percentage: number;
-
-  customer_id: string;
-  customer: ICustomer;
-
-  merchant_id: string;
-  merchant: IMerchant;
-
-  instalment_plan_id: string;
-  instalment_plan: IInstalmentPlan;
-
-  instalment_payments: IInstalmentPayment[];
-}
-
-export interface ITransactionMerchant {
+export interface ITransaction {
     transaction_id: string;
     amount: number;
     date_of_transaction: Date;
@@ -72,8 +48,10 @@ export interface TransactionResult {
     cashback_percentage: number;
 
     customer: CustomerInfo;
+    merchant: IMerchant;
     instalment_plan: IInstalmentPlan;
     issues: IssueInfo[];
+    instalment_payments: IInstalmentPayment[];
 }
 
 interface CustomerInfo {
