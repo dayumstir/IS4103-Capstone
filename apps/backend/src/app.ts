@@ -13,6 +13,7 @@ import customerRoutes from "./routes/customerRoutes";
 import instalmentPlanRoutes from "./routes/instalmentPlanRoutes";
 import issueRoutes from "./routes/issueRoutes";
 import merchantRoutes from "./routes/merchantRoutes";
+import paymentRoutes from "./routes/paymentRoutes";
 import transactionRoutes from "./routes/transactionRoutes";
 import voucherRoutes from "./routes/voucherRoutes";
 import instalmentPaymentRoutes from "./routes/instalmentPaymentRoutes";
@@ -20,6 +21,7 @@ import instalmentPaymentRoutes from "./routes/instalmentPaymentRoutes";
 // Import error handler middleware
 import { errorHandler } from "./middlewares/errorHandler";
 import logger from "./utils/logger";
+import { handleStripeWebhook } from "./controllers/webhookController"; 
 
 // Load environment variables at the start
 dotenv.config();
@@ -28,6 +30,9 @@ const app = express();
 
 // Middleware setup
 app.use(cors());
+
+app.post('/webhook/stripe', express.raw({ type: 'application/json' }), handleStripeWebhook);
+
 app.use(express.json()); // Built-in body-parser in Express
 app.use(express.urlencoded({ extended: true }));
 
@@ -49,6 +54,7 @@ app.use("/customer", customerRoutes);
 app.use("/instalmentPlan", instalmentPlanRoutes);
 app.use("/issue", issueRoutes);
 app.use("/merchant", merchantRoutes);
+app.use("/payment", paymentRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/voucher", voucherRoutes);
 app.use("/instalment-payment", instalmentPaymentRoutes);

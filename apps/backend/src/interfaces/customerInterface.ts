@@ -9,7 +9,9 @@ export interface ICustomer {
     contact_number: string;
     address: string;
     date_of_birth: Date;
-    status: CustomerStatus;   
+    status: CustomerStatus;  
+    wallet_balance: number; 
     credit_score: number;
+    
     credit_tier_id: string;
 }

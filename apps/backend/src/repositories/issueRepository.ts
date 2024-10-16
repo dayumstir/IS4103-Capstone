@@ -1,6 +1,6 @@
 // Handles database operations related to instalment plans
 import { prisma } from "./db";
-import { IIssue, IssueFilter } from "../interfaces/issueInterface";
+import { IIssue, IssueFilter } from "../../../../packages/interfaces/issueInterface";
 
 // Create a new instalment plan in db
 export const createIssue = async (issueData: IIssue) => {
@@ -13,10 +13,12 @@ export const getIssues = async (issueFilter: IssueFilter) => {
     return prisma.issue.findMany({
         where: {
             ...filter,
-            ...(create_from && { create_time: { gte: create_from } }),
-            ...(create_to && { create_time: { lte: create_to } }),
-            ...(update_from && { updated_at: { gte: update_from } }),
-            ...(update_to && { updated_at: { lte: update_to } }),
+            AND: [
+                { create_time: { lte: create_to } },
+                { create_time: { gte: create_from } },
+                { updated_at: { gte: update_from } },
+                { updated_at: { lte: update_to } },
+            ],
             ...(search_term && {
                 OR: [
                     { title: { contains: search_term, mode: "insensitive" } },
@@ -29,6 +31,7 @@ export const getIssues = async (issueFilter: IssueFilter) => {
             issue_id: true,
             title: true,
             description: true,
+            category: true,
             outcome: true,
             status: true,
             create_time: true,
@@ -36,12 +39,14 @@ export const getIssues = async (issueFilter: IssueFilter) => {
             merchant_id: true,
             customer_id: true,
             admin_id: true,
+
+            transaction: true,
         },
     });
 };
 
 export const findIssueById = async (issue_id: string) => {
-    return prisma.issue.findUnique({ where: { issue_id } });
+    return prisma.issue.findUnique({ where: { issue_id }, include: { transaction: true } });
 };
 
 // update issue

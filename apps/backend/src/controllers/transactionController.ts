@@ -38,6 +38,16 @@ export const getCustomerTransactions = async (req: Request, res: Response) => {
     }
 };
 
+// Get Transactions (to replace getUserTransactions to include filter of transactions)
+export const getTransactionsByFilter = async (req: Request, res: Response) => {
+    try {
+        const transactions = await transactionService.getTransactionByFilter(req.body);
+        res.status(201).json(transactions);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 // Get Transaction
 export const getTransaction = async (req: Request, res: Response) => {
     try {
@@ -45,6 +55,19 @@ export const getTransaction = async (req: Request, res: Response) => {
             req.params.transaction_id
         );
         res.status(200).json(transaction);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+// Edit Transaction
+export const editTransaction = async (req: Request, res: Response) => {
+    try {
+        const updatedTransaction = await transactionService.updateTransaction(
+            req.params.transaction_id,
+            req.body
+        );
+        res.status(200).json(updatedTransaction);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }

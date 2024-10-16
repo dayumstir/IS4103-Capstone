@@ -4,14 +4,15 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import {
   IIssue,
   IssueFilter,
+  IssueResult,
   IssueStatus,
-} from "../../interfaces/models/issueInterface";
+} from "../../../../../packages/interfaces/issueInterface";
 import BaseQueryWithAuthCheck from "../utils.tsx/baseQuery";
 
 // Define a service using a base URL and expected endpoints
 export const issueApi = createApi({
   reducerPath: "issueApi",
-  baseQuery: BaseQueryWithAuthCheck("http://localhost:3000/issue"),
+  baseQuery: BaseQueryWithAuthCheck("/issue"),
   endpoints: (builder) => ({
     createIssue: builder.mutation<IIssue, FormData>({
       query: (body) => ({
@@ -20,13 +21,13 @@ export const issueApi = createApi({
         body: body,
       }),
     }),
-    getIssue: builder.query<IIssue, string>({
+    getIssue: builder.query<IssueResult, string>({
       query: (id) => ({
         url: `/${id}`,
         method: "GET",
       }),
     }),
-    getIssues: builder.mutation<IIssue[], IssueFilter>({
+    getIssues: builder.mutation<IssueResult[], IssueFilter>({
       query: (body) => ({
         url: "/list",
         method: "POST",

@@ -8,26 +8,23 @@ import {
 } from "antd";
 import { Buffer } from "buffer";
 import React from "react";
-import { useParams } from "react-router-dom";
-import { useGetAdminQuery } from "../redux/services/admin";
-import { useGetCustomerQuery } from "../redux/services/customer";
+import { Link, useParams } from "react-router-dom";
+import { statusColorMap } from "../../../../packages/interfaces/issueInterface";
 import { useGetIssueQuery } from "../redux/services/issue";
-import { statusColorMap } from "../interfaces/models/issueInterface";
 
 const IssueDetailsScreen: React.FC = () => {
   const { issueId } = useParams<{ issueId: string }>();
   const { data: issue } = useGetIssueQuery(issueId || "", { skip: !issueId });
-  const { data: admin } = useGetAdminQuery(issue?.admin_id || "", {
-    skip: !issue?.admin_id,
-  });
-  const { data: customer } = useGetCustomerQuery(issue?.customer_id || "", {
-    skip: !issue?.customer_id,
-  });
   const basePath = location.pathname.replace(`/${issueId}`, "");
 
   const items: DescriptionsProps["items"] = [
     {
       key: "1",
+      label: "Issue ID",
+      children: issue?.issue_id,
+    },
+    {
+      key: "2",
       label: "Created At",
       children:
         issue?.create_time &&
@@ -37,7 +34,7 @@ const IssueDetailsScreen: React.FC = () => {
         new Date(issue?.create_time).toLocaleTimeString(),
     },
     {
-      key: "2",
+      key: "3",
       label: "Updated At",
       children:
         issue?.updated_at &&
@@ -45,6 +42,40 @@ const IssueDetailsScreen: React.FC = () => {
         new Date(issue?.updated_at).toLocaleTimeString(),
     },
   ];
+
+  const transactionItems: DescriptionsProps["items"] = issue &&
+    issue.transaction && [
+      {
+        key: "1",
+        label: "Transaction ID",
+        children: issue.transaction.transaction_id,
+      },
+      {
+        key: "2",
+        label: "Amount",
+        children: "SGD " + issue.transaction.amount,
+      },
+      {
+        key: "3",
+        label: "Date of Transaction",
+        children: `${new Date(issue.transaction.date_of_transaction).toDateString()}, ${new Date(issue.transaction.date_of_transaction).toLocaleTimeString()}`,
+      },
+      {
+        key: "4",
+        label: "Fully paid date",
+        children: `${new Date(issue.transaction.fully_paid_date).toDateString()}, ${new Date(issue.transaction.fully_paid_date).toLocaleTimeString()}`,
+      },
+      {
+        key: "5",
+        label: "Reference Number",
+        children: issue.transaction.reference_no,
+      },
+      {
+        key: "6",
+        label: "Status",
+        children: issue.transaction.status,
+      },
+    ];
 
   return (
     <div>
@@ -55,8 +86,8 @@ const IssueDetailsScreen: React.FC = () => {
             { title: "Issue Details" },
           ]}
         />
-        <div className="mt-5 grid grid-cols-2 gap-10">
-          <Descriptions title={issue?.title} items={items} />;
+        <div className="mt-5">
+          <Descriptions title={issue?.title} items={items} />
         </div>
       </Card>
       <Card className="mt-10">
@@ -94,6 +125,20 @@ const IssueDetailsScreen: React.FC = () => {
             <span style={{ color: "#9d9d9d" }}>No images</span>
           )}
         </div>
+        {transactionItems && (
+          <>
+            <div className="mt-10 flex items-center gap-x-10">
+              <p className="text-base font-semibold">Transaction Details</p>
+              <Link
+                to={`/financial-management/transactions/${issue?.transaction.transaction_id}`}
+                className="text-blue-500 hover:underline"
+              >
+                View Details
+              </Link>
+            </div>
+            <Descriptions items={transactionItems} />
+          </>
+        )}
       </Card>
     </div>
   );

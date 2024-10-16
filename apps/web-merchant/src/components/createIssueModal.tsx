@@ -9,24 +9,38 @@ import {
   Input,
   message,
   Modal,
+  Select,
   UploadFile,
   UploadProps,
 } from "antd";
 import Dragger from "antd/es/upload/Dragger";
 import { useState } from "react";
-import { IIssue } from "../interfaces/models/issueInterface";
+import {
+  IIssue,
+  IssueCategory,
+} from "../../../../packages/interfaces/issueInterface";
 import { useCreateIssueMutation } from "../redux/services/issue";
+import { RootState } from "../redux/store";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 interface CreateIssueModalProps {
   isModalOpen: boolean;
   setModalOpen: (isOpen: boolean) => void;
+  transactionId?: string;
 }
 const CreateIssueModal = ({
   isModalOpen,
   setModalOpen,
+  transactionId,
 }: CreateIssueModalProps) => {
   const [form] = Form.useForm();
   const [createIssueMutation, { isLoading }] = useCreateIssueMutation();
+  const merchant = useSelector((state: RootState) => state.profile.merchant);
+
+  const initialValues = {
+    category: transactionId && IssueCategory.TRANSACTION,
+  };
 
   const [imagesDisplays, setImagesDisplay] = useState<string[]>(
     Array(4).fill(""),
@@ -122,6 +136,8 @@ const CreateIssueModal = ({
     },
   };
 
+  const navigate = useNavigate();
+
   const onFinish: FormProps<IIssue>["onFinish"] = async (data) => {
     const formData = new FormData();
     formData.append("title", data.title);
@@ -131,20 +147,22 @@ const CreateIssueModal = ({
         formData.append("images", image); // Append each image without an index
       }
     });
-    const merchantId = localStorage.getItem("merchantId");
-    merchantId
-      ? formData.append("merchant_id", merchantId)
+    formData.append("category", data.category);
+    transactionId && formData.append("transaction_id", transactionId);
+    merchant
+      ? formData.append("merchant_id", merchant.merchant_id)
       : message.error("Merchant ID not found");
     data.customer_id && formData.append("customer_id", data.customer_id);
     data.admin_id && formData.append("admin_id", data.admin_id);
 
     await createIssueMutation(formData)
       .unwrap()
-      .then(() => {
+      .then((data) => {
         setModalOpen(false);
         message.success(
           "Your issue has been created. Please expect at least 3 working days for us to get back. Thank you!",
         );
+        navigate(`/business-management/issues/${data.issue_id}`);
       })
       .catch((error) => message.error(error.data.error));
   };
@@ -165,6 +183,7 @@ const CreateIssueModal = ({
         onFinish={onFinish}
         autoComplete="off"
         form={form}
+        initialValues={initialValues}
       >
         <Form.Item<IIssue>
           label="Title"
@@ -181,6 +200,32 @@ const CreateIssueModal = ({
         >
           <Input />
         </Form.Item>
+
+        <Form.Item<IIssue>
+          label="Category"
+          name="category"
+          rules={[{ required: true }]}
+        >
+          <Select
+            showSearch
+            placeholder="Select a category"
+            optionFilterProp="label"
+            // onChange={(value:string)=>{
+
+            // }}
+            // onSearch={onSearch}
+            options={Object.values(IssueCategory).map((category) => ({
+              value: category,
+              label: category.charAt(0) + category.slice(1).toLowerCase(), // Format label (e.g., "Account")
+            }))}
+          />
+        </Form.Item>
+
+        {transactionId && (
+          <Form.Item<IIssue> label="Transaction ID" name="transaction_id">
+            <Input disabled placeholder={transactionId} value={transactionId} />
+          </Form.Item>
+        )}
 
         <Form.Item label="Images">
           <Dragger {...props}>
@@ -202,38 +247,37 @@ const CreateIssueModal = ({
                   <Card
                     key={index}
                     className="my-5"
-                    style={{ width: 100, height: 150 }}
+                    style={{ width: 80, height: 120 }}
                     cover={
                       imageDisplay != "" && (
-                        <Image
-                          alt=""
-                          src={imageDisplay}
-                          height={70}
-                          className="object-cover"
-                        />
+                        <div className="relative">
+                          <Image
+                            alt=""
+                            src={imageDisplay}
+                            height={80}
+                            className="object-cover"
+                          />
+                          <Button
+                            onClick={() => {
+                              setImages((prevImages) => {
+                                const newImages = [...prevImages];
+                                newImages[index] = undefined;
+                                return newImages;
+                              });
+                              setImagesDisplay((prevDisplays) => {
+                                const newDisplays = [...prevDisplays];
+                                newDisplays[index] = "";
+                                return newDisplays;
+                              });
+                            }}
+                            className="mt-1 w-full" // Margin top for spacing, full width
+                          >
+                            <DeleteFilled />
+                          </Button>
+                        </div>
                       )
                     }
-                  >
-                    {imageDisplay && (
-                      <Button
-                        onClick={() => {
-                          setImages((prevImages) => {
-                            const newImages = [...prevImages];
-                            newImages[index] = undefined;
-                            return newImages;
-                          });
-                          setImagesDisplay((prevDisplays) => {
-                            const newDisplays = [...prevDisplays];
-                            newDisplays[index] = "";
-                            return newDisplays;
-                          });
-                          console.log(images);
-                        }}
-                      >
-                        <DeleteFilled />
-                      </Button>
-                    )}
-                  </Card>
+                  ></Card>
                 );
               })}
           </div>

@@ -1,12 +1,9 @@
 // Contains the business logic related to instalment plans
-import { IIssue, IssueFilter, IssueStatus } from "../interfaces/issueInterface";
+import { IIssue, IssueFilter, IssueStatus } from "../../../../packages/interfaces/issueInterface";
 import * as issueRepository from "../repositories/issueRepository";
 import logger from "../utils/logger";
 
-export const createIssue = async (
-    issueData: IIssue,
-    issueImages?: Buffer[]
-) => {
+export const createIssue = async (issueData: IIssue, issueImages?: Buffer[]) => {
     logger.info("Executing createIssue...");
     const issue = await issueRepository.createIssue({
         ...issueData,
@@ -30,10 +27,7 @@ export const getIssueById = async (issue_id: string) => {
     return issue;
 };
 
-export const updateIssue = async (
-    issue_id: string,
-    updateData: Partial<IIssue>
-) => {
+export const updateIssue = async (issue_id: string, updateData: Partial<IIssue>) => {
     logger.info("Executing updateIssue...");
 
     const issue = await issueRepository.updateIssue(issue_id, updateData);

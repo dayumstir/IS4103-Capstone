@@ -51,6 +51,16 @@ export const getAllCustomers = async () => {
     return customers;
 };
 
+// Update the customer's wallet balance
+export const topUpWallet = async (customer_id: string, amount: number) => {
+    logger.info(`Topping up wallet balance for customer: ${customer_id}`, customer_id);
+    const customer = await customerRepository.topUpWallet(customer_id, amount);
+    if (!customer) {
+        throw new NotFoundError("Customer not found");
+    }
+    return customer;
+};
+
 // Search customers
 export const searchCustomers = async (searchQuery: string) => {
     logger.info(`Searching for customers with query: ${searchQuery}`);
@@ -64,10 +74,7 @@ export const searchCustomers = async (searchQuery: string) => {
 };
 
 // Update the customer's profile picture in the database
-export const updateProfilePicture = async (
-    customerId: string,
-    profilePictureBuffer: Buffer
-) => {
+export const updateProfilePicture = async (customerId: string, profilePictureBuffer: Buffer) => {
     logger.info("Updating profile picture for customer:", customerId);
 
     // Update the profile picture in the database
