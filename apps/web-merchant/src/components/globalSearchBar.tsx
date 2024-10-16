@@ -1,33 +1,29 @@
+import { ArrowRightOutlined, ExpandOutlined } from "@ant-design/icons";
 import {
   Button,
   Card,
-  Checkbox,
   Collapse,
   CollapseProps,
-  Drawer,
   Input,
   message,
   Popover,
   Spin,
 } from "antd";
 import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   IssueFilter,
-  IIssue,
   IssueResult,
 } from "../../../../packages/interfaces/issueInterface";
+import {
+  TransactionFilter,
+  TransactionResult,
+} from "../../../../packages/interfaces/transactionInterface";
 import { sortDirection } from "../interfaces/sortingInterface";
 import { useGetIssuesMutation } from "../redux/services/issue";
 import { useGetTransactionsByFilterMutation } from "../redux/services/transaction";
 import { RootState } from "../redux/store";
-import { useSelector } from "react-redux";
-import {
-  ITransaction,
-  TransactionFilter,
-  TransactionResult,
-} from "../../../../packages/interfaces/transactionInterface";
-import { ExpandOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import GlobalSearchDrawer from "./globalSearchDrawer";
 
 const GlobalSearchBar: React.FC = () => {
@@ -153,15 +149,24 @@ const GlobalSearchBar: React.FC = () => {
           }}
           className="my-1"
         >
-          <p className="line-clamp-1">
-            <b>{issue.title}</b>
-          </p>
-          <p className="line-clamp-2">{issue.description}</p>
-          <p style={{ color: "#9d9d9d" }}>
-            {issue?.create_time
-              ? `${new Date(issue.create_time).toDateString()}, ${new Date(issue.create_time).toLocaleTimeString()}`
-              : "No Date Available"}
-          </p>
+          <div className="grid gap-2">
+            <div className="flex">
+              <p className="w-2/5 font-bold">Title:</p>
+              <p className="line-clamp-1 flex-1">{issue.title}</p>
+            </div>
+            <div className="flex">
+              <p className="w-2/5 font-bold">Description:</p>
+              <p className="line-clamp-2 flex-1">{issue.description}</p>
+            </div>
+            <div className="flex">
+              <p className="w-2/5 font-bold">Created At:</p>
+              <p className="flex-1 text-gray-500">
+                {issue?.create_time
+                  ? `${new Date(issue.create_time).toDateString()}, ${new Date(issue.create_time).toLocaleTimeString()}`
+                  : "No Date Available"}
+              </p>
+            </div>
+          </div>
         </Card>
       )),
     },
@@ -202,14 +207,47 @@ const GlobalSearchBar: React.FC = () => {
           }}
           className="my-1"
         >
-          <p className="line-clamp-1">
-            <b>{transaction.reference_no}</b>
-          </p>
-          <p className="line-clamp-2">{transaction.amount}</p>
-          <p style={{ color: "#9d9d9d" }}>
-            {transaction?.date_of_transaction &&
-              `${new Date(transaction.date_of_transaction).toDateString()}, ${new Date(transaction.date_of_transaction).toLocaleTimeString()}`}
-          </p>
+          <div className="grid gap-2">
+            <div className="flex">
+              <p className="w-1/3 font-bold">Ref No:</p>
+              <p className="line-clamp-1 flex-1">{transaction.reference_no}</p>
+            </div>
+            <div className="flex">
+              <p className="w-1/3 font-bold">Amount:</p>
+              <p className="line-clamp-2 flex-1">SGD {transaction.amount}</p>
+            </div>
+            <div className="flex">
+              <p className="w-1/3 font-bold">Cashback:</p>
+              <p className="flex-1 text-gray-500">
+                {transaction?.cashback_percentage}%
+              </p>
+            </div>
+            <div className="flex">
+              <p className="w-1/3 font-bold">Instalment Plan:</p>
+              <p className="flex-1 text-gray-500">
+                {transaction.instalment_plan.name}
+              </p>
+            </div>
+            <div className="flex">
+              <p className="w-1/3 font-bold">Customer:</p>
+              <p>
+                <p className="w-1/3 flex-1 text-gray-500">
+                  {transaction?.customer.name}
+                </p>
+                <p className="flex-1 text-gray-500">
+                  {transaction?.customer.email}
+                </p>
+              </p>
+            </div>
+            <div className="flex">
+              <p className="w-1/3 font-bold">Date:</p>
+              <p className="flex-1 text-gray-500">
+                {transaction?.date_of_transaction
+                  ? `${new Date(transaction.date_of_transaction).toDateString()}, ${new Date(transaction.date_of_transaction).toLocaleTimeString()}`
+                  : "No Date Available"}
+              </p>
+            </div>
+          </div>
         </Card>
       )),
     },
@@ -227,7 +265,7 @@ const GlobalSearchBar: React.FC = () => {
           {(issues && issues.length > 0) ||
           (transactions && transactions.length > 0) ? (
             <div className="flex items-center justify-between">
-              <div></div>
+              <div>Search Results</div>
               <Button
                 icon={<ExpandOutlined />}
                 onClick={() => {
@@ -235,6 +273,7 @@ const GlobalSearchBar: React.FC = () => {
                   setIsOpen(false);
                 }}
                 className="mb-2"
+                size="small"
               />
             </div>
           ) : null}
@@ -277,7 +316,7 @@ const GlobalSearchBar: React.FC = () => {
         content={popoverContent}
         arrow={false}
         open={isOpen}
-        className="w-100 m-10"
+        className="m-10"
       >
         <Search
           placeholder="Search..."
