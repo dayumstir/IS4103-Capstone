@@ -52,7 +52,7 @@ export default function TransactionDetails() {
             {transaction.instalment_plan.number_of_instalments} Instalment
             Payments
           </Text>
-          <View className="mt-4 h-2 w-full overflow-hidden rounded-full bg-blue-700">
+          <View className="mt-4 h-2 w-full rounded-full bg-blue-700">
             <View
               className="h-full rounded-full bg-white"
               style={{

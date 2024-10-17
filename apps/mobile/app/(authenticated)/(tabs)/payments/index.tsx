@@ -71,7 +71,7 @@ export default function PaymentsPage() {
         </TouchableOpacity>
       </View>
 
-      {/* ===== Available Balance & Outstanding Payments ===== */}
+      {/* ===== Wallet Balance & Outstanding Payments ===== */}
       <LinearGradient
         colors={["#3b82f6", "#9333ea"]}
         start={{ x: 0, y: 0.5 }}
@@ -85,7 +85,7 @@ export default function PaymentsPage() {
         <View className="mb-4 flex-row items-center justify-between">
           <View>
             <Text className="text-sm font-semibold text-white">
-              Available Balance
+              Wallet Balance
             </Text>
             <Text className="text-3xl font-bold text-white">
               {formatCurrency(balance)}
@@ -192,7 +192,11 @@ export default function PaymentsPage() {
       {/* ===== Recent Transactions ===== */}
       <View className="mx-4 mb-4 rounded-xl bg-white p-8">
         <Text className="mb-2 text-xl font-bold">Recent Transactions</Text>
-        {transactions && (
+        {isTransactionsLoading ? (
+          <View className="items-center justify-center py-4">
+            <ActivityIndicator size="large" />
+          </View>
+        ) : transactions && transactions.length > 0 ? (
           <>
             {transactions.slice(0, 3).map((transaction) => (
               <TouchableOpacity
@@ -226,16 +230,23 @@ export default function PaymentsPage() {
                 </View>
               </TouchableOpacity>
             ))}
+            <Button
+              type="primary"
+              onPress={() => router.push("/payments/allTransactions")}
+            >
+              <Text className="font-semibold text-white">
+                View All Transactions
+              </Text>
+            </Button>
           </>
+        ) : (
+          <View className="items-center gap-2 px-8 py-4">
+            <Text className="text-center font-medium leading-6 text-gray-500">
+              You have no recent transactions
+            </Text>
+            <Text className="text-center text-4xl">😊</Text>
+          </View>
         )}
-        <Button
-          type="primary"
-          onPress={() => router.push("/payments/allTransactions")}
-        >
-          <Text className="font-semibold text-white">
-            View All Transactions
-          </Text>
-        </Button>
       </View>
     </ScrollView>
   );

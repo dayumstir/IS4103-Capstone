@@ -203,10 +203,8 @@ export default function AllTransactions() {
             onPress={() => onSelect(option.value)}
           >
             <Text
-              className={`text-sm ${
-                selectedValue === option.value
-                  ? "font-semibold text-white"
-                  : "text-gray-700"
+              className={`text-sm font-semibold ${
+                selectedValue === option.value ? "text-white" : "text-gray-700"
               }`}
             >
               {option.label}
@@ -324,6 +322,14 @@ export default function AllTransactions() {
                 color="#d1d5db"
                 className="absolute left-4 top-2"
               />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity
+                  className="absolute right-4 top-2"
+                  onPress={() => setSearchQuery("")}
+                >
+                  <Ionicons name="close-circle" size={20} color="#9ca3af" />
+                </TouchableOpacity>
+              )}
             </View>
             <TouchableOpacity
               className="p-2"

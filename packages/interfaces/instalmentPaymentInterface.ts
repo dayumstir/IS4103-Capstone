@@ -1,4 +1,4 @@
-import { ITransaction } from "./transactionInterface";
+import { TransactionResult } from "./transactionInterface";
 import { IVoucherAssigned } from "./voucherInterface";
 import { ICashbackWallet } from "./cashbackWalletInterface";
 
@@ -12,7 +12,7 @@ export interface IInstalmentPayment {
     instalment_number: number;
 
     transaction_id: string;
-    transaction: ITransaction;
+    transaction: TransactionResult;
 
     voucher_assigned_id?: string;
     voucher_assigned?: IVoucherAssigned;

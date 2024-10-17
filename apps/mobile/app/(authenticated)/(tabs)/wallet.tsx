@@ -1,32 +1,33 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollView, Text, View, TextInput, Linking } from 'react-native';
-import { StripeProvider, useStripe } from '@stripe/stripe-react-native';
-import { Button } from '@ant-design/react-native';
-import Toast from 'react-native-toast-message';
+import { useState, useEffect, useCallback } from "react";
+import { ScrollView, Text, View, TextInput, Linking } from "react-native";
+import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
+import { Button } from "@ant-design/react-native";
+import Toast from "react-native-toast-message";
 
-import { useCreatePaymentIntentMutation } from '../../../redux/services/paymentService';
-import { useGetProfileQuery } from '../../../redux/services/customerService';
-import { STRIPE_PUBLISHABLE_KEY } from '@env';
+import { useCreatePaymentIntentMutation } from "../../../redux/services/paymentService";
+import { useGetProfileQuery } from "../../../redux/services/customerService";
+import { STRIPE_PUBLISHABLE_KEY } from "@env";
 
-import { useForm, Controller } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 // Define Zod schema for validation
 const topUpSchema = z.object({
   amount: z
     .string()
-    .min(1, 'Amount is required')
+    .min(1, "Amount is required")
     .refine((val) => {
       const num = parseFloat(val);
       return !isNaN(num) && num > 0;
-    }, 'Please enter a valid positive amount'),
+    }, "Please enter a valid positive amount"),
 });
 
 type TopUpFormValues = z.infer<typeof topUpSchema>;
 
 export default function WalletPage() {
-  const { initPaymentSheet, presentPaymentSheet, handleURLCallback } = useStripe();
+  const { initPaymentSheet, presentPaymentSheet, handleURLCallback } =
+    useStripe();
   const [loading, setLoading] = useState(false);
   const { data: profile, refetch } = useGetProfileQuery();
   const [createPaymentIntent] = useCreatePaymentIntentMutation();
@@ -42,13 +43,15 @@ export default function WalletPage() {
 
   // Ensure publishable key is available
   if (!STRIPE_PUBLISHABLE_KEY) {
-    console.error('Stripe publishable key is missing');
+    console.error("Stripe publishable key is missing");
     return null;
   }
 
   // Fetch payment sheet parameters from backend
   const fetchPaymentSheetParams = async (amount: string) => {
-    const response = await createPaymentIntent({ amount: Number(amount) }).unwrap();
+    const response = await createPaymentIntent({
+      amount: Number(amount),
+    }).unwrap();
     const { paymentIntent, ephemeralKey, customer } = response;
 
     return { paymentIntent, ephemeralKey, customer };
@@ -56,14 +59,15 @@ export default function WalletPage() {
 
   // Initialize payment sheet
   const initializePaymentSheet = async (amount: string) => {
-    const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams(amount);
+    const { paymentIntent, ephemeralKey, customer } =
+      await fetchPaymentSheetParams(amount);
 
     const { error } = await initPaymentSheet({
-      merchantDisplayName: 'Panda Pay',
+      merchantDisplayName: "Panda Pay",
       customerId: customer,
       customerEphemeralKeySecret: ephemeralKey,
       paymentIntentClientSecret: paymentIntent,
-      returnURL: 'panda://stripe-redirect',
+      returnURL: "panda://stripe-redirect",
       // Additional configurations if needed
     });
 
@@ -74,22 +78,22 @@ export default function WalletPage() {
 
   // Open payment sheet
   const openPaymentSheet = async () => {
-    console.log('Opening payment sheet...');
+    console.log("Opening payment sheet...");
     const { error } = await presentPaymentSheet();
 
     if (error) {
-      if (error.code === 'Canceled') {
+      if (error.code === "Canceled") {
         // User canceled the payment
         Toast.show({
-          type: 'info',
-          text1: 'Payment canceled',
-          text2: 'You have canceled the payment.',
+          type: "info",
+          text1: "Payment canceled",
+          text2: "You have canceled the payment.",
         });
       } else {
-        console.error('Payment failed:', error);
+        console.error("Payment failed:", error);
         Toast.show({
-          type: 'error',
-          text1: 'Payment failed',
+          type: "error",
+          text1: "Payment failed",
           text2: error.message,
         });
       }
@@ -97,8 +101,8 @@ export default function WalletPage() {
       setLoading(false);
     } else {
       Toast.show({
-        type: 'success',
-        text1: 'Payment successful',
+        type: "success",
+        text1: "Payment successful",
       });
       // Refresh wallet balance
       refetch();
@@ -118,10 +122,10 @@ export default function WalletPage() {
       await initializePaymentSheet(amount);
       await openPaymentSheet();
     } catch (error: any) {
-      console.error('Error topping up wallet:', error);
+      console.error("Error topping up wallet:", error);
       Toast.show({
-        type: 'error',
-        text1: 'Error',
+        type: "error",
+        text1: "Error",
         text2: error.message,
       });
       setLoading(false);
@@ -142,7 +146,7 @@ export default function WalletPage() {
         }
       }
     },
-    [handleURLCallback]
+    [handleURLCallback],
   );
 
   // Listen for incoming links
@@ -156,9 +160,12 @@ export default function WalletPage() {
     getUrlAsync();
 
     // Set up an event listener for incoming links
-    const deepLinkListener = Linking.addEventListener('url', (event: { url: string }) => {
-      handleDeepLink(event.url);
-    });
+    const deepLinkListener = Linking.addEventListener(
+      "url",
+      (event: { url: string }) => {
+        handleDeepLink(event.url);
+      },
+    );
 
     return () => deepLinkListener.remove();
   }, [handleDeepLink]);
@@ -166,9 +173,11 @@ export default function WalletPage() {
   return (
     <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
       <ScrollView>
-        <View className="mx-4 flex gap-4 rounded-lg bg-white p-8">
+        <View className="m-4 flex gap-4 rounded-lg bg-white p-8">
           <Text className="mb-4 text-2xl font-bold">Wallet Details</Text>
-          <Text className="text-lg">Current Balance: ${profile?.wallet_balance.toFixed(2)}</Text>
+          <Text className="text-lg">
+            Current Balance: ${profile?.wallet_balance.toFixed(2)}
+          </Text>
 
           <Text className="mb-2 font-semibold">Amount</Text>
           <Controller
@@ -185,7 +194,9 @@ export default function WalletPage() {
                   keyboardType="numeric"
                 />
                 {errors.amount && (
-                  <Text className="mt-1 text-red-500">{errors.amount.message}</Text>
+                  <Text className="mt-1 text-red-500">
+                    {errors.amount.message}
+                  </Text>
                 )}
               </View>
             )}
@@ -197,7 +208,7 @@ export default function WalletPage() {
             disabled={!STRIPE_PUBLISHABLE_KEY || loading}
             loading={loading}
           >
-            Top Up
+            <Text className="font-semibold text-white">Top Up</Text>
           </Button>
         </View>
       </ScrollView>

@@ -32,7 +32,6 @@ model Customer {
   status          Status
   wallet_balance  Float    @default(0)
   credit_score    Int      @default(0)
-  wallet_balance  Float    @default(0)
 
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
@@ -272,15 +271,15 @@ enum IssueCategory {
 }
 
 model Issue {
-  issue_id    String      @id @default(cuid())
+  issue_id    String        @id @default(cuid())
   title       String
   description String
   category    IssueCategory
   outcome     String?
   status      IssueStatus
-  images      Bytes[]     @db.ByteA
-  create_time DateTime    @default(now())
-  updated_at  DateTime    @updatedAt
+  images      Bytes[]       @db.ByteA
+  create_time DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
 
   merchant_id    String? // Optional foreign key to Merchant
   customer_id    String? // Optional foreign key to Customer
