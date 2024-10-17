@@ -1,34 +1,31 @@
+import { ArrowRightOutlined, ExpandOutlined } from "@ant-design/icons";
 import {
   Button,
   Card,
-  Checkbox,
   Collapse,
   CollapseProps,
-  Drawer,
   Input,
   message,
   Popover,
   Spin,
 } from "antd";
 import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   IssueFilter,
-  IIssue,
   IssueResult,
 } from "../../../../packages/interfaces/issueInterface";
+import {
+  TransactionFilter,
+  TransactionResult,
+} from "../../../../packages/interfaces/transactionInterface";
 import { sortDirection } from "../interfaces/sortingInterface";
 import { useGetIssuesMutation } from "../redux/services/issue";
 import { useGetTransactionsByFilterMutation } from "../redux/services/transaction";
 import { RootState } from "../redux/store";
-import { useSelector } from "react-redux";
-import {
-  ITransaction,
-  TransactionFilter,
-  TransactionResult,
-} from "../../../../packages/interfaces/transactionInterface";
-import { ExpandOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import GlobalSearchDrawer from "./globalSearchDrawer";
+import Highlighter from "react-highlight-words";
 
 const GlobalSearchBar: React.FC = () => {
   const navigate = useNavigate();
@@ -123,6 +120,8 @@ const GlobalSearchBar: React.FC = () => {
     }
   }, [issueFilter, transactionFilter]);
 
+  const highlightedColour = "yellow-300";
+
   const issueItems: CollapseProps["items"] = [
     {
       key: "1",
@@ -153,15 +152,42 @@ const GlobalSearchBar: React.FC = () => {
           }}
           className="my-1"
         >
-          <p className="line-clamp-1">
-            <b>{issue.title}</b>
-          </p>
-          <p className="line-clamp-2">{issue.description}</p>
-          <p style={{ color: "#9d9d9d" }}>
-            {issue?.create_time
-              ? `${new Date(issue.create_time).toDateString()}, ${new Date(issue.create_time).toLocaleTimeString()}`
-              : "No Date Available"}
-          </p>
+          <div className="">
+            <div className="flex">
+              <p className="w-2/5 font-bold">Title:</p>
+              <Highlighter
+                highlightClassName={highlightedColour}
+                searchWords={[searchTerm]}
+                autoEscape={true}
+                textToHighlight={issue.title}
+                className="line-clamp-1 flex-1"
+              />
+            </div>
+            <div className="flex">
+              <p className="w-2/5 font-bold">Description:</p>
+              <Highlighter
+                highlightClassName={highlightedColour}
+                searchWords={[searchTerm]}
+                autoEscape={true}
+                textToHighlight={issue.description}
+                className="line-clamp-1 flex-1"
+              />
+            </div>
+            <div className="flex">
+              <p className="w-2/5 font-bold">Created At:</p>
+              <Highlighter
+                highlightClassName={highlightedColour}
+                searchWords={[searchTerm]}
+                autoEscape={true}
+                textToHighlight={
+                  issue?.create_time
+                    ? `${new Date(issue.create_time).toDateString()}, ${new Date(issue.create_time).toLocaleTimeString()}`
+                    : "No Date Available"
+                }
+                className="flex-1 text-gray-500"
+              />
+            </div>
+          </div>
         </Card>
       )),
     },
@@ -202,14 +228,79 @@ const GlobalSearchBar: React.FC = () => {
           }}
           className="my-1"
         >
-          <p className="line-clamp-1">
-            <b>{transaction.reference_no}</b>
-          </p>
-          <p className="line-clamp-2">{transaction.amount}</p>
-          <p style={{ color: "#9d9d9d" }}>
-            {transaction?.date_of_transaction &&
-              `${new Date(transaction.date_of_transaction).toDateString()}, ${new Date(transaction.date_of_transaction).toLocaleTimeString()}`}
-          </p>
+          <div className="">
+            <div className="flex">
+              <p className="w-1/3 font-bold">Ref No:</p>
+              <Highlighter
+                highlightClassName={highlightedColour}
+                searchWords={[searchTerm]}
+                autoEscape={true}
+                textToHighlight={transaction.reference_no}
+                className="line-clamp-1 flex-1"
+              />
+            </div>
+          </div>
+          <div className="flex">
+            <p className="w-1/3 font-bold">Amount:</p>
+            <Highlighter
+              highlightClassName={highlightedColour}
+              searchWords={[searchTerm]}
+              autoEscape={true}
+              textToHighlight={`SGD ${transaction.amount}`}
+              className="line-clamp-1 flex-1"
+            />
+          </div>
+          <div className="flex">
+            <p className="w-1/3 font-bold">Cashback:</p>
+            {String(transaction?.cashback_percentage) == searchTerm ? (
+              <Highlighter
+                highlightClassName={highlightedColour}
+                searchWords={[searchTerm]}
+                autoEscape={true}
+                textToHighlight={`${transaction?.cashback_percentage}%`}
+                className="line-clamp-1 flex-1"
+              />
+            ) : (
+              <p>{transaction?.cashback_percentage}%</p>
+            )}
+          </div>
+          <div className="flex">
+            <p className="w-1/3 font-bold">Instalment Plan:</p>
+            <Highlighter
+              highlightClassName={highlightedColour}
+              searchWords={[searchTerm]}
+              autoEscape={true}
+              textToHighlight={transaction.instalment_plan.name}
+              className="line-clamp-1 flex-1"
+            />
+          </div>
+          <div className="flex">
+            <p className="w-1/3 font-bold">Customer:</p>
+            <p>
+              <Highlighter
+                highlightClassName={highlightedColour}
+                searchWords={[searchTerm]}
+                autoEscape={true}
+                textToHighlight={transaction?.customer.name}
+                className="line-clamp-1 flex-1"
+              />
+              <Highlighter
+                highlightClassName={highlightedColour}
+                searchWords={[searchTerm]}
+                autoEscape={true}
+                textToHighlight={transaction?.customer.email}
+                className="line-clamp-1 flex-1"
+              />
+            </p>
+          </div>
+          <div className="flex">
+            <p className="w-1/3 font-bold">Date:</p>
+            <p className="flex-1 text-gray-500">
+              {transaction?.date_of_transaction
+                ? `${new Date(transaction.date_of_transaction).toDateString()}, ${new Date(transaction.date_of_transaction).toLocaleTimeString()}`
+                : "No Date Available"}
+            </p>
+          </div>
         </Card>
       )),
     },
@@ -227,7 +318,7 @@ const GlobalSearchBar: React.FC = () => {
           {(issues && issues.length > 0) ||
           (transactions && transactions.length > 0) ? (
             <div className="flex items-center justify-between">
-              <div></div>
+              <div>Search Results</div>
               <Button
                 icon={<ExpandOutlined />}
                 onClick={() => {
@@ -235,6 +326,7 @@ const GlobalSearchBar: React.FC = () => {
                   setIsOpen(false);
                 }}
                 className="mb-2"
+                size="small"
               />
             </div>
           ) : null}
@@ -277,7 +369,7 @@ const GlobalSearchBar: React.FC = () => {
         content={popoverContent}
         arrow={false}
         open={isOpen}
-        className="w-100 m-10"
+        className="m-10"
       >
         <Search
           placeholder="Search..."
