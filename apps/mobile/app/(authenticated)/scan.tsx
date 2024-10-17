@@ -130,14 +130,7 @@ export default function ScanScreen() {
       return;
     }
 
-    const newTransaction: Omit<
-      ITransaction,
-      | "transaction_id"
-      | "customer"
-      | "merchant"
-      | "instalment_plan"
-      | "instalment_payments" // created in transactionRepository.ts
-    > = {
+    const newTransaction: Omit<ITransaction, "transaction_id"> = {
       amount: purchase.price,
       date_of_transaction: new Date(),
       status: TransactionStatus.IN_PROGRESS,
@@ -148,6 +141,7 @@ export default function ScanScreen() {
       customer_id: customer.customer_id,
       merchant_id: scannedMerchantId,
       instalment_plan_id: selectedPlanId,
+      merchant_payment_id: "",
     };
 
     try {
