@@ -21,12 +21,10 @@ export const createTransaction = async (transactionData: ITransaction) => {
     }
 
     // Calculate the amount per instalment
-    const amountPerInstalment =
-        transactionData.amount / instalmentPlan.number_of_instalments;
+    const amountPerInstalment = transactionData.amount / instalmentPlan.number_of_instalments;
 
     // eg. Payment every 4.5 days
-    const frequency =
-        (instalmentPlan.time_period * 7) / instalmentPlan.number_of_instalments;
+    const frequency = (instalmentPlan.time_period * 7) / instalmentPlan.number_of_instalments;
 
     // Function to add partial days to a date
     const addPartialDays = (date: Date, days: number) => {
@@ -47,10 +45,8 @@ export const createTransaction = async (transactionData: ITransaction) => {
     }
 
     // Initialise all instances of instalment payments
-    const instalmentPayments: Omit<
-        IInstalmentPayment,
-        "instalment_payment_id" | "transaction"
-    >[] = [];
+    const instalmentPayments: Omit<IInstalmentPayment, "instalment_payment_id" | "transaction">[] =
+        [];
     for (let i = 1; i <= instalmentPlan.number_of_instalments; i++) {
         instalmentPayments.push({
             amount_due: amountPerInstalment,
@@ -66,12 +62,8 @@ export const createTransaction = async (transactionData: ITransaction) => {
     }
 
     // Destructure id values to connect to other tables
-    const {
-        customer_id,
-        merchant_id,
-        instalment_plan_id,
-        ...transactionDataWithoutRelations
-    } = transactionData;
+    const { customer_id, merchant_id, instalment_plan_id, ...transactionDataWithoutRelations } =
+        transactionData;
 
     return prisma.transaction.create({
         data: {
@@ -130,15 +122,11 @@ export const findTransactionsByCustomerId = async (
 
         switch (dateFilter) {
             case "7days":
-                startDate = new Date(
-                    currentDate.getTime() - 7 * 24 * 60 * 60 * 1000
-                );
+                startDate = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
                 endDate = currentDate;
                 break;
             case "30days":
-                startDate = new Date(
-                    currentDate.getTime() - 30 * 24 * 60 * 60 * 1000
-                );
+                startDate = new Date(currentDate.getTime() - 30 * 24 * 60 * 60 * 1000);
                 endDate = currentDate;
                 break;
             case "3months":
@@ -196,11 +184,8 @@ export const findTransactionsByCustomerId = async (
     });
 };
 
-export const findTransactionsByFilter = async (
-    transactionFilter: TransactionFilter
-) => {
-    const { sorting, create_from, create_to, search_term, ...filter } =
-        transactionFilter;
+export const findTransactionsByFilter = async (transactionFilter: TransactionFilter) => {
+    const { sorting, create_from, create_to, search_term, ...filter } = transactionFilter;
 
     let parsedAmount: number | undefined;
 
@@ -212,12 +197,6 @@ export const findTransactionsByFilter = async (
             parsedAmount = parsed;
         }
     }
-
-    const statusMatches: TransactionStatus[] = search_term
-        ? (Object.values(TransactionStatus).filter((status) =>
-              status.toLowerCase().includes(search_term.toLowerCase())
-          ) as TransactionStatus[])
-        : [];
 
     return prisma.transaction.findMany({
         where: {
