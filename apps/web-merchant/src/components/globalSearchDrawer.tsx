@@ -248,17 +248,11 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
                         </div>
                         <div className="flex">
                           <p className="w-1/3 font-bold">Created At:</p>
-                          <Highlighter
-                            highlightClassName={highlightedColour}
-                            searchWords={[searchTerm]}
-                            autoEscape={true}
-                            textToHighlight={
-                              issue?.create_time
-                                ? `${new Date(issue.create_time).toDateString()}, ${new Date(issue.create_time).toLocaleTimeString()}`
-                                : "No Date Available"
-                            }
-                            className="line-clamp-1 flex-1"
-                          />
+                          <p className="flex-1 text-gray-500">
+                            {issue?.create_time
+                              ? `${new Date(issue.create_time).toDateString()}, ${new Date(issue.create_time).toLocaleTimeString()}`
+                              : "No Date Available"}
+                          </p>
                         </div>
                       </div>
                     </Card>

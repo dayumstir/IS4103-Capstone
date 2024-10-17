@@ -175,17 +175,11 @@ const GlobalSearchBar: React.FC = () => {
             </div>
             <div className="flex">
               <p className="w-2/5 font-bold">Created At:</p>
-              <Highlighter
-                highlightClassName={highlightedColour}
-                searchWords={[searchTerm]}
-                autoEscape={true}
-                textToHighlight={
-                  issue?.create_time
-                    ? `${new Date(issue.create_time).toDateString()}, ${new Date(issue.create_time).toLocaleTimeString()}`
-                    : "No Date Available"
-                }
-                className="flex-1 text-gray-500"
-              />
+              <p className="flex-1 text-gray-500">
+                {issue?.create_time
+                  ? `${new Date(issue.create_time).toDateString()}, ${new Date(issue.create_time).toLocaleTimeString()}`
+                  : "No Date Available"}
+              </p>
             </div>
           </div>
         </Card>
@@ -308,7 +302,7 @@ const GlobalSearchBar: React.FC = () => {
 
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const popoverContent = (
-    <div className="h-60 w-80 overflow-y-auto" ref={popoverRef}>
+    <div className="overflow-y-auto md:h-60 lg:h-80" ref={popoverRef}>
       {isLoadingIssues && isLoadingTransactions ? (
         <div className="flex h-full items-center justify-center">
           <Spin />
@@ -370,6 +364,7 @@ const GlobalSearchBar: React.FC = () => {
         arrow={false}
         open={isOpen}
         className="m-10"
+        overlayStyle={{ width: "25%" }}
       >
         <Search
           placeholder="Search..."
