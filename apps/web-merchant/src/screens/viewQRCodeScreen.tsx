@@ -1,8 +1,10 @@
-import { Button, Card, Form, FormProps, Input, InputNumber } from "antd";
+import { Button, Card, Form, FormProps, Input, InputNumber, Modal } from "antd";
 import { QRCodeSVG } from "qrcode.react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
+import { ExpandOutlined } from "@ant-design/icons";
+import QrCodeModal from "../components/QRCodeModal";
 
 interface GenerateQRCodeProps {
   amount: number;
@@ -16,6 +18,8 @@ const ViewQRCodeScreen: React.FC = () => {
   const [referenceNumber, setReferenceNumber] = useState<string>("");
   const [isDisplayed, setIsDisplayed] = useState(false);
 
+  const [isEnlarged, setIsEnlarged] = useState(false);
+
   const onFinish: FormProps<GenerateQRCodeProps>["onFinish"] = async (data) => {
     setAmount(data.amount);
     setReferenceNumber(data.referenceNumber);
@@ -24,6 +28,13 @@ const ViewQRCodeScreen: React.FC = () => {
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center">
+      {isEnlarged && (
+        <QrCodeModal
+          isModalOpen={isEnlarged}
+          setIsModalClose={setIsEnlarged}
+          value={`${merchant?.merchant_id}:${amount}:${referenceNumber}`}
+        />
+      )}
       <Card className="mb-10 flex h-48 w-48 items-center justify-center md:h-72 md:w-72 lg:h-96 lg:w-96">
         {isDisplayed ? (
           <div className="flex flex-col items-center">
@@ -34,10 +45,15 @@ const ViewQRCodeScreen: React.FC = () => {
             <p>
               <span style={{ color: "#9d9d9d" }}>Amount:</span> SGD {amount}
             </p>
-            <p>
+            <p className="line-clamp-1">
               <span style={{ color: "#9d9d9d" }}>Reference Number: </span>
               {referenceNumber == "" ? "-" : referenceNumber}
             </p>
+            <Button
+              className="absolute bottom-4 right-4"
+              onClick={() => setIsEnlarged(true)}
+              icon={<ExpandOutlined />}
+            />
           </div>
         ) : (
           "Enter an amount to generate a QR code"
