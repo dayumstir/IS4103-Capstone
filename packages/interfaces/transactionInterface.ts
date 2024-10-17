@@ -13,7 +13,7 @@ export interface ITransaction {
     transaction_id: string;
     amount: number;
     date_of_transaction: Date;
-    fully_paid_date: Date;
+    fully_paid_date: Date | null;
     status: TransactionStatus;
     reference_no: string;
     cashback_percentage: number;
