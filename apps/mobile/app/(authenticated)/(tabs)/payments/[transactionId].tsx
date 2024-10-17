@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useGetTransactionByIdQuery } from "../../../../redux/services/transactionService";
 import { formatCurrency } from "../../../../utils/formatCurrency";
 import { format } from "date-fns";
-import { ActivityIndicator } from "@ant-design/react-native";
+import { ActivityIndicator, Button } from "@ant-design/react-native";
 import { useState } from "react";
 
 export default function TransactionDetails() {
@@ -273,6 +273,24 @@ export default function TransactionDetails() {
             </View>
           </View>
         )}
+
+        {/* ===== Raise Issue Button ===== */}
+        <View className="mt-4">
+          <Button
+            type="warning"
+            onPress={() => {
+              router.push({
+                pathname: "/account/issue/newIssue",
+                params: {
+                  transaction_id: transaction.transaction_id,
+                  merchant_id: transaction.merchant.merchant_id,
+                },
+              });
+            }}
+          >
+            <Text className="font-semibold text-white">Raise an Issue</Text>
+          </Button>
+        </View>
       </View>
     </ScrollView>
   );
