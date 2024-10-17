@@ -1,5 +1,5 @@
 // Contains the business logic related to instalment plans
-import { IInstalmentPlan } from "../interfaces/instalmentPlanInterface";
+import { IInstalmentPlan } from "@repo/interfaces/instalmentPlanInterface";
 import * as instalmentPlanRepository from "../repositories/instalmentPlanRepository";
 import logger from "../utils/logger";
 

@@ -14,7 +14,7 @@ export const getCustomerById = async (customer_id: string) => {
 };
 
 export const getCustomerByEmail = async (email: string) => {
-    logger.info('Executing getCustomerByEmail...');
+    logger.info("Executing getCustomerByEmail...");
     const customer = await customerRepository.findCustomerByEmail(email);
     if (!customer) {
         throw new NotFoundError("Customer not found");
@@ -22,8 +22,11 @@ export const getCustomerByEmail = async (email: string) => {
     return customer;
 };
 
-export const updateCustomer = async (customer_id: string, updateData: Partial<ICustomer>) => {
-    logger.info('Executing updateCustomer...');
+export const updateCustomer = async (
+    customer_id: string,
+    updateData: Partial<ICustomer>
+) => {
+    logger.info("Executing updateCustomer...");
     // Prevent email and phone number from being edited
     if (updateData.email || updateData.contact_number) {
         throw new Error("Email and phone number cannot be edited");

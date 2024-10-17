@@ -66,12 +66,8 @@ export default function InstalmentPlanScreen() {
     setEditingPlan(plan);
     editForm.resetFields();
 
-    // Data from db is string, need to convert them back to number
     editForm.setFieldsValue({
       ...plan,
-      interest_rate: Number(plan.interest_rate),
-      minimum_amount: Number(plan.minimum_amount),
-      maximum_amount: Number(plan.maximum_amount),
       credit_tier_ids: plan.credit_tiers?.map((tier) => tier.credit_tier_id),
     });
     setIsModalOpen(true);

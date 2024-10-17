@@ -78,27 +78,34 @@ export const listAllCustomersWithSearch = async (search: string) => {
 export const getInstalmentPlans = async (customer_id: string) => {
     const customer = await prisma.customer.findUnique({
         where: { customer_id: customer_id },
-        include: {
-            credit_tier: {
-                select: {
-                    instalment_plans: true,
-                },
-            },
-        },
     });
 
     if (!customer) {
         throw new Error("Customer not found");
     }
 
-    return customer.credit_tier.instalment_plans;
+    const creditTier = await prisma.creditTier.findFirst({
+        where: {
+            min_credit_score: { lte: customer.credit_score },
+            max_credit_score: { gte: customer.credit_score },
+        },
+        include: {
+            instalment_plans: true,
+        },
+    });
+
+    if (!creditTier) {
+        throw new Error("No credit tier found for the customer's credit score");
+    }
+
+    return creditTier.instalment_plans;
 };
 
 // Update the customer's wallet balance
 export const topUpWallet = async (customer_id: string, amount: number) => {
     return await prisma.customer.update({
         where: { customer_id },
-        data: { 
+        data: {
             wallet_balance: {
                 increment: amount,
             },
