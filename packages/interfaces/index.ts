@@ -1,7 +1,12 @@
 export { ICreditTier } from "./creditTierInterface";
 export { ICustomer, CustomerStatus } from "./customerInterface";
 export { IInstalmentPlan } from "./instalmentPlanInterface";
-export { IIssue, IssueStatus, IssueFilter } from "./issueInterface";
+export {
+    IIssue,
+    IssueStatus,
+    IssueCategory,
+    IssueFilter,
+} from "./issueInterface";
 export {
     IMerchant,
     IMerchantPayment,

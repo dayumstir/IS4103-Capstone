@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TextInput } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@ant-design/react-native";
+import { Button, Picker } from "@ant-design/react-native";
 import { router } from "expo-router";
 import ImagePickerField from "../../../../../components/imagePickerField";
 import { useCreateIssueMutation } from "../../../../../redux/services/issueService";
@@ -10,6 +10,9 @@ import Toast from "react-native-toast-message";
 import * as ImagePicker from "expo-image-picker";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
+import { IssueCategory } from "@repo/interfaces";
+import { useState } from "react";
+import { TouchableOpacity } from "react-native";
 
 // Define your Zod schema
 const issueSchema = z.object({
@@ -21,6 +24,9 @@ const issueSchema = z.object({
     .string()
     .min(1, "Description is required")
     .max(200, "Description must be 200 characters or less"),
+  category: z.nativeEnum(IssueCategory, {
+    required_error: "Category is required",
+  }),
   merchant_id: z.string().optional(),
   transaction_id: z.string().optional(),
   image: z.array(z.custom<ImagePicker.ImagePickerAsset>()).optional(),
@@ -39,6 +45,7 @@ export default function NewIssue() {
 
   const [createIssue, { isLoading }] = useCreateIssueMutation();
   const { profile } = useSelector((state: RootState) => state.customer);
+  const [categoryVisible, setCategoryVisible] = useState(false);
 
   const onSubmit = async (data: IssueFormValues) => {
     try {
@@ -48,6 +55,7 @@ export default function NewIssue() {
       }
 
       formData.append("title", data.title);
+      formData.append("category", data.category);
       formData.append("description", data.description);
 
       // TODO: Auto populate merchant_id and transaction_id if issue is raised from a transaction
@@ -102,6 +110,50 @@ export default function NewIssue() {
               {errors.title && (
                 <Text className="mt-1 text-red-500">
                   {errors.title.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+
+        <Text className="mb-2 font-semibold">Category</Text>
+        <Controller
+          control={control}
+          name="category"
+          render={({ field: { onChange, value } }) => (
+            <View className="mb-4">
+              <TouchableOpacity
+                className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
+                onPress={() => setCategoryVisible(true)}
+              >
+                <Text>
+                  {value
+                    ? value.charAt(0).toUpperCase() +
+                      value.slice(1).toLowerCase()
+                    : "Select Category"}
+                </Text>
+              </TouchableOpacity>
+              <Picker
+                data={Object.values(IssueCategory).map((category) => ({
+                  value: category,
+                  label:
+                    category.charAt(0).toUpperCase() +
+                    category.slice(1).toLowerCase(),
+                }))}
+                cols={1}
+                onChange={(val) => {
+                  onChange(val[0]);
+                  setCategoryVisible(false);
+                }}
+                visible={categoryVisible}
+                value={[value]}
+                okText="Confirm"
+                dismissText="Cancel"
+                onDismiss={() => setCategoryVisible(false)}
+              />
+              {errors.category && (
+                <Text className="mt-1 text-red-500">
+                  {errors.category.message}
                 </Text>
               )}
             </View>
