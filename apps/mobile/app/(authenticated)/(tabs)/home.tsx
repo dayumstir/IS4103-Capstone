@@ -171,7 +171,7 @@ export default function HomePage() {
                 className="flex-row items-center justify-between border-t border-gray-200 py-4"
               >
                 <View>
-                  <Text className="text-base font-medium">
+                  <Text className="font-medium">
                     {payment.transaction.merchant.name.length > 20
                       ? `${payment.transaction.merchant.name.slice(0, 20)}...`
                       : payment.transaction.merchant.name}
@@ -181,7 +181,7 @@ export default function HomePage() {
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-4">
-                  <Text className="text-base font-medium">
+                  <Text className="font-semibold">
                     {formatCurrency(payment.amount_due)}
                   </Text>
                   <TouchableOpacity className="rounded-md border border-blue-500 bg-white px-4 py-2">
@@ -253,7 +253,7 @@ export default function HomePage() {
                     </Text>
                   </View>
                   <View>
-                    <Text className="text-base font-medium">
+                    <Text className="font-medium">
                       {transaction.merchant.name.length > 20
                         ? `${transaction.merchant.name.slice(0, 20)}...`
                         : transaction.merchant.name}
@@ -265,7 +265,7 @@ export default function HomePage() {
                 </View>
                 <View className="flex-row items-center gap-4">
                   <Text
-                    className={`text-base font-medium ${transaction.amount <= 0 ? "text-green-600" : "text-red-600"}`}
+                    className={`font-semibold ${transaction.amount <= 0 ? "text-green-600" : "text-red-600"}`}
                   >
                     {transaction.amount <= 0 ? "+" : "-"}
                     {formatCurrency(Math.abs(transaction.amount))}

@@ -107,7 +107,7 @@ export default function PaymentsPage() {
               {formatCurrency(totalOutstanding)}
             </Text>
           </View>
-          {totalOutstanding > 0 && (
+          {/* {totalOutstanding > 0 && (
             <TouchableOpacity
               className="rounded-md bg-white px-4 py-2"
               onPress={handlePayAll}
@@ -116,11 +116,11 @@ export default function PaymentsPage() {
                 Pay All
               </Text>
             </TouchableOpacity>
-          )}
+          )} */}
         </View>
       </LinearGradient>
 
-      {/* ===== Upcoming Instalment Payments ===== */}
+      {/* ===== Outstanding Payments ===== */}
       <View className="m-4 rounded-xl bg-white p-8">
         <View className="mb-2 flex-row items-center justify-between">
           <Text className="text-xl font-bold">Outstanding Payments</Text>
@@ -159,12 +159,19 @@ export default function PaymentsPage() {
                           ? `${payment.transaction.merchant.name.slice(0, 20)}...`
                           : payment.transaction.merchant.name}
                       </Text>
-                      <Text className="text-sm text-gray-500">
-                        Due: {format(payment.due_date, "dd MMM yyyy")}
+                      <Text
+                        className={`text-sm ${
+                          payment.due_date < new Date()
+                            ? "font-bold text-red-500"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {payment.due_date < new Date() ? "Overdue: " : "Due: "}
+                        {format(payment.due_date, "dd MMM yyyy")}
                       </Text>
                     </View>
                     <View className="flex-row items-center gap-4">
-                      <Text className="text-base font-medium">
+                      <Text className="text-base font-semibold">
                         {formatCurrency(payment.amount_due)}
                       </Text>
                       <TouchableOpacity className="rounded-md border border-blue-500 bg-white px-4 py-2">
@@ -224,7 +231,7 @@ export default function PaymentsPage() {
                       </Text>
                     </View>
                   </View>
-                  <Text className="text-base font-medium text-red-600">
+                  <Text className="text-base font-semibold text-red-600">
                     -{formatCurrency(transaction.amount)}
                   </Text>
                 </View>
