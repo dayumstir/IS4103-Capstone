@@ -93,7 +93,7 @@ export default function NewIssue() {
       });
 
       reset();
-      router.push("/account/issue");
+      router.replace("/account/issue");
     } catch (error) {
       Toast.show({
         type: "error",
@@ -225,7 +225,9 @@ export default function NewIssue() {
             type="ghost"
             onPress={() => {
               reset();
-              router.push("/account/issue");
+              transaction_id
+                ? router.replace(`/payments/${transaction_id}`)
+                : router.replace("/account/issue");
             }}
           >
             <Text className="font-semibold text-blue-500">Cancel</Text>

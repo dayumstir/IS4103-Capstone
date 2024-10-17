@@ -192,7 +192,7 @@ export default function IssueDetailsPage() {
                       style: "destructive",
                       onPress: () => {
                         cancelIssue({ issue_id: issueId });
-                        router.navigate("/account/issue");
+                        router.replace("/account/issue");
                       },
                     },
                   ],

@@ -279,7 +279,7 @@ export default function TransactionDetails() {
           <Button
             type="warning"
             onPress={() => {
-              router.push({
+              router.replace({
                 pathname: "/account/issue/newIssue",
                 params: {
                   transaction_id: transaction.transaction_id,
