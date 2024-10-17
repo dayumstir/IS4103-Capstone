@@ -1,6 +1,7 @@
 // Manages instalment plan-related actions
 import { Request, Response } from "express";
 import * as instalmentPlanService from "../services/instalmentPlanService";
+import logger from "../utils/logger";
 
 // Create Instalment Plan
 export const createInstalmentPlan = async (req: Request, res: Response) => {
@@ -10,6 +11,7 @@ export const createInstalmentPlan = async (req: Request, res: Response) => {
         );
         res.status(201).json(instalmentPlan);
     } catch (error: any) {
+        logger.error(`Error in createInstalmentPlan: ${error.message}`);
         res.status(400).json({ error: error.message });
     }
 };
@@ -21,6 +23,7 @@ export const getAllInstalmentPlans = async (req: Request, res: Response) => {
             await instalmentPlanService.getAllInstalmentPlans();
         res.status(200).json(instalmentPlans);
     } catch (error: any) {
+        logger.error(`Error in getAllInstalmentPlans: ${error.message}`);
         res.status(400).json({ error: error.message });
     }
 };
@@ -34,6 +37,7 @@ export const getInstalmentPlan = async (req: Request, res: Response) => {
             );
         res.status(200).json(instalmentPlan);
     } catch (error: any) {
+        logger.error(`Error in getInstalmentPlan: ${error.message}`);
         res.status(400).json({ error: error.message });
     }
 };
@@ -48,6 +52,7 @@ export const editInstalmentPlan = async (req: Request, res: Response) => {
             );
         res.status(200).json(updatedInstalmentPlan);
     } catch (error: any) {
+        logger.error(`Error in editInstalmentPlan: ${error.message}`);
         res.status(400).json({ error: error.message });
     }
 };

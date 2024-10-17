@@ -3,13 +3,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 
 export default function TabsLayout() {
   return (
-    <Tabs
-      screenOptions={
-        {
-          // headerShown: false,
-        }
-      }
-    >
+    <Tabs>
       <Tabs.Screen
         name="home"
         options={{
@@ -23,7 +17,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="payments"
         options={{
-          headerTitle: "Payments",
+          headerShown: false,
           title: "Payments",
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="creditcard" size={size} color={color} />

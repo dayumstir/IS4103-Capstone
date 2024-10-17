@@ -33,9 +33,6 @@ model Customer {
   wallet_balance  Float    @default(0)
   credit_score    Int      @default(0)
 
-  credit_tier_id String     @default("tier_1")
-  credit_tier    CreditTier @relation(fields: [credit_tier_id], references: [credit_tier_id])
-
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
   passwordResetTokens     PasswordResetToken[]
@@ -179,12 +176,12 @@ enum TransactionStatus {
 }
 
 model Transaction {
-  transaction_id       String            @id @default(cuid())
-  amount               Float
-  date_of_transaction  DateTime
-  status               TransactionStatus
-  fully_paid_date      DateTime?
-  reference_no         String            @default("")
+  transaction_id      String            @id @default(cuid())
+  amount              Float
+  date_of_transaction DateTime
+  status              TransactionStatus
+  fully_paid_date     DateTime?
+  reference_no        String            @default("")
   cashback_percentage Float             @default(0)
 
   customer_id String
@@ -258,7 +255,6 @@ model CreditTier {
   min_credit_score Int
   max_credit_score Int
 
-  customers        Customer[]
   instalment_plans InstalmentPlan[]
 }
 
@@ -275,15 +271,15 @@ enum IssueCategory {
 }
 
 model Issue {
-  issue_id    String      @id @default(cuid())
+  issue_id    String        @id @default(cuid())
   title       String
   description String
   category    IssueCategory
   outcome     String?
   status      IssueStatus
-  images      Bytes[]     @db.ByteA
-  create_time DateTime    @default(now())
-  updated_at  DateTime    @updatedAt
+  images      Bytes[]       @db.ByteA
+  create_time DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
 
   merchant_id    String? // Optional foreign key to Merchant
   customer_id    String? // Optional foreign key to Customer

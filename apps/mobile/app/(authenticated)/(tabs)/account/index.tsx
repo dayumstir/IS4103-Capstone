@@ -1,36 +1,26 @@
-import { setProfile } from "../../../../redux/features/customerSlice";
-import { useEffect } from "react";
 import { Buffer } from "buffer";
 import { Text, View, Image, Linking, TouchableOpacity } from "react-native";
 import { ActivityIndicator, Button } from "@ant-design/react-native";
-import { useDispatch } from "react-redux";
-import { useGetProfileQuery } from "../../../../redux/services/customerService";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../../redux/features/customerAuthSlice";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import { ScrollView } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { RootState } from "../../../../redux/store";
 
 export default function AccountPage() {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  // Fetch the profile using the API call
-  const { data: profile, isLoading } = useGetProfileQuery();
+  const profile = useSelector((state: RootState) => state.customer.profile);
 
   // Logout handler
   const handleLogout = () => {
     dispatch(logout());
     router.replace("/login");
   };
-
-  // Update Redux store when profile data is fetched
-  useEffect(() => {
-    if (profile && !isLoading) {
-      dispatch(setProfile(profile));
-    }
-  }, [profile, isLoading, dispatch]);
 
   return (
     <ScrollView>
