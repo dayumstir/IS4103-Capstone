@@ -221,7 +221,9 @@ export default function TransactionsScreen() {
                       : "orange"
                   }
                 >
-                  {transactionDetails.status}
+                  {transactionDetails.status === TransactionStatus.FULLY_PAID
+                    ? "Fully Paid"
+                    : "In Progress"}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Customer">
