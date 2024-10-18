@@ -153,11 +153,13 @@ export default function PaymentsPage() {
                         : "py-4"
                     }`}
                   >
-                    <View>
-                      <Text className="text-base font-medium">
-                        {payment.transaction.merchant.name.length > 20
-                          ? `${payment.transaction.merchant.name.slice(0, 20)}...`
-                          : payment.transaction.merchant.name}
+                    <View className="mr-4 flex-1">
+                      <Text
+                        className="text-base font-medium"
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {payment.transaction.merchant.name}
                       </Text>
                       <Text
                         className={`text-sm ${
@@ -213,27 +215,29 @@ export default function PaymentsPage() {
                 }}
               >
                 <View className="flex-row items-center justify-between border-t border-gray-200 py-4">
-                  <View className="flex-row items-center gap-2">
+                  <View className="flex-row items-center gap-4">
                     <View className="h-10 w-10 items-center justify-center rounded-full bg-blue-100">
                       {/* TODO: Replace with merchant profile picture */}
                       <Text className="text-center font-bold text-blue-500">
                         {transaction.merchant.name.slice(0, 1).toUpperCase()}
                       </Text>
                     </View>
-                    <View>
-                      <Text className="text-base font-medium">
-                        {transaction.merchant.name.length > 20
-                          ? `${transaction.merchant.name.slice(0, 20)}...`
-                          : transaction.merchant.name}
+                    <View className="mr-4 flex-1">
+                      <Text
+                        className="text-base font-medium"
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {transaction.merchant.name}
                       </Text>
                       <Text className="text-sm text-gray-500">
                         {format(transaction.date_of_transaction, "dd MMM yyyy")}
                       </Text>
                     </View>
+                    <Text className="text-base font-semibold text-red-600">
+                      -{formatCurrency(transaction.amount)}
+                    </Text>
                   </View>
-                  <Text className="text-base font-semibold text-red-600">
-                    -{formatCurrency(transaction.amount)}
-                  </Text>
                 </View>
               </TouchableOpacity>
             ))}
