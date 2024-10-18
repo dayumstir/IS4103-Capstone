@@ -18,6 +18,12 @@ export const createTransaction = async (transactionData: ITransaction) => {
     return transaction;
 };
 
+export const getAllTransactions = async (searchQuery: string) => {
+    const transactions =
+        await transactionRepository.findAllTransactions(searchQuery);
+    return transactions;
+};
+
 export const getCustomerTransactions = async (
     customer_id: string,
     searchQuery: string,

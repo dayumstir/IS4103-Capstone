@@ -113,11 +113,13 @@ export default function AllTransactions() {
                           {t.merchant?.name?.[0].toUpperCase() || "?"}
                         </Text>
                       </View>
-                      <View>
-                        <Text className="font-semibold">
-                          {t.merchant?.name?.length > 20
-                            ? `${t.merchant.name.slice(0, 20)}...`
-                            : t.merchant?.name || "Unknown Merchant"}
+                      <View className="mr-4 flex-1">
+                        <Text
+                          className="font-semibold"
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                        >
+                          {t.merchant?.name}
                         </Text>
                         <View className="mt-1 flex-row items-center gap-2">
                           <Text className="text-sm text-gray-500">
@@ -137,10 +139,10 @@ export default function AllTransactions() {
                           </View>
                         </View>
                       </View>
+                      <Text className="text-base font-medium text-red-600">
+                        -{formatCurrency(t.amount)}
+                      </Text>
                     </View>
-                    <Text className="text-base font-medium text-red-600">
-                      -{formatCurrency(t.amount)}
-                    </Text>
                   </View>
                 </TouchableOpacity>
               ))}

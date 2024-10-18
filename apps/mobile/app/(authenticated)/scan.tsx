@@ -6,7 +6,11 @@ import { setPaymentStage } from "../../redux/features/paymentStageSlice";
 import { RootState } from "../../redux/store";
 import { router } from "expo-router";
 import { useCreateTransactionMutation } from "../../redux/services/transactionService";
-import { ITransaction, TransactionStatus } from "@repo/interfaces";
+import {
+  ITransaction,
+  TransactionResult,
+  TransactionStatus,
+} from "@repo/interfaces";
 import ScanQrCodeScreen from "../../components/scan/scanQrCodeScreen";
 import VerifyPurchaseScreen from "../../components/scan/verifyPurchaseScreen";
 import TransactionCompleteScreen from "../../components/scan/transactionCompleteScreen";
@@ -31,7 +35,9 @@ export default function ScanScreen() {
   const customer = useSelector((state: RootState) => state.customer.profile);
   const dispatch = useDispatch();
   const [createTransaction] = useCreateTransactionMutation();
-  const [transaction, setTransaction] = useState<ITransaction | null>(null);
+  const [transaction, setTransaction] = useState<TransactionResult | null>(
+    null,
+  );
 
   const {
     data: merchant,

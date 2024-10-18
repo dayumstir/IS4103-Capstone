@@ -23,7 +23,7 @@ export const transactionApi = createApi({
   endpoints: (builder) => ({
     // Create Transaction
     createTransaction: builder.mutation<
-      ITransaction,
+      TransactionResult,
       Omit<ITransaction, "transaction_id">
     >({
       query: (newTransaction) => ({

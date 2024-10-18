@@ -2,6 +2,7 @@
 import { Router } from "express";
 import {
     getTransaction,
+    getAllTransactions,
     getCustomerTransactions,
     editTransaction,
     createTransaction,
@@ -12,6 +13,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 const router = Router();
 
 router.post("/", authMiddleware, createTransaction);
+router.get("/", authMiddleware, getAllTransactions);
 router.get("/customer", authMiddleware, getCustomerTransactions);
 router.post("/list", authMiddleware, getTransactionsByFilter);
 router.get("/:transaction_id", authMiddleware, getTransaction);

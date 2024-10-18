@@ -32,6 +32,12 @@ export default function BusinessManagementRoute() {
           key: "issues",
           label: <Link to="/business-management/issues">Issues</Link>,
         },
+        {
+          key: "transactions",
+          label: (
+            <Link to="/business-management/transactions">Transactions</Link>
+          ),
+        },
       ],
     },
   ];

@@ -100,12 +100,14 @@ export default function TransactionDetails() {
                   color="#3b82f6"
                   className="mr-4"
                 />
-                <View>
+                <View className="flex-1">
                   <Text className="text-sm text-gray-500">Merchant</Text>
-                  <Text className="font-medium">
-                    {transaction.merchant.name.length > 14
-                      ? `${transaction.merchant.name.slice(0, 14)}...`
-                      : transaction.merchant.name}
+                  <Text
+                    className="font-medium"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {transaction.merchant.name}
                   </Text>
                 </View>
               </View>

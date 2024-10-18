@@ -108,12 +108,13 @@ export default function HomePage() {
                 <Ionicons name="person" size={24} color="black" />
               )}
             </View>
-            <View>
-              <Text className="text-2xl font-bold text-white">
-                Hello,{" "}
-                {profile && profile.name.length > 15
-                  ? `${profile.name.slice(0, 15)}...`
-                  : profile?.name}
+            <View className="flex-1">
+              <Text
+                className="text-2xl font-bold text-white"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                Hello, {profile?.name || "User"}
               </Text>
               <Text className="text-sm text-white">
                 Here's your wallet overview
@@ -170,11 +171,13 @@ export default function HomePage() {
                 key={payment.instalment_payment_id}
                 className="flex-row items-center justify-between border-t border-gray-200 py-4"
               >
-                <View>
-                  <Text className="font-medium">
-                    {payment.transaction.merchant.name.length > 20
-                      ? `${payment.transaction.merchant.name.slice(0, 20)}...`
-                      : payment.transaction.merchant.name}
+                <View className="mr-4 flex-1">
+                  <Text
+                    className="font-medium"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {payment.transaction.merchant.name}
                   </Text>
                   <Text className="text-sm text-gray-500">
                     Due: {format(payment.due_date, "dd MMM yyyy")}
@@ -252,18 +255,18 @@ export default function HomePage() {
                       {transaction.merchant.name.slice(0, 1).toUpperCase()}
                     </Text>
                   </View>
-                  <View>
-                    <Text className="font-medium">
-                      {transaction.merchant.name.length > 20
-                        ? `${transaction.merchant.name.slice(0, 20)}...`
-                        : transaction.merchant.name}
+                  <View className="mr-4 flex-1">
+                    <Text
+                      className="font-medium"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {transaction.merchant.name}
                     </Text>
                     <Text className="text-sm text-gray-500">
                       {format(transaction.date_of_transaction, "dd MMM yyyy")}
                     </Text>
                   </View>
-                </View>
-                <View className="flex-row items-center gap-4">
                   <Text
                     className={`font-semibold ${transaction.amount <= 0 ? "text-green-600" : "text-red-600"}`}
                   >
