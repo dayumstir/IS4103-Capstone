@@ -292,6 +292,7 @@ export const findTransactionById = async (transaction_id: string) => {
             },
             merchant: {
                 select: {
+                    merchant_id: true,
                     name: true,
                     email: true,
                 },

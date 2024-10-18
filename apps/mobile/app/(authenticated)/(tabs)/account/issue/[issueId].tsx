@@ -18,6 +18,7 @@ import { Buffer } from "buffer";
 import { useGetMerchantByIdQuery } from "../../../../../redux/services/merchantService";
 import { AntDesign } from "@expo/vector-icons";
 import { IssueStatus } from "@repo/interfaces";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function IssueDetailsPage() {
   const router = useRouter();
@@ -115,16 +116,33 @@ export default function IssueDetailsPage() {
 
         <Text className="mt-4">{issue.description}</Text>
 
-        <View>
-          {issue.merchant_id && (
-            <Text className="mt-4 font-semibold">
-              Merchant: {merchant?.name}
-            </Text>
-          )}
-          {issue.transaction_id && (
-            <Text className="mt-1">Transaction ID: {issue.transaction_id}</Text>
-          )}
-        </View>
+        {issue.transaction_id && (
+          <TouchableOpacity
+            onPress={() => router.push(`/payments/${issue.transaction_id}`)}
+            className="mt-4 flex-row items-center rounded-md bg-blue-50 p-4"
+          >
+            <Ionicons
+              name="receipt-outline"
+              size={24}
+              color="#3b82f6"
+              className="mr-4"
+            />
+            <View>
+              <Text className="font-medium text-blue-500">
+                View Transaction Details
+              </Text>
+              <Text className="text-xs text-blue-500">
+                ID: {issue.transaction_id}
+              </Text>
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color="#3b82f6"
+              className="ml-auto"
+            />
+          </TouchableOpacity>
+        )}
 
         {/* ===== Attached Images ===== */}
         {issue.images && issue.images.length > 0 && (
@@ -174,7 +192,7 @@ export default function IssueDetailsPage() {
                       style: "destructive",
                       onPress: () => {
                         cancelIssue({ issue_id: issueId });
-                        router.navigate("/account/issue");
+                        router.replace("/account/issue");
                       },
                     },
                   ],

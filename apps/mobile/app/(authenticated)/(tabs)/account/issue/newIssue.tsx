@@ -2,14 +2,17 @@ import { View, Text, ScrollView, TextInput } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@ant-design/react-native";
-import { router } from "expo-router";
+import { Button, Picker } from "@ant-design/react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import ImagePickerField from "../../../../../components/imagePickerField";
 import { useCreateIssueMutation } from "../../../../../redux/services/issueService";
 import Toast from "react-native-toast-message";
 import * as ImagePicker from "expo-image-picker";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
+import { IssueCategory } from "@repo/interfaces";
+import { useState } from "react";
+import { TouchableOpacity } from "react-native";
 
 // Define your Zod schema
 const issueSchema = z.object({
@@ -21,6 +24,9 @@ const issueSchema = z.object({
     .string()
     .min(1, "Description is required")
     .max(200, "Description must be 200 characters or less"),
+  category: z.nativeEnum(IssueCategory, {
+    required_error: "Category is required",
+  }),
   merchant_id: z.string().optional(),
   transaction_id: z.string().optional(),
   image: z.array(z.custom<ImagePicker.ImagePickerAsset>()).optional(),
@@ -33,12 +39,20 @@ export default function NewIssue() {
     control,
     handleSubmit,
     formState: { errors },
+    reset,
+    setValue,
   } = useForm<IssueFormValues>({
     resolver: zodResolver(issueSchema),
   });
 
   const [createIssue, { isLoading }] = useCreateIssueMutation();
   const { profile } = useSelector((state: RootState) => state.customer);
+  const [categoryVisible, setCategoryVisible] = useState(false);
+  const { transaction_id, merchant_id } = useLocalSearchParams();
+
+  if (transaction_id) {
+    setValue("category", IssueCategory.TRANSACTION);
+  }
 
   const onSubmit = async (data: IssueFormValues) => {
     try {
@@ -48,12 +62,18 @@ export default function NewIssue() {
       }
 
       formData.append("title", data.title);
+
       formData.append("description", data.description);
 
-      // TODO: Auto populate merchant_id and transaction_id if issue is raised from a transaction
-      // if (data.merchant_id) formData.append("merchant_id", data.merchant_id);
-      // if (data.transaction_id)
-      //   formData.append("transaction_id", data.transaction_id);
+      if (transaction_id) {
+        formData.append("transaction_id", transaction_id.toString());
+        formData.append("category", IssueCategory.TRANSACTION);
+      } else {
+        formData.append("category", data.category);
+      }
+      if (merchant_id) {
+        formData.append("merchant_id", merchant_id.toString());
+      }
 
       if (data.image) {
         data.image.forEach((img, index) => {
@@ -71,7 +91,9 @@ export default function NewIssue() {
         type: "success",
         text1: "Issue created successfully",
       });
-      router.back();
+
+      reset();
+      router.replace("/account/issue");
     } catch (error) {
       Toast.show({
         type: "error",
@@ -84,7 +106,9 @@ export default function NewIssue() {
   return (
     <ScrollView>
       <View className="m-4 rounded-lg bg-white p-8">
-        <Text className="mb-4 text-2xl font-bold">Raise an Issue</Text>
+        <Text className="mb-4 text-2xl font-bold">
+          {transaction_id ? "Raise a Transaction Issue" : "Raise an Issue"}
+        </Text>
 
         <Text className="mb-2 font-semibold">Title</Text>
         <Controller
@@ -102,6 +126,51 @@ export default function NewIssue() {
               {errors.title && (
                 <Text className="mt-1 text-red-500">
                   {errors.title.message}
+                </Text>
+              )}
+            </View>
+          )}
+        />
+
+        <Text className="mb-2 font-semibold">Category</Text>
+        <Controller
+          control={control}
+          name="category"
+          render={({ field: { onChange, value } }) => (
+            <View className="mb-4">
+              <TouchableOpacity
+                className="rounded-md border border-gray-300 p-4 focus:border-blue-500"
+                onPress={() => setCategoryVisible(true)}
+                disabled={!!transaction_id}
+              >
+                <Text>
+                  {value
+                    ? value.charAt(0).toUpperCase() +
+                      value.slice(1).toLowerCase()
+                    : "Select Category"}
+                </Text>
+              </TouchableOpacity>
+              <Picker
+                data={Object.values(IssueCategory).map((category) => ({
+                  value: category,
+                  label:
+                    category.charAt(0).toUpperCase() +
+                    category.slice(1).toLowerCase(),
+                }))}
+                cols={1}
+                onChange={(val) => {
+                  onChange(val[0]);
+                  setCategoryVisible(false);
+                }}
+                visible={categoryVisible}
+                value={[value]}
+                okText="Confirm"
+                dismissText="Cancel"
+                onDismiss={() => setCategoryVisible(false)}
+              />
+              {errors.category && (
+                <Text className="mt-1 text-red-500">
+                  {errors.category.message}
                 </Text>
               )}
             </View>
@@ -152,7 +221,15 @@ export default function NewIssue() {
           >
             <Text className="font-semibold text-white">Submit Issue</Text>
           </Button>
-          <Button type="ghost" onPress={() => router.back()}>
+          <Button
+            type="ghost"
+            onPress={() => {
+              reset();
+              transaction_id
+                ? router.replace(`/payments/${transaction_id}`)
+                : router.replace("/account/issue");
+            }}
+          >
             <Text className="font-semibold text-blue-500">Cancel</Text>
           </Button>
         </View>

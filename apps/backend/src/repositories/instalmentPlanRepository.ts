@@ -9,11 +9,13 @@ export const createInstalmentPlan = async (
     return prisma.instalmentPlan.create({
         data: {
             ...instalmentPlanData,
-            credit_tiers: {
-                connect: instalmentPlanData.credit_tiers.map((tier) => ({
-                    credit_tier_id: tier.credit_tier_id,
-                })),
-            },
+            credit_tiers: instalmentPlanData.credit_tiers
+                ? {
+                      connect: instalmentPlanData.credit_tiers.map((tier) => ({
+                          credit_tier_id: tier.credit_tier_id,
+                      })),
+                  }
+                : undefined,
         },
     });
 };

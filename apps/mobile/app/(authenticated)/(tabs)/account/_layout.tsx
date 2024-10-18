@@ -9,6 +9,10 @@ export default function AccountLayout() {
         options={{ headerTitle: "Edit Profile" }}
       />
       <Stack.Screen
+        name="eligiblePlans"
+        options={{ headerTitle: "Instalment Plans" }}
+      />
+      <Stack.Screen
         name="resetPassword"
         options={{ headerTitle: "Reset Password" }}
       />
