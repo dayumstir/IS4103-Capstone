@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { ITransaction } from "@repo/interfaces";
+import { TransactionResult } from "@repo/interfaces";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { format } from "date-fns";
 import { Button } from "@ant-design/react-native";
@@ -11,7 +11,7 @@ export default function TransactionCompleteScreen({
   onViewPaymentHistory,
   onBackToHome,
 }: {
-  transaction: ITransaction;
+  transaction: TransactionResult;
   merchantName: string;
   onViewPaymentHistory: () => void;
   onBackToHome: () => void;
@@ -72,7 +72,11 @@ export default function TransactionCompleteScreen({
             </Text>
 
             <Text className="w-1/2 text-gray-600">Transaction ID:</Text>
-            <Text className="w-1/2 font-medium">
+            <Text
+              className="w-1/2 font-medium"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {transaction.transaction_id}
             </Text>
           </View>

@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useGetAllVouchersQuery } from "../../../../../redux/services/voucherService";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
-import { IVoucher } from "../../../../../interfaces/voucherInterface";
+import { IVoucher } from "@repo/interfaces";
 import { format } from "date-fns";
 import EmptyPlaceholder from "../../../../../components/emptyPlaceholder";
 
