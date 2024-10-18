@@ -97,9 +97,21 @@ export default function AccountPage() {
           <AntDesign name="infocirlceo" size={16} color="#3b82f6" />
           <Text className="text-blue-500 underline">What does this mean?</Text>
         </TouchableOpacity>
+
+        <Button type="primary" onPress={() => router.push("/account/eligiblePlans")}>
+          <AntDesign
+            name="filetext1"
+            size={20}
+            color="white"
+            className="mr-2"
+          />
+          <Text className="my-auto font-semibold text-white">
+            View Eligible Plans
+          </Text>
+        </Button>
       </View>
 
-      {/* ===== Button Group ===== */}
+      {/* ===== Account Services ===== */}
       <View className="m-4 flex gap-2 rounded-lg bg-white p-8">
         <Text className="mb-4 text-2xl font-bold">Account Services</Text>
 
