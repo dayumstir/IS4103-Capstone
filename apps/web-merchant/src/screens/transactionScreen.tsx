@@ -2,9 +2,12 @@ import {
   Breadcrumb,
   Button,
   Card,
+  Form,
+  FormProps,
   Empty,
   Input,
   message,
+  Modal,
   Table,
   TableProps,
   Tag,
@@ -23,6 +26,12 @@ import { sortDirection } from "../interfaces/sortingInterface";
 import { useGetTransactionsByFilterMutation } from "../redux/services/transaction";
 import { RootState } from "../redux/store";
 import { EyeOutlined } from "@ant-design/icons";
+import {
+  useGetProfileQuery,
+  useEditProfileMutation,
+} from "../redux/services/profile";
+import { EditProfileProps } from "../interfaces/screens/editProfileInterface";
+
 interface TransactionTableInterface {
   key: string;
   instalmentPlanName: string;
@@ -59,6 +68,22 @@ const TransactionScreen: React.FC = () => {
       sortBy: "date_of_transaction",
       sortDirection: sortDirection.DESC,
     },
+  });
+
+  const [isEditCashbackModalOpen, setIsEditCashbackModalOpen] =
+  useState(false);
+  const [cashback, setCashback] = useState(0.0);
+  const merchantId = localStorage.getItem("merchantId");
+  if (!merchantId) {
+    navigate("/login");
+    return null;
+  }
+  const { data: profile, refetch } = useGetProfileQuery(merchantId);
+
+  useEffect(() => {
+    if (profile) {
+      setCashback(profile.cashback);
+    }
   });
 
   useEffect(() => {
@@ -281,8 +306,23 @@ const TransactionScreen: React.FC = () => {
     <Card>
       <div className="flex justify-between">
         <Breadcrumb items={[{ title: "Transactions" }]} />
+        <Button
+            type="primary"
+            onClick={() => setIsEditCashbackModalOpen(true)}
+          >
+            Edit CashBack
+        </Button>
+          {isEditCashbackModalOpen && (
+        <EditCashbackModal
+          refetch={refetch}
+          merchantId={merchantId}
+          initCashback={cashback}
+          isModalOpen={isEditCashbackModalOpen}
+          setModalOpen={setIsEditCashbackModalOpen}
+        />
+      )}
       </div>
-
+      
       <Search
         placeholder="Search by amount, reference number, cashback, customer, or installment plan"
         onChange={handleSearchChange}
@@ -301,4 +341,73 @@ const TransactionScreen: React.FC = () => {
   );
 };
 
+
+
+const EditCashbackModal = ({
+  refetch,
+  merchantId,
+  initCashback,
+  isModalOpen,
+  setModalOpen,
+}: EditProfileProps) => {
+  const [form] = Form.useForm();
+  const [EditProfileMutation] = useEditProfileMutation();
+
+  const onFinish: FormProps["onFinish"] = async (data) => {
+    data.cashback = parseFloat(data.cashback);
+    await EditProfileMutation({
+      id: merchantId,
+      body: data,
+    })
+      .unwrap()
+      .then(() => {
+        message.success("Update Cashback Successful!");
+        setModalOpen(false);
+      })
+      .catch((error) => message.error(error.data.error));
+      refetch();
+  };
+  return (
+    <Modal
+      title="Cashback percentage currently offered"
+      open={isModalOpen}
+      onOk={() => form.submit()}
+      cancelText="Cancel"
+      okText="Confirm"
+      onCancel={() => setModalOpen(false)}
+    >    
+      <Form
+        name="basic"
+        onFinish={onFinish}
+        form={form}
+        labelCol={{ span: 10 }}
+        wrapperCol={{ span: 16 }}
+      >
+        <Form.Item
+          name="cashback"
+          label="Cashback (%)"
+          rules={[
+            {
+              required: true,
+              message: "Please input your Cashback desired",
+            },
+            {
+              validator: (_, value) => {
+                if (value !== undefined && (value < 0 || value > 100)) {
+                  return Promise.reject(new Error("Cashback must be between 0 and 100."));
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
+          initialValue={initCashback}
+          hasFeedback
+        >
+          <Input type="number" min={0} max={100} />
+        </Form.Item>
+    
+      </Form>
+    </Modal>
+  );
+};
 export default TransactionScreen;

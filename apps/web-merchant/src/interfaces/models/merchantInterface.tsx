@@ -11,4 +11,5 @@ export interface IMerchant {
   profile_picture?: Buffer;
   status: MerchantStatus;
   qr_code: string;
+  cashback: number;
 }

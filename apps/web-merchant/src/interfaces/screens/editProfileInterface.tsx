@@ -5,6 +5,7 @@ export interface EditProfileProps {
   initContactNumber: string;
   initAddress: string;
   initProfileDisplay: string;
+  initCashback: number;
   isModalOpen: boolean;
   setModalOpen: (isOpen: boolean) => void;
 }
