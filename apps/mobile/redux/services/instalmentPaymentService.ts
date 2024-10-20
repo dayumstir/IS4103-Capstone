@@ -34,6 +34,15 @@ export const instalmentPaymentApi = createApi({
     getInstalmentPaymentById: builder.query<IInstalmentPayment, string>({
       query: (instalmentPaymentId) => `/${instalmentPaymentId}`,
     }),
+
+    // Pay Instalment Payment
+    payInstalmentPayment: builder.mutation<void, string>({
+      query: (instalmentPaymentId) => ({
+        url: `/${instalmentPaymentId}/pay`,
+        method: "POST",
+      }),
+      invalidatesTags: ["InstalmentPaymentsList"],
+    }),
   }),
 });
 
@@ -42,4 +51,5 @@ export const instalmentPaymentApi = createApi({
 export const {
   useGetCustomerOutstandingInstalmentPaymentsQuery,
   useGetInstalmentPaymentByIdQuery,
+  usePayInstalmentPaymentMutation,
 } = instalmentPaymentApi;
