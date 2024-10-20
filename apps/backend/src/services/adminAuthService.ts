@@ -38,7 +38,7 @@ const generateRandomPassword = (length = 8) => {
 
 
 export const add = async (adminData: IAdmin) => {
-    const { username, email } = adminData;
+    const { username, email, password } = adminData;
 
     // Check for existing admin in db
     const existingAdminEmail = await adminRepository.findAdminByEmail(email);
@@ -50,9 +50,11 @@ export const add = async (adminData: IAdmin) => {
     }
 
     // Generate a random password
-    const password = generateRandomPassword(); // Generate a random password
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    var generatedPassword =  generateRandomPassword();
+    var hashedPassword = await bcrypt.hash(generatedPassword, 10);
+    if(password && password.trim() !== "") {
+         hashedPassword = await bcrypt.hash(password, 10);
+    }
 
     // Create admin record in db
     const newAdmin= await adminRepository.createAdmin({
@@ -68,8 +70,11 @@ export const add = async (adminData: IAdmin) => {
         admin_id: newAdmin.admin_id , 
         email: newAdmin.email
     }, process.env.JWT_SECRET!, { expiresIn: "1h"});
+    if(password && password.trim() !== "") {
+        return { admin: newAdmin, token, password:password, username};
+    }
+    return { admin: newAdmin, token, password:generatedPassword , username};
 
-    return { admin: newAdmin, token, password, username};
 };
 
 
