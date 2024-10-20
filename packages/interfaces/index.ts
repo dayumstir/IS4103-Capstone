@@ -32,4 +32,4 @@ export {
     TransactionStatus,
 } from "./transactionInterface";
 export { sortDirection, Sorting } from "./sortingInterface";
-export { IVoucher, IVoucherAssigned, VoucherStatus } from "./voucherInterface";
+export { IVoucher, IVoucherAssigned, VoucherAssignedStatus } from "./voucherInterface";

@@ -20,7 +20,7 @@ export interface IVoucher {
 
 export interface IVoucherAssigned {
   voucher_assigned_id: string;
-  status: VoucherStatus;
+  status: VoucherAssignedStatus;
   remaining_uses: number;
   date_time_issued: Date;
 
@@ -30,7 +30,7 @@ export interface IVoucherAssigned {
   instalment_payment?: IInstalmentPayment;
 }
 
-export enum VoucherStatus {
+export enum VoucherAssignedStatus {
   AVAILABLE = "AVAILABLE",
   EXPIRED = "EXPIRED",
   USED = "USED",
