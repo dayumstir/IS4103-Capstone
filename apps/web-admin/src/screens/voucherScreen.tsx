@@ -1,5 +1,4 @@
 import { useState } from "react";
-import debounce from "debounce";
 import {
   Form,
   Input,
@@ -15,8 +14,8 @@ import {
   Modal,
   Descriptions,
   Divider,
-  AutoComplete,
   Spin,
+  Select
 } from "antd";
 import { PlusOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
 import { 
@@ -35,7 +34,6 @@ export default function VoucherScreen() {
   const [createVoucherForm] = Form.useForm();
   const [assignVoucherForm] = Form.useForm();
   const [voucherSearch, setVoucherSearch] = useState("");
-  const [customerSearch, setCustomerSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,23 +71,11 @@ export default function VoucherScreen() {
     }
   };
 
-  // Handle assigning voucher to customer
-  // Fetch customer data based on search
-  const { data: customerOptions } = useGetAllCustomersQuery(customerSearch, {
-    skip: !customerSearch, // Don't fetch if the search is empty
+  // Handle assign voucher to customer
+  const { data: customerOptions, isLoading: isCustomersLoading } = useGetAllCustomersQuery(undefined, {
+    skip: !isModalOpen,
   });
 
-  // Handle customer search and selection with debounced search
-  const handleCustomerSearch = debounce((value: string) => {
-    setCustomerSearch(value);
-  }, 300);
-
-  // Handle customer selection from AutoComplete
-  const handleCustomerSelect = (customerEmail: string) => {
-    assignVoucherForm.setFieldsValue({ customer_email: customerEmail });
-  };
-
-  // Handle assign voucher to customer
   const handleAssignVoucher = async (values: { customer_email: string }) => {
     if (!selectedVoucherId) {
       message.error("No voucher selected.");
@@ -130,7 +116,6 @@ export default function VoucherScreen() {
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedVoucherId(null);
-    setCustomerSearch(""); // Clear the customer search on close
     assignVoucherForm.resetFields(); // Clear the assign form fields
   };
 
@@ -374,30 +359,34 @@ export default function VoucherScreen() {
             {/* Assign Voucher */}
             {voucherDetails.is_active && (
               <Card className="mb-8 border border-gray-300" title="Assign Voucher">
-                <Form
-                  form={assignVoucherForm}
-                  layout="vertical"
-                  onFinish={handleAssignVoucher}
-                >
-                  <Form.Item
-                    name="customer_email"
-                    label="Customer Email"
-                    rules={[{ required: true, message: "Please input the customer email!" }]}
+                {isCustomersLoading ? (
+                  <Spin />
+                ) : (
+                  <Form
+                    form={assignVoucherForm}
+                    layout="vertical"
+                    onFinish={handleAssignVoucher}
                   >
-                    <AutoComplete
-                      options={customerOptions?.map((customer) => ({ value: customer.email }))}
-                      onSearch={handleCustomerSearch}
-                      onSelect={handleCustomerSelect}
-                      placeholder="Search customer by email"
-                      allowClear
-                    />
-                  </Form.Item>
-                  <Form.Item>
-                    <Button type="primary" htmlType="submit">
-                      Assign Voucher
-                    </Button>
-                  </Form.Item>
-                </Form>
+                    <Form.Item
+                      name="customer_email"
+                      label="Customer Email"
+                      rules={[{ required: true, message: "Please select the customer!" }]}
+                    >
+                      <Select
+                        placeholder="Select a customer"
+                        options={customerOptions?.map((customer) => ({
+                          label: customer.email,
+                          value: customer.email,
+                        }))}
+                      />
+                    </Form.Item>
+                    <Form.Item>
+                      <Button type="primary" htmlType="submit">
+                        Assign Voucher
+                      </Button>
+                    </Form.Item>
+                  </Form>
+                )}
               </Card>
             )}
           </>
@@ -406,5 +395,5 @@ export default function VoucherScreen() {
         )}
       </Modal>
     </div>
-  )
+  );
 }
