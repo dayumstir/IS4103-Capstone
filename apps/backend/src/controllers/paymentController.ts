@@ -1,8 +1,9 @@
 // src/controllers/paymentController.ts
 import { Request, Response, NextFunction } from "express";
 import * as customerService from '../services/customerService';
+import * as topUpService from '../services/topUpService';
 import logger from "../utils/logger";
-import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from "../utils/error";
+import { BadRequestError, NotFoundError, UnauthorizedError } from "../utils/error";
 import { stripe } from "../utils/stripe";
 
 export const topUpWallet = async (req: Request, res: Response, next: NextFunction) => {
@@ -71,6 +72,24 @@ export const topUpWallet = async (req: Request, res: Response, next: NextFunctio
         });
     } catch (error) {
         logger.error("Error during top up wallet:", error);
+        next(error);
+    }
+};
+
+// Get top-up record by Customer ID
+export const getTopUpByCustomerId = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("Executing getTopUpByCustomerId...");
+
+    const customer_id = req.customer_id;
+    if (!customer_id) {
+        return next(new UnauthorizedError("Unauthorized: customer_id is missing"));
+    }
+
+    try {
+        const topUpRecords = await topUpService.getTopUpByCustomerId(customer_id);
+        res.status(200).json(topUpRecords);
+    } catch (error) {
+        logger.error("Error during getTopUpByCustomerId:", error);
         next(error);
     }
 };

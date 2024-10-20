@@ -10,3 +10,12 @@ export const createTopUp = async (customer_id: string, amount: number) => {
 
     return topUpRecord;
 };
+
+// Get all top-up records by Customer ID
+export const getTopUpByCustomerId = async (customer_id: string) => {
+    logger.info(`Fetching top-up records for customer: ${customer_id}`);
+
+    const topUpRecords = await topUpRepository.getTopUpByCustomerId(customer_id);
+
+    return topUpRecords;
+};

@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
-import { useCreatePaymentIntentMutation } from "../../../../redux/services/paymentService";
+import { useCreatePaymentIntentMutation, useGetTopUpByCustomerIdQuery } from "../../../../redux/services/paymentService";
 import { useGetProfileQuery } from "../../../../redux/services/customerService";
 import { useGetCustomerTransactionsQuery } from "../../../../redux/services/transactionService";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
@@ -125,6 +125,8 @@ export default function WalletPage() {
       });
       // Refresh wallet balance
       refetch();
+      // Refresh top-up records
+      refetchTopUpRecords();
       // Reset form
       reset({
         amount: '',
@@ -191,6 +193,19 @@ export default function WalletPage() {
     return () => deepLinkListener.remove();
   }, [handleDeepLink]);
 
+  // Fetch top-up records
+  const {
+    data: topUpRecords,
+    isLoading: isTopUpRecordsLoading,
+    refetch: refetchTopUpRecords,
+  } = useGetTopUpByCustomerIdQuery();
+
+  // Sort top-up records by createdAt in descending order (newest first)
+  const sortedTopUpRecords = topUpRecords
+    ? [...topUpRecords].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+    : [];
 
   // Fetch transactions
   const {
@@ -307,62 +322,48 @@ export default function WalletPage() {
           </Button>
         </View>
 
-        {/* ===== Recent Transactions ===== */}
+        {/* ===== Recent Top Ups ===== */}
         <View className="mx-4 mb-4 rounded-xl bg-white p-8">
-          <Text className="mb-2 text-xl font-bold">Recent Transactions</Text>
-          {isTransactionsLoading ? (
+          <Text className="mb-2 text-xl font-bold">Recent Top Ups</Text>
+          {isTopUpRecordsLoading ? (
             <View className="items-center justify-center py-4">
               <ActivityIndicator size="large" />
             </View>
-          ) : transactions && transactions.length > 0 ? (
+          ) : sortedTopUpRecords && sortedTopUpRecords.length > 0 ? (
             <>
-              {transactions.slice(0, 3).map((transaction) => (
-                <TouchableOpacity
-                  key={transaction.transaction_id}
-                  onPress={() => {
-                    router.push(`/payments/${transaction.transaction_id}`);
-                  }}
+              {sortedTopUpRecords.map((topUp) => (
+                <View
+                  key={topUp.topUp_id}
+                  className="flex-row items-center justify-between border-t border-gray-200 py-4"
                 >
-                  <View className="flex-row items-center justify-between border-t border-gray-200 py-4">
-                    <View className="flex-row items-center gap-4">
-                      <View className="h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                        {/* TODO: Replace with merchant profile picture */}
-                        <Text className="text-center font-bold text-blue-500">
-                          {transaction.merchant.name.slice(0, 1).toUpperCase()}
-                        </Text>
-                      </View>
-                      <View className="mr-4 flex-1">
-                        <Text
-                          className="text-base font-medium"
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
-                        >
-                          {transaction.merchant.name}
-                        </Text>
-                        <Text className="text-sm text-gray-500">
-                          {format(transaction.date_of_transaction, "dd MMM yyyy")}
-                        </Text>
-                      </View>
-                      <Text className="text-base font-semibold text-red-600">
-                        -{formatCurrency(transaction.amount)}
+                  <View className="flex-row items-center gap-4">
+                    <View className="h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                      {/* Icon representing top-up */}
+                      <Text className="text-center text-2xl">💰</Text>
+                    </View>
+                    <View className="mr-4 flex-1">
+                      <Text
+                        className="text-base font-medium"
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        Top Up
+                      </Text>
+                      <Text className="text-sm text-gray-500">
+                        {format(new Date(topUp.createdAt), "dd MMM yyyy, hh:mm a")}
                       </Text>
                     </View>
+                    <Text className="text-base font-semibold text-green-600">
+                      +{formatCurrency(topUp.amount)}
+                    </Text>
                   </View>
-                </TouchableOpacity>
+                </View>
               ))}
-              <Button
-                type="primary"
-                onPress={() => router.push("/payments/allTransactions")}
-              >
-                <Text className="font-semibold text-white">
-                  View All Transactions
-                </Text>
-              </Button>
             </>
           ) : (
             <View className="items-center gap-2 px-8 py-4">
               <Text className="text-center font-medium leading-6 text-gray-500">
-                You have no recent transactions
+                You have no recent top-ups
               </Text>
               <Text className="text-center text-4xl">😊</Text>
             </View>
