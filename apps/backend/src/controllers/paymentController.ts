@@ -1,7 +1,7 @@
 // src/controllers/paymentController.ts
 import { Request, Response, NextFunction } from "express";
 import * as customerService from '../services/customerService';
-import * as topUpService from '../services/topUpService';
+import * as paymentHistoryService from '../services/paymentHistoryService';
 import logger from "../utils/logger";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../utils/error";
 import { stripe } from "../utils/stripe";
@@ -76,9 +76,9 @@ export const topUpWallet = async (req: Request, res: Response, next: NextFunctio
     }
 };
 
-// Get top-up record by Customer ID
-export const getTopUpByCustomerId = async (req: Request, res: Response, next: NextFunction) => {
-    logger.info("Executing getTopUpByCustomerId...");
+// Get Payment History by Customer ID
+export const getPaymentHistoryByCustomerId = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("Executing getPaymentHistoryByCustomerId...");
 
     const customer_id = req.customer_id;
     if (!customer_id) {
@@ -86,10 +86,10 @@ export const getTopUpByCustomerId = async (req: Request, res: Response, next: Ne
     }
 
     try {
-        const topUpRecords = await topUpService.getTopUpByCustomerId(customer_id);
-        res.status(200).json(topUpRecords);
+        const paymentHistoryRecords = await paymentHistoryService.getPaymentHistoryByCustomerId(customer_id);
+        res.status(200).json(paymentHistoryRecords);
     } catch (error) {
-        logger.error("Error during getTopUpByCustomerId:", error);
+        logger.error("Error during getPaymentHistoryByCustomerId:", error);
         next(error);
     }
 };

@@ -2,7 +2,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store";
 import { API_URL } from "../../config/apiConfig";
-import { ITopUp } from "@repo/interfaces";
+import { IPaymentHistory } from "@repo/interfaces";
 
 interface PaymentIntentResponse {
     paymentIntent: string;
@@ -35,12 +35,12 @@ export const paymentApi = createApi({
             }),
         }),
 
-        // Get top-up records by Customer ID
-        getTopUpByCustomerId: builder.query<ITopUp[], void>({
-            query: () => "/top-up",
+        // Get payment history
+        getPaymentHistory: builder.query<IPaymentHistory[], void>({
+            query: () => "/history",
         }),
     }),
 });
 
 // Export hooks for usage in functional components
-export const { useCreatePaymentIntentMutation, useGetTopUpByCustomerIdQuery } = paymentApi;
+export const { useCreatePaymentIntentMutation, useGetPaymentHistoryQuery } = paymentApi;

@@ -4,8 +4,6 @@ export interface IPaymentHistory {
     amount: number;
     payment_date: Date;
     payment_type: PaymentType;
-    reference_no?: string;
-    description?: string;
 
     customer_id: string;
 }

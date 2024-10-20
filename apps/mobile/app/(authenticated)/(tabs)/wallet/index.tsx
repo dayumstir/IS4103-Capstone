@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
-import { useCreatePaymentIntentMutation, useGetTopUpByCustomerIdQuery } from "../../../../redux/services/paymentService";
+import { useCreatePaymentIntentMutation, useGetPaymentHistoryQuery } from "../../../../redux/services/paymentService";
 import { useGetProfileQuery } from "../../../../redux/services/customerService";
 import { useGetCustomerTransactionsQuery } from "../../../../redux/services/transactionService";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
@@ -198,12 +198,12 @@ export default function WalletPage() {
     data: topUpRecords,
     isLoading: isTopUpRecordsLoading,
     refetch: refetchTopUpRecords,
-  } = useGetTopUpByCustomerIdQuery();
+  } = useGetPaymentHistoryQuery();
 
   // Sort top-up records by createdAt in descending order (newest first)
   const sortedTopUpRecords = topUpRecords
     ? [...topUpRecords].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        (a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime()
       )
     : [];
 
@@ -333,7 +333,7 @@ export default function WalletPage() {
             <>
               {sortedTopUpRecords.map((topUp) => (
                 <View
-                  key={topUp.topUp_id}
+                  key={topUp.payment_history_id}
                   className="flex-row items-center justify-between border-t border-gray-200 py-4"
                 >
                   <View className="flex-row items-center gap-4">
@@ -350,7 +350,7 @@ export default function WalletPage() {
                         Top Up
                       </Text>
                       <Text className="text-sm text-gray-500">
-                        {format(new Date(topUp.createdAt), "dd MMM yyyy, hh:mm a")}
+                        {format(new Date(topUp.payment_date), "dd MMM yyyy, hh:mm a")}
                       </Text>
                     </View>
                     <Text className="text-base font-semibold text-green-600">

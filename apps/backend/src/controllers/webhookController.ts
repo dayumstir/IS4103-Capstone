@@ -2,13 +2,15 @@ import { Request, Response } from 'express';
 import { stripe } from '../utils/stripe';
 import Stripe from 'stripe'; // Import Stripe types
 import { topUpWallet } from '../services/customerService';
-import { createTopUp } from '../services/topUpService';
+import { createPaymentHistory } from '../services/paymentHistoryService';
+import { PaymentType } from '@repo/interfaces';
+import logger from '../utils/logger';
 
 export const handleStripeWebhook = async (req: Request, res: Response) => {
     const sig = req.headers['stripe-signature'];
 
     if (!sig) {
-        console.error('Webhook signature is missing.');
+        logger.error('Webhook signature is missing.');
         return res.status(400).send('Webhook signature is missing.');
     }
 
@@ -23,7 +25,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
     } catch (err) {
-        console.error(`Webhook signature verification failed: ${(err as Error).message}`);
+        logger.error(`Webhook signature verification failed: ${(err as Error).message}`);
         return res.status(400).send(`Webhook Error: ${(err as Error).message}`);
     }
 
@@ -35,7 +37,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
 
         try {
             await topUpWallet(customer_id, amount);
-            await createTopUp(customer_id, amount);
+            await createPaymentHistory(customer_id, amount, PaymentType.TOP_UP);
             console.log(`Wallet topped up for customer ${customer_id} by $${amount}`);
         } catch (err: any) {
             console.error(`Failed to update wallet balance: ${err.message}`);

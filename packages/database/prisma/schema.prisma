@@ -182,8 +182,6 @@ model PaymentHistory {
   amount               Float
   payment_date         DateTime           @default(now())
   payment_type         PaymentType
-  reference_no         String?
-  description          String?
 
   // Relationships
   customer_id          String
