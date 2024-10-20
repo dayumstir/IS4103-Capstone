@@ -1,7 +1,6 @@
 // src/repositories/voucherRepository.ts
 import { prisma } from "./db";
-import { IVoucher } from "../interfaces/voucherInterface";
-import { VoucherAssignedStatus } from "../interfaces/voucherAssignedStatusInterface";
+import { IVoucher, VoucherStatus } from "@repo/interfaces";
 
 // Create Voucher
 export const createVoucher = async (voucherData: IVoucher) => {
@@ -14,11 +13,10 @@ export const createVoucher = async (voucherData: IVoucher) => {
 export const assignVoucher = async (voucher_id: string, customer_id: string, usage_limit: number) => {
     return await prisma.voucherAssigned.create({
         data: {
-            status: VoucherAssignedStatus.AVAILABLE,
+            status: VoucherStatus.AVAILABLE,
             voucher_id,
             customer_id,
             remaining_uses: usage_limit,
-            used_installment_payment_id: null,
         }
     });
 };
@@ -32,7 +30,7 @@ export const deactivateVoucher = async (voucher_id: string) => {
 
     await prisma.voucherAssigned.updateMany({
         where: { voucher_id },
-        data: { status: VoucherAssignedStatus.UNAVAILABLE }
+        data: { status: VoucherStatus.UNAVAILABLE }
     });
 
     return deactivateVoucher;

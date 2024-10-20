@@ -1,5 +1,5 @@
 // src/services/voucherService.ts
-import { IVoucher } from "../interfaces/voucherInterface";
+import { IVoucher } from "@repo/interfaces";
 import * as voucherRepository from "../repositories/voucherRepository";
 import logger from "../utils/logger";
 import { NotFoundError, BadRequestError } from "../utils/error";
