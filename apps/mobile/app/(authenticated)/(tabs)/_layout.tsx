@@ -27,6 +27,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="wallet"
         options={{
+          headerShown: false,
           headerTitle: "Wallet",
           title: "Wallet",
           tabBarIcon: ({ color, size }) => (

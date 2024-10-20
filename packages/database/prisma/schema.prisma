@@ -39,6 +39,7 @@ model Customer {
   issues                  Issue[]
   vouchersAssigned        VoucherAssigned[]
   transactions            Transaction[]
+  topUps                  TopUp[]
 }
 
 // Utility Schemas
@@ -168,6 +169,16 @@ model MerchantEmailVerificationToken {
 
   @@unique([email, token])
   @@index([merchant_id])
+}
+
+model TopUp {
+  top_up_id      String   @id @default(cuid())
+  amount         Float
+
+  createdAt DateTime @default(now())
+
+  customer_id String
+  customer    Customer @relation(fields: [customer_id], references: [customer_id])
 }
 
 enum TransactionStatus {
