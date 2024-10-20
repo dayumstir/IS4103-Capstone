@@ -33,7 +33,7 @@ export const getInstalmentPayment = async (instalment_payment_id: string) => {
 
 export const editInstalmentPayment = async (
     instalment_payment_id: string,
-    updateData: IInstalmentPayment
+    updateData: Partial<IInstalmentPayment>
 ) => {
     logger.info("Executing editInstalmentPayment...");
     const instalmentPayment =

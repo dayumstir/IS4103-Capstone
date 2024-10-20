@@ -47,7 +47,7 @@ export const findCustomerOutstandingInstalmentPayments = async (
 // Update instalment payment in db
 export const updateInstalmentPayment = async (
     instalment_payment_id: string,
-    updateData: Omit<IInstalmentPayment, "transaction" | "voucher_assigned">
+    updateData: Partial<IInstalmentPayment>
 ) => {
     const {
         voucher_assigned_id,

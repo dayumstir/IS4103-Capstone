@@ -255,18 +255,19 @@ model InstalmentPayment {
   paid_date               DateTime?
   instalment_number       Int // depends on frequency of instalment plan
 
+  amount_deducted_from_wallet Float?
+  amount_discount_from_voucher    Float?
+  amount_deducted_from_cashback_wallet Float?
+
   // Relationships
   transaction_id String
   transaction    Transaction @relation(fields: [transaction_id], references: [transaction_id])
 
   voucher_assigned_id             String?            @unique
   voucher_assigned                VoucherAssigned?   @relation(fields: [voucher_assigned_id], references: [voucher_assigned_id])
-  amount_discount_from_voucher    Float?
-
-  amount_deducted_from_wallet Float?
-
-  cashback_wallet                      CashbackWallet?
-  amount_deducted_from_cashback_wallet Float?
+  
+  cashback_wallet_id              String?            @unique
+  cashback_wallet                 CashbackWallet?
 }
 
 model CashbackWallet {
@@ -359,7 +360,6 @@ model VoucherAssigned {
   voucher_assigned_id     String             @id @default(cuid())
   status                  VoucherAssignedStatus
   remaining_uses          Int
-
   date_time_issued        DateTime           @default(now())
 
   // Relationships
@@ -367,5 +367,6 @@ model VoucherAssigned {
   voucher_id              String
   customer                Customer           @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
   customer_id             String
-  instalment_payment      InstalmentPayment?
+  instalment_payment      InstalmentPayment? 
+  instalment_payment_id   String?
 }

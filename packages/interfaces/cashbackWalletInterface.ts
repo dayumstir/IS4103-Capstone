@@ -6,6 +6,7 @@ import { IInstalmentPayment } from "./instalmentPaymentInterface";
 export interface ICashbackWallet {
     cashback_wallet_id: string;
     amount: number;
+    created_at: Date;
 
     customer_id: string;
     customer: ICustomer;

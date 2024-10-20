@@ -12,17 +12,18 @@ export interface IInstalmentPayment {
     paid_date?: Date;
     instalment_number: number;
 
+    amount_deducted_from_wallet?: number;
+    amount_discount_from_voucher?: number;
+    amount_deducted_from_cashback_wallet?: number;
+
     transaction_id: string;
     transaction: TransactionResult;
 
     voucher_assigned_id?: string;
-    voucher_assigned?: IVoucherAssigned;
-    amount_discount_from_voucher?: number;
+    voucher_assigned?: IVoucherAssigned;    
 
-    amount_deducted_from_wallet?: number;
-
+    cashback_wallet_id?: string;
     cashback_wallet?: ICashbackWallet;
-    amount_deducted_from_cashback_wallet?: number;
 }
 
 export enum InstalmentPaymentStatus {
