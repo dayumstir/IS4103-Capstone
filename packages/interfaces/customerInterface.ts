@@ -1,3 +1,4 @@
+// packages/interfaces/customerInterface.ts
 export interface ICustomer {
     customer_id: string;
     name: string;
@@ -8,8 +9,8 @@ export interface ICustomer {
     address: string;
     date_of_birth: Date;
     status: CustomerStatus;
-    credit_score: number;
     wallet_balance: number;
+    credit_score: number;
 }
 
 export enum CustomerStatus {

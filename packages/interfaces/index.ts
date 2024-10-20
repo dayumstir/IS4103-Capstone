@@ -1,5 +1,14 @@
+// packages/interfaces/index.ts
+export { ICashbackWallet } from "./cashbackWalletInterface";
 export { ICreditTier } from "./creditTierInterface";
-export { ICustomer, CustomerStatus } from "./customerInterface";
+export { 
+    ICustomer, 
+    CustomerStatus 
+} from "./customerInterface";
+export {
+    IInstalmentPayment,
+    InstalmentPaymentStatus,
+} from "./instalmentPaymentInterface";
 export { IInstalmentPlan } from "./instalmentPlanInterface";
 export {
     IIssue,
@@ -7,22 +16,20 @@ export {
     IssueCategory,
     IssueFilter,
 } from "./issueInterface";
-export {
-    IMerchant,
-    IMerchantPayment,
-    MerchantStatus,
+export { 
+    IMerchant, 
+    IMerchantPayment, 
+    MerchantStatus 
 } from "./merchantInterface";
-export { sortDirection, Sorting } from "./sortingInterface";
+export { 
+    IPaymentHistory, 
+    PaymentType 
+} from "./paymentHistoryInterface";
 export {
     ITransaction,
     TransactionFilter,
     TransactionResult,
     TransactionStatus,
 } from "./transactionInterface";
+export { sortDirection, Sorting } from "./sortingInterface";
 export { IVoucher, IVoucherAssigned, VoucherStatus } from "./voucherInterface";
-export {
-    IInstalmentPayment,
-    InstalmentPaymentStatus,
-} from "./instalmentPaymentInterface";
-export { ICashbackWallet } from "./cashbackWalletInterface";
-export {ITopUp} from "./topUpInterface";

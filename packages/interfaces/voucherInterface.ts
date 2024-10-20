@@ -1,3 +1,6 @@
+// packages/interfaces/voucherInterface.ts
+import { IInstalmentPayment } from "./instalmentPaymentInterface";
+
 export interface IVoucher {
   voucher_id: string;
   title: string;
@@ -18,15 +21,13 @@ export interface IVoucher {
 export interface IVoucherAssigned {
   voucher_assigned_id: string;
   status: VoucherStatus;
-  date_time_issued: Date;
   remaining_uses: number;
+  date_time_issued: Date;
 
   voucher_id: string;
   voucher: IVoucher;
-
   customer_id: string;
-
-  used_installment_payment_id: string;
+  instalment_payment?: IInstalmentPayment;
 }
 
 export enum VoucherStatus {

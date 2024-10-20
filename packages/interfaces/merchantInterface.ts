@@ -1,3 +1,4 @@
+// packages/interfaces/merchantInterface.ts
 import { ITransaction } from "./transactionInterface";
 
 export enum MerchantStatus {
@@ -7,7 +8,6 @@ export enum MerchantStatus {
     SUSPENDED = "SUSPENDED",
 }
 
-// Defines the structure of a merchant object
 export interface IMerchant {
     merchant_id: string;
     name: string;
@@ -15,9 +15,9 @@ export interface IMerchant {
     password: string;
     contact_number: string;
     address: string;
-    profile_picture?: Buffer;
-    status: MerchantStatus;
     qr_code: string;
+    status: MerchantStatus;
+    profile_picture?: Buffer;
     cashback: number;
 }
 

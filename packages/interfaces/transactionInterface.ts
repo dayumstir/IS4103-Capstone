@@ -1,3 +1,4 @@
+// packages/interfaces/transactionInterface.ts
 import { IInstalmentPayment } from "./instalmentPaymentInterface";
 import { IInstalmentPlan } from "./instalmentPlanInterface";
 import { IMerchant } from "./merchantInterface";
@@ -13,14 +14,14 @@ export interface ITransaction {
     transaction_id: string;
     amount: number;
     date_of_transaction: Date;
-    fully_paid_date: Date | null;
     status: TransactionStatus;
+    fully_paid_date?: Date;
     reference_no: string;
     cashback_percentage: number;
     customer_id: string;
     merchant_id: string;
-    merchant_payment_id: string;
     instalment_plan_id: string;
+    merchant_payment_id?: string;
 }
 
 export interface TransactionFilter {

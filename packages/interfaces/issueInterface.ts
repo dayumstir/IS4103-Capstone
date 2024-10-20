@@ -1,4 +1,4 @@
-// Defines the structure of an issue object
+// packages/interfaces/issueInterface.ts
 import { Sorting } from "./sortingInterface";
 import { ITransaction } from "./transactionInterface";
 
@@ -19,12 +19,13 @@ export enum IssueCategory {
     TRANSACTION = "TRANSACTION",
     OTHERS = "OTHERS",
 }
+
 export interface IIssue {
     issue_id: string;
     title: string;
     description: string;
     category: IssueCategory;
-    outcome: string;
+    outcome?: string;
     status: IssueStatus;
     images?: Buffer[];
     create_time: Date;
