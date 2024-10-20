@@ -25,3 +25,4 @@ export {
     InstalmentPaymentStatus,
 } from "./instalmentPaymentInterface";
 export { ICashbackWallet } from "./cashbackWalletInterface";
+export {ITopUp} from "./topUpInterface";
