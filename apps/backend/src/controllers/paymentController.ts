@@ -109,13 +109,21 @@ export const makePayment = async (req: Request, res: Response, next: NextFunctio
     const {
         instalment_payment_id,
         voucher_assigned_id,
-        amount_discount_from_voucher,
+        amount_discount_from_voucher = 0,
         amount_deducted_from_wallet = 0,
     } = req.body;
 
     try {
         // Get Instalment Payment from database
         const instalmentPayment = await instalmentPaymentService.getInstalmentPayment(instalment_payment_id);
+        
+        if (!instalmentPayment) {
+            throw new NotFoundError("Instalment payment not found");
+        }
+
+        if (instalmentPayment.status === InstalmentPaymentStatus.PAID) {
+            throw new BadRequestError("Instalment payment is already paid");
+        }
 
         // Deduct amount from wallet
         if (amount_deducted_from_wallet > 0) {

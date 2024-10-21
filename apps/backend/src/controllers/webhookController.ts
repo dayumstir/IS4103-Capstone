@@ -3,8 +3,8 @@ import { stripe } from '../utils/stripe';
 import Stripe from 'stripe'; // Import Stripe types
 import { topUpWallet } from '../services/customerService';
 import { createPaymentHistory } from '../services/paymentHistoryService';
-import { PaymentType } from '@repo/interfaces';
 import logger from '../utils/logger';
+import { PaymentType } from '@repo/interfaces';
 
 export const handleStripeWebhook = async (req: Request, res: Response) => {
     const sig = req.headers['stripe-signature'];
