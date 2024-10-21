@@ -33,6 +33,8 @@ export const paymentApi = createApi({
         },
     }),
 
+    tagTypes: ["VoucherList"],
+
     endpoints: (builder) => ({
         // Fetch payment sheet parameters
         createPaymentIntent: builder.mutation<PaymentIntentResponse, { amount: number }>({
@@ -55,6 +57,7 @@ export const paymentApi = createApi({
                 method: "POST",
                 body: paymentData,
             }),
+            invalidatesTags: ["VoucherList"],
         }),
     }),
 });

@@ -29,6 +29,7 @@ export default function InstalmentPaymentDetails() {
   const { instalmentPaymentId } = useLocalSearchParams<{ instalmentPaymentId: string }>();
   const [voucherModalVisible, setVoucherModalVisible] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState<IVoucherAssigned | null>(null);
+  const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
   const { profile } = useSelector((state: RootState) => state.customer);
   const router = useRouter();
 
@@ -45,6 +46,7 @@ export default function InstalmentPaymentDetails() {
     data: vouchers,
     isLoading: isVouchersLoading,
     error: vouchersError,
+    refetch: refetchVouchers,
   } = useGetAllVouchersQuery({ customer_id: profile?.customer_id ?? ""});
 
   // Mutation hook for making payment
@@ -113,6 +115,7 @@ export default function InstalmentPaymentDetails() {
       });
       // Refresh data
       refetch();
+      refetchVouchers();
       // Navigate back to payments page
       router.back();
     } catch (error) {
@@ -123,6 +126,13 @@ export default function InstalmentPaymentDetails() {
       });
     }
   };
+
+  // Filter out unusable vouchers
+  const usableVouchers = vouchers?.filter(
+    (voucherAssigned) =>
+      voucherAssigned.remaining_uses > 0 &&
+      voucherAssigned.status === "AVAILABLE"
+  );
 
   return (
     <ScrollView>
@@ -217,30 +227,74 @@ export default function InstalmentPaymentDetails() {
         {/* ===== Merchant Details ===== */}
         <View className="mb-4 rounded-xl bg-white p-8">
           <Text className="mb-4 text-xl font-bold">Merchant Details</Text>
-          <View className="flex-row items-center">
-            <Ionicons
-              name="storefront-outline"
-              size={20}
-              color="#3b82f6"
-              className="mr-4"
-            />
-            <View>
-              <Text className="text-sm text-gray-500">Name</Text>
-              <Text className="font-medium">
-                {instalmentPayment.transaction.merchant.name}
-              </Text>
-              <Text className="text-sm text-gray-500">Email</Text>
-              <Text className="font-medium">
-                {instalmentPayment.transaction.merchant.email}
-              </Text>
-              <Text className="text-sm text-gray-500">Contact Number</Text>
-              <Text className="font-medium">
-                {instalmentPayment.transaction.merchant.contact_number}
-              </Text>
-              <Text className="text-sm text-gray-500">Address</Text>
-              <Text className="font-medium">
-                {instalmentPayment.transaction.merchant.address}
-              </Text>
+          <View className="flex-row flex-wrap">
+            {/* Name */}
+            <View className="mb-4 w-1/2 pr-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="person-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Name</Text>
+                  <Text className="font-medium">
+                    {instalmentPayment.transaction.merchant.name}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            {/* Email */}
+            <View className="mb-4 w-1/2 pl-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Email</Text>
+                  <Text className="font-medium">
+                    {instalmentPayment.transaction.merchant.email}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            {/* Contact Number */}
+            <View className="mb-4 w-1/2 pr-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="call-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Contact Number</Text>
+                  <Text className="font-medium">
+                    {instalmentPayment.transaction.merchant.contact_number}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            {/* Address */}
+            <View className="mb-4 w-1/2 pl-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="location-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Address</Text>
+                  <Text className="font-medium">
+                    {instalmentPayment.transaction.merchant.address}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
         </View>
@@ -320,7 +374,7 @@ export default function InstalmentPaymentDetails() {
         {instalmentPayment.status === "UNPAID" && (
           <Button
             type="primary"
-            onPress={handlePayInstalment}
+            onPress={() => setIsConfirmationVisible(true)}
             loading={isPaying}
           >
             <Text className="font-semibold text-white">Pay Now</Text>
@@ -345,9 +399,9 @@ export default function InstalmentPaymentDetails() {
               <ActivityIndicator size="large" />
             ) : vouchersError ? (
               <Text>Error loading vouchers. Please try again later.</Text>
-            ) : vouchers && vouchers.length > 0 ? (
+            ) : usableVouchers && usableVouchers.length > 0 ? (
               <ScrollView>
-              {vouchers.map((voucherAssigned) => {
+              {usableVouchers.map((voucherAssigned) => {
                 const voucher = voucherAssigned.voucher;
                 return (
                   <TouchableOpacity
@@ -415,6 +469,44 @@ export default function InstalmentPaymentDetails() {
         </View>
       </Modal>
 
+      {/* ===== Confirmation Modal ===== */}
+      <Modal
+        visible={isConfirmationVisible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setIsConfirmationVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setIsConfirmationVisible(false)}>
+          <BlurView intensity={100} tint="dark"/>
+        </TouchableWithoutFeedback>
+        <View className="flex-1 items-center justify-center">
+          <View className="rounded-lg bg-white p-6">
+            <Text className="mb-4 text-lg font-bold">Confirm Payment</Text>
+            <Text className="mb-6 text-base">
+              Are you sure you want to pay {formatCurrency(amountFromWallet)} for this instalment?
+            </Text>
+            <View className="flex-row justify-end">
+              <Button
+                type="ghost"
+                onPress={() => setIsConfirmationVisible(false)}
+                style={{ marginRight: 8 }}
+              >
+                <Text className="font-semibold text-gray-500">Cancel</Text>
+              </Button>
+              <Button
+                type="primary"
+                onPress={async () => {
+                  setIsConfirmationVisible(false);
+                  await handlePayInstalment();
+                }}
+                loading={isPaying}
+              >
+                <Text className="font-semibold text-white">Confirm</Text>
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
