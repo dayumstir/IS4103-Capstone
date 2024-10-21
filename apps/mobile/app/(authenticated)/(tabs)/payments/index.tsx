@@ -107,16 +107,6 @@ export default function PaymentsPage() {
               {formatCurrency(totalOutstanding)}
             </Text>
           </View>
-          {/* {totalOutstanding > 0 && (
-            <TouchableOpacity
-              className="rounded-md bg-white px-4 py-2"
-              onPress={handlePayAll}
-            >
-              <Text className="text-sm font-semibold text-blue-500">
-                Pay All
-              </Text>
-            </TouchableOpacity>
-          )} */}
         </View>
       </LinearGradient>
 
@@ -155,11 +145,18 @@ export default function PaymentsPage() {
                   >
                     <View className="mr-4 flex-1">
                       <Text
-                        className="text-base font-medium"
+                        className="font-medium"
                         numberOfLines={1}
                         ellipsizeMode="tail"
                       >
                         {payment.transaction.merchant.name}
+                      </Text>
+                      <Text className="text-sm font-medium text-blue-500">
+                        Instalment {payment.instalment_number} of{" "}
+                        {
+                          payment.transaction.instalment_plan
+                            .number_of_instalments
+                        }
                       </Text>
                       <Text
                         className={`text-sm ${
@@ -231,7 +228,10 @@ export default function PaymentsPage() {
                         {transaction.merchant.name}
                       </Text>
                       <Text className="text-sm text-gray-500">
-                        {format(transaction.date_of_transaction, "d MMM yyyy, h:mm a")}
+                        {format(
+                          transaction.date_of_transaction,
+                          "d MMM yyyy, h:mm a",
+                        )}
                       </Text>
                     </View>
                     <Text className="text-base font-semibold text-red-600">
