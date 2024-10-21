@@ -123,7 +123,7 @@ export default function RewardsPage() {
 
         <View className="mt-2 border-t border-gray-200 pt-2">
           <Text className="text-xs text-gray-600">
-            Expires: {format(voucher.expiry_date, "dd MMM yyyy")}
+            Expires: {format(voucher.expiry_date, "d MMM yyyy")}
           </Text>
 
           <Text className="text-xs text-gray-600">

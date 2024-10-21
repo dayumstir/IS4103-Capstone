@@ -180,7 +180,7 @@ export default function HomePage() {
                     {payment.transaction.merchant.name}
                   </Text>
                   <Text className="text-sm text-gray-500">
-                    Due: {format(payment.due_date, "dd MMM yyyy")}
+                    Due: {format(payment.due_date, "d MMM yyyy")}
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-4">
@@ -264,7 +264,7 @@ export default function HomePage() {
                       {transaction.merchant.name}
                     </Text>
                     <Text className="text-sm text-gray-500">
-                      {format(transaction.date_of_transaction, "dd MMM yyyy")}
+                      {format(transaction.date_of_transaction, "d MMM yyyy, h:mm a")}
                     </Text>
                   </View>
                   <Text

@@ -1,11 +1,11 @@
 // wallet/index.tsx
-import React, { useState, useEffect, useCallback } from "react";
-import { 
-  ScrollView, 
-  Text, 
-  View, 
-  TextInput, 
-  Linking, 
+import { useState, useEffect, useCallback } from "react";
+import {
+  ScrollView,
+  Text,
+  View,
+  TextInput,
+  Linking,
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl
@@ -137,7 +137,7 @@ export default function WalletPage() {
       refetchPaymentHistory();
       // Reset form
       reset({
-        amount: '',
+        amount: "",
       });
       // Reset loading state
       setLoading(false);
@@ -292,7 +292,7 @@ export default function WalletPage() {
                     </Text>
                   )}
                 </View>
-                
+
                 {/* Suggested Amount Buttons */}
                 <View className="mb-4 flex-row justify-between">
                   {[10, 20, 50, 100].map((suggestedAmount) => (
