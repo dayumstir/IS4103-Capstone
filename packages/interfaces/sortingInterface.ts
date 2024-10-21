@@ -1,3 +1,4 @@
+// packages/interfaces/sortingInterface.ts
 export enum sortDirection {
     ASC = "asc",
     DESC = "desc",

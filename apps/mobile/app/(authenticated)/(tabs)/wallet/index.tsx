@@ -1,5 +1,5 @@
 // wallet/index.tsx
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   ScrollView,
   Text,
@@ -8,20 +8,16 @@ import {
   Linking,
   TouchableOpacity,
   ActivityIndicator,
+  RefreshControl
 } from "react-native";
 import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
 import { Button } from "@ant-design/react-native";
 import Toast from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 
-import {
-  useCreatePaymentIntentMutation,
-  useGetTopUpByCustomerIdQuery,
-} from "../../../../redux/services/paymentService";
+import { useCreatePaymentIntentMutation, useGetPaymentHistoryQuery } from "../../../../redux/services/paymentService";
 import { useGetProfileQuery } from "../../../../redux/services/customerService";
-import { useGetCustomerTransactionsQuery } from "../../../../redux/services/transactionService";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
 import { formatCurrency } from "../../../../utils/formatCurrency";
 import { format } from "date-fns";
@@ -45,14 +41,23 @@ const topUpSchema = z.object({
 type TopUpFormValues = z.infer<typeof topUpSchema>;
 
 export default function WalletPage() {
-  const { initPaymentSheet, presentPaymentSheet, handleURLCallback } =
-    useStripe();
+  const { initPaymentSheet, presentPaymentSheet, handleURLCallback } = useStripe();
   const [loading, setLoading] = useState(false);
   const { data: profile, refetch } = useGetProfileQuery();
   const [createPaymentIntent] = useCreatePaymentIntentMutation();
+  const [refreshing, setRefreshing] = useState(false);
 
-  const router = useRouter();
+  const onRefresh = () => {
+    setRefreshing(true);
+    Promise.all([refetchPaymentHistory(), refetchInstalmentPayments()])
+      .then(() => setRefreshing(false))
+      .catch((error) => {
+        console.error("Error refreshing data:", error);
+        setRefreshing(false);
+      });
+  };
 
+  // Form state
   const {
     control,
     handleSubmit,
@@ -128,8 +133,8 @@ export default function WalletPage() {
       });
       // Refresh wallet balance
       refetch();
-      // Refresh top-up records
-      refetchTopUpRecords();
+      // Refresh payment history
+      refetchPaymentHistory();
       // Reset form
       reset({
         amount: "",
@@ -196,27 +201,12 @@ export default function WalletPage() {
     return () => deepLinkListener.remove();
   }, [handleDeepLink]);
 
-  // Fetch top-up records
+  // Fetch payment history
   const {
-    data: topUpRecords,
-    isLoading: isTopUpRecordsLoading,
-    refetch: refetchTopUpRecords,
-  } = useGetTopUpByCustomerIdQuery();
-
-  // Sort top-up records by createdAt in descending order (newest first)
-  const sortedTopUpRecords = topUpRecords
-    ? [...topUpRecords].sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
-    : [];
-
-  // Fetch transactions
-  const {
-    data: transactions,
-    isLoading: isTransactionsLoading,
-    refetch: refetchTransactions,
-  } = useGetCustomerTransactionsQuery("");
+    data: paymentHistory,
+    isLoading: isPaymentHistoryLoading,
+    refetch: refetchPaymentHistory,
+  } = useGetPaymentHistoryQuery();
 
   // Fetch outstanding instalment payments
   const {
@@ -234,7 +224,11 @@ export default function WalletPage() {
 
   return (
     <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View className="m-4 flex-row items-center justify-between">
           <Text className="text-4xl font-bold">Wallet</Text>
           <TouchableOpacity className="p-2">
@@ -304,14 +298,17 @@ export default function WalletPage() {
                   {[10, 20, 50, 100].map((suggestedAmount) => (
                     <TouchableOpacity
                       key={suggestedAmount}
-                      className="mx-1 flex-1 rounded-md border border-blue-500 bg-white px-4 py-2"
-                      onPress={() =>
-                        setValue("amount", suggestedAmount.toString())
-                      }
+                      className="flex-1 mx-1"
+                      onPress={() => {
+                        setValue('amount', suggestedAmount.toString());
+                        handleSubmit(handleTopUp)();
+                      }}
                     >
-                      <Text className="text-center font-semibold text-blue-500">
-                        ${suggestedAmount}
-                      </Text>
+                      <View className="rounded-lg p-1 items-center justify-center border">
+                        <Text className="font-semibold text-lg">
+                          ${suggestedAmount}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -328,48 +325,72 @@ export default function WalletPage() {
           </Button>
         </View>
 
-        {/* ===== Recent Top Ups ===== */}
+        {/* ===== Recent Transactions ===== */}
         <View className="mx-4 mb-4 rounded-xl bg-white p-8">
-          <Text className="mb-2 text-xl font-bold">Recent Top Ups</Text>
-          {isTopUpRecordsLoading ? (
+          <Text className="mb-2 text-xl font-bold">Recent Transactions</Text>
+          {isPaymentHistoryLoading ? (
             <View className="items-center justify-center py-4">
               <ActivityIndicator size="large" />
             </View>
-          ) : sortedTopUpRecords && sortedTopUpRecords.length > 0 ? (
+          ) : paymentHistory && paymentHistory.length > 0 ? (
             <>
-              {sortedTopUpRecords.map((topUp) => (
-                <View
-                  key={topUp.topUp_id}
-                  className="flex-row items-center justify-between border-t border-gray-200 py-4"
-                >
-                  <View className="flex-row items-center gap-4">
-                    <View className="h-10 w-10 items-center justify-center rounded-full bg-green-100">
-                      {/* Icon representing top-up */}
-                      <Text className="text-center text-2xl">💰</Text>
-                    </View>
-                    <View className="mr-4 flex-1">
-                      <Text
-                        className="text-base font-medium"
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                      >
-                        Top Up
+              {paymentHistory.map((record) => {
+                let icon = "💰";
+                let title = "Top Up";
+                let amountColor = "text-green-600";
+                let amountPrefix = "+";
+
+                if (record.payment_type === "INSTALMENT_PAYMENT") {
+                  icon = "💸";
+                  title = "Instalment Payment";
+                  amountColor = "text-red-600";
+                  amountPrefix = "-";
+                } else if (record.payment_type === "REFUND") {
+                  icon = "💵";
+                  title = "Refund";
+                  amountColor = "text-green-600";
+                  amountPrefix = "+";
+                } else if (record.payment_type === "OTHER") {
+                  icon = "🔄";
+                  title = "Transaction";
+                  amountColor = "text-gray-600";
+                  amountPrefix = "";
+                }
+
+                return (
+                  <View
+                    key={record.payment_history_id}
+                    className="flex-row items-center justify-between border-t border-gray-200 py-4"
+                  >
+                    <View className="flex-row items-center gap-4">
+                      <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+                        {/* Icon representing the transaction type */}
+                        <Text className="text-center text-2xl">{icon}</Text>
+                      </View>
+                      <View className="mr-4 flex-1">
+                        <Text
+                          className="text-base font-medium"
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                        >
+                          {title}
+                        </Text>
+                        <Text className="text-sm text-gray-500">
+                          {format(new Date(record.payment_date), "dd MMM yyyy, hh:mm a")}
+                        </Text>
+                      </View>
+                      <Text className={`text-base font-semibold ${amountColor}`}>
+                        {amountPrefix}{formatCurrency(record.amount)}
                       </Text>
-                      <Text className="text-sm text-gray-500">
-                        {format(topUp.createdAt, "d MMM yyyy, h:mm a")}
-                      </Text>
                     </View>
-                    <Text className="text-base font-semibold text-green-600">
-                      +{formatCurrency(topUp.amount)}
-                    </Text>
                   </View>
-                </View>
-              ))}
+                );
+              })}
             </>
           ) : (
             <View className="items-center gap-2 px-8 py-4">
               <Text className="text-center font-medium leading-6 text-gray-500">
-                You have no recent top-ups
+                You have no recent transactions
               </Text>
               <Text className="text-center text-4xl">😊</Text>
             </View>

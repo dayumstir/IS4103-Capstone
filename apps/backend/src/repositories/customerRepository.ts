@@ -1,4 +1,4 @@
-// Handles database operations related to customers
+// src/repositories/customerRepository.ts
 import { prisma } from "./db";
 import { ICustomer } from "../interfaces/customerInterface";
 

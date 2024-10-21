@@ -1,4 +1,5 @@
-import { useState } from "react";
+// payments/index.tsx
+import React, { useState, useEffect } from "react";
 import {
   ScrollView,
   View,
@@ -7,35 +8,65 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { Button } from "@ant-design/react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { formatCurrency } from "../../../../utils/formatCurrency";
-import { format } from "date-fns";
+import { useRouter } from "expo-router";
+import { useIsFocused } from '@react-navigation/native';
+
 import { useGetCustomerTransactionsQuery } from "../../../../redux/services/transactionService";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
+import { useGetProfileQuery } from "../../../../redux/services/customerService";
+import { formatCurrency } from "../../../../utils/formatCurrency";
+import { format } from "date-fns";
+
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../redux/store";
 
 export default function PaymentsPage() {
   const [isInstalmentsExpanded, setIsInstalmentsExpanded] = useState(true);
   const router = useRouter();
+  const isFocused = useIsFocused();
 
+  // Fetch profile data
+  const {
+    data: profile,
+    isLoading: isProfileLoading,
+    refetch: refetchProfile,
+  } = useGetProfileQuery();
+
+  // Fetch transactions
   const {
     data: transactions,
     isLoading: isTransactionsLoading,
     refetch: refetchTransactions,
   } = useGetCustomerTransactionsQuery("");
 
+  // Fetch outstanding instalment payments
   const {
     data: outstandingInstalmentPayments,
     isLoading: isInstalmentPaymentsLoading,
     refetch: refetchInstalmentPayments,
   } = useGetCustomerOutstandingInstalmentPaymentsQuery();
 
-  const profile = useSelector((state: RootState) => state.customer.profile);
+  // Calculate total outstanding payments
+  const totalOutstanding =
+    outstandingInstalmentPayments?.reduce(
+      (sum, payment) => sum + payment.amount_due,
+      0,
+    ) ?? 0;
 
+  useEffect(() => {
+    if (isFocused) {
+      refetchProfile();
+      refetchTransactions();
+      refetchInstalmentPayments();
+    }
+  }, [isFocused]);
+
+  const balance = profile?.wallet_balance ?? 0;
+
+  // Refreshing state
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = () => {
@@ -47,14 +78,6 @@ export default function PaymentsPage() {
         setRefreshing(false);
       });
   };
-
-  const balance = profile?.wallet_balance ?? 0;
-
-  const totalOutstanding =
-    outstandingInstalmentPayments?.reduce(
-      (sum, payment) => sum + payment.amount_due,
-      0,
-    ) ?? 0;
 
   const handlePayAll = () => {};
 
@@ -173,7 +196,10 @@ export default function PaymentsPage() {
                       <Text className="text-base font-semibold">
                         {formatCurrency(payment.amount_due)}
                       </Text>
-                      <TouchableOpacity className="rounded-md border border-blue-500 bg-white px-4 py-2">
+                      <TouchableOpacity 
+                        className="rounded-md border border-blue-500 bg-white px-4 py-2"
+                        onPress={() => router.push(`/payments/instalments/${payment.instalment_payment_id}`)}
+                      >
                         <Text className="text-sm font-semibold text-blue-500">
                           Pay
                         </Text>

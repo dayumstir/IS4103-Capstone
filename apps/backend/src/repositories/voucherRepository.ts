@@ -1,7 +1,7 @@
 // src/repositories/voucherRepository.ts
 import { prisma } from "./db";
-import { IVoucher } from "../interfaces/voucherInterface";
-import { VoucherAssignedStatus } from "../interfaces/voucherAssignedStatusInterface";
+import { IVoucher, VoucherAssignedStatus } from "@repo/interfaces";
+import { NotFoundError, BadRequestError } from "../utils/error";
 
 // Create Voucher
 export const createVoucher = async (voucherData: IVoucher) => {
@@ -18,7 +18,6 @@ export const assignVoucher = async (voucher_id: string, customer_id: string, usa
             voucher_id,
             customer_id,
             remaining_uses: usage_limit,
-            used_installment_payment_id: null,
         }
     });
 };
@@ -71,12 +70,54 @@ export const getVoucherDetails = async (voucher_id: string) => {
     });
 };
 
-// Get Customer Vouchers
+// Get Customer AssignedVouchers
 export const getCustomerVouchers = async (customer_id: string) => {
     return await prisma.voucherAssigned.findMany({
         where: { customer_id },
         include: {
             voucher: true,
         },
+    });
+};
+
+// Use Voucher
+export const useVoucher = async (voucher_assigned_id: string) => {
+    return await prisma.$transaction(async (transaction) => {
+        const voucherAssigned = await transaction.voucherAssigned.findUnique({
+            where: { voucher_assigned_id },
+        });
+
+        if (!voucherAssigned) {
+            throw new NotFoundError("Voucher not found");
+        }
+
+        if (voucherAssigned.status !== VoucherAssignedStatus.AVAILABLE) {
+            throw new BadRequestError("Voucher is not available");
+        }
+
+        if (voucherAssigned.remaining_uses <= 0) {
+            throw new BadRequestError("Voucher has no remaining uses");
+        }
+
+        // Decrement remaining uses
+        const updatedVoucherAssigned = await transaction.voucherAssigned.update({
+            where: { voucher_assigned_id },
+            data: { 
+                remaining_uses: { decrement: 1 },
+            },
+        });
+
+        // Update status to USED if no remaining uses
+        if (updatedVoucherAssigned.remaining_uses === 0) {
+            const finalVoucherAssigned = await transaction.voucherAssigned.update({
+                where: { voucher_assigned_id },
+                data: { 
+                    status: VoucherAssignedStatus.USED 
+                },
+            });
+            return finalVoucherAssigned;
+        }
+
+        return updatedVoucherAssigned;
     });
 };

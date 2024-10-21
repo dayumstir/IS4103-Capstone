@@ -1,3 +1,7 @@
+// packages/interfaces/voucherInterface.ts
+import { ICustomer } from "./customerInterface";
+import { IInstalmentPayment } from "./instalmentPaymentInterface";
+
 export interface IVoucher {
   voucher_id: string;
   title: string;
@@ -17,19 +21,19 @@ export interface IVoucher {
 
 export interface IVoucherAssigned {
   voucher_assigned_id: string;
-  status: VoucherStatus;
-  date_time_issued: Date;
+  status: VoucherAssignedStatus;
   remaining_uses: number;
+  date_time_issued: Date;
 
-  voucher_id: string;
   voucher: IVoucher;
-
+  voucher_id: string;
+  customer: ICustomer;
   customer_id: string;
-
-  used_installment_payment_id: string;
+  instalment_payment?: IInstalmentPayment;
+  instalment_payment_id?: string;
 }
 
-export enum VoucherStatus {
+export enum VoucherAssignedStatus {
   AVAILABLE = "AVAILABLE",
   EXPIRED = "EXPIRED",
   USED = "USED",

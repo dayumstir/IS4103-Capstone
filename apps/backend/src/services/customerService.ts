@@ -1,4 +1,4 @@
-// Contains the business logic related to customers
+// src/services/customerService.ts
 import { ICustomer } from "../interfaces/customerInterface";
 import * as customerRepository from "../repositories/customerRepository";
 import logger from "../utils/logger";

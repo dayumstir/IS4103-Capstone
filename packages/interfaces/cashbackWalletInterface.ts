@@ -1,13 +1,19 @@
+// packages/interfaces/cashbackWalletInterface.ts
 import { ICustomer } from "./customerInterface";
 import { IMerchant } from "./merchantInterface";
+import { IInstalmentPayment } from "./instalmentPaymentInterface";
 
 export interface ICashbackWallet {
-    cashbackWalletId: string;
-    balance: number;
+    cashback_wallet_id: string;
+    amount: number;
+    created_at: Date;
 
-    customerId: string;
+    customer_id: string;
     customer: ICustomer;
 
-    merchantId: string; // Can only be used at this merchant
+    merchant_id: string; // Can only be used at this merchant
     merchant: IMerchant;
+
+    instalment_payment_id?: string;
+    instalment_payment?: IInstalmentPayment;
 }
