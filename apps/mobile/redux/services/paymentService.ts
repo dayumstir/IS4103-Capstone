@@ -11,6 +11,14 @@ interface PaymentIntentResponse {
     publishableKey: string;
 }
 
+// Define the request body interface for makePayment
+interface MakePaymentRequest {
+    instalment_payment_id: string;
+    voucher_assigned_id?: string;
+    amount_discount_from_voucher?: number;
+    amount_deducted_from_wallet: number;
+}
+
 export const paymentApi = createApi({
     reducerPath: "paymentApi",
 
@@ -39,8 +47,17 @@ export const paymentApi = createApi({
         getPaymentHistory: builder.query<IPaymentHistory[], void>({
             query: () => "/history",
         }),
+
+        // Make payment
+        makePayment: builder.mutation<{ message: string }, MakePaymentRequest>({
+            query: (paymentData) => ({
+                url: "/make-payment",
+                method: "POST",
+                body: paymentData,
+            }),
+        }),
     }),
 });
 
 // Export hooks for usage in functional components
-export const { useCreatePaymentIntentMutation, useGetPaymentHistoryQuery } = paymentApi;
+export const { useCreatePaymentIntentMutation, useGetPaymentHistoryQuery, useMakePaymentMutation } = paymentApi;

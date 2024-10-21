@@ -15,13 +15,18 @@ export const findAllInstalmentPayments = async () => {
 };
 
 // Find instalment payment by id (unique attribute) in db
-export const findInstalmentPaymentById = async (
-    instalment_payment_id: string
-) => {
+export const findInstalmentPaymentById = async (instalment_payment_id: string) => {
     return prisma.instalmentPayment.findUnique({
-        where: { instalment_payment_id: instalment_payment_id },
+      where: { instalment_payment_id: instalment_payment_id },
+        include: {
+            transaction: {
+                include: {
+                    merchant: true,
+                },
+            },
+        },
     });
-};
+};  
 
 export const findCustomerOutstandingInstalmentPayments = async (
     customer_id: string
@@ -51,22 +56,27 @@ export const updateInstalmentPayment = async (
 ) => {
     const {
         voucher_assigned_id,
-        transaction_id,
         cashback_wallet_id,
         ...otherUpdateData
     } = updateData;
 
+    // Prepare the data object for the update
+    const dataToUpdate: any = {
+        ...otherUpdateData,
+    };
+
+    // Conditionally include the voucher_assigned update
+    if (voucher_assigned_id) {
+        dataToUpdate.voucher_assigned = { connect: { voucher_assigned_id: voucher_assigned_id } };
+    }
+
+    // Conditionally include the cashback_wallet update
+    if (cashback_wallet_id) {
+        dataToUpdate.cashback_wallet = { connect: { cashback_wallet_id: cashback_wallet_id } };
+    }
+
     return await prisma.instalmentPayment.update({
         where: { instalment_payment_id: instalment_payment_id },
-        data: {
-            ...otherUpdateData,
-            transaction: { connect: { transaction_id: transaction_id } },
-            voucher_assigned: voucher_assigned_id
-                ? { connect: { voucher_assigned_id: voucher_assigned_id } }
-                : undefined,
-            cashback_wallet: cashback_wallet_id
-                ? { connect: { cashback_wallet_id: cashback_wallet_id } }
-                : undefined,
-        },
+        data: dataToUpdate,
     });
 };

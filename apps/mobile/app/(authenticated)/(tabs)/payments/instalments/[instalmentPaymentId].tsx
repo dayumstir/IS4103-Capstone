@@ -17,6 +17,7 @@ import { BlurView } from 'expo-blur';
 
 import { useGetInstalmentPaymentByIdQuery } from "../../../../../redux/services/instalmentPaymentService";
 import { useGetAllVouchersQuery } from "../../../../../redux/services/voucherService";
+import { useMakePaymentMutation } from "../../../../../redux/services/paymentService";
 import { formatCurrency } from "../../../../../utils/formatCurrency";
 import { format } from "date-fns";
 
@@ -46,26 +47,8 @@ export default function InstalmentPaymentDetails() {
     error: vouchersError,
   } = useGetAllVouchersQuery({ customer_id: profile?.customer_id ?? ""});
 
-  // Handle payment
-  const handlePayInstalment = async () => {
-    try {
-      // await payInstalmentPayment(instalmentPaymentId).unwrap();
-      Toast.show({
-        type: "success",
-        text1: "Payment Successful",
-      });
-      // Refresh data
-      refetch();
-      // Navigate back to payments page
-      router.back();
-    } catch (error) {
-      console.error("Payment failed:", error);
-      Toast.show({
-        type: "error",
-        text1: "Payment failed"
-      });
-    }
-  };
+  // Mutation hook for making payment
+  const [makePayment, { isLoading: isPaying }] = useMakePaymentMutation();
 
   if (isLoading)
     return (
@@ -85,6 +68,61 @@ export default function InstalmentPaymentDetails() {
         <Text>No instalment payment found</Text>
       </View>
     );
+
+  // Calculate voucher discount
+  let voucherDiscount = 0;
+
+  if (selectedVoucher) {
+    const voucher = selectedVoucher.voucher;
+    if (voucher.percentage_discount > 0) {
+      voucherDiscount = instalmentPayment.amount_due * (voucher.percentage_discount / 100);
+    } else if (voucher.amount_discount > 0) {
+      voucherDiscount = voucher.amount_discount;
+    }
+  }
+
+  // Ensure voucher discount does not exceed instalment amount
+  voucherDiscount = Math.min(voucherDiscount, instalmentPayment.amount_due);
+
+  const walletBalance = profile?.wallet_balance || 0;
+
+  const amountFromWallet = instalmentPayment.amount_due - voucherDiscount;
+
+  // Make payment
+  const handlePayInstalment = async () => {
+    try {
+      if (amountFromWallet > walletBalance) {
+        Toast.show({
+          type: "error",
+          text1: "Insufficient Wallet Balance",
+          text2: "You do not have enough balance in your wallet.",
+        });
+        return;
+      }
+
+      await makePayment({
+        instalment_payment_id: instalmentPaymentId as string,
+        voucher_assigned_id: selectedVoucher?.voucher_assigned_id,
+        amount_discount_from_voucher: voucherDiscount,
+        amount_deducted_from_wallet: amountFromWallet,
+      }).unwrap();
+
+      Toast.show({
+        type: "success",
+        text1: "Payment Successful",
+      });
+      // Refresh data
+      refetch();
+      // Navigate back to payments page
+      router.back();
+    } catch (error) {
+      console.error("Payment failed:", error);
+      Toast.show({
+        type: "error",
+        text1: "Payment failed"
+      });
+    }
+  };
 
   return (
     <ScrollView>
@@ -186,33 +224,73 @@ export default function InstalmentPaymentDetails() {
               color="#3b82f6"
               className="mr-4"
             />
-            {/* <View>
+            <View>
               <Text className="text-sm text-gray-500">Name</Text>
               <Text className="font-medium">
                 {instalmentPayment.transaction.merchant.name}
               </Text>
-            </View> */}
+              <Text className="text-sm text-gray-500">Email</Text>
+              <Text className="font-medium">
+                {instalmentPayment.transaction.merchant.email}
+              </Text>
+              <Text className="text-sm text-gray-500">Contact Number</Text>
+              <Text className="font-medium">
+                {instalmentPayment.transaction.merchant.contact_number}
+              </Text>
+              <Text className="text-sm text-gray-500">Address</Text>
+              <Text className="font-medium">
+                {instalmentPayment.transaction.merchant.address}
+              </Text>
+            </View>
           </View>
         </View>
 
-        {/* ===== Voucher and Cashback Buttons ===== */}
-        <View className="mb-4">
-          <Button
-            type="ghost"
-            onPress={() => setVoucherModalVisible(true)}
-          >
-            <Text className="font-semibold text-blue-500">Use Voucher</Text>
-          </Button>
-          {/* Uncomment and implement cashback logic as needed */}
+        {/* ===== Payment Breakdown ===== */}
+        <View className="mb-4 rounded-xl bg-white p-4">
+          <Text className="mb-2 text-xl font-bold">Payment Breakdown</Text>
+          <View className="flex-row justify-between mb-2">
+            <Text className="text-base">Instalment Amount:</Text>
+            <Text className="text-base">
+              {formatCurrency(instalmentPayment.amount_due)}
+            </Text>
+          </View>
+          {voucherDiscount > 0 && (
+            <View className="flex-row justify-between mb-2">
+              <Text className="text-base">Voucher Discount:</Text>
+              <Text className="text-base text-green-600">
+                -{formatCurrency(voucherDiscount)}
+              </Text>
+            </View>
+          )}
+          <View className="border-t border-gray-200 my-2" />
+          <View className="flex-row justify-between">
+            <Text className="text-lg font-semibold">Total Payable:</Text>
+            <Text className="text-lg font-semibold">
+              {formatCurrency(amountFromWallet)}
+            </Text>
+          </View>
+        </View>
+
+        {/* ===== Voucher Button (visible only when no voucher is selected) ===== */}
+        {!selectedVoucher && (
+          <View className="mb-4">
+            <Button
+              type="ghost"
+              onPress={() => setVoucherModalVisible(true)}
+            >
+              <Text className="font-semibold text-blue-500">Use Voucher</Text>
+            </Button>
+          </View>
+        )}
+        {/* Uncomment and implement cashback logic as needed */}
           {/* <Button
             type="ghost"
             onPress={() => setCashbackModalVisible(true)}
           >
             <Text className="font-semibold text-blue-500">Use Cashback</Text>
           </Button> */}
-        </View>
 
-        {/* ===== Display Selected Voucher/Cashback ===== */}
+        {/* ===== Display Selected Voucher ===== */}
         {selectedVoucher && (
           <View className="mb-4 p-4 border rounded-md bg-green-50">
             <View className="flex-row justify-between items-center mb-2">
@@ -225,13 +303,13 @@ export default function InstalmentPaymentDetails() {
             </View>
             <Text className="text-sm text-gray-700 mb-1">
               Discount:{" "}
-              {selectedVoucher.voucher.percentage_discount !== 0
+              {selectedVoucher.voucher.percentage_discount > 0
                 ? `${selectedVoucher.voucher.percentage_discount}%`
                 : formatCurrency(selectedVoucher.voucher.amount_discount)}
             </Text>
             <Text className="text-sm text-gray-700">
               Valid Until:{" "}
-              {format(new Date(selectedVoucher.voucher.expiry_date), 'dd MMM yyyy')}
+              {format(new Date(selectedVoucher.voucher.expiry_date), "dd MMM yyyy")}
             </Text>
           </View>
         )}
@@ -240,7 +318,11 @@ export default function InstalmentPaymentDetails() {
 
         {/* ===== Pay Button ===== */}
         {instalmentPayment.status === "UNPAID" && (
-          <Button type="primary" onPress={handlePayInstalment}>
+          <Button
+            type="primary"
+            onPress={handlePayInstalment}
+            loading={isPaying}
+          >
             <Text className="font-semibold text-white">Pay Now</Text>
           </Button>
         )}
@@ -332,6 +414,7 @@ export default function InstalmentPaymentDetails() {
           </View>
         </View>
       </Modal>
+
     </ScrollView>
   );
 };
