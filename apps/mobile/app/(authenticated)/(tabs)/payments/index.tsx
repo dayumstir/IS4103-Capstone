@@ -1,5 +1,5 @@
 // payments/index.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ScrollView,
   View,
@@ -12,9 +12,11 @@ import { Button } from "@ant-design/react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { useIsFocused } from '@react-navigation/native';
 
 import { useGetCustomerTransactionsQuery } from "../../../../redux/services/transactionService";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
+import { useGetProfileQuery } from "../../../../redux/services/customerService";
 import { formatCurrency } from "../../../../utils/formatCurrency";
 import { format } from "date-fns";
 
@@ -24,6 +26,14 @@ import { RootState } from "../../../../redux/store";
 export default function PaymentsPage() {
   const [isInstalmentsExpanded, setIsInstalmentsExpanded] = useState(true);
   const router = useRouter();
+  const isFocused = useIsFocused();
+
+  // Fetch profile data
+  const {
+    data: profile,
+    isLoading: isProfileLoading,
+    refetch: refetchProfile,
+  } = useGetProfileQuery();
 
   // Fetch transactions
   const {
@@ -46,8 +56,14 @@ export default function PaymentsPage() {
       0,
     ) ?? 0;
 
-  // Fetch profile
-  const profile = useSelector((state: RootState) => state.customer.profile);
+  useEffect(() => {
+    if (isFocused) {
+      refetchProfile();
+      refetchTransactions();
+      refetchInstalmentPayments();
+    }
+  }, [isFocused]);
+
   const balance = profile?.wallet_balance ?? 0;
 
   // Refreshing state
