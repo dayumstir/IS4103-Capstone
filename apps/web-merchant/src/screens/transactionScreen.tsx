@@ -70,8 +70,7 @@ const TransactionScreen: React.FC = () => {
     },
   });
 
-  const [isEditCashbackModalOpen, setIsEditCashbackModalOpen] =
-  useState(false);
+  const [isEditCashbackModalOpen, setIsEditCashbackModalOpen] = useState(false);
   const [cashback, setCashback] = useState(0.0);
   const merchantId = localStorage.getItem("merchantId");
   if (!merchantId) {
@@ -305,24 +304,22 @@ const TransactionScreen: React.FC = () => {
   return (
     <Card>
       <div className="flex justify-between">
-        <Breadcrumb items={[{ title: "Transactions" }]} />
-        <Button
-            type="primary"
-            onClick={() => setIsEditCashbackModalOpen(true)}
-          >
-            Edit CashBack
+        {/* <Breadcrumb items={[{ title: "Transactions" }]} /> */}
+        <h2 className="text-xl font-bold"> Transactions</h2>
+        <Button type="primary" onClick={() => setIsEditCashbackModalOpen(true)}>
+          Edit CashBack
         </Button>
-          {isEditCashbackModalOpen && (
-        <EditCashbackModal
-          refetch={refetch}
-          merchantId={merchantId}
-          initCashback={cashback}
-          isModalOpen={isEditCashbackModalOpen}
-          setModalOpen={setIsEditCashbackModalOpen}
-        />
-      )}
+        {isEditCashbackModalOpen && (
+          <EditCashbackModal
+            refetch={refetch}
+            merchantId={merchantId}
+            initCashback={cashback}
+            isModalOpen={isEditCashbackModalOpen}
+            setModalOpen={setIsEditCashbackModalOpen}
+          />
+        )}
       </div>
-      
+
       <Search
         placeholder="Search by amount, reference number, cashback, customer, or installment plan"
         onChange={handleSearchChange}
@@ -340,8 +337,6 @@ const TransactionScreen: React.FC = () => {
     </Card>
   );
 };
-
-
 
 const EditCashbackModal = ({
   refetch,
@@ -365,7 +360,7 @@ const EditCashbackModal = ({
         setModalOpen(false);
       })
       .catch((error) => message.error(error.data.error));
-      refetch();
+    refetch();
   };
   return (
     <Modal
@@ -375,7 +370,7 @@ const EditCashbackModal = ({
       cancelText="Cancel"
       okText="Confirm"
       onCancel={() => setModalOpen(false)}
-    >    
+    >
       <Form
         name="basic"
         onFinish={onFinish}
@@ -394,7 +389,9 @@ const EditCashbackModal = ({
             {
               validator: (_, value) => {
                 if (value !== undefined && (value < 0 || value > 100)) {
-                  return Promise.reject(new Error("Cashback must be between 0 and 100."));
+                  return Promise.reject(
+                    new Error("Cashback must be between 0 and 100."),
+                  );
                 }
                 return Promise.resolve();
               },
@@ -405,7 +402,6 @@ const EditCashbackModal = ({
         >
           <Input type="number" min={0} max={100} />
         </Form.Item>
-    
       </Form>
     </Modal>
   );

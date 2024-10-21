@@ -10,7 +10,10 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { transactionStatusColorMap } from "../../../../packages/interfaces/transactionInterface";
+import {
+  TransactionStatus,
+  transactionStatusColorMap,
+} from "../../../../packages/interfaces/transactionInterface";
 import { useGetTransactionQuery } from "../redux/services/transaction";
 import CreateIssueModal from "../components/createIssueModal";
 import { SortOrder } from "antd/es/table/interface";
@@ -266,17 +269,19 @@ const TransactionDetailsScreen: React.FC = () => {
         </div>
 
         <div className="mt-5">
-          <Descriptions title={transaction.transaction_id} items={items} />
+          <Descriptions title="Transaction Details" items={items} />
         </div>
       </Card>
       <Card className="mt-10">
         <p className="text-base font-semibold">Status</p>
         {transaction && (
           <Tag
-            color={transactionStatusColorMap[transaction?.status] || "default"}
-            key={status}
+            color={transactionStatusColorMap[transaction.status] || "default"}
+            key={transaction.status}
           >
-            {transaction?.status.toUpperCase()}
+            {transaction.status == TransactionStatus.IN_PROGRESS &&
+              "IN PROGRESS"}
+            {transaction.status == TransactionStatus.FULLY_PAID && "FULLY PAID"}
           </Tag>
         )}
         <p className="mt-10 text-base font-semibold">Customer</p>
@@ -286,29 +291,6 @@ const TransactionDetailsScreen: React.FC = () => {
         {issueItems.length > 0 && (
           <>
             <p className="mt-10 text-base font-semibold">Issues</p>
-            {/* {issueItems.map((issueItem, index) => (
-              <Descriptions key={index} column={1}>
-                {issueItem.item &&
-                  issueItem.item.map((descItem) => (
-                    <Descriptions.Item
-                      key={descItem.key}
-                      label={descItem.label}
-                    >
-                      <div className="flex items-center gap-x-10">
-                        {descItem.children}
-                        {descItem.label == "Title" && (
-                          <Link
-                            to={`/business-management/issues/${issueItem.key}`}
-                            className="text-blue-500 hover:underline"
-                          >
-                            View Details
-                          </Link>
-                        )}
-                      </div>
-                    </Descriptions.Item>
-                  ))}
-              </Descriptions>
-            ))} */}
             <Table<IssueTableInterface>
               columns={issueColumns}
               dataSource={transaction.issues}
