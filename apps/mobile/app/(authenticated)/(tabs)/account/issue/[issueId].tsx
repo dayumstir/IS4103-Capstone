@@ -110,7 +110,7 @@ export default function IssueDetailsPage() {
             Issue ID: {issue.issue_id}
           </Text>
           <Text className="mt-1 text-sm text-gray-600">
-            Date Created: {format(issue.create_time, "dd MMM yyyy")}
+            Date Created: {format(issue.create_time, "d MMM yyyy, h:mm a")}
           </Text>
         </View>
 
