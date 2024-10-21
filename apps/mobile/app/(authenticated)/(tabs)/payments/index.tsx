@@ -169,7 +169,7 @@ export default function PaymentsPage() {
                         }`}
                       >
                         {payment.due_date < new Date() ? "Overdue: " : "Due: "}
-                        {format(payment.due_date, "dd MMM yyyy")}
+                        {format(payment.due_date, "d MMM yyyy")}
                       </Text>
                     </View>
                     <View className="flex-row items-center gap-4">
@@ -231,7 +231,7 @@ export default function PaymentsPage() {
                         {transaction.merchant.name}
                       </Text>
                       <Text className="text-sm text-gray-500">
-                        {format(transaction.date_of_transaction, "dd MMM yyyy")}
+                        {format(transaction.date_of_transaction, "d MMM yyyy, h:mm a")}
                       </Text>
                     </View>
                     <Text className="text-base font-semibold text-red-600">

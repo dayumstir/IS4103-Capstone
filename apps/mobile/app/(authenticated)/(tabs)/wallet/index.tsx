@@ -1,13 +1,13 @@
 // wallet/index.tsx
-import React, { useState, useEffect, useCallback } from "react";
-import { 
-  ScrollView, 
-  Text, 
-  View, 
-  TextInput, 
-  Linking, 
+import { useState, useEffect, useCallback } from "react";
+import {
+  ScrollView,
+  Text,
+  View,
+  TextInput,
+  Linking,
   TouchableOpacity,
-  ActivityIndicator 
+  ActivityIndicator,
 } from "react-native";
 import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
 import { Button } from "@ant-design/react-native";
@@ -16,7 +16,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
-import { useCreatePaymentIntentMutation, useGetTopUpByCustomerIdQuery } from "../../../../redux/services/paymentService";
+import {
+  useCreatePaymentIntentMutation,
+  useGetTopUpByCustomerIdQuery,
+} from "../../../../redux/services/paymentService";
 import { useGetProfileQuery } from "../../../../redux/services/customerService";
 import { useGetCustomerTransactionsQuery } from "../../../../redux/services/transactionService";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
@@ -129,7 +132,7 @@ export default function WalletPage() {
       refetchTopUpRecords();
       // Reset form
       reset({
-        amount: '',
+        amount: "",
       });
       // Reset loading state
       setLoading(false);
@@ -203,7 +206,8 @@ export default function WalletPage() {
   // Sort top-up records by createdAt in descending order (newest first)
   const sortedTopUpRecords = topUpRecords
     ? [...topUpRecords].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )
     : [];
 
@@ -294,16 +298,18 @@ export default function WalletPage() {
                     </Text>
                   )}
                 </View>
-                
+
                 {/* Suggested Amount Buttons */}
                 <View className="mb-4 flex-row justify-between">
                   {[10, 20, 50, 100].map((suggestedAmount) => (
                     <TouchableOpacity
                       key={suggestedAmount}
-                      className="flex-1 mx-1 rounded-md border border-blue-500 bg-white px-4 py-2"
-                      onPress={() => setValue('amount', suggestedAmount.toString())}
+                      className="mx-1 flex-1 rounded-md border border-blue-500 bg-white px-4 py-2"
+                      onPress={() =>
+                        setValue("amount", suggestedAmount.toString())
+                      }
                     >
-                      <Text className="text-center text-blue-500 font-semibold">
+                      <Text className="text-center font-semibold text-blue-500">
                         ${suggestedAmount}
                       </Text>
                     </TouchableOpacity>
@@ -350,7 +356,7 @@ export default function WalletPage() {
                         Top Up
                       </Text>
                       <Text className="text-sm text-gray-500">
-                        {format(new Date(topUp.createdAt), "dd MMM yyyy, hh:mm a")}
+                        {format(topUp.createdAt, "d MMM yyyy, h:mm a")}
                       </Text>
                     </View>
                     <Text className="text-base font-semibold text-green-600">

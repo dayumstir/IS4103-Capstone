@@ -16,6 +16,7 @@ import {
 import { ICustomer, IMerchant, TransactionResult } from "@repo/interfaces";
 import { formatCurrency } from "../utils/formatCurrency";
 import { EyeOutlined } from "@ant-design/icons";
+import { format } from "date-fns";
 
 const { Search } = Input;
 
@@ -119,7 +120,13 @@ export default function TransactionsScreen() {
       title: "Date",
       dataIndex: "date_of_transaction",
       key: "date_of_transaction",
-      render: (date: string) => new Date(date).toLocaleDateString(),
+      render: (date: string) => (
+        <span className="whitespace-nowrap">
+          {format(new Date(date), "d MMM yyyy")}
+          <br />
+          {format(new Date(date), "h:mm:ss a")}
+        </span>
+      ),
       sorter: (a: TransactionResult, b: TransactionResult) =>
         new Date(a.date_of_transaction).getTime() -
         new Date(b.date_of_transaction).getTime(),
@@ -203,8 +210,8 @@ export default function TransactionsScreen() {
                   }
                 >
                   {transactionDetails.status === TransactionStatus.FULLY_PAID
-                    ? "Fully Paid"
-                    : "In Progress"}
+                    ? "FULLY PAID"
+                    : "IN PROGRESS"}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Customer">
@@ -217,9 +224,9 @@ export default function TransactionsScreen() {
                 {formatCurrency(transactionDetails.amount)}
               </Descriptions.Item>
               <Descriptions.Item label="Date">
-                {new Date(
-                  transactionDetails.date_of_transaction,
-                ).toLocaleDateString()}
+                {format(transactionDetails.date_of_transaction, "d MMM yyyy")}
+                <br />
+                {format(transactionDetails.date_of_transaction, "h:mm:ss a")}
               </Descriptions.Item>
               <Descriptions.Item label="Instalment Plan">
                 {transactionDetails.instalment_plan.name}
@@ -247,7 +254,13 @@ export default function TransactionsScreen() {
                   title: "Due Date",
                   dataIndex: "due_date",
                   key: "due_date",
-                  render: (date: string) => new Date(date).toLocaleDateString(),
+                  render: (date: string) => (
+                    <span className="whitespace-nowrap">
+                      {format(new Date(date), "d MMM yyyy")}
+                      <br />
+                      {format(new Date(date), "h:mm:ss a")}
+                    </span>
+                  ),
                 },
                 {
                   title: "Status",

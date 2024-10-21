@@ -61,7 +61,7 @@ export default function VoucherDetails() {
               </Text>
               <Text>
                 <Text className="font-bold">Expiry Date:</Text>{" "}
-                {format(voucher.expiry_date, "dd MMM yyyy")}
+                {format(voucher.expiry_date, "d MMM yyyy")}
               </Text>
               <Text>
                 <Text className="font-bold">Usage Limit:</Text>{" "}
