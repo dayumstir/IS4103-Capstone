@@ -116,7 +116,7 @@ export default function AllIssuesPage() {
             <View className="flex-1 gap-1">
               <Text className="text-lg font-semibold">{issue.title}</Text>
               <Text className="pb-1 text-sm text-gray-600">
-                {format(issue.create_time, "dd MMM yyyy")}
+                {format(issue.create_time, "d MMM yyyy, h:mm a")}
               </Text>
               <IssueStatusBadge status={issue.status} />
             </View>

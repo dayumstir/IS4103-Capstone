@@ -43,6 +43,7 @@ export const findCustomerOutstandingInstalmentPayments = async (
             transaction: {
                 include: {
                     merchant: true,
+                    instalment_plan: true,
                 },
             },
         },

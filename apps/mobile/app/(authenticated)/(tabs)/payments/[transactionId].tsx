@@ -76,7 +76,7 @@ export default function TransactionDetails() {
         <View className="my-4 rounded-xl bg-white p-8">
           <Text className="mb-4 text-xl font-bold">Transaction Details</Text>
           <View className="flex-row flex-wrap">
-            <View className="mb-4 w-1/2 pr-2">
+            <View className="mb-4 w-2/5 pr-2">
               <View className="flex-row items-center">
                 <Ionicons
                   name="wallet-outline"
@@ -92,7 +92,7 @@ export default function TransactionDetails() {
                 </View>
               </View>
             </View>
-            <View className="mb-4 w-1/2 pl-2">
+            <View className="mb-4 w-3/5 pl-2">
               <View className="flex-row items-center">
                 <Ionicons
                   name="storefront-outline"
@@ -112,26 +112,7 @@ export default function TransactionDetails() {
                 </View>
               </View>
             </View>
-            <View className="mb-4 w-1/2 pr-2">
-              <View className="flex-row items-center">
-                <Ionicons
-                  name="calendar-outline"
-                  size={20}
-                  color="#3b82f6"
-                  className="mr-4"
-                />
-                <View>
-                  <Text className="text-sm text-gray-500">Date</Text>
-                  <Text className="font-medium">
-                    {format(
-                      new Date(transaction.date_of_transaction),
-                      "dd MMM yyyy",
-                    )}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <View className="mb-4 w-1/2 pl-2">
+            <View className="mb-4 w-2/5 pr-2">
               <View className="flex-row items-center">
                 <Ionicons
                   name="trending-up-outline"
@@ -147,7 +128,26 @@ export default function TransactionDetails() {
                 </View>
               </View>
             </View>
-            <View className="w-1/2 pr-2">
+            <View className="mb-4 w-3/5 pl-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Date</Text>
+                  <Text className="font-medium">
+                    {format(
+                      new Date(transaction.date_of_transaction),
+                      "d MMM yyyy, h:mm a",
+                    )}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View className="w-2/5 pr-2">
               <View className="flex-row items-center">
                 <Ionicons
                   name="flag-outline"
@@ -165,7 +165,7 @@ export default function TransactionDetails() {
                 </View>
               </View>
             </View>
-            <View className="w-1/2 pl-2">
+            <View className="w-3/5 pl-2">
               <View className="flex-row items-center">
                 <Ionicons
                   name="time-outline"
@@ -179,7 +179,7 @@ export default function TransactionDetails() {
                     {transaction.fully_paid_date
                       ? format(
                           new Date(transaction.fully_paid_date),
-                          "dd MMM yyyy",
+                          "d MMM yyyy, h:mm a",
                         )
                       : "N/A"}
                   </Text>
@@ -208,7 +208,8 @@ export default function TransactionDetails() {
                     Instalment {payment.instalment_number}
                   </Text>
                   <Text className="text-xs text-gray-500">
-                    Due: {format(new Date(payment.due_date), "dd MMM yyyy")}
+                    Due:{" "}
+                    {format(new Date(payment.due_date), "d MMM yyyy")}
                   </Text>
                 </View>
               </View>
@@ -220,11 +221,11 @@ export default function TransactionDetails() {
                   className={`mt-1 rounded px-2 py-1 ${payment.status === "PAID" ? "bg-green-100" : "bg-yellow-100"}`}
                 >
                   <Text
-                    className={
+                    className={`text-xs font-medium ${
                       payment.status === "PAID"
-                        ? "text-green-800"
-                        : "text-yellow-800"
-                    }
+                        ? "text-green-600"
+                        : "text-yellow-600"
+                    }`}
                   >
                     {payment.status}
                   </Text>
