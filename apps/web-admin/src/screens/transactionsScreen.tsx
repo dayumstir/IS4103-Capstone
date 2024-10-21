@@ -7,13 +7,11 @@ import {
   Tag,
   Modal,
   Descriptions,
-  message,
   Empty,
 } from "antd";
 import {
   useGetTransactionsQuery,
   useGetTransactionByIdQuery,
-  useUpdateTransactionStatusMutation,
 } from "../redux/services/transactionService";
 import { ICustomer, IMerchant, TransactionResult } from "@repo/interfaces";
 import { formatCurrency } from "../utils/formatCurrency";
@@ -38,7 +36,6 @@ export default function TransactionsScreen() {
     useGetTransactionByIdQuery(selectedTransactionId ?? "", {
       skip: !selectedTransactionId,
     });
-  const [updateTransactionStatus] = useUpdateTransactionStatusMutation();
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -82,22 +79,6 @@ export default function TransactionsScreen() {
   const handleModalClose = () => {
     setIsModalVisible(false);
     setSelectedTransactionId(null);
-  };
-
-  const handleUpdateStatus = async (
-    transactionId: string,
-    newStatus: string,
-  ) => {
-    try {
-      await updateTransactionStatus({
-        transaction_id: transactionId,
-        status: newStatus,
-      }).unwrap();
-      message.success("Transaction status updated successfully");
-      refetchTransactionDetails();
-    } catch (error) {
-      message.error("Failed to update transaction status");
-    }
   };
 
   const columns = [
@@ -152,13 +133,13 @@ export default function TransactionsScreen() {
           color={status === TransactionStatus.FULLY_PAID ? "green" : "orange"}
         >
           {status === TransactionStatus.FULLY_PAID
-            ? "Fully Paid"
-            : "In Progress"}
+            ? "FULLY PAID"
+            : "IN PROGRESS"}
         </Tag>
       ),
       filters: [
-        { text: "Fully Paid", value: TransactionStatus.FULLY_PAID },
-        { text: "In Progress", value: TransactionStatus.IN_PROGRESS },
+        { text: "FULLY PAID", value: TransactionStatus.FULLY_PAID },
+        { text: "IN PROGRESS", value: TransactionStatus.IN_PROGRESS },
       ],
       onFilter: (value: React.Key | boolean, record: TransactionResult) =>
         record.status === value,

@@ -220,11 +220,11 @@ export default function TransactionDetails() {
                   className={`mt-1 rounded px-2 py-1 ${payment.status === "PAID" ? "bg-green-100" : "bg-yellow-100"}`}
                 >
                   <Text
-                    className={
+                    className={`text-xs font-medium ${
                       payment.status === "PAID"
-                        ? "text-green-800"
-                        : "text-yellow-800"
-                    }
+                        ? "text-green-600"
+                        : "text-yellow-600"
+                    }`}
                   >
                     {payment.status}
                   </Text>

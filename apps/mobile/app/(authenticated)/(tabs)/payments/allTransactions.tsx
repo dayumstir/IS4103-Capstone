@@ -133,8 +133,8 @@ export default function AllTransactions() {
                               className={`text-xs font-medium ${t.status === TransactionStatus.IN_PROGRESS ? "text-amber-600" : "text-emerald-600"}`}
                             >
                               {t.status === TransactionStatus.IN_PROGRESS
-                                ? "In Progress"
-                                : "Fully Paid"}
+                                ? "IN PROGRESS"
+                                : "FULLY PAID"}
                             </Text>
                           </View>
                         </View>
