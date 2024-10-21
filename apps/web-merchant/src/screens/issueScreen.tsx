@@ -145,7 +145,7 @@ const IssueScreen: React.FC = () => {
         },
       ],
       onFilter: (value, record) => record.category === value,
-      className: "w-1/5 md:w-1/4 lg:w-1/5",
+      className: "w-1/6",
     },
     {
       title: "Title",
@@ -160,7 +160,7 @@ const IssueScreen: React.FC = () => {
           {text}
         </div>
       ),
-      className: "w-1/5 md:w-1/4 lg:w-1/5",
+      className: "w-1/6",
     },
     {
       title: "Description",
@@ -175,7 +175,7 @@ const IssueScreen: React.FC = () => {
           {text}
         </div>
       ),
-      className: "w-1/5 md:w-1/4 lg:w-1/5",
+      className: "w-1/6",
     },
     {
       title: "Status",
@@ -204,22 +204,28 @@ const IssueScreen: React.FC = () => {
         },
       ],
       onFilter: (value, record) => record.status === value,
-      className: "w-1/5 md:w-1/4 lg:w-1/5",
+      className: "w-1/6",
     },
     {
       title: "Outcome",
       dataIndex: "outcome",
       key: "outcome",
-      className: "w-1/5 md:w-1/4 lg:w-1/5",
+      render: (outcome: string) => (
+        <div className="truncate" style={{ maxWidth: "200px" }}>
+          {outcome}
+        </div>
+      ),
+      className: "w-1/6",
     },
     {
       title: "Action",
       key: "action",
       render: (issue: IssueTableInterface) => (
-        <div>
+        <div className="flex space-x-2">
           <Button
             icon={<EyeOutlined />}
             onClick={() => navigate(`${location.pathname}/${issue.key}`)}
+            className="w-full"
           >
             View Details
           </Button>
@@ -245,7 +251,8 @@ const IssueScreen: React.FC = () => {
               <Button
                 type="primary"
                 danger
-                className="ml-5"
+                // className="ml-5"
+                className="w-full"
                 icon={<StopOutlined />}
               >
                 Cancel
@@ -256,7 +263,8 @@ const IssueScreen: React.FC = () => {
               type="primary"
               danger
               disabled
-              className="ml-5"
+              // className="ml-5"
+              className="w-full"
               icon={<StopOutlined />}
             >
               Cancel
@@ -264,7 +272,7 @@ const IssueScreen: React.FC = () => {
           )}
         </div>
       ),
-      className: "w-1/5 md:w-1/4 lg:w-1/5",
+      className: "w-1/6",
     },
   ];
 
@@ -278,7 +286,8 @@ const IssueScreen: React.FC = () => {
       )}
 
       <div className="flex justify-between">
-        <Breadcrumb items={[{ title: "Issues" }]} />
+        {/* <Breadcrumb items={[{ title: "Issues" }]} /> */}
+        <h2 className="text-xl font-bold"> Issues</h2>
         <Button type="primary" onClick={() => setIsCreateIssueModalOpen(true)}>
           Raise an Issue
         </Button>

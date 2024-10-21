@@ -153,7 +153,7 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
         {/* Filter Column */}
         <div className="relative mr-2 w-1/3">
           <div className="sticky top-0 z-10 bg-white pb-2">
-            <h3 className="font-semibold">Filters</h3>
+            <h3 className="mb-3 font-semibold">Filters</h3>
             <p>Date Range:</p>
             <RangePicker onChange={handleRangeChange} />
             <div className="mt-2 flex flex-col">
