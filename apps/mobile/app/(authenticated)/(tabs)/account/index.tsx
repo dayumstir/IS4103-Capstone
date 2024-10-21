@@ -98,7 +98,10 @@ export default function AccountPage() {
           <Text className="text-blue-500 underline">What does this mean?</Text>
         </TouchableOpacity>
 
-        <Button type="primary" onPress={() => router.push("/account/eligiblePlans")}>
+        <Button
+          type="primary"
+          onPress={() => router.push("/account/eligiblePlans")}
+        >
           <AntDesign
             name="filetext1"
             size={20}

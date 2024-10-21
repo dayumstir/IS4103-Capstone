@@ -71,7 +71,7 @@ export default function AllTransactions() {
       ? [
           ...new Set(
             transactions.map((t) =>
-              format(new Date(t.date_of_transaction), "dd MMM yyyy"),
+              format(new Date(t.date_of_transaction), "d MMM yyyy"),
             ),
           ),
         ]
@@ -90,7 +90,7 @@ export default function AllTransactions() {
               ?.filter(
                 // Filter transactions on that date
                 (t) =>
-                  format(new Date(t.date_of_transaction), "dd MMM yyyy") ===
+                  format(new Date(t.date_of_transaction), "d MMM yyyy") ===
                   date,
               )
               .map((t, index, transactionsOnDate) => (
@@ -123,8 +123,7 @@ export default function AllTransactions() {
                         </Text>
                         <View className="mt-1 flex-row items-center gap-2">
                           <Text className="text-sm text-gray-500">
-                            {t.instalment_plan?.number_of_instalments || "N/A"}{" "}
-                            payments
+                            {format(new Date(t.date_of_transaction), "h:mm a")}
                           </Text>
                           <View
                             className={`rounded-full px-2 py-1 ${t.status === TransactionStatus.IN_PROGRESS ? "bg-yellow-100" : "bg-emerald-100"}`}
@@ -133,8 +132,8 @@ export default function AllTransactions() {
                               className={`text-xs font-medium ${t.status === TransactionStatus.IN_PROGRESS ? "text-amber-600" : "text-emerald-600"}`}
                             >
                               {t.status === TransactionStatus.IN_PROGRESS
-                                ? "In Progress"
-                                : "Fully Paid"}
+                                ? "IN PROGRESS"
+                                : "FULLY PAID"}
                             </Text>
                           </View>
                         </View>

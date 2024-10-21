@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ITransaction, TransactionResult } from "@repo/interfaces";
+import { TransactionResult } from "@repo/interfaces";
 
 export const transactionApi = createApi({
   reducerPath: "transactionApi",
@@ -29,24 +29,8 @@ export const transactionApi = createApi({
       query: (id) => `/transaction/${id}`,
       providesTags: (result, error, id) => [{ type: "TransactionList", id }],
     }),
-
-    // Update transaction status
-    updateTransactionStatus: builder.mutation<
-      ITransaction,
-      { transaction_id: string; status: string }
-    >({
-      query: ({ transaction_id, status }) => ({
-        url: `/transaction/${transaction_id}`,
-        method: "PATCH",
-        body: { status },
-      }),
-      invalidatesTags: ["TransactionList"],
-    }),
   }),
 });
 
-export const {
-  useGetTransactionsQuery,
-  useGetTransactionByIdQuery,
-  useUpdateTransactionStatusMutation,
-} = transactionApi;
+export const { useGetTransactionsQuery, useGetTransactionByIdQuery } =
+  transactionApi;

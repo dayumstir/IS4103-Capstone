@@ -1,5 +1,5 @@
 import { IInstalmentPlan } from "@repo/interfaces";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { Button } from "@ant-design/react-native";
 
@@ -73,7 +73,25 @@ export default function SelectInstalmentPlanScreen({
 
       {/* ===== Confirm & Cancel Buttons ===== */}
       <View className="flex w-full gap-4">
-        <Button type="primary" onPress={onConfirm} disabled={!selectedPlanId}>
+        <Button
+          type="primary"
+          onPress={() => {
+            Alert.alert(
+              "Confirm Instalment Plan",
+              `Are you sure you want to proceed with the ${selectedPlanId ? instalmentPlans.find((plan) => plan.instalment_plan_id === selectedPlanId)?.name : ""} plan?\n\nTotal Amount: ${formatCurrency(price)}\nNumber of Payments: ${selectedPlanId ? instalmentPlans.find((plan) => plan.instalment_plan_id === selectedPlanId)?.number_of_instalments : ""}\nPayment Amount: ${selectedPlanId ? formatCurrency(price / (instalmentPlans.find((plan) => plan.instalment_plan_id === selectedPlanId)?.number_of_instalments || 1)) : ""}\nPayment Frequency: Every ${selectedPlanId ? (((instalmentPlans.find((plan) => plan.instalment_plan_id === selectedPlanId)?.time_period || 0) * 7) / (instalmentPlans.find((plan) => plan.instalment_plan_id === selectedPlanId)?.number_of_instalments || 1)).toFixed(1) : ""} days`,
+              [
+                {
+                  text: "Cancel",
+                },
+                {
+                  text: "Confirm",
+                  onPress: onConfirm,
+                },
+              ],
+            );
+          }}
+          disabled={!selectedPlanId}
+        >
           <Text className="font-semibold text-white">Confirm</Text>
         </Button>
 

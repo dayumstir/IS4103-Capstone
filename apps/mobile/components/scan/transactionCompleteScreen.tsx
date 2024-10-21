@@ -34,46 +34,52 @@ export default function TransactionCompleteScreen({
         <View className="mb-6 rounded-xl bg-gray-100 p-4">
           <Text className="mb-4 font-semibold">Transaction Details</Text>
           <View className="flex-row flex-wrap">
-            <Text className="w-1/2 pb-3 text-gray-600">Total Amount:</Text>
-            <Text className="w-1/2 pb-3 font-medium">
+            <Text className="w-2/5 pb-3 text-gray-600">Total Amount:</Text>
+            <Text className="w-3/5 pb-3 font-medium">
               {formatCurrency(transaction.amount)}
             </Text>
 
-            <Text className="w-1/2 pb-3 text-gray-600">Merchant:</Text>
-            <Text className="w-1/2 pb-3 font-medium">{merchantName}</Text>
+            <Text className="w-2/5 pb-3 text-gray-600">Merchant:</Text>
+            <Text
+              className="w-3/5 pb-3 font-medium"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {merchantName}
+            </Text>
 
-            <Text className="w-1/2 text-gray-600">Date:</Text>
-            <Text className="w-1/2 font-medium">
-              {format(new Date(transaction.date_of_transaction), "dd MMM yyyy")}
+            <Text className="w-2/5 pb-3 text-gray-600">Date:</Text>
+            <Text className="w-3/5 pb-3 font-medium">
+              {format(transaction.date_of_transaction, "d MMM yyyy, h:mm a")}
             </Text>
 
             {/* ===== Divider ===== */}
             <View className="my-3 h-px w-full bg-gray-300" />
 
-            <Text className="w-1/2 pb-3 text-gray-600">Instalments:</Text>
-            <Text className="w-1/2 font-medium">
-              {transaction.instalment_plan.number_of_instalments}
+            <Text className="w-2/5 pb-3 text-gray-600">Payments:</Text>
+            <Text className="w-3/5 pb-3 font-medium">
+              {transaction.instalment_plan.number_of_instalments} instalments
             </Text>
 
-            <Text className="w-1/2 pb-3 text-gray-600">Payment Freq:</Text>
-            <Text className="w-1/2 font-medium">
+            <Text className="w-2/5 pb-3 text-gray-600">Payment Freq:</Text>
+            <Text className="w-3/5 pb-3 font-medium">
               {`${(
                 (transaction.instalment_plan.time_period * 7) /
                 transaction.instalment_plan.number_of_instalments
               ).toFixed(1)} days`}
             </Text>
 
-            <Text className="w-1/2 pb-3 text-gray-600">First Payment Due:</Text>
-            <Text className="w-1/2 font-medium">
+            <Text className="w-2/5 pb-3 text-gray-600">First Payment:</Text>
+            <Text className="w-3/5 pb-3 font-medium">
               {format(
-                new Date(transaction.instalment_payments[0].due_date),
-                "dd MMM yyyy",
+                transaction.instalment_payments[0].due_date,
+                "d MMM yyyy, h:mm a",
               )}
             </Text>
 
-            <Text className="w-1/2 text-gray-600">Transaction ID:</Text>
+            <Text className="w-2/5 pb-3 text-gray-600">Transaction ID:</Text>
             <Text
-              className="w-1/2 font-medium"
+              className="w-3/5 font-medium"
               numberOfLines={1}
               ellipsizeMode="tail"
             >
