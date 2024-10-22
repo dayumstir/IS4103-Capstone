@@ -1,3 +1,4 @@
+// packages/interfaces/instalmentPlanInterface.ts
 import { ICreditTier } from "./creditTierInterface";
 
 export interface IInstalmentPlan {

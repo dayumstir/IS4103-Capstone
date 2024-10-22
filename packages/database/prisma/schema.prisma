@@ -33,13 +33,16 @@ model Customer {
   wallet_balance  Float    @default(0)
   credit_score    Int      @default(0)
 
+  // Relationships
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
   passwordResetTokens     PasswordResetToken[]
+
+  cashbackWallets         CashbackWallet[]
   issues                  Issue[]
   vouchersAssigned        VoucherAssigned[]
   transactions            Transaction[]
-  topUps                  TopUp[]
+  paymentHistories        PaymentHistory[]
 }
 
 // Utility Schemas
@@ -136,7 +139,10 @@ model Merchant {
   status                  Status
   profile_picture         Bytes?                           @db.ByteA
   cashback                Float
+
+  // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
+  cashbackWallets         CashbackWallet[]
   issues                  Issue[]
   Transaction             Transaction[]
 }
@@ -171,14 +177,22 @@ model MerchantEmailVerificationToken {
   @@index([merchant_id])
 }
 
-model TopUp {
-  top_up_id      String   @id @default(cuid())
-  amount         Float
+model PaymentHistory {
+  payment_history_id   String             @id @default(cuid())
+  amount               Float
+  payment_date         DateTime           @default(now())
+  payment_type         PaymentType
 
-  createdAt DateTime @default(now())
+  // Relationships
+  customer_id          String
+  customer             Customer           @relation(fields: [customer_id], references: [customer_id])
+}
 
-  customer_id String
-  customer    Customer @relation(fields: [customer_id], references: [customer_id])
+enum PaymentType {
+  TOP_UP
+  INSTALMENT_PAYMENT
+  REFUND
+  OTHER
 }
 
 enum TransactionStatus {
@@ -195,6 +209,7 @@ model Transaction {
   reference_no        String            @default("")
   cashback_percentage Float             @default(0)
 
+  // Relationships
   customer_id String
   customer    Customer @relation(fields: [customer_id], references: [customer_id])
 
@@ -226,6 +241,11 @@ model InstalmentPlan {
   transactions Transaction[]
 }
 
+enum InstalmentPaymentStatus {
+  PAID
+  UNPAID
+}
+
 model InstalmentPayment {
   instalment_payment_id   String                  @id @default(cuid())
   amount_due              Float
@@ -235,29 +255,33 @@ model InstalmentPayment {
   paid_date               DateTime?
   instalment_number       Int // depends on frequency of instalment plan
 
+  amount_deducted_from_wallet Float?
+  amount_discount_from_voucher    Float?
+  amount_deducted_from_cashback_wallet Float?
+
+  // Relationships
   transaction_id String
   transaction    Transaction @relation(fields: [transaction_id], references: [transaction_id])
 
-  voucher_assigned_id          String?
-  voucher_assigned             VoucherAssigned? @relation(fields: [voucher_assigned_id], references: [voucher_assigned_id])
-  amount_discount_from_voucher Float?
-
-  amount_deducted_from_wallet Float
-
-  cashback_wallet_id                   String?
-  cashback_wallet                      CashbackWallet? @relation(fields: [cashback_wallet_id], references: [cashback_wallet_id])
-  amount_deducted_from_cashback_wallet Float?
-}
-
-enum InstalmentPaymentStatus {
-  PAID
-  UNPAID
+  voucher_assigned_id             String?            @unique
+  voucher_assigned                VoucherAssigned?   @relation(fields: [voucher_assigned_id], references: [voucher_assigned_id])
+  
+  cashback_wallet_id              String?            @unique
+  cashback_wallet                 CashbackWallet?
 }
 
 model CashbackWallet {
-  cashback_wallet_id String              @id @default(cuid())
-  amount             Float
-  InstalmentPayment  InstalmentPayment[]
+  cashback_wallet_id   String             @id @default(cuid())
+  amount               Float
+  createdAt            DateTime           @default(now())
+
+  // Relationships
+  customer_id          String             @unique
+  customer             Customer           @relation(fields: [customer_id], references: [customer_id])
+  merchant_id          String             @unique
+  merchant             Merchant           @relation(fields: [merchant_id], references: [merchant_id])
+  instalment_payment_id String?           @unique
+  instalment_payment   InstalmentPayment? @relation(fields: [instalment_payment_id], references: [instalment_payment_id])
 }
 
 model CreditTier {
@@ -333,17 +357,16 @@ enum VoucherAssignedStatus {
 }
 
 model VoucherAssigned {
-  voucher_assigned_id String                @id @default(cuid())
-  status              VoucherAssignedStatus
-  date_time_issued    DateTime              @default(now())
-  remaining_uses      Int
+  voucher_assigned_id     String             @id @default(cuid())
+  status                  VoucherAssignedStatus
+  remaining_uses          Int
+  date_time_issued        DateTime           @default(now())
 
   // Relationships
-  voucher     Voucher  @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
-  voucher_id  String
-  customer    Customer @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
-  customer_id String
-
-  used_installment_payment_id String? // TODO: Associate with installment plan
-  InstalmentPayment           InstalmentPayment[]
+  voucher                 Voucher            @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
+  voucher_id              String
+  customer                Customer           @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  customer_id             String
+  instalment_payment      InstalmentPayment? 
+  instalment_payment_id   String?
 }

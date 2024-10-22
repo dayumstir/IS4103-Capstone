@@ -1,8 +1,9 @@
-// src/routes/stripeRoutes.ts
+// src/routes/paymentRoutes.ts
 import { Router } from "express";
 import {
     topUpWallet,
-    getTopUpByCustomerId,
+    getPaymentHistoryByCustomerId,
+    makePayment,
 } from "../controllers/paymentController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -11,6 +12,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.post("/top-up", topUpWallet);
-router.get("/top-up", getTopUpByCustomerId);
+router.get("/history", getPaymentHistoryByCustomerId);
+router.post("/make-payment", makePayment);
 
 export default router;

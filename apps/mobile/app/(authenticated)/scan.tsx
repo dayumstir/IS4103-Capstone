@@ -60,6 +60,16 @@ export default function ScanScreen() {
     }
   }, [merchant]);
 
+  // Merchant ID invalid
+  useEffect(() => {
+    if (merchantError) {
+      console.error(merchantError);
+      setError("Invalid QR code");
+      dispatch(setPaymentStage("Error"));
+      setScannedMerchantId(null); // Reset scanned merchant ID
+    }
+  }, [merchantError, dispatch]);
+
   if (!status) {
     // Camera permissions are still loading
     return <View />;
@@ -82,13 +92,6 @@ export default function ScanScreen() {
     );
   }
 
-  // Merchant ID invalid
-  if (merchantError) {
-    console.error(merchantError);
-    setError("Merchant ID invalid");
-    dispatch(setPaymentStage("Error"));
-  }
-
   const handleQrCodeScanned = ({
     type,
     data,
@@ -99,6 +102,12 @@ export default function ScanScreen() {
     if (data.includes(":")) {
       // QR Code data is in the format "MerchantId:Price:ReferenceNo"
       const [rawMerchantId, rawPrice, rawReferenceNo] = data.split(":");
+
+      if (!rawMerchantId || !rawPrice || !rawReferenceNo) {
+        setError("Invalid QR code");
+        dispatch(setPaymentStage("Error"));
+        return;
+      }
 
       // Sanitize the merchant ID, price and reference number
       const merchantId = rawMerchantId.trim();
@@ -140,7 +149,6 @@ export default function ScanScreen() {
       amount: purchase.price,
       date_of_transaction: new Date(),
       status: TransactionStatus.IN_PROGRESS,
-      fully_paid_date: null,
       reference_no: purchase.referenceNo,
       cashback_percentage: merchant?.cashback ?? 0,
 
@@ -163,6 +171,9 @@ export default function ScanScreen() {
 
   const handleCancel = () => {
     setScannedMerchantId(null);
+    setPurchase({ merchantName: "", price: 0, referenceNo: "" });
+    setSelectedPlanId(null);
+    setTransaction(null);
     dispatch(setPaymentStage("Scan QR Code"));
   };
 
@@ -222,6 +233,8 @@ export default function ScanScreen() {
           <View className="flex-1 items-center justify-center p-16">
             <Text className="text-center text-xl font-semibold text-red-500">
               There has been an error. Please close this window and try again.
+              {"\n"}
+              {"\n"}
               Error: {error}
             </Text>
           </View>

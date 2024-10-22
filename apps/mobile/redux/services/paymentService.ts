@@ -2,13 +2,21 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store";
 import { API_URL } from "../../config/apiConfig";
-import { ITopUp } from "@repo/interfaces";
+import { IPaymentHistory } from "@repo/interfaces";
 
 interface PaymentIntentResponse {
     paymentIntent: string;
     ephemeralKey: string;
     customer: string;
     publishableKey: string;
+}
+
+// Define the request body interface for makePayment
+interface MakePaymentRequest {
+    instalment_payment_id: string;
+    voucher_assigned_id?: string;
+    amount_discount_from_voucher?: number;
+    amount_deducted_from_wallet: number;
 }
 
 export const paymentApi = createApi({
@@ -25,6 +33,8 @@ export const paymentApi = createApi({
         },
     }),
 
+    tagTypes: ["VoucherList"],
+
     endpoints: (builder) => ({
         // Fetch payment sheet parameters
         createPaymentIntent: builder.mutation<PaymentIntentResponse, { amount: number }>({
@@ -35,12 +45,22 @@ export const paymentApi = createApi({
             }),
         }),
 
-        // Get top-up records by Customer ID
-        getTopUpByCustomerId: builder.query<ITopUp[], void>({
-            query: () => "/top-up",
+        // Get payment history
+        getPaymentHistory: builder.query<IPaymentHistory[], void>({
+            query: () => "/history",
+        }),
+
+        // Make payment
+        makePayment: builder.mutation<{ message: string }, MakePaymentRequest>({
+            query: (paymentData) => ({
+                url: "/make-payment",
+                method: "POST",
+                body: paymentData,
+            }),
+            invalidatesTags: ["VoucherList"],
         }),
     }),
 });
 
 // Export hooks for usage in functional components
-export const { useCreatePaymentIntentMutation, useGetTopUpByCustomerIdQuery } = paymentApi;
+export const { useCreatePaymentIntentMutation, useGetPaymentHistoryQuery, useMakePaymentMutation } = paymentApi;

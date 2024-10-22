@@ -1,5 +1,5 @@
 // src/services/voucherService.ts
-import { IVoucher } from "../interfaces/voucherInterface";
+import { IVoucher } from "@repo/interfaces";
 import * as voucherRepository from "../repositories/voucherRepository";
 import logger from "../utils/logger";
 import { NotFoundError, BadRequestError } from "../utils/error";
@@ -72,4 +72,13 @@ export const getVoucherDetails = async (voucher_id: string) => {
 export const getCustomerVouchers = async (customer_id: string) => {
     logger.info(`Fetching vouchers for customer: ${customer_id}`, customer_id);
     return await voucherRepository.getCustomerVouchers(customer_id);
+};
+
+// Use Voucher
+export const useVoucher = async (voucher_assigned_id: string) => {
+    logger.info(`Using voucher: ${voucher_assigned_id}`, voucher_assigned_id);
+
+    const voucherAssigned = await voucherRepository.useVoucher(voucher_assigned_id);
+    
+    return voucherAssigned;
 };

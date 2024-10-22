@@ -1,4 +1,4 @@
-import { ICustomer } from "./customerInterface";
+// packages/interfaces/creditTierInterface.ts
 import { IInstalmentPlan } from "./instalmentPlanInterface";
 
 export interface ICreditTier {
@@ -7,6 +7,5 @@ export interface ICreditTier {
     min_credit_score: number;
     max_credit_score: number;
 
-    customers: ICustomer[];
     instalment_plans: IInstalmentPlan[];
 }
