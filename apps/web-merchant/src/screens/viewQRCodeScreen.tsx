@@ -77,9 +77,26 @@ const ViewQRCodeScreen: React.FC = () => {
                 required: true,
                 message: "Please input the transaction cost amount!",
               },
+              {
+                type: "number",
+                min: 10,
+                message: "Amount must be minimally SGD 10!",
+              },
+              {
+                type: "number",
+                max: 0,
+                validator: (_, value) => {
+                  if (value < 0) {
+                    return Promise.reject(
+                      new Error("Amount cannot be negative!"),
+                    );
+                  }
+                  return Promise.resolve();
+                },
+              },
             ]}
           >
-            <InputNumber min={0} prefix="SGD" style={{ width: "100%" }} />
+            <InputNumber prefix="SGD" style={{ width: "100%" }} />
           </Form.Item>
 
           <Form.Item<GenerateQRCodeProps>
