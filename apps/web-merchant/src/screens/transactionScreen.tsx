@@ -168,8 +168,11 @@ const TransactionScreen: React.FC = () => {
       title: "Date of Transaction",
       dataIndex: "dateOfTransaction",
       showSorterTooltip: true,
-      sorter: (a: TransactionTableInterface, b: TransactionTableInterface) =>
-        a.dateOfTransaction.getTime() - b.dateOfTransaction.getTime(),
+      sorter: (a: TransactionTableInterface, b: TransactionTableInterface) => {
+        const dateA = new Date(a.dateOfTransaction).getTime();
+        const dateB = new Date(b.dateOfTransaction).getTime();
+        return dateA - dateB;
+      },
       sortDirections: ["ascend", "descend"] as SortOrder[],
       key: "dateOfTransaction",
       render: (dateOfTransaction: Date) => (
@@ -213,7 +216,9 @@ const TransactionScreen: React.FC = () => {
         a.amount - b.amount,
       sortDirections: ["ascend", "descend"] as SortOrder[],
       key: "cashbackPercentage",
-      render: (amount: string) => <div className="truncate">SGD {amount}</div>,
+      render: (amount: number) => (
+        <div className="truncate">SGD {amount.toFixed(2)}</div>
+      ),
       className: "w-1/10",
     },
     {
@@ -247,13 +252,17 @@ const TransactionScreen: React.FC = () => {
       title: "Fully Paid Date",
       dataIndex: "fullyPaidDate",
       showSorterTooltip: true,
-      sorter: (a: TransactionTableInterface, b: TransactionTableInterface) =>
-        a.fullyPaidDate.getTime() - b.fullyPaidDate.getTime(),
+      sorter: (a: TransactionTableInterface, b: TransactionTableInterface) => {
+        const dateA = new Date(a.dateOfTransaction).getTime();
+        const dateB = new Date(b.dateOfTransaction).getTime();
+        return dateA - dateB;
+      },
       sortDirections: ["ascend", "descend"] as SortOrder[],
       key: "fullyPaidDate",
       render: (fullyPaidDate: Date) => (
         <div>
-          {`${new Date(fullyPaidDate).toDateString()}, ${new Date(fullyPaidDate).toLocaleTimeString()}`}
+          {fullyPaidDate &&
+            `${new Date(fullyPaidDate).toDateString()}, ${new Date(fullyPaidDate).toLocaleTimeString()}`}
         </div>
       ),
       className: "w-1/10",
