@@ -210,6 +210,7 @@ const CreateIssueModal = ({
             showSearch
             placeholder="Select a category"
             optionFilterProp="label"
+            disabled={transactionId ? true : false}
             // onChange={(value:string)=>{
 
             // }}
