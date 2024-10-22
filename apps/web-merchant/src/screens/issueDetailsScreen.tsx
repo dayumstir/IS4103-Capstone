@@ -9,8 +9,15 @@ import {
 import { Buffer } from "buffer";
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { statusColorMap } from "../../../../packages/interfaces/issueInterface";
+import {
+  IssueStatus,
+  statusColorMap,
+} from "../../../../packages/interfaces/issueInterface";
 import { useGetIssueQuery } from "../redux/services/issue";
+import {
+  TransactionStatus,
+  transactionStatusColorMap,
+} from "../../../../packages/interfaces/transactionInterface";
 
 const IssueDetailsScreen: React.FC = () => {
   const { issueId } = useParams<{ issueId: string }>();
@@ -63,7 +70,12 @@ const IssueDetailsScreen: React.FC = () => {
       {
         key: "4",
         label: "Fully paid date",
-        children: `${new Date(issue.transaction.fully_paid_date).toDateString()}, ${new Date(issue.transaction.fully_paid_date).toLocaleTimeString()}`,
+        children: (
+          <div>
+            {issue.transaction.fully_paid_date &&
+              `${new Date(issue.transaction.fully_paid_date).toDateString()}, ${new Date(issue.transaction.fully_paid_date).toLocaleTimeString()}`}
+          </div>
+        ),
       },
       {
         key: "5",
@@ -73,7 +85,19 @@ const IssueDetailsScreen: React.FC = () => {
       {
         key: "6",
         label: "Status",
-        children: issue.transaction.status,
+        children: (
+          <Tag
+            color={
+              transactionStatusColorMap[issue.transaction.status] || "default"
+            }
+            key={issue.transaction.status}
+          >
+            {issue.transaction.status == TransactionStatus.IN_PROGRESS &&
+              "IN PROGRESS"}
+            {issue.transaction.status == TransactionStatus.FULLY_PAID &&
+              "FULLY PAID"}
+          </Tag>
+        ),
       },
     ];
 
@@ -95,8 +119,13 @@ const IssueDetailsScreen: React.FC = () => {
         <p>{issue?.description}</p>
         <p className="mt-10 text-base font-semibold">Status</p>
         {issue && (
-          <Tag color={statusColorMap[issue?.status] || "default"} key={status}>
-            {issue?.status.toUpperCase()}
+          <Tag
+            color={statusColorMap[issue.status] || "default"}
+            key={issue.status}
+          >
+            {issue.status == IssueStatus.PENDING_OUTCOME && "PENDING"}
+            {issue.status == IssueStatus.RESOLVED && "RESOLVED"}
+            {issue.status == IssueStatus.CANCELLED && "CANCELLED"}
           </Tag>
         )}
         <p className="mt-10 text-base font-semibold">Outcome</p>

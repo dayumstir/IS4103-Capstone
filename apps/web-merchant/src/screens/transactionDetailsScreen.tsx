@@ -106,12 +106,12 @@ const TransactionDetailsScreen: React.FC = () => {
     {
       key: "4",
       label: "Time Period",
-      children: transaction?.instalment_plan.time_period,
+      children: `${transaction?.instalment_plan.time_period} months`,
     },
     {
       key: "5",
       label: "Interest Rate",
-      children: transaction?.instalment_plan.interest_rate,
+      children: `${transaction?.instalment_plan.interest_rate}%`,
     },
     {
       key: "6",
@@ -156,8 +156,11 @@ const TransactionDetailsScreen: React.FC = () => {
       title: "Date",
       dataIndex: "create_time",
       showSorterTooltip: true,
-      sorter: (a: IssueTableInterface, b: IssueTableInterface) =>
-        a.create_time.getTime() - b.create_time.getTime(),
+      sorter: (a: IssueTableInterface, b: IssueTableInterface) => {
+        const dateA = new Date(a.create_time).getTime();
+        const dateB = new Date(b.create_time).getTime();
+        return dateA - dateB;
+      },
       sortDirections: ["ascend", "descend"] as SortOrder[],
       key: "create_time",
       render: (create_time: Date) => (
