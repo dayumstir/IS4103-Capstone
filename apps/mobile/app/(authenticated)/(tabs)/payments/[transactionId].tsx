@@ -80,7 +80,119 @@ export default function TransactionDetails() {
 
         {/* ===== Transaction Details ===== */}
         <View className="my-4 rounded-xl bg-white p-8">
-          {/* ... Transaction Details ... */}
+          <Text className="mb-4 text-xl font-bold">Transaction Details</Text>
+          <View className="flex-row flex-wrap">
+            <View className="mb-4 w-2/5 pr-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="wallet-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Amount</Text>
+                  <Text className="font-medium">
+                    {formatCurrency(transaction.amount)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View className="mb-4 w-3/5 pl-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="storefront-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View className="flex-1">
+                  <Text className="text-sm text-gray-500">Merchant</Text>
+                  <Text
+                    className="font-medium"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {transaction.merchant.name}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View className="mb-4 w-2/5 pr-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="trending-up-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Cashback</Text>
+                  <Text className="font-medium">
+                    {transaction.cashback_percentage}%
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View className="mb-4 w-3/5 pl-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Date</Text>
+                  <Text className="font-medium">
+                    {format(
+                      new Date(transaction.date_of_transaction),
+                      "d MMM yyyy, h:mm a",
+                    )}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View className="w-2/5 pr-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="flag-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Status</Text>
+                  <Text className="font-medium">
+                    {transaction.status === "FULLY_PAID"
+                      ? "Fully Paid"
+                      : "In Progress"}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View className="w-3/5 pl-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="time-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Fully Paid Date</Text>
+                  <Text className="font-medium">
+                    {transaction.fully_paid_date
+                      ? format(
+                          new Date(transaction.fully_paid_date),
+                          "d MMM yyyy, h:mm a",
+                        )
+                      : "N/A"}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
         </View>
 
         {/* ===== Instalment Payments ===== */}
@@ -176,7 +288,42 @@ export default function TransactionDetails() {
         {/* ===== Instalment Plan Details ===== */}
         {transaction.instalment_plan && (
           <View className="mt-4 rounded-xl bg-white p-8">
-            {/* ... Instalment Plan Details ... */}
+            <Text className="mb-4 text-xl font-bold">Instalment Plan</Text>
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-gray-500">Plan Name</Text>
+              <Text className="font-medium">
+                {transaction.instalment_plan.name}
+              </Text>
+            </View>
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-gray-500">Number of Instalments</Text>
+              <Text className="font-medium">
+                {transaction.instalment_plan.number_of_instalments}
+              </Text>
+            </View>
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-gray-500">Time Period</Text>
+              <Text className="font-medium">
+                {transaction.instalment_plan.time_period} weeks
+              </Text>
+            </View>
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-gray-500">Payment Frequency</Text>
+              <Text className="font-medium">
+                Every{" "}
+                {(
+                  (transaction.instalment_plan.time_period * 7) /
+                  transaction.instalment_plan.number_of_instalments
+                ).toFixed(1)}{" "}
+                days
+              </Text>
+            </View>
+            <View className="flex-row items-center justify-between">
+              <Text className="text-gray-500">Interest Rate</Text>
+              <Text className="font-medium">
+                {transaction.instalment_plan.interest_rate}%
+              </Text>
+            </View>
           </View>
         )}
 
