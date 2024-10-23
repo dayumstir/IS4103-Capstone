@@ -15,6 +15,7 @@ import { Button } from "@ant-design/react-native";
 import Toast from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 
 import { useCreatePaymentIntentMutation, useGetPaymentHistoryQuery } from "../../../../redux/services/paymentService";
 import { useGetProfileQuery } from "../../../../redux/services/customerService";
@@ -46,6 +47,7 @@ export default function WalletPage() {
   const { data: profile, refetch } = useGetProfileQuery();
   const [createPaymentIntent] = useCreatePaymentIntentMutation();
   const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -344,16 +346,16 @@ export default function WalletPage() {
           </Button>
         </View>
 
-        {/* ===== Recent Transactions ===== */}
+        {/* ===== Recent Payment/TopUp History ===== */}
         <View className="mx-4 mb-4 rounded-xl bg-white p-8">
-          <Text className="mb-2 text-xl font-bold">Recent Transactions</Text>
+          <Text className="mb-2 text-xl font-bold">Recent Payment/TopUp history</Text>
           {isPaymentHistoryLoading ? (
             <View className="items-center justify-center py-4">
               <ActivityIndicator size="large" />
             </View>
           ) : paymentHistory && paymentHistory.length > 0 ? (
             <>
-              {paymentHistory.map((record) => {
+              {paymentHistory.slice(0, 3).map((record) => {
                 let icon = "💰";
                 let title = "Top Up";
                 let amountColor = "text-green-600";
@@ -405,11 +407,18 @@ export default function WalletPage() {
                   </View>
                 );
               })}
+              <Button
+                type="primary"
+                onPress={() => router.push("/wallet/allPaymentHistory")}
+                className="mt-4"
+              >
+                <Text className="font-semibold text-white">View All Payment/TopUp history</Text>
+              </Button>
             </>
           ) : (
             <View className="items-center gap-2 px-8 py-4">
               <Text className="text-center font-medium leading-6 text-gray-500">
-                You have no recent transactions
+                You have no recent payments/topUps
               </Text>
               <Text className="text-center text-4xl">😊</Text>
             </View>
