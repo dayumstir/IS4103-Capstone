@@ -167,8 +167,13 @@ export default function HomePage() {
           outstandingInstalmentPayments.length > 0 ? (
           <View>
             {outstandingInstalmentPayments.slice(0, 3).map((payment, index) => (
-              <View
+              <TouchableOpacity
                 key={payment.instalment_payment_id}
+                onPress={() =>
+                  router.push(
+                    `/payments/instalments/${payment.instalment_payment_id}`
+                  )
+                }
                 className="flex-row items-center justify-between border-t border-gray-200 py-4"
               >
                 <View className="mr-4 flex-1">
@@ -187,13 +192,8 @@ export default function HomePage() {
                   <Text className="font-semibold">
                     {formatCurrency(payment.amount_due)}
                   </Text>
-                  <TouchableOpacity className="rounded-md border border-blue-500 bg-white px-4 py-2">
-                    <Text className="text-sm font-semibold text-blue-500">
-                      Pay
-                    </Text>
-                  </TouchableOpacity>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         ) : (
