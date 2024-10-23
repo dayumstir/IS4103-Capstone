@@ -1,3 +1,4 @@
+// payments/allTransactions.tsx
 import { useState, useRef } from "react";
 import {
   View,
