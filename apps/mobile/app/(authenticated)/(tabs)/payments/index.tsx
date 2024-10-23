@@ -158,8 +158,13 @@ export default function PaymentsPage() {
               outstandingInstalmentPayments.length > 0 ? (
               <View>
                 {outstandingInstalmentPayments.map((payment, index) => (
-                  <View
+                  <TouchableOpacity
                     key={payment.instalment_payment_id}
+                    onPress={() =>
+                      router.push(
+                        `/payments/instalments/${payment.instalment_payment_id}`
+                      )
+                    }
                     className={`flex-row items-center justify-between border-t border-gray-200 ${
                       index === outstandingInstalmentPayments.length - 1
                         ? "pt-4"
@@ -176,10 +181,7 @@ export default function PaymentsPage() {
                       </Text>
                       <Text className="text-sm font-medium text-blue-500">
                         Instalment {payment.instalment_number} of{" "}
-                        {
-                          payment.transaction.instalment_plan
-                            .number_of_instalments
-                        }
+                        {payment.transaction.instalment_plan.number_of_instalments}
                       </Text>
                       <Text
                         className={`text-sm ${
@@ -196,16 +198,8 @@ export default function PaymentsPage() {
                       <Text className="text-base font-semibold">
                         {formatCurrency(payment.amount_due)}
                       </Text>
-                      <TouchableOpacity 
-                        className="rounded-md border border-blue-500 bg-white px-4 py-2"
-                        onPress={() => router.push(`/payments/instalments/${payment.instalment_payment_id}`)}
-                      >
-                        <Text className="text-sm font-semibold text-blue-500">
-                          Pay
-                        </Text>
-                      </TouchableOpacity>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
             ) : (

@@ -14,5 +14,5 @@ export interface IVoucherAssigned {
     voucher_id: string;            
     customer_id: string;   
 
-    used_installment_payment_id?: string;
+    installment_payment_id?: string;
 }

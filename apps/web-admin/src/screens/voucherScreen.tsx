@@ -373,6 +373,7 @@ export default function VoucherScreen() {
                       rules={[{ required: true, message: "Please select the customer!" }]}
                     >
                       <Select
+                        showSearch
                         placeholder="Select a customer"
                         options={customerOptions?.map((customer) => ({
                           label: customer.email,

@@ -245,57 +245,6 @@ export default function InstalmentPaymentDetails() {
                 </View>
               </View>
             </View>
-            {/* Email */}
-            <View className="mb-4 w-1/2 pl-2">
-              <View className="flex-row items-center">
-                <Ionicons
-                  name="mail-outline"
-                  size={20}
-                  color="#3b82f6"
-                  className="mr-4"
-                />
-                <View>
-                  <Text className="text-sm text-gray-500">Email</Text>
-                  <Text className="font-medium">
-                    {instalmentPayment.transaction.merchant.email}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            {/* Contact Number */}
-            <View className="mb-4 w-1/2 pr-2">
-              <View className="flex-row items-center">
-                <Ionicons
-                  name="call-outline"
-                  size={20}
-                  color="#3b82f6"
-                  className="mr-4"
-                />
-                <View>
-                  <Text className="text-sm text-gray-500">Contact Number</Text>
-                  <Text className="font-medium">
-                    {instalmentPayment.transaction.merchant.contact_number}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            {/* Address */}
-            <View className="mb-4 w-1/2 pl-2">
-              <View className="flex-row items-center">
-                <Ionicons
-                  name="location-outline"
-                  size={20}
-                  color="#3b82f6"
-                  className="mr-4"
-                />
-                <View>
-                  <Text className="text-sm text-gray-500">Address</Text>
-                  <Text className="font-medium">
-                    {instalmentPayment.transaction.merchant.address}
-                  </Text>
-                </View>
-              </View>
-            </View>
           </View>
         </View>
 

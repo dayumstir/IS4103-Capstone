@@ -1,5 +1,5 @@
-// payments/allTransactions.tsx
-import React, { useState, useRef } from "react";
+// wallet/allPaymentHistory.tsx
+import React, { useState, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -7,14 +7,20 @@ import {
   TouchableOpacity,
   RefreshControl,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
-import { useGetCustomerTransactionsQuery } from "../../../../redux/services/transactionService";
+import { useGetPaymentHistoryQuery } from "../../../../redux/services/paymentService";
 import { Ionicons } from "@expo/vector-icons";
-import { format, isToday } from "date-fns";
+import {
+  format,
+  isToday,
+  isWithinInterval,
+  subDays,
+  subMonths,
+} from "date-fns";
 import { formatCurrency } from "../../../../utils/formatCurrency";
 import EmptyPlaceholder from "../../../../components/emptyPlaceholder";
-import { ActivityIndicator } from "@ant-design/react-native";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { useDebounce } from "use-debounce";
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -22,29 +28,22 @@ import BottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { Button } from "@ant-design/react-native";
-import { TransactionStatus } from "@repo/interfaces";
 
-export default function AllTransactions() {
+export default function AllPaymentHistory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 
   const [dateFilter, setDateFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [tempDateFilter, setTempDateFilter] = useState("all");
-  const [tempStatusFilter, setTempStatusFilter] = useState("all");
+  const [tempTypeFilter, setTempTypeFilter] = useState("all");
 
   const {
-    data: transactions,
+    data: paymentHistory,
     isFetching,
-    isLoading: isTransactionsLoading,
+    isLoading: isPaymentHistoryLoading,
     refetch,
-  } = useGetCustomerTransactionsQuery(
-    debouncedSearchQuery +
-      "&date_filter=" +
-      dateFilter +
-      "&status_filter=" +
-      statusFilter,
-  );
+  } = useGetPaymentHistoryQuery();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -53,12 +52,94 @@ export default function AllTransactions() {
     refetch().then(() => setRefreshing(false));
   };
 
-  const transactionList = () => {
-    // While user is typing / fetching / loading
+  const router = useRouter();
+
+  // Memoize the filtered payment history
+  const filteredPaymentHistory = useMemo(() => {
+    if (!paymentHistory || paymentHistory.length === 0) {
+      return [];
+    }
+
+    const query = debouncedSearchQuery.toLowerCase();
+
+    return paymentHistory.filter((record) => {
+      // Apply search query
+      const matchesSearch =
+        record.payment_type.toLowerCase().includes(query) ||
+        format(new Date(record.payment_date), "d MMM yyyy, h:mm a")
+          .toLowerCase()
+          .includes(query) ||
+        record.amount.toString().includes(query);
+
+      // Apply date filter
+      let matchesDateFilter = true;
+      if (dateFilter !== "all") {
+        const paymentDate = new Date(record.payment_date);
+        const now = new Date();
+
+        switch (dateFilter) {
+          case "7days":
+            matchesDateFilter = isWithinInterval(paymentDate, {
+              start: subDays(now, 7),
+              end: now,
+            });
+            break;
+          case "30days":
+            matchesDateFilter = isWithinInterval(paymentDate, {
+              start: subDays(now, 30),
+              end: now,
+            });
+            break;
+          case "3months":
+            matchesDateFilter = isWithinInterval(paymentDate, {
+              start: subMonths(now, 3),
+              end: now,
+            });
+            break;
+          case "6months":
+            matchesDateFilter = isWithinInterval(paymentDate, {
+              start: subMonths(now, 6),
+              end: now,
+            });
+            break;
+          case "1year":
+            matchesDateFilter = isWithinInterval(paymentDate, {
+              start: subMonths(now, 12),
+              end: now,
+            });
+            break;
+          default:
+            matchesDateFilter = true;
+        }
+      }
+
+      // Apply type filter
+      let matchesTypeFilter = true;
+      if (typeFilter !== "all") {
+        switch (typeFilter) {
+          case "topup":
+            matchesTypeFilter = record.payment_type === "TOP_UP";
+            break;
+          case "instalment":
+            matchesTypeFilter = record.payment_type === "INSTALMENT_PAYMENT";
+            break;
+          case "refund":
+            matchesTypeFilter = record.payment_type === "REFUND";
+            break;
+          default:
+            matchesTypeFilter = true;
+        }
+      }
+
+      return matchesSearch && matchesDateFilter && matchesTypeFilter;
+    });
+  }, [paymentHistory, debouncedSearchQuery, dateFilter, typeFilter]);
+
+  const paymentHistoryList = () => {
     if (
       debouncedSearchQuery !== searchQuery ||
       isFetching ||
-      isTransactionsLoading
+      isPaymentHistoryLoading
     ) {
       return (
         <View className="mt-16">
@@ -67,52 +148,66 @@ export default function AllTransactions() {
       );
     }
 
-    // Unique dates for transactions
-    const uniqueDates = transactions
-      ? [
-          ...new Set(
-            transactions.map((t) =>
-              format(new Date(t.date_of_transaction), "d MMM yyyy"),
-            ),
-          ),
-        ]
-      : [];
+    if (filteredPaymentHistory.length === 0) {
+      return <EmptyPlaceholder message="No transactions found" />;
+    }
 
-    return (
-      uniqueDates.length > 0 &&
+    // Unique dates for payment history
+    const uniqueDates = [
+      ...new Set(
+        filteredPaymentHistory.map((t) =>
+          format(new Date(t.payment_date), "d MMM yyyy")
+        )
+      ),
+    ];
+
+    return uniqueDates.length > 0 ? (
       uniqueDates.map((date) => (
-        // ===== Transaction Block By Date =====
         <View key={date} className="mb-4">
           <Text className="mb-2 text-xl font-bold">
             {isToday(new Date(date)) ? "Today" : date}
           </Text>
           <View className="flex-1 rounded-xl bg-white p-4">
-            {transactions
-              ?.filter(
-                // Filter transactions on that date
-                (t) =>
-                  format(new Date(t.date_of_transaction), "d MMM yyyy") ===
-                  date,
+            {filteredPaymentHistory
+              .filter(
+                (t) => format(new Date(t.payment_date), "d MMM yyyy") === date
               )
-              .map((t, index, transactionsOnDate) => (
-                // ===== Transaction Row =====
-                <TouchableOpacity
-                  key={t.transaction_id}
-                  onPress={() => {
-                    router.push(`/payments/${t.transaction_id}`);
-                  }}
-                >
+              .map((t, index, transactionsOnDate) => {
+                // Determine payment history details
+                let icon = "💰";
+                let title = "Top Up";
+                let amountColor = "text-green-600";
+                let amountPrefix = "+";
+
+                if (t.payment_type === "INSTALMENT_PAYMENT") {
+                  icon = "💸";
+                  title = "Instalment Payment";
+                  amountColor = "text-red-600";
+                  amountPrefix = "-";
+                } else if (t.payment_type === "REFUND") {
+                  icon = "💵";
+                  title = "Refund";
+                  amountColor = "text-green-600";
+                  amountPrefix = "+";
+                } else if (t.payment_type === "OTHER") {
+                  icon = "🔄";
+                  title = "Transaction";
+                  amountColor = "text-gray-600";
+                  amountPrefix = "";
+                }
+
+                return (
                   <View
+                    key={t.payment_history_id}
                     className={`flex-row items-center justify-between border-gray-200 ${
                       index === 0 ? "pt-0" : "border-t pt-4"
-                    } ${index === transactionsOnDate.length - 1 ? "pb-0" : "pb-4"}`}
+                    } ${
+                      index === transactionsOnDate.length - 1 ? "pb-0" : "pb-4"
+                    }`}
                   >
                     <View className="flex-row items-center gap-4">
-                      <View className="h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                        {/* TODO: Replace with merchant profile picture */}
-                        <Text className="text-center font-bold text-blue-500">
-                          {t.merchant?.name?.[0].toUpperCase() || "?"}
-                        </Text>
+                      <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+                        <Text className="text-center text-2xl">{icon}</Text>
                       </View>
                       <View className="mr-4 flex-1">
                         <Text
@@ -120,38 +215,29 @@ export default function AllTransactions() {
                           numberOfLines={1}
                           ellipsizeMode="tail"
                         >
-                          {t.merchant?.name}
+                          {title}
                         </Text>
-                        <View className="mt-1 flex-row items-center gap-2">
-                          <Text className="text-sm text-gray-500">
-                            {format(new Date(t.date_of_transaction), "h:mm a")}
-                          </Text>
-                          <View
-                            className={`rounded-full px-2 py-1 ${t.status === TransactionStatus.IN_PROGRESS ? "bg-yellow-100" : "bg-emerald-100"}`}
-                          >
-                            <Text
-                              className={`text-xs font-medium ${t.status === TransactionStatus.IN_PROGRESS ? "text-amber-600" : "text-emerald-600"}`}
-                            >
-                              {t.status === TransactionStatus.IN_PROGRESS
-                                ? "IN PROGRESS"
-                                : "FULLY PAID"}
-                            </Text>
-                          </View>
-                        </View>
+                        <Text className="text-sm text-gray-500">
+                          {format(new Date(t.payment_date), "h:mm a")}
+                        </Text>
                       </View>
-                      <Text className="text-base font-medium text-red-600">
-                        -{formatCurrency(t.amount)}
+                      <Text className={`text-base font-medium ${amountColor}`}>
+                        {amountPrefix}
+                        {formatCurrency(t.amount)}
                       </Text>
                     </View>
                   </View>
-                </TouchableOpacity>
-              ))}
+                );
+              })}
           </View>
         </View>
       ))
+    ) : (
+      <EmptyPlaceholder message="No transactions found" />
     );
   };
 
+  // Filter Menu Implementation
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const closeFilterMenu = () => {
@@ -160,15 +246,15 @@ export default function AllTransactions() {
 
   const applyFilters = () => {
     setDateFilter(tempDateFilter);
-    setStatusFilter(tempStatusFilter);
+    setTypeFilter(tempTypeFilter);
     closeFilterMenu();
   };
 
   const clearFilters = () => {
     setDateFilter("all");
-    setStatusFilter("all");
+    setTypeFilter("all");
     setTempDateFilter("all");
-    setTempStatusFilter("all");
+    setTempTypeFilter("all");
     closeFilterMenu();
   };
 
@@ -223,7 +309,7 @@ export default function AllTransactions() {
         <View className="mb-4 flex-row items-center justify-between">
           <View className="flex-row items-center gap-4">
             <Ionicons name="filter-outline" size={28} color="black" />
-            <Text className="text-2xl font-bold">Filter Transactions</Text>
+            <Text className="text-2xl font-bold">Filter Payment History</Text>
           </View>
           <TouchableOpacity onPress={clearFilters}>
             <Text className="text-blue-500">Clear All</Text>
@@ -245,14 +331,15 @@ export default function AllTransactions() {
         />
 
         <RadioButtonGroup
-          label="Transaction Status"
+          label="Payment Type"
           options={[
             { label: "All", value: "all" },
-            { label: "Fully Paid", value: "fullypaid" },
-            { label: "In Progress", value: "inprogress" },
+            { label: "Top Up", value: "topup" },
+            { label: "Instalment Payment", value: "instalment" },
+            { label: "Refund", value: "refund" },
           ]}
-          selectedValue={tempStatusFilter}
-          onSelect={setTempStatusFilter}
+          selectedValue={tempTypeFilter}
+          onSelect={setTempTypeFilter}
         />
 
         <Button type="primary" onPress={applyFilters}>
@@ -263,32 +350,52 @@ export default function AllTransactions() {
   );
 
   const renderActiveFilters = () => {
-    if (dateFilter === "all" && statusFilter === "all") return null;
+    if (dateFilter === "all" && typeFilter === "all") return null;
+
+    const getDateFilterLabel = () => {
+      switch (dateFilter) {
+        case "7days":
+          return "Last 7 Days";
+        case "30days":
+          return "Last 30 Days";
+        case "3months":
+          return "Last 3 Months";
+        case "6months":
+          return "Last 6 Months";
+        case "1year":
+          return "Last Year";
+        default:
+          return "";
+      }
+    };
+
+    const getTypeFilterLabel = () => {
+      switch (typeFilter) {
+        case "topup":
+          return "Top Up";
+        case "instalment":
+          return "Instalment Payment";
+        case "refund":
+          return "Refund";
+        default:
+          return "";
+      }
+    };
 
     return (
       <View className="mb-4 flex-row flex-wrap items-center">
         <Text className="mr-2 text-gray-500">Active Filters:</Text>
         {dateFilter !== "all" && (
-          <View className="mr-2 rounded-full bg-blue-100 px-2 py-1">
+          <View className="mr-2 mb-2 rounded-full bg-blue-100 px-2 py-1">
             <Text className="text-sm font-medium text-blue-700">
-              {dateFilter === "7days"
-                ? "Last 7 Days"
-                : dateFilter === "30days"
-                  ? "Last 30 Days"
-                  : dateFilter === "3months"
-                    ? "Last 3 Months"
-                    : dateFilter === "6months"
-                      ? "Last 6 Months"
-                      : dateFilter === "1year"
-                        ? "Last Year"
-                        : ""}
+              {getDateFilterLabel()}
             </Text>
           </View>
         )}
-        {statusFilter !== "all" && (
-          <View className="mr-2 rounded-full bg-blue-100 px-2 py-1">
+        {typeFilter !== "all" && (
+          <View className="mr-2 mb-2 rounded-full bg-blue-100 px-2 py-1">
             <Text className="text-sm font-medium text-blue-700">
-              {statusFilter === "fullypaid" ? "Fully Paid" : "In Progress"}
+              {getTypeFilterLabel()}
             </Text>
           </View>
         )}
@@ -307,7 +414,7 @@ export default function AllTransactions() {
         }
       >
         <View className="m-4 flex-1">
-          <Text className="mb-4 text-4xl font-bold">Transactions</Text>
+          <Text className="mb-4 text-4xl font-bold">Payment History</Text>
 
           {/* ===== Search Bar and Filter Button ===== */}
           <View className="mb-4 flex-row items-center">
@@ -322,11 +429,11 @@ export default function AllTransactions() {
                 name="search-outline"
                 size={20}
                 color="#d1d5db"
-                className="absolute left-4 top-2"
+                style={{ position: "absolute", left: 12, top: 10 }}
               />
               {searchQuery.length > 0 && (
                 <TouchableOpacity
-                  className="absolute right-4 top-2"
+                  style={{ position: "absolute", right: 12, top: 10 }}
                   onPress={() => setSearchQuery("")}
                 >
                   <Ionicons name="close-circle" size={20} color="#9ca3af" />
@@ -350,12 +457,8 @@ export default function AllTransactions() {
 
           {renderActiveFilters()}
 
-          {/* ===== Transactions By Unique Date ===== */}
-          {transactionList()}
-
-          {transactions && transactions.length === 0 && (
-            <EmptyPlaceholder message="No transactions found" />
-          )}
+          {/* ===== Payment History By Date ===== */}
+          {paymentHistoryList()}
         </View>
       </ScrollView>
 

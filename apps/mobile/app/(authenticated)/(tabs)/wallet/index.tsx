@@ -15,6 +15,7 @@ import { Button } from "@ant-design/react-native";
 import Toast from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 
 import { useCreatePaymentIntentMutation, useGetPaymentHistoryQuery } from "../../../../redux/services/paymentService";
 import { useGetProfileQuery } from "../../../../redux/services/customerService";
@@ -46,6 +47,7 @@ export default function WalletPage() {
   const { data: profile, refetch } = useGetProfileQuery();
   const [createPaymentIntent] = useCreatePaymentIntentMutation();
   const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -144,11 +146,9 @@ export default function WalletPage() {
     }
   };
 
-  const handleTopUp = async (data: TopUpFormValues) => {
-    const { amount } = data;
-
+  const handleTopUpAmount = async (amount: string) => {
     setLoading(true);
-
+  
     try {
       await initializePaymentSheet(amount);
       await openPaymentSheet();
@@ -162,7 +162,16 @@ export default function WalletPage() {
       setLoading(false);
     }
   };
+  
+  const handleTopUp = async (data: TopUpFormValues) => {
+    const { amount } = data;
+    await handleTopUpAmount(amount);
+  };
 
+  const handleTopUpSuggestedAmount = async (amount: number) => {
+    await handleTopUpAmount(amount.toString());
+  };  
+  
   // Handle deep links
   const handleDeepLink = useCallback(
     async (url: string | null) => {
@@ -272,6 +281,38 @@ export default function WalletPage() {
         {/* ===== Top Up ===== */}
         <View className="m-4 rounded-xl bg-white p-8">
           <Text className="mb-2 text-xl font-bold">Top Up Wallet</Text>
+
+          {/* Instruction for Suggested Amounts */}
+          <Text className="mb-2 text-sm text-gray-700">
+            You can click on any of the suggested amounts for payment:
+          </Text>
+
+          {/* Suggested Amount Buttons */}
+          <View className="mb-4 flex-row justify-between">
+            {[10, 20, 50, 100].map((suggestedAmount) => (
+              <TouchableOpacity
+                key={suggestedAmount}
+                className="flex-1 mx-1"
+                onPress={() => handleTopUpSuggestedAmount(suggestedAmount)}
+                disabled={loading}
+              >
+                <View
+                  className={`rounded-lg p-2 items-center justify-center border ${
+                    loading ? "bg-gray-200" : "bg-white"
+                  }`}
+                >
+                  <Text className="font-semibold text-lg">${suggestedAmount}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Instruction for Custom Amount */}
+          <Text className="mb-2 text-sm text-gray-700">
+            Or enter your own custom amount:
+          </Text>
+
+          {/* Custom Amount Input */}
           <Controller
             control={control}
             name="amount"
@@ -287,34 +328,14 @@ export default function WalletPage() {
                     keyboardType="numeric"
                   />
                   {errors.amount && (
-                    <Text className="mt-1 text-red-500">
-                      {errors.amount.message}
-                    </Text>
+                    <Text className="mt-1 text-red-500">{errors.amount.message}</Text>
                   )}
-                </View>
-
-                {/* Suggested Amount Buttons */}
-                <View className="mb-4 flex-row justify-between">
-                  {[10, 20, 50, 100].map((suggestedAmount) => (
-                    <TouchableOpacity
-                      key={suggestedAmount}
-                      className="flex-1 mx-1"
-                      onPress={() => {
-                        setValue('amount', suggestedAmount.toString());
-                        handleSubmit(handleTopUp)();
-                      }}
-                    >
-                      <View className="rounded-lg p-1 items-center justify-center border">
-                        <Text className="font-semibold text-lg">
-                          ${suggestedAmount}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
                 </View>
               </View>
             )}
           />
+
+          {/* Top Up Button */}
           <Button
             type="primary"
             onPress={handleSubmit(handleTopUp)}
@@ -325,16 +346,16 @@ export default function WalletPage() {
           </Button>
         </View>
 
-        {/* ===== Recent Transactions ===== */}
+        {/* ===== Recent Payment/TopUp History ===== */}
         <View className="mx-4 mb-4 rounded-xl bg-white p-8">
-          <Text className="mb-2 text-xl font-bold">Recent Transactions</Text>
+          <Text className="mb-2 text-xl font-bold">Recent Payment/TopUp history</Text>
           {isPaymentHistoryLoading ? (
             <View className="items-center justify-center py-4">
               <ActivityIndicator size="large" />
             </View>
           ) : paymentHistory && paymentHistory.length > 0 ? (
             <>
-              {paymentHistory.map((record) => {
+              {paymentHistory.slice(0, 3).map((record) => {
                 let icon = "💰";
                 let title = "Top Up";
                 let amountColor = "text-green-600";
@@ -386,11 +407,18 @@ export default function WalletPage() {
                   </View>
                 );
               })}
+              <Button
+                type="primary"
+                onPress={() => router.push("/wallet/allPaymentHistory")}
+                className="mt-4"
+              >
+                <Text className="font-semibold text-white">View All Payment/TopUp history</Text>
+              </Button>
             </>
           ) : (
             <View className="items-center gap-2 px-8 py-4">
               <Text className="text-center font-medium leading-6 text-gray-500">
-                You have no recent transactions
+                You have no recent payments/topUps
               </Text>
               <Text className="text-center text-4xl">😊</Text>
             </View>
