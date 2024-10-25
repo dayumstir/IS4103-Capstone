@@ -74,7 +74,10 @@ export default function HomePage() {
   };
 
   const getProgressValue = () => {
-    return (profile?.wallet_balance ?? 0) / getTotalOutstandingPayments();
+    return Math.min(
+      1,
+      (profile?.wallet_balance ?? 0) / getTotalOutstandingPayments(),
+    );
   };
 
   return (
@@ -146,11 +149,7 @@ export default function HomePage() {
             />
           </View>
           <Text className="mt-2 text-center font-medium text-white">
-            {(
-              ((profile?.wallet_balance ?? 0) / getTotalOutstandingPayments()) *
-              100
-            ).toFixed(1)}
-            % of payments covered
+            {`${(getProgressValue() * 100).toFixed(1)}% of payments covered`}
           </Text>
         </View>
       </View>
@@ -171,7 +170,7 @@ export default function HomePage() {
                 key={payment.instalment_payment_id}
                 onPress={() =>
                   router.push(
-                    `/payments/instalments/${payment.instalment_payment_id}`
+                    `/payments/instalments/${payment.instalment_payment_id}`,
                   )
                 }
                 className="flex-row items-center justify-between border-t border-gray-200 py-4"
@@ -264,7 +263,10 @@ export default function HomePage() {
                       {transaction.merchant.name}
                     </Text>
                     <Text className="text-sm text-gray-500">
-                      {format(transaction.date_of_transaction, "d MMM yyyy, h:mm a")}
+                      {format(
+                        transaction.date_of_transaction,
+                        "d MMM yyyy, h:mm a",
+                      )}
                     </Text>
                   </View>
                   <Text

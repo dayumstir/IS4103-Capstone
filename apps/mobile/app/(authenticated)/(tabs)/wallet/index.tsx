@@ -1,5 +1,5 @@
 // wallet/index.tsx
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ScrollView,
   Text,
@@ -8,7 +8,7 @@ import {
   Linking,
   TouchableOpacity,
   ActivityIndicator,
-  RefreshControl
+  RefreshControl,
 } from "react-native";
 import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
 import { Button } from "@ant-design/react-native";
@@ -17,7 +17,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
-import { useCreatePaymentIntentMutation, useGetPaymentHistoryQuery } from "../../../../redux/services/paymentService";
+import {
+  useCreatePaymentIntentMutation,
+  useGetPaymentHistoryQuery,
+} from "../../../../redux/services/paymentService";
 import { useGetProfileQuery } from "../../../../redux/services/customerService";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
 import { formatCurrency } from "../../../../utils/formatCurrency";
@@ -42,7 +45,8 @@ const topUpSchema = z.object({
 type TopUpFormValues = z.infer<typeof topUpSchema>;
 
 export default function WalletPage() {
-  const { initPaymentSheet, presentPaymentSheet, handleURLCallback } = useStripe();
+  const { initPaymentSheet, presentPaymentSheet, handleURLCallback } =
+    useStripe();
   const [loading, setLoading] = useState(false);
   const { data: profile, refetch } = useGetProfileQuery();
   const [createPaymentIntent] = useCreatePaymentIntentMutation();
@@ -148,7 +152,7 @@ export default function WalletPage() {
 
   const handleTopUpAmount = async (amount: string) => {
     setLoading(true);
-  
+
     try {
       await initializePaymentSheet(amount);
       await openPaymentSheet();
@@ -162,7 +166,7 @@ export default function WalletPage() {
       setLoading(false);
     }
   };
-  
+
   const handleTopUp = async (data: TopUpFormValues) => {
     const { amount } = data;
     await handleTopUpAmount(amount);
@@ -170,8 +174,8 @@ export default function WalletPage() {
 
   const handleTopUpSuggestedAmount = async (amount: number) => {
     await handleTopUpAmount(amount.toString());
-  };  
-  
+  };
+
   // Handle deep links
   const handleDeepLink = useCallback(
     async (url: string | null) => {
@@ -284,7 +288,7 @@ export default function WalletPage() {
 
           {/* Instruction for Suggested Amounts */}
           <Text className="mb-2 text-sm text-gray-700">
-            You can click on any of the suggested amounts for payment:
+            Tap on any of the suggested amounts for payment:
           </Text>
 
           {/* Suggested Amount Buttons */}
@@ -292,16 +296,18 @@ export default function WalletPage() {
             {[10, 20, 50, 100].map((suggestedAmount) => (
               <TouchableOpacity
                 key={suggestedAmount}
-                className="flex-1 mx-1"
+                className="mx-1 flex-1"
                 onPress={() => handleTopUpSuggestedAmount(suggestedAmount)}
                 disabled={loading}
               >
                 <View
-                  className={`rounded-lg p-2 items-center justify-center border ${
+                  className={`items-center justify-center rounded-lg border p-2 ${
                     loading ? "bg-gray-200" : "bg-white"
                   }`}
                 >
-                  <Text className="font-semibold text-lg">${suggestedAmount}</Text>
+                  <Text className="text-lg font-semibold">
+                    ${suggestedAmount}
+                  </Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -328,7 +334,9 @@ export default function WalletPage() {
                     keyboardType="numeric"
                   />
                   {errors.amount && (
-                    <Text className="mt-1 text-red-500">{errors.amount.message}</Text>
+                    <Text className="mt-1 text-red-500">
+                      {errors.amount.message}
+                    </Text>
                   )}
                 </View>
               </View>
@@ -346,9 +354,11 @@ export default function WalletPage() {
           </Button>
         </View>
 
-        {/* ===== Recent Payment/TopUp History ===== */}
+        {/* ===== Recent Payment/Top Up History ===== */}
         <View className="mx-4 mb-4 rounded-xl bg-white p-8">
-          <Text className="mb-2 text-xl font-bold">Recent Payment/TopUp history</Text>
+          <Text className="mb-2 text-xl font-bold">
+            Recent Payment/Top Up history
+          </Text>
           {isPaymentHistoryLoading ? (
             <View className="items-center justify-center py-4">
               <ActivityIndicator size="large" />
@@ -397,11 +407,17 @@ export default function WalletPage() {
                           {title}
                         </Text>
                         <Text className="text-sm text-gray-500">
-                          {format(new Date(record.payment_date), "dd MMM yyyy, hh:mm a")}
+                          {format(
+                            new Date(record.payment_date),
+                            "dd MMM yyyy, hh:mm a",
+                          )}
                         </Text>
                       </View>
-                      <Text className={`text-base font-semibold ${amountColor}`}>
-                        {amountPrefix}{formatCurrency(record.amount)}
+                      <Text
+                        className={`text-base font-semibold ${amountColor}`}
+                      >
+                        {amountPrefix}
+                        {formatCurrency(record.amount)}
                       </Text>
                     </View>
                   </View>
@@ -412,7 +428,9 @@ export default function WalletPage() {
                 onPress={() => router.push("/wallet/allPaymentHistory")}
                 className="mt-4"
               >
-                <Text className="font-semibold text-white">View All Payment/TopUp history</Text>
+                <Text className="font-semibold text-white">
+                  View All Payment / Top Up History
+                </Text>
               </Button>
             </>
           ) : (
