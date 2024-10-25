@@ -9,7 +9,7 @@ export default function InstalmentsLayout() {
       <Stack.Screen
         name="[instalmentPaymentId]"
         options={{
-          headerTitle: "Payment Details",
+          headerTitle: "Instalment Details",
           headerLeft: () => (
             <TouchableOpacity
               className="flex-row gap-1"

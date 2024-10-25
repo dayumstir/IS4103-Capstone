@@ -18,6 +18,7 @@ export default function PaymentsLayout() {
       <Stack.Screen
         name="instalments"
         options={{
+          headerTitle: "Back",
           headerShown: false,
         }}
       />

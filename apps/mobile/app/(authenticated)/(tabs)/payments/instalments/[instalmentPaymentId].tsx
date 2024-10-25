@@ -231,7 +231,7 @@ export default function InstalmentPaymentDetails() {
               </View>
             </View>
 
-            <View className="w-1/2 pr-2">
+            <View className="mb-4 w-1/2 pr-2">
               <View className="flex-row items-center">
                 <Ionicons
                   name="alert-circle-outline"
@@ -260,7 +260,7 @@ export default function InstalmentPaymentDetails() {
               </View>
             </View>
 
-            <View className="w-1/2 pl-2">
+            <View className="mb-4 w-1/2 pl-2">
               <View className="flex-row items-center">
                 <Ionicons
                   name="time-outline"
@@ -282,6 +282,24 @@ export default function InstalmentPaymentDetails() {
               </View>
             </View>
           </View>
+          {/* ===== Navigate to Transaction Details ===== */}
+          <Button
+            type="primary"
+            onPress={() =>
+              router.push(`/payments/${instalmentPayment.transaction_id}`)
+            }
+            className="w-full"
+          >
+            <View className="flex-row items-center justify-center">
+              <Ionicons
+                name="receipt-outline"
+                size={20}
+                color="#fff"
+                className="mr-2"
+              />
+              <Text className="font-semibold text-white">View Transaction</Text>
+            </View>
+          </Button>
         </View>
 
         {/* ===== Merchant Details ===== */}

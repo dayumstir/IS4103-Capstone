@@ -15,7 +15,7 @@ import { useDispatch } from "react-redux";
 import { setProfile } from "../../../redux/features/customerSlice";
 import { Ionicons } from "@expo/vector-icons";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../redux/services/instalmentPaymentService";
-import { ActivityIndicator, Button } from "@ant-design/react-native";
+import { ActivityIndicator } from "@ant-design/react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useGetCustomerTransactionsQuery } from "../../../redux/services/transactionService";
 import { Buffer } from "buffer";
@@ -154,60 +154,6 @@ export default function HomePage() {
         </View>
       </View>
 
-      {/* ===== Outstanding Payments ===== */}
-      <View className="m-4 rounded-xl bg-white p-8">
-        <Text className="mb-4 text-xl font-bold">Outstanding Payments</Text>
-
-        {isInstalmentPaymentsLoading ? (
-          <View className="items-center justify-center py-4">
-            <ActivityIndicator size="large" />
-          </View>
-        ) : outstandingInstalmentPayments &&
-          outstandingInstalmentPayments.length > 0 ? (
-          <View>
-            {outstandingInstalmentPayments.slice(0, 3).map((payment, index) => (
-              <TouchableOpacity
-                key={payment.instalment_payment_id}
-                onPress={() =>
-                  router.push(
-                    `/payments/instalments/${payment.instalment_payment_id}`,
-                  )
-                }
-                className="flex-row items-center justify-between border-t border-gray-200 py-4"
-              >
-                <View className="mr-4 flex-1">
-                  <Text
-                    className="font-medium"
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {payment.transaction.merchant.name}
-                  </Text>
-                  <Text className="text-sm text-gray-500">
-                    Due: {format(payment.due_date, "d MMM yyyy")}
-                  </Text>
-                </View>
-                <View className="flex-row items-center gap-4">
-                  <Text className="font-semibold">
-                    {formatCurrency(payment.amount_due)}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ) : (
-          <View className="items-center gap-2 px-8 py-4">
-            <Text className="text-center font-medium leading-6 text-gray-500">
-              Hooray, you have paid all your outstanding instalment payments!
-            </Text>
-            <Text className="text-center text-4xl"> 🎉</Text>
-          </View>
-        )}
-        <Button type="primary" onPress={() => router.push("/payments")}>
-          <Text className="font-semibold text-white">View All</Text>
-        </Button>
-      </View>
-
       {/* ===== Scan to Pay ===== */}
       <LinearGradient
         colors={["#3b82f6", "#9333ea"]}
@@ -217,6 +163,7 @@ export default function HomePage() {
           padding: 8,
           borderRadius: 12,
           marginHorizontal: 16,
+          marginTop: 16,
         }}
       >
         <TouchableOpacity

@@ -225,7 +225,7 @@ export default function NewIssue() {
             type="ghost"
             onPress={() => {
               reset();
-              router.back();
+              router.replace("/account/issue");
             }}
           >
             <Text className="font-semibold text-blue-500">Cancel</Text>

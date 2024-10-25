@@ -357,7 +357,7 @@ export default function WalletPage() {
         {/* ===== Recent Payment/Top Up History ===== */}
         <View className="mx-4 mb-4 rounded-xl bg-white p-8">
           <Text className="mb-2 text-xl font-bold">
-            Recent Payment/Top Up history
+            Recent Wallet History
           </Text>
           {isPaymentHistoryLoading ? (
             <View className="items-center justify-center py-4">
