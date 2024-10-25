@@ -48,8 +48,8 @@ export default function TransactionCompleteScreen({
               {merchantName}
             </Text>
 
-            <Text className="w-2/5 pb-3 text-gray-600">Date:</Text>
-            <Text className="w-3/5 pb-3 font-medium">
+            <Text className="w-2/5 text-gray-600">Date:</Text>
+            <Text className="w-3/5 font-medium">
               {format(transaction.date_of_transaction, "d MMM yyyy, h:mm a")}
             </Text>
 

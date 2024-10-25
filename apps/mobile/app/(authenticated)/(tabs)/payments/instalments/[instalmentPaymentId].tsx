@@ -1,19 +1,20 @@
 // payments/instalments/[instalmentPaymentId].tsx
 import { useState } from "react";
-import { 
-    ActivityIndicator, 
-    ScrollView, 
-    Text, 
-    View,
-    Modal,
-    TouchableOpacity,
-    TouchableWithoutFeedback
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  View,
+  Modal,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  RefreshControl,
 } from "react-native";
 import { Button } from "@ant-design/react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
-import { BlurView } from 'expo-blur';
+import { BlurView } from "expo-blur";
 
 import { useGetInstalmentPaymentByIdQuery } from "../../../../../redux/services/instalmentPaymentService";
 import { useGetAllVouchersQuery } from "../../../../../redux/services/voucherService";
@@ -26,9 +27,12 @@ import { RootState } from "../../../../../redux/store";
 import { IVoucherAssigned } from "@repo/interfaces";
 
 export default function InstalmentPaymentDetails() {
-  const { instalmentPaymentId } = useLocalSearchParams<{ instalmentPaymentId: string }>();
+  const { instalmentPaymentId } = useLocalSearchParams<{
+    instalmentPaymentId: string;
+  }>();
   const [voucherModalVisible, setVoucherModalVisible] = useState(false);
-  const [selectedVoucher, setSelectedVoucher] = useState<IVoucherAssigned | null>(null);
+  const [selectedVoucher, setSelectedVoucher] =
+    useState<IVoucherAssigned | null>(null);
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
   const { profile } = useSelector((state: RootState) => state.customer);
   const router = useRouter();
@@ -47,10 +51,19 @@ export default function InstalmentPaymentDetails() {
     isLoading: isVouchersLoading,
     error: vouchersError,
     refetch: refetchVouchers,
-  } = useGetAllVouchersQuery({ customer_id: profile?.customer_id ?? ""});
+  } = useGetAllVouchersQuery({ customer_id: profile?.customer_id ?? "" });
 
   // Mutation hook for making payment
   const [makePayment, { isLoading: isPaying }] = useMakePaymentMutation();
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    Promise.all([refetch(), refetchVouchers()]).finally(() => {
+      setRefreshing(false);
+    });
+  };
 
   if (isLoading)
     return (
@@ -77,7 +90,8 @@ export default function InstalmentPaymentDetails() {
   if (selectedVoucher) {
     const voucher = selectedVoucher.voucher;
     if (voucher.percentage_discount > 0) {
-      voucherDiscount = instalmentPayment.amount_due * (voucher.percentage_discount / 100);
+      voucherDiscount =
+        instalmentPayment.amount_due * (voucher.percentage_discount / 100);
     } else if (voucher.amount_discount > 0) {
       voucherDiscount = voucher.amount_discount;
     }
@@ -122,7 +136,7 @@ export default function InstalmentPaymentDetails() {
       console.error("Payment failed:", error);
       Toast.show({
         type: "error",
-        text1: "Payment failed"
+        text1: "Payment failed",
       });
     }
   };
@@ -131,15 +145,21 @@ export default function InstalmentPaymentDetails() {
   const usableVouchers = vouchers?.filter(
     (voucherAssigned) =>
       voucherAssigned.remaining_uses > 0 &&
-      voucherAssigned.status === "AVAILABLE"
+      voucherAssigned.status === "AVAILABLE",
   );
 
   return (
-    <ScrollView>
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View className="m-4">
         {/* ===== Instalment Payment Details ===== */}
         <View className="mb-4 rounded-xl bg-white p-8">
-          <Text className="mb-4 text-xl font-bold">Payment Details</Text>
+          <Text className="mb-4 text-xl font-bold">
+            Instalment Payment Details
+          </Text>
           <View className="flex-row flex-wrap">
             <View className="mb-4 w-1/2 pr-2">
               <View className="flex-row items-center">
@@ -168,7 +188,10 @@ export default function InstalmentPaymentDetails() {
                 <View>
                   <Text className="text-sm text-gray-500">Due Date</Text>
                   <Text className="font-medium">
-                    {format(new Date(instalmentPayment.due_date), "dd MMM yyyy")}
+                    {format(
+                      new Date(instalmentPayment.due_date),
+                      "dd MMM yyyy",
+                    )}
                   </Text>
                 </View>
               </View>
@@ -182,7 +205,9 @@ export default function InstalmentPaymentDetails() {
                   className="mr-4"
                 />
                 <View>
-                  <Text className="text-sm text-gray-500">Instalment Number</Text>
+                  <Text className="text-sm text-gray-500">
+                    Instalment Number
+                  </Text>
                   <Text className="font-medium">
                     {instalmentPayment.instalment_number}
                   </Text>
@@ -199,29 +224,82 @@ export default function InstalmentPaymentDetails() {
                 />
                 <View>
                   <Text className="text-sm text-gray-500">Status</Text>
-                  <Text className="font-medium">{instalmentPayment.status}</Text>
+                  <Text className="font-medium">
+                    {instalmentPayment.status}
+                  </Text>
                 </View>
               </View>
             </View>
-            {instalmentPayment.late_payment_amount_due > 0 && (
-              <View className="mb-4 w-full">
-                <View className="flex-row items-center">
-                  <Ionicons
-                    name="alert-circle-outline"
-                    size={20}
-                    color="#f87171"
-                    className="mr-4"
-                  />
-                  <View>
-                    <Text className="text-sm text-gray-500">Late Payment Fee</Text>
-                    <Text className="font-medium text-red-600">
-                      {formatCurrency(instalmentPayment.late_payment_amount_due)}
-                    </Text>
-                  </View>
+
+            <View className="mb-4 w-1/2 pr-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="alert-circle-outline"
+                  size={20}
+                  color={
+                    instalmentPayment.late_payment_amount_due > 0
+                      ? "#ef4444"
+                      : "#3b82f6"
+                  }
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">
+                    Late Payment Fee
+                  </Text>
+                  <Text
+                    className={`font-medium ${instalmentPayment.late_payment_amount_due > 0 ? "text-red-500" : ""}`}
+                  >
+                    {instalmentPayment.late_payment_amount_due > 0
+                      ? formatCurrency(
+                          instalmentPayment.late_payment_amount_due,
+                        )
+                      : "N/A"}
+                  </Text>
                 </View>
               </View>
-            )}
+            </View>
+
+            <View className="mb-4 w-1/2 pl-2">
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="time-outline"
+                  size={20}
+                  color="#3b82f6"
+                  className="mr-4"
+                />
+                <View>
+                  <Text className="text-sm text-gray-500">Date Paid</Text>
+                  <Text className="font-medium">
+                    {instalmentPayment.paid_date
+                      ? format(
+                          new Date(instalmentPayment.paid_date),
+                          "d MMM yyyy",
+                        )
+                      : "N/A"}
+                  </Text>
+                </View>
+              </View>
+            </View>
           </View>
+          {/* ===== Navigate to Transaction Details ===== */}
+          <Button
+            type="primary"
+            onPress={() =>
+              router.push(`/payments/${instalmentPayment.transaction_id}`)
+            }
+            className="w-full"
+          >
+            <View className="flex-row items-center justify-center">
+              <Ionicons
+                name="receipt-outline"
+                size={20}
+                color="#fff"
+                className="mr-2"
+              />
+              <Text className="font-semibold text-white">View Transaction</Text>
+            </View>
+          </Button>
         </View>
 
         {/* ===== Merchant Details ===== */}
@@ -229,7 +307,7 @@ export default function InstalmentPaymentDetails() {
           <Text className="mb-4 text-xl font-bold">Merchant Details</Text>
           <View className="flex-row flex-wrap">
             {/* Name */}
-            <View className="mb-4 w-1/2 pr-2">
+            <View className="w-1/2 pr-2">
               <View className="flex-row items-center">
                 <Ionicons
                   name="person-outline"
@@ -249,23 +327,23 @@ export default function InstalmentPaymentDetails() {
         </View>
 
         {/* ===== Payment Breakdown ===== */}
-        <View className="mb-4 rounded-xl bg-white p-4">
+        <View className="mb-4 rounded-xl bg-white p-8">
           <Text className="mb-2 text-xl font-bold">Payment Breakdown</Text>
-          <View className="flex-row justify-between mb-2">
+          <View className="mb-2 flex-row justify-between">
             <Text className="text-base">Instalment Amount:</Text>
             <Text className="text-base">
               {formatCurrency(instalmentPayment.amount_due)}
             </Text>
           </View>
           {voucherDiscount > 0 && (
-            <View className="flex-row justify-between mb-2">
+            <View className="mb-2 flex-row justify-between">
               <Text className="text-base">Voucher Discount:</Text>
               <Text className="text-base text-green-600">
                 -{formatCurrency(voucherDiscount)}
               </Text>
             </View>
           )}
-          <View className="border-t border-gray-200 my-2" />
+          <View className="my-2 border-t border-gray-200" />
           <View className="flex-row justify-between">
             <Text className="text-lg font-semibold">Total Payable:</Text>
             <Text className="text-lg font-semibold">
@@ -277,16 +355,13 @@ export default function InstalmentPaymentDetails() {
         {/* ===== Voucher Button (visible only when no voucher is selected) ===== */}
         {!selectedVoucher && (
           <View className="mb-4">
-            <Button
-              type="ghost"
-              onPress={() => setVoucherModalVisible(true)}
-            >
+            <Button type="ghost" onPress={() => setVoucherModalVisible(true)}>
               <Text className="font-semibold text-blue-500">Use Voucher</Text>
             </Button>
           </View>
         )}
         {/* Uncomment and implement cashback logic as needed */}
-          {/* <Button
+        {/* <Button
             type="ghost"
             onPress={() => setCashbackModalVisible(true)}
           >
@@ -295,16 +370,16 @@ export default function InstalmentPaymentDetails() {
 
         {/* ===== Display Selected Voucher ===== */}
         {selectedVoucher && (
-          <View className="mb-4 p-4 border rounded-md bg-green-50">
-            <View className="flex-row justify-between items-center mb-2">
-              <Text className="font-semibold text-lg text-green-800">
+          <View className="mb-4 rounded-md border bg-green-50 p-4">
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-lg font-semibold text-green-800">
                 {selectedVoucher.voucher.title}
               </Text>
               <TouchableOpacity onPress={() => setSelectedVoucher(null)}>
                 <Ionicons name="close-circle" size={24} color="red" />
               </TouchableOpacity>
             </View>
-            <Text className="text-sm text-gray-700 mb-1">
+            <Text className="mb-1 text-sm text-gray-700">
               Discount:{" "}
               {selectedVoucher.voucher.percentage_discount > 0
                 ? `${selectedVoucher.voucher.percentage_discount}%`
@@ -312,7 +387,10 @@ export default function InstalmentPaymentDetails() {
             </Text>
             <Text className="text-sm text-gray-700">
               Valid Until:{" "}
-              {format(new Date(selectedVoucher.voucher.expiry_date), "dd MMM yyyy")}
+              {format(
+                new Date(selectedVoucher.voucher.expiry_date),
+                "dd MMM yyyy",
+              )}
             </Text>
           </View>
         )}
@@ -342,7 +420,7 @@ export default function InstalmentPaymentDetails() {
           <BlurView intensity={10} tint="dark" style={{ flex: 1 }} />
         </TouchableWithoutFeedback>
         <View>
-          <View className="max-h-3/4 bg-white p-4 rounded-t-xl">
+          <View className="max-h-3/4 rounded-t-xl bg-white p-4">
             <Text className="mb-4 text-xl font-bold">Select a Voucher</Text>
             {isVouchersLoading ? (
               <ActivityIndicator size="large" />
@@ -350,64 +428,79 @@ export default function InstalmentPaymentDetails() {
               <Text>Error loading vouchers. Please try again later.</Text>
             ) : usableVouchers && usableVouchers.length > 0 ? (
               <ScrollView>
-              {usableVouchers.map((voucherAssigned) => {
-                const voucher = voucherAssigned.voucher;
-                return (
-                  <TouchableOpacity
-                    key={voucherAssigned.voucher_assigned_id}
-                    className="mb-2 p-4 border rounded-md bg-white shadow-sm"
-                    onPress={() => {
-                      setSelectedVoucher(voucherAssigned);
-                      setVoucherModalVisible(false);
-                    }}
-                  >
-                    <Text className="font-semibold text-lg mb-1">{voucher.title}</Text>
+                {usableVouchers.map((voucherAssigned) => {
+                  const voucher = voucherAssigned.voucher;
+                  return (
+                    <TouchableOpacity
+                      key={voucherAssigned.voucher_assigned_id}
+                      className="mb-2 rounded-md border bg-white p-4 shadow-sm"
+                      onPress={() => {
+                        setSelectedVoucher(voucherAssigned);
+                        setVoucherModalVisible(false);
+                      }}
+                    >
+                      <Text className="mb-1 text-lg font-semibold">
+                        {voucher.title}
+                      </Text>
 
-                    <View className="flex-row flex-wrap mb-2">
-                      <View className="w-1/2 mb-2">
-                        <Text className="text-sm text-gray-500">Percentage Discount:</Text>
-                        <Text className="text-base font-medium">
-                          {voucher.percentage_discount}%
-                        </Text>
+                      <View className="mb-2 flex-row flex-wrap">
+                        <View className="mb-2 w-1/2">
+                          <Text className="text-sm text-gray-500">
+                            Percentage Discount:
+                          </Text>
+                          <Text className="text-base font-medium">
+                            {voucher.percentage_discount}%
+                          </Text>
+                        </View>
+
+                        <View className="mb-2 w-1/2">
+                          <Text className="text-sm text-gray-500">
+                            Discount Amount:
+                          </Text>
+                          <Text className="text-base font-medium">
+                            ${voucher.amount_discount}
+                          </Text>
+                        </View>
+
+                        <View className="mb-2 w-1/2">
+                          <Text className="text-sm text-gray-500">
+                            Usage Limit:
+                          </Text>
+                          <Text className="text-base font-medium">
+                            {voucherAssigned.remaining_uses} /{" "}
+                            {voucher.usage_limit}
+                          </Text>
+                        </View>
+
+                        <View className="mb-2 w-1/2">
+                          <Text className="text-sm text-gray-500">
+                            Valid Until:
+                          </Text>
+                          <Text className="text-base font-medium">
+                            {format(
+                              new Date(voucher.expiry_date),
+                              "dd MMM yyyy",
+                            )}
+                          </Text>
+                        </View>
+
+                        <View className="mb-2 w-1/2">
+                          <Text className="text-sm text-gray-500">Status:</Text>
+                          <Text
+                            className={`text-base font-medium ${
+                              voucher.is_active
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {voucher.is_active ? "Active" : "Inactive"}
+                          </Text>
+                        </View>
                       </View>
-
-                      <View className="w-1/2 mb-2">
-                        <Text className="text-sm text-gray-500">Discount Amount:</Text>
-                        <Text className="text-base font-medium">
-                          ${voucher.amount_discount}
-                        </Text>
-                      </View>
-
-                      <View className="w-1/2 mb-2">
-                        <Text className="text-sm text-gray-500">Usage Limit:</Text>
-                        <Text className="text-base font-medium">
-                          {voucherAssigned.remaining_uses} / {voucher.usage_limit}
-                        </Text>
-                      </View>
-
-                      <View className="w-1/2 mb-2">
-                        <Text className="text-sm text-gray-500">Valid Until:</Text>
-                        <Text className="text-base font-medium">
-                          {format(new Date(voucher.expiry_date), 'dd MMM yyyy')}
-                        </Text>
-                      </View>
-
-                      <View className="w-1/2 mb-2">
-                        <Text className="text-sm text-gray-500">Status:</Text>
-                        <Text
-                          className={`text-base font-medium ${
-                            voucher.is_active ? 'text-green-600' : 'text-red-600'
-                          }`}
-                        >
-                          {voucher.is_active ? 'Active' : 'Inactive'}
-                        </Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
             ) : (
               <Text>No vouchers available.</Text>
             )}
@@ -425,14 +518,17 @@ export default function InstalmentPaymentDetails() {
         transparent={true}
         onRequestClose={() => setIsConfirmationVisible(false)}
       >
-        <TouchableWithoutFeedback onPress={() => setIsConfirmationVisible(false)}>
-          <BlurView intensity={100} tint="dark"/>
+        <TouchableWithoutFeedback
+          onPress={() => setIsConfirmationVisible(false)}
+        >
+          <BlurView intensity={100} tint="dark" />
         </TouchableWithoutFeedback>
         <View className="flex-1 items-center justify-center">
           <View className="rounded-lg bg-white p-6">
             <Text className="mb-4 text-lg font-bold">Confirm Payment</Text>
             <Text className="mb-6 text-base">
-              Are you sure you want to pay {formatCurrency(amountFromWallet)} for this instalment?
+              Are you sure you want to pay {formatCurrency(amountFromWallet)}{" "}
+              for this instalment?
             </Text>
             <View className="flex-row justify-end">
               <Button
@@ -458,4 +554,4 @@ export default function InstalmentPaymentDetails() {
       </Modal>
     </ScrollView>
   );
-};
+}

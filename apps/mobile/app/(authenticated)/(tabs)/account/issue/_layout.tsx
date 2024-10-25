@@ -21,7 +21,23 @@ export default function IssuesLayout() {
           ),
         }}
       />
-      <Stack.Screen name="newIssue" options={{ headerTitle: "New Issue" }} />
+      <Stack.Screen
+        name="newIssue"
+        options={{
+          headerTitle: "New Issue",
+          headerLeft: () => (
+            <TouchableOpacity
+              className="flex-row gap-1"
+              onPress={() => {
+                router.back();
+              }}
+            >
+              <Ionicons name="chevron-back" size={24} color="#3b82f6" />
+              <Text className="text-xl text-blue-500">Back</Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <Stack.Screen
         name="[issueId]"
         options={{ headerTitle: "Issue Details" }}

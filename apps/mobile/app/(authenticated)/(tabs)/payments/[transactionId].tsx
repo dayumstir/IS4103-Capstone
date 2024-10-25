@@ -5,7 +5,7 @@ import {
   ScrollView,
   RefreshControl,
   ActivityIndicator,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,7 +35,7 @@ export default function TransactionDetails() {
   const getProgressValue = () => {
     if (!transaction?.instalment_plan) return 1;
     const paidInstalments = transaction.instalment_payments.filter(
-      (p) => p.status === "PAID"
+      (p) => p.status === "PAID",
     ).length;
     return paidInstalments / transaction.instalment_plan.number_of_instalments;
   };
@@ -70,7 +70,9 @@ export default function TransactionDetails() {
           </View>
           <View className="mt-2 flex-row justify-between">
             <Text className="text-white">
-              {transaction.status === "FULLY_PAID" ? "Fully Paid" : "In Progress"}
+              {transaction.status === "FULLY_PAID"
+                ? "Fully Paid"
+                : "In Progress"}
             </Text>
             <Text className="text-white">
               {(getProgressValue() * 100).toFixed(0)}% Complete
@@ -199,89 +201,55 @@ export default function TransactionDetails() {
         <View className="rounded-xl bg-white p-8">
           <Text className="mb-4 text-xl font-bold">Instalment Payments</Text>
           {transaction.instalment_payments.map((payment, index) => {
-            const isPaid = payment.status === 'PAID';
+            const isPaid = payment.status === "PAID";
             const rowClassName = `flex-row items-center justify-between border-t border-gray-200 ${
-              index === transaction.instalment_payments.length - 1 ? 'pt-2' : 'py-2'
+              index === transaction.instalment_payments.length - 1
+                ? "pt-2"
+                : "py-2"
             }`;
 
-            if (isPaid) {
-              return (
-                <View
-                  key={payment.instalment_payment_id}
-                  className={rowClassName}
-                >
-                  {/* ---- Content of Each Instalment ---- */}
-                  <View className="flex-row items-center">
-                    <View className="mr-4 h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                      <Text className="font-semibold text-blue-600">
-                        {index + 1}
-                      </Text>
-                    </View>
-                    <View>
-                      <Text className="font-medium">
-                        Instalment {payment.instalment_number}
-                      </Text>
-                      <Text className="text-xs text-gray-500">
-                        Due: {format(new Date(payment.due_date), 'd MMM yyyy')}
-                      </Text>
-                    </View>
-                  </View>
-                  <View className="items-end">
-                    <Text className="font-medium">
-                      {formatCurrency(payment.amount_due)}
+            return (
+              <TouchableOpacity
+                key={payment.instalment_payment_id}
+                onPress={() =>
+                  router.push(
+                    `/payments/instalments/${payment.instalment_payment_id}`,
+                  )
+                }
+                className={rowClassName}
+              >
+                {/* ===== Content of Each Instalment ===== */}
+                <View className="flex-row items-center">
+                  <View className="mr-4 h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                    <Text className="font-semibold text-blue-600">
+                      {index + 1}
                     </Text>
-                    <View
-                      className="mt-1 rounded px-2 py-1 bg-green-100"
-                    >
-                      <Text className="text-xs font-medium text-green-600">
-                        {payment.status}
-                      </Text>
-                    </View>
+                  </View>
+                  <View>
+                    <Text className="font-medium">
+                      Instalment {payment.instalment_number}
+                    </Text>
+                    <Text className="text-xs text-gray-500">
+                      Due: {format(new Date(payment.due_date), "d MMM yyyy")}
+                    </Text>
                   </View>
                 </View>
-              );
-            } else {
-              return (
-                <TouchableOpacity
-                  key={payment.instalment_payment_id}
-                  onPress={() =>
-                    router.push(
-                      `/payments/instalments/${payment.instalment_payment_id}`
-                    )
-                  }
-                  className={rowClassName}
-                >
-                  {/* ---- Content of Each Instalment ---- */}
-                  <View className="flex-row items-center">
-                    <View className="mr-4 h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                      <Text className="font-semibold text-blue-600">
-                        {index + 1}
-                      </Text>
-                    </View>
-                    <View>
-                      <Text className="font-medium">
-                        Instalment {payment.instalment_number}
-                      </Text>
-                      <Text className="text-xs text-gray-500">
-                        Due: {format(new Date(payment.due_date), 'd MMM yyyy')}
-                      </Text>
-                    </View>
-                  </View>
-                  <View className="items-end">
-                    <Text className="font-medium">
-                      {formatCurrency(payment.amount_due)}
-                    </Text>
-                    <View
-                      className="mt-1 rounded px-2 py-1 bg-yellow-100"
+                <View className="items-end">
+                  <Text className="font-medium">
+                    {formatCurrency(payment.amount_due)}
+                  </Text>
+                  <View
+                    className={`mt-1 rounded px-2 py-1 ${isPaid ? "bg-green-100" : "bg-yellow-100"}`}
+                  >
+                    <Text
+                      className={`text-xs font-medium ${isPaid ? "text-green-600" : "text-yellow-600"}`}
                     >
-                      <Text className="text-xs font-medium text-yellow-600">
-                        {payment.status}
-                      </Text>
-                    </View>
+                      {payment.status}
+                    </Text>
                   </View>
-                </TouchableOpacity>
-              );
-            }
+                </View>
+              </TouchableOpacity>
+            );
           })}
         </View>
 

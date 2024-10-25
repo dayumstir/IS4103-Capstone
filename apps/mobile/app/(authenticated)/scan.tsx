@@ -170,10 +170,6 @@ export default function ScanScreen() {
   };
 
   const handleCancel = () => {
-    setScannedMerchantId(null);
-    setPurchase({ merchantName: "", price: 0, referenceNo: "" });
-    setSelectedPlanId(null);
-    setTransaction(null);
     dispatch(setPaymentStage("Scan QR Code"));
   };
 

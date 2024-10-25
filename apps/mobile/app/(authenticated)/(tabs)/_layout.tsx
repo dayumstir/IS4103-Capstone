@@ -3,7 +3,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 
 export default function TabsLayout() {
   return (
-    <Tabs>
+    <Tabs backBehavior="history">
       <Tabs.Screen
         name="home"
         options={{
