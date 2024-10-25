@@ -225,9 +225,7 @@ export default function NewIssue() {
             type="ghost"
             onPress={() => {
               reset();
-              transaction_id
-                ? router.replace(`/payments/${transaction_id}`)
-                : router.replace("/account/issue");
+              router.back();
             }}
           >
             <Text className="font-semibold text-blue-500">Cancel</Text>
