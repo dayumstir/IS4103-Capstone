@@ -370,3 +370,14 @@ model VoucherAssigned {
   instalment_payment      InstalmentPayment? 
   instalment_payment_id   String?
 }
+
+model WithdrawalFeeRate {
+  withdrawal_fee_rate_id      String             @id @default(cuid())
+  name                        String
+  wallet_balance_max          Float
+  wallet_balance_min          Float         
+  monthly_revenue_max         Float
+  monthly_revenue_min         Float    
+  percentage_withdrawal_fee   Float
+  percentage_transaction_fee  Float
+}
