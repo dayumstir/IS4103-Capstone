@@ -43,6 +43,7 @@ model Customer {
   vouchersAssigned        VoucherAssigned[]
   transactions            Transaction[]
   paymentHistories        PaymentHistory[]
+  notifications           Notification[]
 }
 
 // Utility Schemas
@@ -126,6 +127,7 @@ model Admin {
   admin_type      AdminType // TODO: Implement as enum
   issues          Issue[]
   vouchersCreated Voucher[]
+  notifications   Notification[]
 }
 
 model Merchant {
@@ -145,6 +147,7 @@ model Merchant {
   cashbackWallets         CashbackWallet[]
   issues                  Issue[]
   Transaction             Transaction[]
+  notifications           Notification[]
 }
 
 // Merchant Sign Up Use Case: Store phone number OTPs
@@ -380,4 +383,31 @@ model WithdrawalFeeRate {
   monthly_revenue_min         Float    
   percentage_withdrawal_fee   Float
   percentage_transaction_fee  Float
+}
+
+//Notifications
+enum NotificationPriority {
+  HIGH
+  LOW
+}
+
+model Notification {
+  notification_id    String      @id @default(cuid())
+  title       String
+  description String
+  create_time DateTime    @default(now())
+  priority    NotificationPriority
+
+  merchant_id    String? // Optional foreign key to Merchant
+  customer_id    String? // Optional foreign key to Customer
+  admin_id       String? // Optional foreign key to Admin
+  transaction_id String? // Optional foreign key to Transaction
+  issue_id       String? // Optional foreign key to Issue
+
+  // Relations
+  merchant    Merchant?    @relation(fields: [merchant_id], references: [merchant_id])
+  customer    Customer?    @relation(fields: [customer_id], references: [customer_id])
+  admin       Admin?       @relation(fields: [admin_id], references: [admin_id])
+  transaction Transaction? @relation(fields: [transaction_id], references: [transaction_id])
+  issues      Issue?       @relation(fields: [issue_id], references: [issue_id])
 }

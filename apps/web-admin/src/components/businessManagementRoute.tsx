@@ -38,6 +38,12 @@ export default function BusinessManagementRoute() {
             <Link to="/business-management/transactions">Transactions</Link>
           ),
         },
+        {
+          key: "notifications",
+          label: (
+            <Link to="/business-management/notifications">Notifications</Link>
+          ),
+        },
       ],
     },
   ];
