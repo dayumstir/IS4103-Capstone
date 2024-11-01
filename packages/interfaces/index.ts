@@ -18,7 +18,6 @@ export {
 } from "./issueInterface";
 export { 
     IMerchant, 
-    IMerchantPayment, 
     MerchantStatus 
 } from "./merchantInterface";
 export { 
@@ -33,3 +32,4 @@ export {
 } from "./transactionInterface";
 export { sortDirection, Sorting } from "./sortingInterface";
 export { IVoucher, IVoucherAssigned, VoucherAssignedStatus } from "./voucherInterface";
+export { IMerchantPayment } from "./merchantPaymentInterface";

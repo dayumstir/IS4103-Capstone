@@ -38,11 +38,11 @@ model Customer {
   otps                    Otp[]
   passwordResetTokens     PasswordResetToken[]
 
-  cashbackWallets         CashbackWallet[]
-  issues                  Issue[]
-  vouchersAssigned        VoucherAssigned[]
-  transactions            Transaction[]
-  paymentHistories        PaymentHistory[]
+  cashbackWallets  CashbackWallet[]
+  issues           Issue[]
+  vouchersAssigned VoucherAssigned[]
+  transactions     Transaction[]
+  paymentHistories PaymentHistory[]
 }
 
 // Utility Schemas
@@ -129,22 +129,23 @@ model Admin {
 }
 
 model Merchant {
-  merchant_id             String                           @id @default(cuid())
-  name                    String
-  email                   String                           @unique
-  password                String
-  contact_number          String
-  address                 String
-  qr_code                 String
-  status                  Status
-  profile_picture         Bytes?                           @db.ByteA
-  cashback                Float
+  merchant_id     String @id @default(cuid())
+  name            String
+  email           String @unique
+  password        String
+  contact_number  String
+  address         String
+  qr_code         String
+  status          Status
+  profile_picture Bytes? @db.ByteA
+  cashback        Float
 
   // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
   cashbackWallets         CashbackWallet[]
   issues                  Issue[]
   Transaction             Transaction[]
+  merchantPayments        MerchantPayment[]
 }
 
 // Merchant Sign Up Use Case: Store phone number OTPs
@@ -178,14 +179,14 @@ model MerchantEmailVerificationToken {
 }
 
 model PaymentHistory {
-  payment_history_id   String             @id @default(cuid())
-  amount               Float
-  payment_date         DateTime           @default(now())
-  payment_type         PaymentType
+  payment_history_id String      @id @default(cuid())
+  amount             Float
+  payment_date       DateTime    @default(now())
+  payment_type       PaymentType
 
   // Relationships
-  customer_id          String
-  customer             Customer           @relation(fields: [customer_id], references: [customer_id])
+  customer_id String
+  customer    Customer @relation(fields: [customer_id], references: [customer_id])
 }
 
 enum PaymentType {
@@ -255,33 +256,33 @@ model InstalmentPayment {
   paid_date               DateTime?
   instalment_number       Int // depends on frequency of instalment plan
 
-  amount_deducted_from_wallet Float?
-  amount_discount_from_voucher    Float?
+  amount_deducted_from_wallet          Float?
+  amount_discount_from_voucher         Float?
   amount_deducted_from_cashback_wallet Float?
 
   // Relationships
   transaction_id String
   transaction    Transaction @relation(fields: [transaction_id], references: [transaction_id])
 
-  voucher_assigned_id             String?            @unique
-  voucher_assigned                VoucherAssigned?   @relation(fields: [voucher_assigned_id], references: [voucher_assigned_id])
-  
-  cashback_wallet_id              String?            @unique
-  cashback_wallet                 CashbackWallet?
+  voucher_assigned_id String?          @unique
+  voucher_assigned    VoucherAssigned? @relation(fields: [voucher_assigned_id], references: [voucher_assigned_id])
+
+  cashback_wallet_id String?         @unique
+  cashback_wallet    CashbackWallet?
 }
 
 model CashbackWallet {
-  cashback_wallet_id   String             @id @default(cuid())
-  amount               Float
-  createdAt            DateTime           @default(now())
+  cashback_wallet_id String   @id @default(cuid())
+  amount             Float
+  createdAt          DateTime @default(now())
 
   // Relationships
-  customer_id          String             @unique
-  customer             Customer           @relation(fields: [customer_id], references: [customer_id])
-  merchant_id          String             @unique
-  merchant             Merchant           @relation(fields: [merchant_id], references: [merchant_id])
-  instalment_payment_id String?           @unique
-  instalment_payment   InstalmentPayment? @relation(fields: [instalment_payment_id], references: [instalment_payment_id])
+  customer_id           String             @unique
+  customer              Customer           @relation(fields: [customer_id], references: [customer_id])
+  merchant_id           String             @unique
+  merchant              Merchant           @relation(fields: [merchant_id], references: [merchant_id])
+  instalment_payment_id String?            @unique
+  instalment_payment    InstalmentPayment? @relation(fields: [instalment_payment_id], references: [instalment_payment_id])
 }
 
 model CreditTier {
@@ -357,27 +358,51 @@ enum VoucherAssignedStatus {
 }
 
 model VoucherAssigned {
-  voucher_assigned_id     String             @id @default(cuid())
-  status                  VoucherAssignedStatus
-  remaining_uses          Int
-  date_time_issued        DateTime           @default(now())
+  voucher_assigned_id String                @id @default(cuid())
+  status              VoucherAssignedStatus
+  remaining_uses      Int
+  date_time_issued    DateTime              @default(now())
 
   // Relationships
-  voucher                 Voucher            @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
-  voucher_id              String
-  customer                Customer           @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
-  customer_id             String
-  instalment_payment      InstalmentPayment? 
-  instalment_payment_id   String?
+  voucher               Voucher            @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
+  voucher_id            String
+  customer              Customer           @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  customer_id           String
+  instalment_payment    InstalmentPayment?
+  instalment_payment_id String?
 }
 
 model WithdrawalFeeRate {
-  withdrawal_fee_rate_id      String             @id @default(cuid())
-  name                        String
-  wallet_balance_max          Float
-  wallet_balance_min          Float         
-  monthly_revenue_max         Float
-  monthly_revenue_min         Float    
-  percentage_withdrawal_fee   Float
-  percentage_transaction_fee  Float
+  withdrawal_fee_rate_id     String @id @default(cuid())
+  name                       String
+  wallet_balance_max         Float
+  wallet_balance_min         Float
+  monthly_revenue_max        Float
+  monthly_revenue_min        Float
+  percentage_withdrawal_fee  Float
+  percentage_transaction_fee Float
+}
+
+model MerchantPayment {
+  merchant_payment_id         String        @id @default(cuid())
+  from_bank                   String
+  to_merchant_bank_account_no String
+  evidence                    Bytes         @db.ByteA
+  status                      PaymentStatus
+  created_at                  DateTime      @default(now())
+
+  total_amount_from_transactions Float
+  transaction_fee_percentage     Float
+  transaction_fees               Float
+  withdrawal_fee_percentage      Float
+  withdrawal_fee                 Float
+  final_payment_amount           Float
+
+  merchant_id String
+  merchant    Merchant @relation(fields: [merchant_id], references: [merchant_id])
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING_PAYMENT
 }

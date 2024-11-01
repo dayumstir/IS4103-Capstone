@@ -18,11 +18,12 @@ import transactionRoutes from "./routes/transactionRoutes";
 import voucherRoutes from "./routes/voucherRoutes";
 import instalmentPaymentRoutes from "./routes/instalmentPaymentRoutes";
 import withdrawalFeeRateRoutes from "./routes/withdrawalFeeRateRoutes";
+import merchantPaymentRoutes from "./routes/merchantPaymentRoutes";
 
 // Import error handler middleware
 import { errorHandler } from "./middlewares/errorHandler";
 import logger from "./utils/logger";
-import { handleStripeWebhook } from "./controllers/webhookController"; 
+import { handleStripeWebhook } from "./controllers/webhookController";
 
 // Load environment variables at the start
 dotenv.config();
@@ -32,7 +33,11 @@ const app = express();
 // Middleware setup
 app.use(cors());
 
-app.post('/webhook/stripe', express.raw({ type: 'application/json' }), handleStripeWebhook);
+app.post(
+    "/webhook/stripe",
+    express.raw({ type: "application/json" }),
+    handleStripeWebhook
+);
 
 app.use(express.json()); // Built-in body-parser in Express
 app.use(express.urlencoded({ extended: true }));
@@ -60,6 +65,7 @@ app.use("/transaction", transactionRoutes);
 app.use("/voucher", voucherRoutes);
 app.use("/instalment-payment", instalmentPaymentRoutes);
 app.use("/withdrawalFeeRate", withdrawalFeeRateRoutes);
+app.use("/merchantPayment", merchantPaymentRoutes);
 
 // Health check or root route
 app.get("/", (req, res) => {
