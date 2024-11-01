@@ -16,4 +16,5 @@ export interface IMerchant {
     status: MerchantStatus;
     profile_picture?: Buffer;
     cashback: number;
+    wallet_balance: number;
 }

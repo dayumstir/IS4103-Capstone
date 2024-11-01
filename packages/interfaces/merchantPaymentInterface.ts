@@ -7,9 +7,9 @@ export enum PaymentStatus {
 
 export interface IMerchantPayment {
     merchant_payment_id: string;
-    from_bank: string;
+    from_bank: string | null;
     to_merchant_bank_account_no: string;
-    evidence: Buffer;
+    evidence: Buffer | null;
     status: PaymentStatus;
     created_at: Date;
 

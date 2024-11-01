@@ -139,6 +139,7 @@ model Merchant {
   status          Status
   profile_picture Bytes? @db.ByteA
   cashback        Float
+  wallet_balance  Float  @default(0)
 
   // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
@@ -385,9 +386,9 @@ model WithdrawalFeeRate {
 
 model MerchantPayment {
   merchant_payment_id         String        @id @default(cuid())
-  from_bank                   String
+  from_bank                   String?
   to_merchant_bank_account_no String
-  evidence                    Bytes         @db.ByteA
+  evidence                    Bytes?        @db.ByteA
   status                      PaymentStatus
   created_at                  DateTime      @default(now())
 

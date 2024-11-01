@@ -1,35 +1,35 @@
 // packages/interfaces/index.ts
-export { ICashbackWallet } from "./cashbackWalletInterface";
-export { ICreditTier } from "./creditTierInterface";
-export { 
-    ICustomer, 
-    CustomerStatus 
-} from "./customerInterface";
-export {
-    IInstalmentPayment,
-    InstalmentPaymentStatus,
-} from "./instalmentPaymentInterface";
-export { IInstalmentPlan } from "./instalmentPlanInterface";
-export {
-    IIssue,
-    IssueStatus,
-    IssueCategory,
-    IssueFilter,
-} from "./issueInterface";
-export { 
-    IMerchant, 
-    MerchantStatus 
-} from "./merchantInterface";
-export { 
-    IPaymentHistory, 
-    PaymentType 
-} from "./paymentHistoryInterface";
-export {
+export type { ICashbackWallet } from "./cashbackWalletInterface";
+
+export type { ICreditTier } from "./creditTierInterface";
+
+export type { ICustomer } from "./customerInterface";
+export { CustomerStatus } from "./customerInterface";
+
+export type { IInstalmentPayment } from "./instalmentPaymentInterface";
+export { InstalmentPaymentStatus } from "./instalmentPaymentInterface";
+
+export type { IInstalmentPlan } from "./instalmentPlanInterface";
+
+export type { IIssue, IssueFilter } from "./issueInterface";
+export { IssueStatus, IssueCategory } from "./issueInterface";
+
+export type { IMerchant } from "./merchantInterface";
+export { MerchantStatus } from "./merchantInterface";
+
+export type { IPaymentHistory } from "./paymentHistoryInterface";
+export type {
     ITransaction,
     TransactionFilter,
     TransactionResult,
-    TransactionStatus,
 } from "./transactionInterface";
-export { sortDirection, Sorting } from "./sortingInterface";
-export { IVoucher, IVoucherAssigned, VoucherAssignedStatus } from "./voucherInterface";
-export { IMerchantPayment } from "./merchantPaymentInterface";
+export { TransactionStatus } from "./transactionInterface";
+
+export type { Sorting } from "./sortingInterface";
+export { sortDirection } from "./sortingInterface";
+
+export type { IVoucher, IVoucherAssigned } from "./voucherInterface";
+export { VoucherAssignedStatus } from "./voucherInterface";
+
+export type { IMerchantPayment } from "./merchantPaymentInterface";
+export { PaymentStatus } from "./merchantPaymentInterface";
