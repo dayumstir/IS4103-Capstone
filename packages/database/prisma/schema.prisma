@@ -141,6 +141,7 @@ model Merchant {
   status                  Status
   profile_picture         Bytes?                           @db.ByteA
   cashback                Float
+  wallet_balance          Float                            @default(0)
 
   // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
@@ -148,6 +149,7 @@ model Merchant {
   issues                  Issue[]
   Transaction             Transaction[]
   notifications           Notification[]
+  MerchantPayment         MerchantPayment[]
 }
 
 // Merchant Sign Up Use Case: Store phone number OTPs
@@ -178,6 +180,30 @@ model MerchantEmailVerificationToken {
 
   @@unique([email, token])
   @@index([merchant_id])
+}
+
+model MerchantPayment {
+  merchant_payment_id         String        @id @default(cuid())
+  from_bank                   String?
+  to_merchant_bank_account_no String
+  evidence                    Bytes?        @db.ByteA
+  status                      PaymentStatus
+  created_at                  DateTime      @default(now())
+
+  total_amount_from_transactions Float
+  transaction_fee_percentage     Float
+  transaction_fees               Float
+  withdrawal_fee_percentage      Float
+  withdrawal_fee                 Float
+  final_payment_amount           Float
+
+  merchant_id String
+  merchant    Merchant @relation(fields: [merchant_id], references: [merchant_id])
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING_PAYMENT
 }
 
 model PaymentHistory {
@@ -227,6 +253,8 @@ model Transaction {
   issues Issue[]
 
   instalment_payments InstalmentPayment[]
+
+  notifications    Notification[]
 }
 
 model InstalmentPlan {
@@ -329,6 +357,7 @@ model Issue {
   customer    Customer?    @relation(fields: [customer_id], references: [customer_id])
   admin       Admin?       @relation(fields: [admin_id], references: [admin_id])
   transaction Transaction? @relation(fields: [transaction_id], references: [transaction_id])
+  notifications    Notification[]
 }
 
 // Voucher Management Module

@@ -5,25 +5,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useViewCustomerProfileQuery } from "../redux/services/customerService";
 const { Title, Text } = Typography;
 
-interface ICustomer {
-  customer_id: string;
-  name: string;
-  profile_picture: Buffer;
-  email: string;
-  contact_number: string;
-  address: string;
-  date_of_birth: Date;
-  status: string;
-  credit_score: number;
-  credit_tier_id: string;
-}
-
-export default function CustomerProfileScreen(){
+export default function CustomerProfileScreen() {
   const { id } = useParams<{ id: string }>(); // Get customer_id from URL
   const { data: customer, isLoading } = useViewCustomerProfileQuery(id!);
 
   const navigate = useNavigate();
-  
 
   if (isLoading) {
     return <Spin size="large" tip="Loading profile..." />;
@@ -45,9 +31,17 @@ export default function CustomerProfileScreen(){
           cover={
             <Avatar
               size={100}
-              src={customer.profile_picture ? (
-                customer.profile_picture
-              ) : <Avatar className="h-36 w-36 object-cover" size={100} icon={<UserOutlined />} />}
+              src={
+                customer.profile_picture ? (
+                  customer.profile_picture
+                ) : (
+                  <Avatar
+                    className="h-36 w-36 object-cover"
+                    size={100}
+                    icon={<UserOutlined />}
+                  />
+                )
+              }
               alt="Customer's Profile Picture"
             />
           }

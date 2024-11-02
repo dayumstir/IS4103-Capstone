@@ -37,11 +37,17 @@ export default function App() {
           <Route path="/admins/add" element={<AddAdminScreen />} />
           <Route path="/admins" element={<AllAdminScreen />} />
 
-          <Route path="/customers" element={<AllCustomersScreen />} />
-          <Route path="/customer/:id" element={<CustomerProfileScreen />} />
+          <Route path="/admin/customers" element={<AllCustomersScreen />} />
+          <Route
+            path="/admin/customer/:id"
+            element={<CustomerProfileScreen />}
+          />
 
-          <Route path="/merchants" element={<AllMerchantsScreen />} />
-          <Route path="/merchant/:id" element={<MerchantProfileScreen />} />
+          <Route path="/admin/merchants" element={<AllMerchantsScreen />} />
+          <Route
+            path="/admin/merchant/:id"
+            element={<MerchantProfileScreen />}
+          />
 
           <Route element={<BusinessManagementRoute />}>
             {/* ===== Business Management ===== */}

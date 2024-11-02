@@ -7,7 +7,7 @@ import {
 export const notificationApi = createApi({
   reducerPath: "notificationApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/admin",
+    baseUrl: "http://localhost:3000/",
     prepareHeaders: (headers, { getState }) => {
       const token = localStorage.getItem("token");
       if (token) {
@@ -24,7 +24,7 @@ export const notificationApi = createApi({
       Omit<INotification, "notification_id">
     >({
       query: (notification) => ({
-        url: "/notification",
+        url: "/notification/add",
         method: "POST",
         body: notification,
       }),
@@ -39,7 +39,7 @@ export const notificationApi = createApi({
           ? `?search=${encodeURIComponent(search)}`
           : "";
         return {
-          url: `/allNotifications${queryParams}`,
+          url: `/admin/allNotifications${queryParams}`,
           method: "GET",
         };
       },
@@ -49,7 +49,7 @@ export const notificationApi = createApi({
     // View Notification Details
     viewNotificationDetails: builder.query<INotification, string>({
       query: (notification_id) => ({
-        url: `/notification/${notification_id}`,
+        url: `/admin/notification/${notification_id}`,
         method: "GET",
       }),
       providesTags: ["Notification"],

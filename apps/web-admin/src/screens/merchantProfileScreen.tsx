@@ -30,14 +30,17 @@ const MerchantProfileScreen: React.FC = () => {
           throw new Error("No token found");
         }
 
-        const response = await fetch(`http://localhost:3000/merchant/${id}`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${jwt_token}`,
+        const response = await fetch(
+          `http://localhost:3000/admin/merchant/${id}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${jwt_token}`,
+            },
           },
-        });
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch merchant profile");
@@ -48,8 +51,8 @@ const MerchantProfileScreen: React.FC = () => {
           const base64String = btoa(
             new Uint8Array(data.profile_picture.data).reduce(
               (data, byte) => data + String.fromCharCode(byte),
-              ''
-            )
+              "",
+            ),
           );
           data.profile_picture = `data:image/jpeg;base64,${base64String}`;
         }
@@ -88,9 +91,17 @@ const MerchantProfileScreen: React.FC = () => {
           cover={
             <Avatar
               size={100}
-              src={merchant.profile_picture ? (
-                merchant.profile_picture
-              ) : <Avatar className="h-36 w-36 object-cover" size={100} icon={<UserOutlined />} />}
+              src={
+                merchant.profile_picture ? (
+                  merchant.profile_picture
+                ) : (
+                  <Avatar
+                    className="h-36 w-36 object-cover"
+                    size={100}
+                    icon={<UserOutlined />}
+                  />
+                )
+              }
               alt="Merchant's Profile Picture"
             />
           }
