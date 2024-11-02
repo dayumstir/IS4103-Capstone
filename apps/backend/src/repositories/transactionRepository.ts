@@ -376,7 +376,7 @@ export const updateTransaction = async (
     updateData: Partial<ITransaction>
 ) => {
     return prisma.transaction.update({
-        where: { transaction_id: transaction_id },
+        where: { transaction_id },
         data: updateData,
     });
 };

@@ -29,3 +29,10 @@ export const getCashbackWalletsByCustomerId = async (customer_id: string) => {
     logger.info(`Fetching cashback wallets for customer: ${customer_id}`, customer_id);
     return await cashbackWalletRepository.getCashbackWalletsByCustomerId(customer_id);
 };
+
+// Get Cashback Wallet by customer_id and merchant_id
+export const getCashbackWalletByCustomerAndMerchant = async (customer_id: string, merchant_id: string) => {
+    logger.info(`Fetching cashback wallet for customer: ${customer_id} and merchant: ${merchant_id}`);
+    const cashbackWallet = await cashbackWalletRepository.getCashbackWalletByCustomerAndMerchant(customer_id, merchant_id);
+    return cashbackWallet;
+};

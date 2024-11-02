@@ -18,6 +18,8 @@ interface MakePaymentRequest {
     voucher_assigned_id?: string;
     amount_discount_from_voucher?: number;
     amount_deducted_from_wallet: number;
+    cashback_wallet_id?: string;
+    amount_deducted_from_cashback_wallet?: number;
 }
 
 // Define the payment API service

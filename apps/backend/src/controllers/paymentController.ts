@@ -9,6 +9,7 @@ import * as customerService from "../services/customerService";
 import * as instalmentPaymentService from "../services/instalmentPaymentService";
 import * as paymentHistoryService from "../services/paymentHistoryService";
 import * as voucherService from "../services/voucherService";
+import * as cashbackWalletService from "../services/cashbackWalletService";
 
 // Top Up Wallet
 export const topUpWallet = async (req: Request, res: Response, next: NextFunction) => {
@@ -104,6 +105,8 @@ export const makePayment = async (req: Request, res: Response, next: NextFunctio
         voucher_assigned_id,
         amount_discount_from_voucher = 0,
         amount_deducted_from_wallet = 0,
+        cashback_wallet_id,
+        amount_deducted_from_cashback_wallet = 0,
     } = req.body;
 
     try {
@@ -118,9 +121,22 @@ export const makePayment = async (req: Request, res: Response, next: NextFunctio
             throw new BadRequestError("Instalment payment is already paid");
         }
 
+        // Calculate total payment amount
+        const totalPayment = amount_deducted_from_wallet + amount_deducted_from_cashback_wallet + amount_discount_from_voucher;
+
+        // Validate total payment does not exceed amount due
+        if (totalPayment > instalmentPayment.amount_due) {
+            throw new BadRequestError("Total payment amount exceeds amount due");
+        }
+
         // Deduct specified amount from wallet, if applicable
         if (amount_deducted_from_wallet > 0) {
             await customerService.topUpWallet(customer_id, -amount_deducted_from_wallet);
+        }
+
+        // Deduct specified amount from cashback wallet, if applicable
+        if (amount_deducted_from_cashback_wallet > 0 && cashback_wallet_id) {
+            await cashbackWalletService.updateCashbackWalletBalance(cashback_wallet_id, -amount_deducted_from_cashback_wallet);
         }
 
         // Mark voucher as used, if applicable
@@ -136,6 +152,8 @@ export const makePayment = async (req: Request, res: Response, next: NextFunctio
             voucher_assigned_id,
             amount_discount_from_voucher,
             amount_deducted_from_wallet,
+            cashback_wallet_id,
+            amount_deducted_from_cashback_wallet,
             status: InstalmentPaymentStatus.PAID,
             paid_date: new Date(),
         });

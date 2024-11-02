@@ -1,4 +1,4 @@
-// payments/instalments/_layout.tsx
+// app/mobile/app/(authenticated)/(tabs)/payments/instalments/_layout.tsx
 import { router, Stack } from "expo-router";
 import { Text, TouchableOpacity } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";

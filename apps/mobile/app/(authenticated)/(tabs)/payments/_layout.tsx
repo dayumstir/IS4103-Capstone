@@ -1,4 +1,4 @@
-// payments/_layout.tsx
+// app/mobile/app/(authenticated)/(tabs)/payments/_layout.tsx
 import { Stack } from "expo-router";
 
 export default function PaymentsLayout() {
