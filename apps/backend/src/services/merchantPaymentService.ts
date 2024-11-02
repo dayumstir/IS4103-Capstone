@@ -14,3 +14,32 @@ export const createMerchantPayment = async (
         );
     return merchantPayment;
 };
+
+// Get Merchant Payments
+export const getMerchantPayments = async (search: string) => {
+    const merchantPayments =
+        await merchantPaymentRepository.getMerchantPayments(search);
+    return merchantPayments;
+};
+
+// Get Merchant Payment by ID
+export const getMerchantPaymentById = async (merchant_payment_id: string) => {
+    const merchantPayment =
+        await merchantPaymentRepository.getMerchantPaymentById(
+            merchant_payment_id
+        );
+    return merchantPayment;
+};
+
+// Update Merchant Payment
+export const updateMerchantPayment = async (
+    merchant_payment_id: string,
+    paymentData: Partial<Omit<IMerchantPayment, "merchant">>
+) => {
+    const merchantPayment =
+        await merchantPaymentRepository.updateMerchantPayment(
+            merchant_payment_id,
+            paymentData
+        );
+    return merchantPayment;
+};

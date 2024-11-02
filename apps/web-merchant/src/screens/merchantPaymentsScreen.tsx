@@ -20,10 +20,7 @@ import {
   LineChartOutlined,
 } from "@ant-design/icons";
 import { format } from "date-fns";
-import {
-  useGetMerchantPaymentsQuery,
-  useCreateMerchantPaymentMutation,
-} from "../redux/services/merchantPayment";
+import { useCreateMerchantPaymentMutation } from "../redux/services/merchantPayment";
 import { useState, useEffect } from "react";
 import { RootState } from "../redux/store";
 import { useSelector } from "react-redux";
@@ -37,7 +34,6 @@ enum PaymentStatus {
 }
 
 export default function MerchantPaymentsScreen() {
-  const { data: payments, isLoading } = useGetMerchantPaymentsQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [createPayment] = useCreateMerchantPaymentMutation();
@@ -234,8 +230,8 @@ export default function MerchantPaymentsScreen() {
         {/* ===== Merchant Payments Table ===== */}
         <Table
           columns={columns}
-          dataSource={payments}
-          loading={isLoading}
+          dataSource={[]}
+          loading={false}
           rowKey="merchant_payment_id"
           locale={{
             emptyText: <Empty description="No payments found" />,

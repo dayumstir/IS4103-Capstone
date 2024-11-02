@@ -39,8 +39,8 @@ app.post(
     handleStripeWebhook
 );
 
-app.use(express.json()); // Built-in body-parser in Express
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" })); // Built-in body-parser in Express
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Use morgan for HTTP request logging, and integrate with winston logger
 app.use(

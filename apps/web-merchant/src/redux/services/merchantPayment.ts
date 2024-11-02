@@ -7,20 +7,6 @@ export const merchantPaymentApi = createApi({
   baseQuery: BaseQueryWithAuthCheck("/merchantPayment"),
   tagTypes: ["MerchantPaymentList"],
   endpoints: (builder) => ({
-    // Get all merchant payments
-    getMerchantPayments: builder.query<IMerchantPayment[], void>({
-      query: () => ({
-        url: "/",
-        method: "GET",
-      }),
-      providesTags: ["MerchantPaymentList"],
-    }),
-
-    // Get merchant payment by id
-    getMerchantPaymentById: builder.query<IMerchantPayment, string>({
-      query: (id) => `/${id}`,
-    }),
-
     // Create merchant payment
     createMerchantPayment: builder.mutation<
       IMerchantPayment,
@@ -36,8 +22,4 @@ export const merchantPaymentApi = createApi({
   }),
 });
 
-export const {
-  useGetMerchantPaymentsQuery,
-  useGetMerchantPaymentByIdQuery,
-  useCreateMerchantPaymentMutation,
-} = merchantPaymentApi;
+export const { useCreateMerchantPaymentMutation } = merchantPaymentApi;
