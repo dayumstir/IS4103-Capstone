@@ -22,6 +22,7 @@ export const findInstalmentPaymentById = async (instalment_payment_id: string) =
             transaction: {
                 include: {
                     merchant: true,
+                    instalment_plan: true,
                 },
             },
         },

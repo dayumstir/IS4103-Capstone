@@ -32,3 +32,10 @@ export const getCashbackWalletsByCustomerId = async (customer_id: string) => {
         },
     });
 };
+
+// Get Cashback Wallet by customer_id and merchant_id
+export const getCashbackWalletByCustomerAndMerchant = async (customer_id: string, merchant_id: string) => {
+    return await prisma.cashbackWallet.findFirst({
+        where: { customer_id, merchant_id },
+    });
+};

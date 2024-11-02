@@ -105,6 +105,15 @@ export default function InstalmentPaymentDetails() {
       </View>
     );
 
+  // Determine if the instalment payment is past due
+  const isPastDue = isAfter(new Date(), new Date(instalmentPayment.due_date));
+
+  // Retrieve the interest rate from the instalment plan
+  const interestRate = instalmentPayment.transaction.instalment_plan.interest_rate || 0;
+
+  // Calculate the late payment fee
+  const latePaymentFee = isPastDue ? (instalmentPayment.amount_due * interestRate) / 100 : 0;
+
   // Calculate voucher discount
   let voucherDiscount = 0;
 
@@ -182,7 +191,10 @@ export default function InstalmentPaymentDetails() {
 
   // Calculate total payable amount
   const totalPayable =
-    instalmentPayment.amount_due - voucherDiscount - adjustedCashbackAmount;
+    instalmentPayment.amount_due +
+    latePaymentFee -
+    voucherDiscount -
+    adjustedCashbackAmount;
 
   const walletBalance = profile?.wallet_balance || 0;
 
@@ -431,6 +443,14 @@ export default function InstalmentPaymentDetails() {
               {formatCurrency(instalmentPayment.amount_due)}
             </Text>
           </View>
+          {latePaymentFee > 0 && (
+            <View className="mb-2 flex-row justify-between">
+              <Text className="text-base">Late Payment Fee ({interestRate}%):</Text>
+              <Text className="text-base text-red-600">
+                +{formatCurrency(latePaymentFee)}
+              </Text>
+            </View>
+          )}
           {voucherDiscount > 0 && (
             <View className="mb-2 flex-row justify-between">
               <Text className="text-base">Voucher Discount:</Text>
@@ -810,17 +830,18 @@ export default function InstalmentPaymentDetails() {
         transparent={true}
         onRequestClose={() => setIsConfirmationVisible(false)}
       >
-        <TouchableWithoutFeedback
-          onPress={() => setIsConfirmationVisible(false)}
-        >
-          <BlurView intensity={100} tint="dark" />
+        <TouchableWithoutFeedback onPress={() => setIsConfirmationVisible(false)}>
+          <BlurView intensity={30} tint="dark" style={{ flex: 1 }} />
         </TouchableWithoutFeedback>
-        <View className="flex-1 items-center justify-center">
-          <View className="rounded-lg bg-white p-6">
-            <Text className="mb-4 text-lg font-bold">Confirm Payment</Text>
-            <Text className="mb-6 text-base">
-              Are you sure you want to pay {formatCurrency(amountFromWallet)}{" "}
-              for this instalment?
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}>
+          <View className="w-11/12 rounded-xl bg-white p-4">
+            <Text className="mb-4 text-xl font-bold">Confirm Payment</Text>
+            <Text className="mb-4 text-base">
+              Are you sure you want to proceed with the payment of{' '}
+              <Text className="font-semibold">
+                {formatCurrency(amountFromWallet)}
+              </Text>
+              ?
             </Text>
             <View className="flex-row justify-end">
               <Button
@@ -830,14 +851,7 @@ export default function InstalmentPaymentDetails() {
               >
                 <Text className="font-semibold text-gray-500">Cancel</Text>
               </Button>
-              <Button
-                type="primary"
-                onPress={async () => {
-                  setIsConfirmationVisible(false);
-                  await handlePayInstalment();
-                }}
-                loading={isPaying}
-              >
+              <Button type="primary" onPress={handlePayInstalment} loading={isPaying}>
                 <Text className="font-semibold text-white">Confirm</Text>
               </Button>
             </View>
