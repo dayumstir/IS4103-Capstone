@@ -78,8 +78,53 @@ const NotificationsScreen = () => {
     setSearchTerm(e.target.value);
   };
 
-  const showNotificationModal = (notification: INotification) => {
+  const groupNotifications = (notifications) => {
+    return notifications.reduce((acc, notification) => {
+      const formattedCreateTime = new Date(notification.create_time)
+        .toISOString()
+        .slice(0, 19);
+      // Find an existing group with the same title, description, and create time
+      const existingGroup = acc.find(
+        (item) =>
+          item.title === notification.title &&
+          item.description === notification.description &&
+          item.create_time === formattedCreateTime,
+      );
+
+      if (existingGroup) {
+        // Add the user to the existing group
+        if (notification.customer_id) {
+          existingGroup.customer_ids.push(notification.customer_id);
+        }
+        if (notification.merchant_id) {
+          existingGroup.merchant_ids.push(notification.merchant_id);
+        }
+      } else {
+        // Create a new group entry if none found
+        acc.push({
+          ...notification,
+          create_time: formattedCreateTime,
+          customer_ids: notification.customer_id
+            ? [notification.customer_id]
+            : [],
+          merchant_ids: notification.merchant_id
+            ? [notification.merchant_id]
+            : [],
+        });
+      }
+
+      return acc;
+    }, []);
+  };
+
+  const showNotificationModal = (notification) => {
     setCurrentNotification(notification);
+    const isGrouped = notification.customer_ids || notification.merchant_ids;
+    setCurrentNotification({
+      ...notification,
+      customer_ids: isGrouped ? notification.customer_ids : [],
+      merchant_ids: isGrouped ? notification.merchant_ids : [],
+    });
     setCurrentNotificationId(notification.notification_id);
     form.setFieldsValue(notification);
     setIsModalVisible(true);
@@ -97,40 +142,6 @@ const NotificationsScreen = () => {
     form.setFieldsValue({
       [field]: selectedAll ? [] : options.map((option) => option.value),
     });
-  };
-
-  const groupNotifications = (notifications) => {
-    return notifications.reduce((acc, notification) => {
-      // Find an existing group with the same title and description
-      const existingGroup = acc.find(
-        (item) =>
-          item.title === notification.title &&
-          item.description === notification.description,
-      );
-
-      if (existingGroup) {
-        // Add the user to the existing group
-        if (notification.customer_id) {
-          existingGroup.customer_ids.push(notification.customer_id);
-        }
-        if (notification.merchant_id) {
-          existingGroup.merchant_ids.push(notification.merchant_id);
-        }
-      } else {
-        // Create a new group entry if none found
-        acc.push({
-          ...notification,
-          customer_ids: notification.customer_id
-            ? [notification.customer_id]
-            : [],
-          merchant_ids: notification.merchant_id
-            ? [notification.merchant_id]
-            : [],
-        });
-      }
-
-      return acc;
-    }, []);
   };
 
   const groupedNotifications = groupNotifications(notifications || []);
@@ -180,8 +191,6 @@ const NotificationsScreen = () => {
       title: "Title",
       dataIndex: "title",
       key: "title",
-      sorter: (a: INotification, b: INotification) =>
-        a.title.localeCompare(b.title),
       width: 350,
     },
     {
@@ -319,6 +328,7 @@ const NotificationsScreen = () => {
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         width={1000}
+        footer={null}
       >
         <Descriptions bordered column={2}>
           <Descriptions.Item label="Title" span={2}>
@@ -337,31 +347,46 @@ const NotificationsScreen = () => {
             {currentNotification?.create_time &&
               new Date(currentNotification?.create_time).toLocaleTimeString()}
           </Descriptions.Item>
-          {currentNotification?.merchant_id && (
-            <Descriptions.Item label="Merchant" span={2}>
-              <Link to={`/admin/merchant/${currentNotification.merchant_id}`}>
-                {
-                  merchantOptions?.find(
-                    (m) => m.merchant_id === currentNotification.merchant_id,
-                  )?.name
-                }
-              </Link>
+          {currentNotification?.customer_ids?.length > 0 && (
+            <Descriptions.Item label="Customers" span={2}>
+              {currentNotification.customer_ids.map((customerId) => {
+                const customer = customerOptions?.find(
+                  (c) => c.customer_id === customerId,
+                );
+                return (
+                  <div key={customerId}>
+                    {customer?.email ? (
+                      <>
+                        <Tag>Customer</Tag> {customer.email}
+                      </>
+                    ) : (
+                      <span>Unknown Customer</span>
+                    )}
+                  </div>
+                );
+              })}
             </Descriptions.Item>
           )}
-          {currentNotification?.customer_id && (
-            <Descriptions.Item label="Customer" span={2}>
-              <Link to={`/admin/customer/${currentNotification.customer_id}`}>
-                {
-                  customerOptions?.find(
-                    (c) => c.customer_id === currentNotification.customer_id,
-                  )?.name
-                }
-              </Link>
-            </Descriptions.Item>
-          )}
-          {currentAdmin?.admin_id && (
-            <Descriptions.Item label="Admin" span={2}>
-              {currentAdmin.name}
+
+          {/* Display the list of merchants */}
+          {currentNotification?.merchant_ids?.length > 0 && (
+            <Descriptions.Item label="Merchants" span={2}>
+              {currentNotification.merchant_ids.map((merchantId) => {
+                const merchant = merchantOptions?.find(
+                  (m) => m.merchant_id === merchantId,
+                );
+                return (
+                  <div key={merchantId}>
+                    {merchant?.email ? (
+                      <>
+                        <Tag>Merchant</Tag> {merchant.email}
+                      </>
+                    ) : (
+                      <span>Unknown Merchant</span>
+                    )}
+                  </div>
+                );
+              })}
             </Descriptions.Item>
           )}
         </Descriptions>
@@ -405,10 +430,10 @@ const NotificationsScreen = () => {
             label="Customer Email"
             dependencies={["merchant_ids"]}
             rules={[
-              {
-                validator: (_, value) => {
-                  const merchantEmail = form.getFieldValue("merchant_email");
-                  if (value || merchantEmail) {
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const merchantIds = getFieldValue("merchant_ids");
+                  if (value?.length || merchantIds?.length) {
                     return Promise.resolve();
                   }
                   return Promise.reject(
@@ -417,7 +442,7 @@ const NotificationsScreen = () => {
                     ),
                   );
                 },
-              },
+              }),
             ]}
           >
             <Select
@@ -458,10 +483,10 @@ const NotificationsScreen = () => {
             label="Merchant Email"
             dependencies={["customer_ids"]}
             rules={[
-              {
-                validator: (_, value) => {
-                  const customerEmail = form.getFieldValue("customer_email");
-                  if (value || customerEmail) {
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const customerIds = getFieldValue("customer_ids");
+                  if (value?.length || customerIds?.length) {
                     return Promise.resolve();
                   }
                   return Promise.reject(
@@ -470,7 +495,7 @@ const NotificationsScreen = () => {
                     ),
                   );
                 },
-              },
+              }),
             ]}
           >
             <Select
