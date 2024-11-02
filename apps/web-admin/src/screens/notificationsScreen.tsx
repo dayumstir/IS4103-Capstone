@@ -99,6 +99,42 @@ const NotificationsScreen = () => {
     });
   };
 
+  const groupNotifications = (notifications) => {
+    return notifications.reduce((acc, notification) => {
+      // Find an existing group with the same title and description
+      const existingGroup = acc.find(
+        (item) =>
+          item.title === notification.title &&
+          item.description === notification.description,
+      );
+
+      if (existingGroup) {
+        // Add the user to the existing group
+        if (notification.customer_id) {
+          existingGroup.customer_ids.push(notification.customer_id);
+        }
+        if (notification.merchant_id) {
+          existingGroup.merchant_ids.push(notification.merchant_id);
+        }
+      } else {
+        // Create a new group entry if none found
+        acc.push({
+          ...notification,
+          customer_ids: notification.customer_id
+            ? [notification.customer_id]
+            : [],
+          merchant_ids: notification.merchant_id
+            ? [notification.merchant_id]
+            : [],
+        });
+      }
+
+      return acc;
+    }, []);
+  };
+
+  const groupedNotifications = groupNotifications(notifications || []);
+
   const handleCreateNotification = async (values) => {
     const { customer_ids = [], merchant_ids = [], ...restValues } = values;
 
@@ -179,28 +215,33 @@ const NotificationsScreen = () => {
         if (value === "customer") return !!record.customer_id;
         return value === "merchant" && !!record.merchant_id;
       },
-      render: (text, record: INotification) => {
+      render: (text, record) => {
+        const customerCount = record.customer_ids?.length || 0;
+        const merchantCount = record.merchant_ids?.length || 0;
+
         return (
           <>
-            {record.customer_id && (
-              <>
-                <Tag>Customer</Tag>
+            {customerCount > 1 && <Tag>{`Customers: ${customerCount}`}</Tag>}
+            {merchantCount > 1 && <Tag>{`Merchants: ${merchantCount}`}</Tag>}
+            {customerCount === 1 && (
+              <Tag>
+                Customer:{" "}
                 {
                   customerOptions?.find(
-                    (c) => c.customer_id === record.customer_id,
+                    (c) => c.customer_id === record.customer_ids[0],
                   )?.email
                 }
-              </>
+              </Tag>
             )}
-            {record.merchant_id && (
-              <>
-                <Tag>Merchant</Tag>
+            {merchantCount === 1 && (
+              <Tag>
+                Merchant:{" "}
                 {
                   merchantOptions?.find(
-                    (m) => m.merchant_id === record.merchant_id,
+                    (m) => m.merchant_id === record.merchant_ids[0],
                   )?.email
                 }
-              </>
+              </Tag>
             )}
           </>
         );
@@ -266,7 +307,7 @@ const NotificationsScreen = () => {
           </Button>
         </div>
         <Table
-          dataSource={notifications}
+          dataSource={groupedNotifications}
           columns={columns}
           locale={{
             emptyText: <Empty description="No notifications found"></Empty>,
