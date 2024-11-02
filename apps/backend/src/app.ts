@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 // Import routes
 import adminAuthRoutes from "./routes/adminAuthRoutes";
 import adminRoutes from "./routes/adminRoutes";
+import cashBackWalletRoutes from "./routes/cashbackWalletRoutes";
 import creditTierRoutes from "./routes/creditTierRoutes";
 import customerAuthRoutes from "./routes/customerAuthRoutes";
 import customerRoutes from "./routes/customerRoutes";
@@ -49,6 +50,7 @@ app.use(
 // Route setup
 app.use("/adminAuth", adminAuthRoutes);
 app.use("/admin", adminRoutes);
+app.use("/cashbackWallet", cashBackWalletRoutes);
 app.use("/creditTier", creditTierRoutes);
 app.use("/customerAuth", customerAuthRoutes);
 app.use("/customer", customerRoutes);
