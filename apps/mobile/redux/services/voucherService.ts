@@ -1,12 +1,12 @@
+// app/mobile/redux/services/voucherService.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RootState } from "../store"; // Make sure this import path is correct
-import { IVoucher, IVoucherAssigned } from "@repo/interfaces";
 import { API_URL } from "../../config/apiConfig";
+import { RootState } from "../store";
+import { IVoucher, IVoucherAssigned } from "@repo/interfaces";
 
 // Define a service using a base URL and expected endpoints
 export const voucherApi = createApi({
   reducerPath: "voucherApi",
-
   baseQuery: fetchBaseQuery({
     baseUrl: `${API_URL}/voucher`,
     prepareHeaders: (headers, { getState }) => {
@@ -17,29 +17,30 @@ export const voucherApi = createApi({
       return headers;
     },
   }),
-
-  tagTypes: ["VoucherList"],
-
+  tagTypes: ["Voucher"],
   endpoints: (builder) => ({
+
     // Get All Customer Vouchers
     getAllVouchers: builder.query<IVoucherAssigned[], { customer_id: string }>({
       query: ({ customer_id }) => ({
         url: `/customer/${customer_id}`,
         method: "GET",
       }),
-      providesTags: ["VoucherList"],
+      providesTags: [{ type: "Voucher", id: "LIST" }],
     }),
 
-    // Get Voucher by ID
-    getVoucherById: builder.query<IVoucher, string>({
-      query: (id) => ({
-        url: `/${id}`,
+    // Fetch voucher details
+    getVoucherDetails: builder.query<IVoucher, string>({
+      query: (voucher_id) => ({
+        url: `/${voucher_id}`,
         method: "GET",
       }),
+      providesTags: (_, __, arg) => [{ type: "Voucher", id: arg }],
     }),
   }),
 });
 
-// Export hooks for usage in functional components, which are
-// auto-generated based on the defined endpoints
-export const { useGetAllVouchersQuery, useGetVoucherByIdQuery } = voucherApi;
+export const { 
+  useGetAllVouchersQuery, 
+  useGetVoucherDetailsQuery 
+} = voucherApi;
