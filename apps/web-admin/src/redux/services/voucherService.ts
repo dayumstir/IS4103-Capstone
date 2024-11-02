@@ -1,6 +1,9 @@
+// apps/web-admin/src/redux/services/voucherService.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IVoucher } from "../../interfaces/voucherInterface";
-import { IVoucherAssigned } from "../../interfaces/voucherAssignedInterface";
+import { IVoucher, IVoucherAssigned } from "@repo/interfaces";
+
+// Tag type constants
+const VOUCHER_LIST_TAG = { type: 'Voucher', id: 'LIST' } as const;
 
 // Create an API slice for vouchers using RTK Query
 export const voucherApi = createApi({
@@ -15,8 +18,9 @@ export const voucherApi = createApi({
             return headers;
         },
     }),
-    tagTypes: ["Voucher"] as const,
+    tagTypes: ["Voucher"],
     endpoints: (builder) => ({
+        
         // Create voucher
         createVoucher: builder.mutation<IVoucher, Partial<IVoucher>>({
             query: (voucher) => ({
@@ -24,7 +28,7 @@ export const voucherApi = createApi({
                 method: "POST",
                 body: voucher,
             }),
-            invalidatesTags: [{ type: 'Voucher', id: 'LIST' }] // Invalidate the entire voucher list
+            invalidatesTags: [VOUCHER_LIST_TAG] // Invalidate the entire voucher list
         }),
 
         // Assign voucher to customer
@@ -47,7 +51,7 @@ export const voucherApi = createApi({
         }),
 
         // Fetch all vouchers
-        getVouchers: builder.query<IVoucher[], string | undefined>({
+        getAllVouchers: builder.query<IVoucher[], string | undefined>({
             query: (search = '') => {
                 const queryParams = search ? `?search=${encodeURIComponent(search)}` : '';
                 return {
@@ -58,10 +62,10 @@ export const voucherApi = createApi({
             providesTags: (result) =>
                 result
                     ? [
-                        { type: 'Voucher', id: 'LIST' }, // Tag for the entire list
+                        VOUCHER_LIST_TAG, // Tag for the entire list
                         ...result.map((voucher) => ({ type: 'Voucher', id: voucher.voucher_id } as const)), // Tag for each individual voucher
                     ]
-                    : [{ type: 'Voucher', id: 'LIST' }] // If result is undefined, still provide the 'LIST' tag
+                    : [VOUCHER_LIST_TAG] // If result is undefined, still provide the 'LIST' tag
         }),
 
         // Fetch voucher details
@@ -78,7 +82,7 @@ export const {
     useCreateVoucherMutation,
     useAssignVoucherMutation,
     useDeactivateVoucherMutation,
-    useGetVouchersQuery,
+    useGetAllVouchersQuery,
     useGetVoucherDetailsQuery,
   } = voucherApi;
   
