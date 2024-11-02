@@ -1,22 +1,28 @@
-// wallet/index.tsx
-import { useState, useEffect, useCallback } from "react";
+// app/mobile/app/(authenticated)/(tabs)/wallet/index.tsx
+
+import React, { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Linking,
+  RefreshControl,
   ScrollView,
   Text,
-  View,
   TextInput,
-  Linking,
   TouchableOpacity,
-  ActivityIndicator,
-  RefreshControl,
+  View,
 } from "react-native";
-import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
 import { Button } from "@ant-design/react-native";
-import Toast from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
+import Toast from "react-native-toast-message";
 import { useRouter } from "expo-router";
+import { format } from "date-fns";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
+import { STRIPE_PUBLISHABLE_KEY } from "@env";
 import {
   useCreatePaymentIntentMutation,
   useGetPaymentHistoryQuery,
@@ -24,14 +30,8 @@ import {
 import { useGetProfileQuery } from "../../../../redux/services/customerService";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
 import { formatCurrency } from "../../../../utils/formatCurrency";
-import { format } from "date-fns";
-import { STRIPE_PUBLISHABLE_KEY } from "@env";
 
-import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-// Define Zod schema for validation
+// Define validation schema
 const topUpSchema = z.object({
   amount: z
     .string()
@@ -45,63 +45,48 @@ const topUpSchema = z.object({
 type TopUpFormValues = z.infer<typeof topUpSchema>;
 
 export default function WalletPage() {
-  const { initPaymentSheet, presentPaymentSheet, handleURLCallback } =
-    useStripe();
+  const { initPaymentSheet, presentPaymentSheet, handleURLCallback } = useStripe();
   const [loading, setLoading] = useState(false);
-  const { data: profile, refetch } = useGetProfileQuery();
-  const [createPaymentIntent] = useCreatePaymentIntentMutation();
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    Promise.all([refetchPaymentHistory(), refetchInstalmentPayments()])
-      .then(() => setRefreshing(false))
-      .catch((error) => {
-        console.error("Error refreshing data:", error);
-        setRefreshing(false);
-      });
-  };
+  const { data: profile, refetch } = useGetProfileQuery();
+  const [createPaymentIntent] = useCreatePaymentIntentMutation();
 
   // Form state
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<TopUpFormValues>({
+  const { control, handleSubmit, reset, formState: { errors } } = useForm<TopUpFormValues>({
     resolver: zodResolver(topUpSchema),
   });
 
-  // Ensure publishable key is available
-  if (!STRIPE_PUBLISHABLE_KEY) {
-    console.error("Stripe publishable key is missing");
-    return null;
-  }
+  // Fetch payment history and outstanding instalments
+  const {
+    data: outstandingInstalmentPayments,
+    refetch: refetchInstalmentPayments,
+  } = useGetCustomerOutstandingInstalmentPaymentsQuery();
+  
+  const {
+    data: paymentHistory,
+    isLoading: isPaymentHistoryLoading,
+    refetch: refetchPaymentHistory,
+  } = useGetPaymentHistoryQuery();
 
-  // Fetch payment sheet parameters from backend
+  // Total outstanding payments
+  const totalOutstanding = outstandingInstalmentPayments?.reduce((sum, payment) => sum + payment.amount_due, 0) ?? 0;
+
+  // Define handlers and helper functions
   const fetchPaymentSheetParams = async (amount: string) => {
-    const response = await createPaymentIntent({
-      amount: Number(amount),
-    }).unwrap();
-    const { paymentIntent, ephemeralKey, customer } = response;
-
-    return { paymentIntent, ephemeralKey, customer };
+    const roundedAmount = Math.round(parseFloat(amount) * 100); // Convert to cents and round
+    const response = await createPaymentIntent({ amount: roundedAmount }).unwrap();
+    return response;
   };
 
-  // Initialize payment sheet
   const initializePaymentSheet = async (amount: string) => {
-    const { paymentIntent, ephemeralKey, customer } =
-      await fetchPaymentSheetParams(amount);
-
+    const { paymentIntent, ephemeralKey, customer } = await fetchPaymentSheetParams(amount);
     const { error } = await initPaymentSheet({
       merchantDisplayName: "Panda Pay",
       customerId: customer,
       customerEphemeralKeySecret: ephemeralKey,
       paymentIntentClientSecret: paymentIntent,
       returnURL: "panda://stripe-redirect",
-      // Additional configurations if needed
     });
 
     if (error) {
@@ -109,43 +94,32 @@ export default function WalletPage() {
     }
   };
 
-  // Open payment sheet
   const openPaymentSheet = async () => {
-    console.log("Opening payment sheet...");
     const { error } = await presentPaymentSheet();
 
     if (error) {
       if (error.code === "Canceled") {
-        // User canceled the payment
         Toast.show({
           type: "info",
           text1: "Payment canceled",
           text2: "You have canceled the payment.",
         });
       } else {
-        console.error("Payment failed:", error);
         Toast.show({
           type: "error",
           text1: "Payment failed",
           text2: error.message,
         });
       }
-      // Reset loading state
       setLoading(false);
     } else {
       Toast.show({
         type: "success",
         text1: "Payment successful",
       });
-      // Refresh wallet balance
       refetch();
-      // Refresh payment history
       refetchPaymentHistory();
-      // Reset form
-      reset({
-        amount: "",
-      });
-      // Reset loading state
+      reset({ amount: "" });
       setLoading(false);
     }
   };
@@ -157,7 +131,6 @@ export default function WalletPage() {
       await initializePaymentSheet(amount);
       await openPaymentSheet();
     } catch (error: any) {
-      console.error("Error topping up wallet:", error);
       Toast.show({
         type: "error",
         text1: "Error",
@@ -176,64 +149,41 @@ export default function WalletPage() {
     await handleTopUpAmount(amount.toString());
   };
 
-  // Handle deep links
   const handleDeepLink = useCallback(
     async (url: string | null) => {
       if (url) {
         const stripeHandled = await handleURLCallback(url);
-        if (stripeHandled) {
-          // The URL was handled by Stripe
-          // You can perform additional actions if needed
-        } else {
-          // The URL was not handled by Stripe
-          // Handle other deep links if your app uses them
+        if (!stripeHandled) {
+          // Handle non-Stripe deep links if necessary
         }
       }
     },
     [handleURLCallback],
   );
 
-  // Listen for incoming links
   useEffect(() => {
-    // Handle the case where the app is opened via a deep link
     const getUrlAsync = async () => {
       const initialUrl = await Linking.getInitialURL();
       handleDeepLink(initialUrl);
     };
-
     getUrlAsync();
 
-    // Set up an event listener for incoming links
-    const deepLinkListener = Linking.addEventListener(
-      "url",
-      (event: { url: string }) => {
-        handleDeepLink(event.url);
-      },
-    );
+    const deepLinkListener = Linking.addEventListener("url", (event) => {
+      handleDeepLink(event.url);
+    });
 
     return () => deepLinkListener.remove();
   }, [handleDeepLink]);
 
-  // Fetch payment history
-  const {
-    data: paymentHistory,
-    isLoading: isPaymentHistoryLoading,
-    refetch: refetchPaymentHistory,
-  } = useGetPaymentHistoryQuery();
-
-  // Fetch outstanding instalment payments
-  const {
-    data: outstandingInstalmentPayments,
-    isLoading: isInstalmentPaymentsLoading,
-    refetch: refetchInstalmentPayments,
-  } = useGetCustomerOutstandingInstalmentPaymentsQuery();
-
-  // Calculate total outstanding instalment payments
-  const totalOutstanding =
-    outstandingInstalmentPayments?.reduce(
-      (sum, payment) => sum + payment.amount_due,
-      0,
-    ) ?? 0;
+  const onRefresh = () => {
+    setRefreshing(true);
+    Promise.all([refetchPaymentHistory(), refetchInstalmentPayments()])
+      .then(() => setRefreshing(false))
+      .catch((error) => {
+        console.error("Error refreshing data:", error);
+        setRefreshing(false);
+      });
+  };
 
   return (
     <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
@@ -288,7 +238,7 @@ export default function WalletPage() {
 
           {/* Instruction for Suggested Amounts */}
           <Text className="mb-2 text-sm text-gray-700">
-            Tap on any of the suggested amounts for payment:
+            Tap on any of the suggested amounts for top up:
           </Text>
 
           {/* Suggested Amount Buttons */}
@@ -395,7 +345,6 @@ export default function WalletPage() {
                   >
                     <View className="flex-row items-center gap-4">
                       <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-                        {/* Icon representing the transaction type */}
                         <Text className="text-center text-2xl">{icon}</Text>
                       </View>
                       <View className="mr-4 flex-1">
@@ -425,11 +374,11 @@ export default function WalletPage() {
               })}
               <Button
                 type="primary"
-                onPress={() => router.push("/wallet/allPaymentHistory")}
+                onPress={() => router.push("/wallet/allWalletHistory")}
                 className="mt-4"
               >
                 <Text className="font-semibold text-white">
-                  View All Payment / Top Up History
+                  View Wallet History
                 </Text>
               </Button>
             </>

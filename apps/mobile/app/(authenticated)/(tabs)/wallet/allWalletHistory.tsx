@@ -1,38 +1,30 @@
-// wallet/allPaymentHistory.tsx
-import React, { useState, useRef, useMemo } from "react";
+import React, { useRef, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-  TextInput,
   ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useGetPaymentHistoryQuery } from "../../../../redux/services/paymentService";
+import { Button } from "@ant-design/react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  format,
-  isToday,
-  isWithinInterval,
-  subDays,
-  subMonths,
-} from "date-fns";
-import { formatCurrency } from "../../../../utils/formatCurrency";
-import EmptyPlaceholder from "../../../../components/emptyPlaceholder";
-import { useRouter } from "expo-router";
 import { useDebounce } from "use-debounce";
+import { format, isToday, isWithinInterval, subDays, subMonths } from "date-fns";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import { Button } from "@ant-design/react-native";
+
+import EmptyPlaceholder from "../../../../components/emptyPlaceholder";
+import { useGetPaymentHistoryQuery } from "../../../../redux/services/paymentService";
+import { formatCurrency } from "../../../../utils/formatCurrency";
 
 export default function AllPaymentHistory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
-
   const [dateFilter, setDateFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [tempDateFilter, setTempDateFilter] = useState("all");
@@ -44,7 +36,6 @@ export default function AllPaymentHistory() {
     isLoading: isPaymentHistoryLoading,
     refetch,
   } = useGetPaymentHistoryQuery();
-
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = () => {
@@ -52,10 +43,8 @@ export default function AllPaymentHistory() {
     refetch().then(() => setRefreshing(false));
   };
 
-  const router = useRouter();
-
-  // Memoize the filtered payment history
-  const filteredPaymentHistory = useMemo(() => {
+  // Filtered payment history based on filters and search query
+  const getFilteredPaymentHistory = () => {
     if (!paymentHistory || paymentHistory.length === 0) {
       return [];
     }
@@ -63,7 +52,6 @@ export default function AllPaymentHistory() {
     const query = debouncedSearchQuery.toLowerCase();
 
     return paymentHistory.filter((record) => {
-      // Apply search query
       const matchesSearch =
         record.payment_type.toLowerCase().includes(query) ||
         format(new Date(record.payment_date), "d MMM yyyy, h:mm a")
@@ -71,7 +59,6 @@ export default function AllPaymentHistory() {
           .includes(query) ||
         record.amount.toString().includes(query);
 
-      // Apply date filter
       let matchesDateFilter = true;
       if (dateFilter !== "all") {
         const paymentDate = new Date(record.payment_date);
@@ -113,7 +100,6 @@ export default function AllPaymentHistory() {
         }
       }
 
-      // Apply type filter
       let matchesTypeFilter = true;
       if (typeFilter !== "all") {
         switch (typeFilter) {
@@ -133,14 +119,12 @@ export default function AllPaymentHistory() {
 
       return matchesSearch && matchesDateFilter && matchesTypeFilter;
     });
-  }, [paymentHistory, debouncedSearchQuery, dateFilter, typeFilter]);
+  };
 
   const paymentHistoryList = () => {
-    if (
-      debouncedSearchQuery !== searchQuery ||
-      isFetching ||
-      isPaymentHistoryLoading
-    ) {
+    const filteredPaymentHistory = getFilteredPaymentHistory();
+
+    if (isFetching || isPaymentHistoryLoading) {
       return (
         <View className="mt-16">
           <ActivityIndicator size="large" />
@@ -152,7 +136,6 @@ export default function AllPaymentHistory() {
       return <EmptyPlaceholder message="No transactions found" />;
     }
 
-    // Unique dates for payment history
     const uniqueDates = [
       ...new Set(
         filteredPaymentHistory.map((t) =>
@@ -173,7 +156,6 @@ export default function AllPaymentHistory() {
                 (t) => format(new Date(t.payment_date), "d MMM yyyy") === date
               )
               .map((t, index, transactionsOnDate) => {
-                // Determine payment history details
                 let icon = "💰";
                 let title = "Top Up";
                 let amountColor = "text-green-600";
@@ -237,7 +219,6 @@ export default function AllPaymentHistory() {
     );
   };
 
-  // Filter Menu Implementation
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const closeFilterMenu = () => {
@@ -247,6 +228,7 @@ export default function AllPaymentHistory() {
   const applyFilters = () => {
     setDateFilter(tempDateFilter);
     setTypeFilter(tempTypeFilter);
+    refetch(); // Ensure data is refetched after filters are applied
     closeFilterMenu();
   };
 
@@ -255,6 +237,7 @@ export default function AllPaymentHistory() {
     setTypeFilter("all");
     setTempDateFilter("all");
     setTempTypeFilter("all");
+    refetch(); // Ensure data is refetched after clearing filters
     closeFilterMenu();
   };
 

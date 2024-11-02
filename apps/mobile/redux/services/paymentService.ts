@@ -1,9 +1,10 @@
-// src/redux/services/paymentService.ts
+// apps/mobile/redux/services/paymentService.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store";
 import { API_URL } from "../../config/apiConfig";
 import { IPaymentHistory } from "@repo/interfaces";
 
+// Response interface for creating a payment intent
 interface PaymentIntentResponse {
     paymentIntent: string;
     ephemeralKey: string;
@@ -11,7 +12,7 @@ interface PaymentIntentResponse {
     publishableKey: string;
 }
 
-// Define the request body interface for makePayment
+// Request body interface for makePayment
 interface MakePaymentRequest {
     instalment_payment_id: string;
     voucher_assigned_id?: string;
@@ -19,9 +20,9 @@ interface MakePaymentRequest {
     amount_deducted_from_wallet: number;
 }
 
+// Define the payment API service
 export const paymentApi = createApi({
     reducerPath: "paymentApi",
-
     baseQuery: fetchBaseQuery({
         baseUrl: `${API_URL}/payment`,
         prepareHeaders: (headers, { getState }) => {
@@ -32,11 +33,10 @@ export const paymentApi = createApi({
             return headers;
         },
     }),
-
-    tagTypes: ["VoucherList"],
-
+    tagTypes: ["PaymentHistory"],
     endpoints: (builder) => ({
-        // Fetch payment sheet parameters
+
+        // Create a payment intent for wallet top-up
         createPaymentIntent: builder.mutation<PaymentIntentResponse, { amount: number }>({
             query: ({ amount }) => ({
                 url: "/top-up",
@@ -45,22 +45,26 @@ export const paymentApi = createApi({
             }),
         }),
 
-        // Get payment history
+        // Fetch payment history for the authenticated customer
         getPaymentHistory: builder.query<IPaymentHistory[], void>({
             query: () => "/history",
+            providesTags: ["PaymentHistory"],
         }),
 
-        // Make payment
+        // Make a payment toward an instalment plan
         makePayment: builder.mutation<{ message: string }, MakePaymentRequest>({
             query: (paymentData) => ({
                 url: "/make-payment",
                 method: "POST",
                 body: paymentData,
             }),
-            invalidatesTags: ["VoucherList"],
+            invalidatesTags: ["PaymentHistory"],
         }),
     }),
 });
 
-// Export hooks for usage in functional components
-export const { useCreatePaymentIntentMutation, useGetPaymentHistoryQuery, useMakePaymentMutation } = paymentApi;
+export const {
+    useCreatePaymentIntentMutation,
+    useGetPaymentHistoryQuery,
+    useMakePaymentMutation,
+} = paymentApi;

@@ -49,7 +49,7 @@ export const topUpWallet = async (req: Request, res: Response, next: NextFunctio
 
         // Create PaymentIntent for top-up
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount * 100,
+            amount: amount,
             currency: "sgd",
             customer: stripeCustomer.id,
             automatic_payment_methods: { 
