@@ -1,6 +1,5 @@
 // app/mobile/app/(authenticated)/(tabs)/account/rewards/voucherAssignedDetails.tsx
 import { View, Text } from "react-native";
-import { Button } from "@ant-design/react-native";
 import { format } from "date-fns";
 import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -48,7 +47,7 @@ export default function VoucherAssignedDetails() {
           </Text>
           <Text>
             <Text className="font-bold">Remaining Uses:</Text>{" "}
-            {parsedVoucherAssigned.remaining_uses} out of {parsedVoucherAssigned.voucher.usage_limit}
+            {parsedVoucherAssigned.remaining_uses} / {parsedVoucherAssigned.voucher.usage_limit}
           </Text>
           <Text>
             <Text className="font-bold">Status:</Text>{" "}
@@ -61,10 +60,6 @@ export default function VoucherAssignedDetails() {
           <Text className="text-sm text-gray-600">{parsedVoucherAssigned.voucher.terms}</Text>
         </View>
       </View>
-
-      <Button type="primary">
-        <Text className="font-semibold text-white">Use Voucher</Text>
-      </Button>
     </View>
   );
 }

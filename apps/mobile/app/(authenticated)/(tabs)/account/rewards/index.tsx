@@ -107,7 +107,7 @@ export default function RewardsPage() {
             : voucherAssigned.voucher.title}
         </Text>
         <View
-          className={`rounded px-2 py-1 ${
+          className={`rounded px-1 py-0.5 ${
             voucherAssigned.status === "AVAILABLE" ? "bg-blue-500" : "bg-gray-500"
           }`}
         >
