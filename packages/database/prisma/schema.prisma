@@ -371,6 +371,8 @@ model CashbackWallet {
   merchant_id          String            @unique
   merchant             Merchant          @relation(fields: [merchant_id], references: [merchant_id])
   instalment_payments  InstalmentPayment[]
+
+  // TODO: Add cashback wallet history
 }
 
 // Voucher Management Module

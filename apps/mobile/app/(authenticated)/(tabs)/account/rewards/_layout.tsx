@@ -25,6 +25,10 @@ export default function RewardsLayout() {
         name="voucherAssignedDetails"
         options={{ headerTitle: "Voucher Details" }}
       />
+      <Stack.Screen
+        name="cashbackWalletDetails"
+        options={{ headerTitle: "Cashback Wallet Details" }}
+      />
     </Stack>
   );
 }

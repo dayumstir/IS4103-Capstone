@@ -6,6 +6,7 @@ import customerAuthReducer from "./features/customerAuthSlice";
 import customerReducer from "./features/customerSlice";
 import paymentStageReducer from "./features/paymentStageSlice";
 
+import { cashbackWalletApi } from "./services/cashbackWalletService";
 import { customerApi } from "./services/customerService";
 import { customerAuthApi } from "./services/customerAuthService";
 import { instalmentPaymentApi } from "./services/instalmentPaymentService";
@@ -26,6 +27,7 @@ export const store = configureStore({
     customer: customerReducer,
     customerAuth: customerAuthReducer,
     paymentStage: paymentStageReducer,
+    [cashbackWalletApi.reducerPath]: cashbackWalletApi.reducer,
     [customerApi.reducerPath]: customerApi.reducer,
     [customerAuthApi.reducerPath]: customerAuthApi.reducer,
     [instalmentPaymentApi.reducerPath]: instalmentPaymentApi.reducer,
@@ -38,6 +40,7 @@ export const store = configureStore({
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: customSerializableCheck }).concat(
+      cashbackWalletApi.middleware,
       customerApi.middleware,
       customerAuthApi.middleware,
       instalmentPaymentApi.middleware,

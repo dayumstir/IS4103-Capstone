@@ -16,8 +16,9 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 
 import { useGetAllVouchersQuery } from "../../../../../redux/services/voucherService";
+import { useGetAllCashbackWalletsQuery } from "../../../../../redux/services/cashbackWalletService";
 import { RootState } from "../../../../../redux/store";
-import { IVoucherAssigned } from "@repo/interfaces";
+import { IVoucherAssigned, ICashbackWallet } from "@repo/interfaces";
 import EmptyPlaceholder from "../../../../../components/emptyPlaceholder";
 
 export default function RewardsPage() {
@@ -25,24 +26,21 @@ export default function RewardsPage() {
   const { profile } = useSelector((state: RootState) => state.customer);
   const [refreshing, setRefreshing] = useState(false);
 
-  const { data: vouchersAssigned, isLoading, error, refetch } = useGetAllVouchersQuery({
+  const { data: vouchersAssigned, isLoading: isLoadingVouchers, error: voucherError, refetch: refetchVouchers } = useGetAllVouchersQuery({
+    customer_id: profile!.customer_id.toString(),
+  });
+
+  const { data: cashbackWallets, isLoading: isLoadingCashbacks, error: cashbackError, refetch: refetchCashbacks } = useGetAllCashbackWalletsQuery({
     customer_id: profile!.customer_id.toString(),
   });
 
   const onRefresh = () => {
     setRefreshing(true);
-    refetch().then(() => setRefreshing(false));
+    Promise.all([refetchVouchers(), refetchCashbacks()]).then(() => setRefreshing(false));
   };
 
-  // Placeholder data for cashback items
-  const cashbackList = [
-    { id: 1, amount: 5.5, merchant: "SuperMart", date: "2023-09-25" },
-    { id: 2, amount: 2.75, merchant: "CoffeeHouse", date: "2023-09-23" },
-    { id: 3, amount: 10.0, merchant: "ElectroStore", date: "2023-09-20" },
-  ];
-
   // Loading state
-  if (isLoading) {
+  if (isLoadingVouchers || isLoadingCashbacks) {
     return (
       <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" />
@@ -51,12 +49,12 @@ export default function RewardsPage() {
   }
 
   // Error state
-  if (error) {
-    console.error(error);
+  if (voucherError || cashbackError) {
+    console.error(voucherError || cashbackError);
     return (
       <View className="flex-1 items-center justify-center">
         <Text className="px-16 text-center text-lg font-semibold text-red-500">
-          Error loading vouchers. Please close this page and try again.
+          Error loading rewards. Please close this page and try again.
         </Text>
       </View>
     );
@@ -70,29 +68,29 @@ export default function RewardsPage() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      {cashbackList.length > 0 ? (
-        cashbackList.map((cashback, index) => (
-          <View
-            key={cashback.id}
+      {cashbackWallets && cashbackWallets.length > 0 ? (
+        cashbackWallets.map((cashbackWallet, index) => (
+          <TouchableOpacity
+            key={cashbackWallet.cashback_wallet_id}
+            onPress={() =>
+              router.push({ pathname: `/account/rewards/cashbackWalletDetails`, params: { cashbackWallet: JSON.stringify(cashbackWallet) } })
+            }
             className={`mb-4 rounded-lg border border-gray-300 p-4 ${index === 0 ? "mt-4" : ""}`}
           >
             <View className="flex-row items-center justify-between">
               <View>
                 <Text className="text-base font-bold">
-                  ${cashback.amount.toFixed(2)} Cashback
+                  ${cashbackWallet.wallet_balance.toFixed(2)}
                 </Text>
                 <Text className="text-sm text-gray-500">
-                  From: {cashback.merchant}
+                  From: {cashbackWallet.merchant?.name}
                 </Text>
               </View>
-              <Text className="text-sm text-gray-500">
-                Date: {cashback.date}
-              </Text>
             </View>
-          </View>
+          </TouchableOpacity>
         ))
       ) : (
-        <EmptyPlaceholder message="No cashback found" />
+        <EmptyPlaceholder message="No cashback wallets found" />
       )}
     </ScrollView>
   );
