@@ -11,6 +11,7 @@ import {
   Input,
   Tooltip,
   Statistic,
+  Popconfirm,
 } from "antd";
 import {
   EyeOutlined,
@@ -255,7 +256,7 @@ export default function MerchantPaymentsScreen() {
               <InputNumber
                 className="w-full"
                 prefix="$"
-                min={0}
+                min={0.01}
                 max={merchant?.wallet_balance}
               />
             </Form.Item>
@@ -388,9 +389,14 @@ export default function MerchantPaymentsScreen() {
             </Form.Item>
 
             <Form.Item className="flex justify-end">
-              <Button type="primary" htmlType="submit">
-                Confirm Withdrawal
-              </Button>
+              <Popconfirm
+                title="Are you sure you want to proceed with this withdrawal?"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={() => form.submit()}
+              >
+                <Button type="primary">Confirm Withdrawal</Button>
+              </Popconfirm>
             </Form.Item>
           </Form>
         </Modal>

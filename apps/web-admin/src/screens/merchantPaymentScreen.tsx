@@ -13,6 +13,7 @@ import {
   Upload,
   UploadProps,
   Image,
+  Popconfirm,
 } from "antd";
 import { EyeOutlined, UploadOutlined } from "@ant-design/icons";
 import { format } from "date-fns";
@@ -332,9 +333,11 @@ export default function MerchantPaymentsScreen() {
               </Descriptions.Item>
               {paymentDetails.status === PaymentStatus.PAID && (
                 <>
-                  <Descriptions.Item label="Admin Bank Account Number">
-                    {paymentDetails.from_bank ?? "-"}
-                  </Descriptions.Item>
+                  {paymentDetails.from_bank && (
+                    <Descriptions.Item label="Admin Bank Account Number">
+                      {paymentDetails.from_bank}
+                    </Descriptions.Item>
+                  )}
                   {paymentDetails.evidence && (
                     <Descriptions.Item label="Payment Evidence" span={2}>
                       <Image
@@ -399,15 +402,20 @@ export default function MerchantPaymentsScreen() {
                       </div>
                     )}
                   </Form.Item>
-
-                  <Button
-                    type="primary"
-                    onClick={() => handlePayMerchant()}
-                    loading={isSubmitting}
-                    disabled={isSubmitting}
+                  <Popconfirm
+                    title="Are you sure you want to process this payment?"
+                    onConfirm={() => handlePayMerchant()}
+                    okText="Yes"
+                    cancelText="No"
                   >
-                    Pay Merchant
-                  </Button>
+                    <Button
+                      type="primary"
+                      loading={isSubmitting}
+                      disabled={isSubmitting}
+                    >
+                      Pay Merchant
+                    </Button>
+                  </Popconfirm>
                 </Form>
               </div>
             )}

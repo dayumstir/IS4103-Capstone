@@ -53,6 +53,9 @@ export const getMerchantPayments = async (search: string) => {
         include: {
             merchant: true,
         },
+        orderBy: {
+            created_at: "desc",
+        },
     });
     return payments;
 };
