@@ -1,4 +1,4 @@
-// src/repositories/voucherRepository.ts
+// app/backend/src/repositories/voucherRepository.ts
 import { prisma } from "./db";
 import { IVoucher, VoucherAssignedStatus } from "@repo/interfaces";
 import { NotFoundError, BadRequestError } from "../utils/error";
@@ -37,16 +37,16 @@ export const deactivateVoucher = async (voucher_id: string) => {
     return deactivateVoucher;
 };
 
-// Get all vouchers
-export const getAllVouchers = async () => {
-    return await prisma.voucher.findMany();
-};
-
 // Search for voucher by title
 export const searchVoucher = async (searchTerm: string) => {
     return await prisma.voucher.findMany({
         where: { title: { contains: searchTerm, mode: "insensitive"} },
     });
+};
+
+// Get all vouchers
+export const getAllVouchers = async () => {
+    return await prisma.voucher.findMany();
 };
 
 // Get voucher by id

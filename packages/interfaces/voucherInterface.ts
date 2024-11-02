@@ -17,7 +17,6 @@ export interface IVoucher {
   updatedAt: Date;
 
   created_by_admin: string;
-  vouchersAssigned: IVoucherAssigned[];
 }
 
 export interface IVoucherAssigned {
