@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as cashbackWalletService from '../services/cashbackWalletService';
 import logger from "../utils/logger";
-import { BadRequestError, NotFoundError } from "../utils/error";
+import { BadRequestError } from "../utils/error";
 
 // Get Cashback Wallets by customer_id
 export const getCashbackWalletsByCustomerId = async (req: Request, res: Response, next: NextFunction) => {

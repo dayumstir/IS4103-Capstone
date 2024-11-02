@@ -38,11 +38,11 @@ model Customer {
   otps                    Otp[]
   passwordResetTokens     PasswordResetToken[]
 
+  paymentHistories        PaymentHistory[]
   cashbackWallets         CashbackWallet[]
   issues                  Issue[]
   vouchersAssigned        VoucherAssigned[]
   transactions            Transaction[]
-  paymentHistories        PaymentHistory[]
   notifications           Notification[]
 }
 
@@ -348,14 +348,14 @@ enum PaymentType {
 }
 
 model PaymentHistory {
-  payment_history_id   String             @id @default(cuid())
+  payment_history_id   String      @id @default(cuid())
   amount               Float
-  payment_date         DateTime           @default(now())
+  payment_date         DateTime    @default(now())
   payment_type         PaymentType
 
   // Relationships
+  customer             Customer    @relation(fields: [customer_id], references: [customer_id])
   customer_id          String
-  customer             Customer           @relation(fields: [customer_id], references: [customer_id])
 }
 
 model CashbackWallet {
@@ -366,10 +366,10 @@ model CashbackWallet {
   updatedAt            DateTime          @updatedAt
 
   // Relationships
-  customer_id          String            @unique
   customer             Customer          @relation(fields: [customer_id], references: [customer_id])
-  merchant_id          String            @unique
+  customer_id          String            @unique
   merchant             Merchant          @relation(fields: [merchant_id], references: [merchant_id])
+  merchant_id          String            @unique
   instalment_payments  InstalmentPayment[]
 
   // TODO: Add cashback wallet history
