@@ -1,48 +1,53 @@
-import { Request, Response } from 'express';
-import { stripe } from '../utils/stripe';
-import Stripe from 'stripe'; // Import Stripe types
-import { topUpWallet } from '../services/customerService';
-import { createPaymentHistory } from '../services/paymentHistoryService';
-import logger from '../utils/logger';
-import { PaymentType } from '@repo/interfaces';
+// app/backend/src/controllers/webhookController.ts
+import { Request, Response } from "express";
+import Stripe from "stripe"; // Import Stripe types
+import { stripe } from "../utils/stripe";
+import logger from "../utils/logger";
+import { topUpWallet } from "../services/customerService";
+import { createPaymentHistory } from "../services/paymentHistoryService";
+import { PaymentType } from "@repo/interfaces";
 
 export const handleStripeWebhook = async (req: Request, res: Response) => {
-    const sig = req.headers['stripe-signature'];
+    const signature = req.headers["stripe-signature"];
 
-    if (!sig) {
-        logger.error('Webhook signature is missing.');
-        return res.status(400).send('Webhook signature is missing.');
+    // Check if Stripe signature header is present
+    if (!signature) {
+        logger.error("Webhook signature is missing.");
+        return res.status(400).send("Webhook signature is missing.");
     }
 
-    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    // Ensure the webhook secret is set in environment variables
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!webhookSecret) {
         throw new Error("STRIPE_WEBHOOK_SECRET is not defined in the environment variables");
     }
-
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
     let event: Stripe.Event;
 
     try {
-        event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-    } catch (err) {
-        logger.error(`Webhook signature verification failed: ${(err as Error).message}`);
-        return res.status(400).send(`Webhook Error: ${(err as Error).message}`);
+        // Construct the Stripe event with the signature and secret
+        event = stripe.webhooks.constructEvent(req.body, signature, webhookSecret);
+    } catch (error) {
+        logger.error(`Webhook signature verification failed: ${(error as Error).message}`);
+        return res.status(400).send(`Webhook Error: ${(error as Error).message}`);
     }
 
-    // Handle the event
-    if (event.type === 'payment_intent.succeeded') {
+    // Process the event if it's a successful payment intent
+    if (event.type === "payment_intent.succeeded") {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        const customer_id = paymentIntent.metadata.customer_id;
-        const amount = paymentIntent.amount / 100; // Convert back to dollars
+        const customerId = paymentIntent.metadata.customer_id;
+        const amount = paymentIntent.amount / 100; // Convert cents to dollars
 
         try {
-            await topUpWallet(customer_id, amount);
-            await createPaymentHistory(customer_id, amount, PaymentType.TOP_UP);
-            console.log(`Wallet topped up for customer ${customer_id} by $${amount}`);
-        } catch (err: any) {
-            console.error(`Failed to update wallet balance: ${err.message}`);
+            // Update wallet balance and create payment history
+            await topUpWallet(customerId, amount);
+            await createPaymentHistory(amount, PaymentType.TOP_UP, customerId);
+            logger.info(`Wallet topped up for customer ${customerId} by $${amount}`);
+        } catch (error) {
+            logger.error(`Failed to update wallet balance for customer ${customerId}: ${(error as Error).message}`);
         }
     }
 
-    res.status(200).send('Received webhook');
+    // Respond to Stripe to confirm receipt of the webhook
+    res.status(200).send("Received webhook");
 };

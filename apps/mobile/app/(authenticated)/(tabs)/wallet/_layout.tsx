@@ -1,4 +1,4 @@
-// wallet/_layout.tsx
+// app/mobile/app/(authenticated)/(tabs)/wallet/_layout.tsx
 import { Stack } from "expo-router";
 
 export default function WalletLayout() {
@@ -8,10 +8,9 @@ export default function WalletLayout() {
         name="index" 
         options={{ headerTitle: "Wallet" }} 
       />
-      {/* Add additional screens here as you create them */}
       <Stack.Screen 
-        name="allPaymentHistory"
-        options={{ headerTitle: "Payment History" }}
+        name="allWalletHistory"
+        options={{ headerTitle: "Wallet History" }}
       />
     </Stack>
   );

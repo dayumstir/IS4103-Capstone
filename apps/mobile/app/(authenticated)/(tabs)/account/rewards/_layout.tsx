@@ -1,9 +1,9 @@
-import { Stack } from "expo-router";
-import { Text, TouchableOpacity } from "react-native";
-import { router } from "expo-router";
+// app/mobile/app/(authenticated)/(tabs)/account/rewards/_layout.tsx
+import { Stack, router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { Text, TouchableOpacity } from "react-native";
 
-export default function IssuesLayout() {
+export default function RewardsLayout() {
   return (
     <Stack>
       <Stack.Screen
@@ -12,18 +12,22 @@ export default function IssuesLayout() {
           headerTitle: "Rewards",
           headerLeft: () => (
             <TouchableOpacity
-              className="flex-row gap-1"
+              className="flex-row items-center"
               onPress={() => router.navigate("/account")}
             >
               <Ionicons name="chevron-back" size={24} color="#3b82f6" />
-              <Text className="text-xl text-blue-500">Account</Text>
+              <Text className="text-xl text-blue-500 ml-1">Account</Text>
             </TouchableOpacity>
           ),
         }}
       />
       <Stack.Screen
-        name="[voucherId]"
+        name="voucherAssignedDetails"
         options={{ headerTitle: "Voucher Details" }}
+      />
+      <Stack.Screen
+        name="cashbackWalletDetails"
+        options={{ headerTitle: "Cashback Wallet Details" }}
       />
     </Stack>
   );

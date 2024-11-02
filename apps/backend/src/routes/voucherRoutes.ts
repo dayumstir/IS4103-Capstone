@@ -12,7 +12,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.use(authMiddleware); // Apply authMiddleware to all routes
+router.use(authMiddleware);
 
 router.post("/create", createVoucher);
 router.post("/assign", assignVoucher);
