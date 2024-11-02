@@ -220,11 +220,12 @@ model Issue {
 
 // Payments, Wallet and Terms Management Module
 model CreditTier {
-  credit_tier_id   String @id @default(cuid())
-  name             String @unique
+  credit_tier_id   String           @id @default(cuid())
+  name             String           @unique
   min_credit_score Int
   max_credit_score Int
 
+  // Relationships
   instalment_plans InstalmentPlan[]
 }
 
@@ -336,7 +337,7 @@ model InstalmentPayment {
   voucher_assigned_id             String?            @unique
   voucher_assigned                VoucherAssigned?   @relation(fields: [voucher_assigned_id], references: [voucher_assigned_id])
   
-  cashback_wallet_id              String?            @unique
+  cashback_wallet_id              String?            
   cashback_wallet                 CashbackWallet?    @relation(fields: [cashback_wallet_id], references: [cashback_wallet_id])
 }
 

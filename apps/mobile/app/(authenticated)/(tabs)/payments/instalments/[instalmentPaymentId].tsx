@@ -1,5 +1,5 @@
-// payments/instalments/[instalmentPaymentId].tsx
-import { useState } from "react";
+// app/mobile/app/(authenticated)/(tabs)/payments/installments/[instalmentPaymentId].tsx
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -9,35 +9,42 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   RefreshControl,
+  TextInput,
 } from "react-native";
 import { Button } from "@ant-design/react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
 import { BlurView } from "expo-blur";
+import { z } from "zod";
 
 import { useGetInstalmentPaymentByIdQuery } from "../../../../../redux/services/instalmentPaymentService";
 import { useGetAllVouchersQuery } from "../../../../../redux/services/voucherService";
+import { useGetAllCashbackWalletsQuery } from "../../../../../redux/services/cashbackWalletService";
 import { useMakePaymentMutation } from "../../../../../redux/services/paymentService";
 import { formatCurrency } from "../../../../../utils/formatCurrency";
-import { format } from "date-fns";
+import { format, isAfter } from "date-fns";
 
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
-import { IVoucherAssigned } from "@repo/interfaces";
+import { IVoucherAssigned, ICashbackWallet } from "@repo/interfaces";
 
 export default function InstalmentPaymentDetails() {
   const { instalmentPaymentId } = useLocalSearchParams<{
     instalmentPaymentId: string;
   }>();
   const [voucherModalVisible, setVoucherModalVisible] = useState(false);
+  const [cashbackModalVisible, setCashbackModalVisible] = useState(false);
   const [selectedVoucher, setSelectedVoucher] =
     useState<IVoucherAssigned | null>(null);
+  const [selectedCashbackWallet, setSelectedCashbackWallet] =
+    useState<ICashbackWallet | null>(null);
+  const [cashbackAmount, setCashbackAmount] = useState<string>("0");
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
   const { profile } = useSelector((state: RootState) => state.customer);
   const router = useRouter();
 
-  // Fetch the instalment payment by ID
+  /// Fetch the instalment payment by ID
   const {
     data: instalmentPayment,
     isLoading,
@@ -53,6 +60,16 @@ export default function InstalmentPaymentDetails() {
     refetch: refetchVouchers,
   } = useGetAllVouchersQuery({ customer_id: profile?.customer_id ?? "" });
 
+  // Fetch customer's cashback wallets
+  const {
+    data: cashbackWallets,
+    isLoading: isCashbackWalletsLoading,
+    error: cashbackWalletsError,
+    refetch: refetchCashbackWallets,
+  } = useGetAllCashbackWalletsQuery({
+    customer_id: profile?.customer_id ?? "",
+  });
+
   // Mutation hook for making payment
   const [makePayment, { isLoading: isPaying }] = useMakePaymentMutation();
 
@@ -60,7 +77,11 @@ export default function InstalmentPaymentDetails() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    Promise.all([refetch(), refetchVouchers()]).finally(() => {
+    Promise.all([
+      refetch(),
+      refetchVouchers(),
+      refetchCashbackWallets(),
+    ]).finally(() => {
       setRefreshing(false);
     });
   };
@@ -100,9 +121,72 @@ export default function InstalmentPaymentDetails() {
   // Ensure voucher discount does not exceed instalment amount
   voucherDiscount = Math.min(voucherDiscount, instalmentPayment.amount_due);
 
+  // Find applicable cashback wallet
+  const applicableCashbackWallet = cashbackWallets?.find(
+    (wallet) =>
+      wallet.merchant_id === instalmentPayment.transaction.merchant.merchant_id
+  );
+
+  // Only calculate maxCashbackUsable if a cashback wallet is selected
+  const maxCashbackUsable = selectedCashbackWallet
+    ? Math.min(
+        selectedCashbackWallet.wallet_balance,
+        instalmentPayment.amount_due - voucherDiscount
+      )
+    : 0;
+
+  // Input validation using Zod
+  let cashbackAmountError = "";
+
+  if (selectedCashbackWallet) {
+    const cashbackAmountSchema = z.object({
+      amount: z
+        .string()
+        .min(1, { message: "Amount is required" })
+        .refine(
+          (val) => {
+            const num = parseFloat(val);
+            return (
+              !isNaN(num) &&
+              num >= 0 &&
+              num <= maxCashbackUsable
+            );
+          },
+          {
+            message: `Please enter a valid amount between $0 and ${formatCurrency(
+              maxCashbackUsable
+            )}`,
+          }
+        ),
+    });
+
+    const validateCashbackAmount = (amount: string) => {
+      try {
+        cashbackAmountSchema.parse({ amount });
+        return "";
+      } catch (e) {
+        if (e instanceof z.ZodError) {
+          return e.errors[0].message;
+        }
+        return "An unexpected error occurred.";
+      }
+    };
+
+    cashbackAmountError = validateCashbackAmount(cashbackAmount);
+  }
+
+  const adjustedCashbackAmount =
+    selectedCashbackWallet && !cashbackAmountError
+      ? parseFloat(cashbackAmount)
+      : 0;
+
+  // Calculate total payable amount
+  const totalPayable =
+    instalmentPayment.amount_due - voucherDiscount - adjustedCashbackAmount;
+
   const walletBalance = profile?.wallet_balance || 0;
 
-  const amountFromWallet = instalmentPayment.amount_due - voucherDiscount;
+  const amountFromWallet = totalPayable;
 
   // Make payment
   const handlePayInstalment = async () => {
@@ -121,6 +205,8 @@ export default function InstalmentPaymentDetails() {
         voucher_assigned_id: selectedVoucher?.voucher_assigned_id,
         amount_discount_from_voucher: voucherDiscount,
         amount_deducted_from_wallet: amountFromWallet,
+        cashback_wallet_id: selectedCashbackWallet?.cashback_wallet_id,
+        amount_deducted_from_cashback_wallet: adjustedCashbackAmount,
       }).unwrap();
 
       Toast.show({
@@ -130,6 +216,7 @@ export default function InstalmentPaymentDetails() {
       // Refresh data
       refetch();
       refetchVouchers();
+      refetchCashbackWallets();
       // Navigate back to payments page
       router.back();
     } catch (error) {
@@ -142,11 +229,20 @@ export default function InstalmentPaymentDetails() {
   };
 
   // Filter out unusable vouchers
-  const usableVouchers = vouchers?.filter(
-    (voucherAssigned) =>
+  const usableVouchers = vouchers?.filter((voucherAssigned) => {
+    const isNotExpired =
+      isAfter(new Date(voucherAssigned.voucher.expiry_date), new Date());
+    return (
       voucherAssigned.remaining_uses > 0 &&
-      voucherAssigned.status === "AVAILABLE",
-  );
+      voucherAssigned.status === "AVAILABLE" &&
+      isNotExpired
+    );
+  });
+
+  // Handle cashback amount input
+  const handleCashbackAmountChange = (value: string) => {
+    setCashbackAmount(value);
+  };
 
   return (
     <ScrollView
@@ -343,6 +439,14 @@ export default function InstalmentPaymentDetails() {
               </Text>
             </View>
           )}
+          {adjustedCashbackAmount > 0 && (
+            <View className="mb-2 flex-row justify-between">
+              <Text className="text-base">Cashback Applied:</Text>
+              <Text className="text-base text-green-600">
+                -{formatCurrency(adjustedCashbackAmount)}
+              </Text>
+            </View>
+          )}
           <View className="my-2 border-t border-gray-200" />
           <View className="flex-row justify-between">
             <Text className="text-lg font-semibold">Total Payable:</Text>
@@ -360,13 +464,6 @@ export default function InstalmentPaymentDetails() {
             </Button>
           </View>
         )}
-        {/* Uncomment and implement cashback logic as needed */}
-        {/* <Button
-            type="ghost"
-            onPress={() => setCashbackModalVisible(true)}
-          >
-            <Text className="font-semibold text-blue-500">Use Cashback</Text>
-          </Button> */}
 
         {/* ===== Display Selected Voucher ===== */}
         {selectedVoucher && (
@@ -389,13 +486,58 @@ export default function InstalmentPaymentDetails() {
               Valid Until:{" "}
               {format(
                 new Date(selectedVoucher.voucher.expiry_date),
-                "dd MMM yyyy",
+                "dd MMM yyyy"
               )}
             </Text>
           </View>
         )}
 
-        {/* Implement cashback display if needed */}
+        {/* ===== Cashback Button ===== */}
+        {!selectedCashbackWallet && (
+          <View className="mb-4">
+            <Button
+              type="ghost"
+              onPress={() => setCashbackModalVisible(true)}
+              disabled={!applicableCashbackWallet}
+            >
+              <Text
+                className={`font-semibold ${
+                  applicableCashbackWallet ? "text-blue-500" : "text-gray-400"
+                }`}
+              >
+                Use Cashback
+              </Text>
+            </Button>
+          </View>
+        )}
+
+        {/* ===== Display Selected Cashback ===== */}
+        {selectedCashbackWallet && adjustedCashbackAmount > 0 && (
+          <View className="mb-4 rounded-md border bg-green-50 p-4">
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="text-lg font-semibold text-green-800">
+                Cashback Applied
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedCashbackWallet(null);
+                  setCashbackAmount("0");
+                }}
+              >
+                <Ionicons name="close-circle" size={24} color="red" />
+              </TouchableOpacity>
+            </View>
+            <Text className="mb-1 text-sm text-gray-700">
+              Amount Used: {formatCurrency(adjustedCashbackAmount)}
+            </Text>
+            <Text className="text-sm text-gray-700">
+              Remaining Balance:{" "}
+              {formatCurrency(
+                selectedCashbackWallet.wallet_balance - adjustedCashbackAmount
+              )}
+            </Text>
+          </View>
+        )}
 
         {/* ===== Pay Button ===== */}
         {instalmentPayment.status === "UNPAID" && (
@@ -419,95 +561,245 @@ export default function InstalmentPaymentDetails() {
         <TouchableWithoutFeedback onPress={() => setVoucherModalVisible(false)}>
           <BlurView intensity={10} tint="dark" style={{ flex: 1 }} />
         </TouchableWithoutFeedback>
-        <View>
-          <View className="max-h-3/4 rounded-t-xl bg-white p-4">
-            <Text className="mb-4 text-xl font-bold">Select a Voucher</Text>
-            {isVouchersLoading ? (
-              <ActivityIndicator size="large" />
-            ) : vouchersError ? (
-              <Text>Error loading vouchers. Please try again later.</Text>
-            ) : usableVouchers && usableVouchers.length > 0 ? (
-              <ScrollView>
-                {usableVouchers.map((voucherAssigned) => {
-                  const voucher = voucherAssigned.voucher;
-                  return (
-                    <TouchableOpacity
-                      key={voucherAssigned.voucher_assigned_id}
-                      className="mb-2 rounded-md border bg-white p-4 shadow-sm"
-                      onPress={() => {
-                        setSelectedVoucher(voucherAssigned);
-                        setVoucherModalVisible(false);
-                      }}
-                    >
-                      <Text className="mb-1 text-lg font-semibold">
-                        {voucher.title}
+        <View className="absolute bottom-0 left-0 right-0 max-h-3/4 rounded-t-xl bg-white p-4">
+          <Text className="mb-4 text-xl font-bold">Select a Voucher</Text>
+          {isVouchersLoading ? (
+            <ActivityIndicator size="large" />
+          ) : vouchersError ? (
+            <Text>Error loading vouchers. Please try again later.</Text>
+          ) : usableVouchers && usableVouchers.length > 0 ? (
+            <ScrollView>
+              {usableVouchers.map((voucherAssigned, index) => (
+                <TouchableOpacity
+                  key={voucherAssigned.voucher_assigned_id}
+                  onPress={() => {
+                    setSelectedVoucher(voucherAssigned);
+                    setVoucherModalVisible(false);
+                  }}
+                  className={`${
+                    index === 0 ? "mt-4" : ""
+                  } ${index === usableVouchers.length - 1 ? "" : "mb-4"}`}
+                >
+                  {/* VoucherAssignedCard code directly included here */}
+                  <View className="w-full rounded-lg border border-gray-300 bg-white p-4">
+                    <View className="mb-2 flex-row items-center justify-between">
+                      <Text className="text-lg font-bold">
+                        {voucherAssigned.voucher.title.length > 25
+                          ? voucherAssigned.voucher.title.substring(0, 25) +
+                            "..."
+                          : voucherAssigned.voucher.title}
                       </Text>
-
-                      <View className="mb-2 flex-row flex-wrap">
-                        <View className="mb-2 w-1/2">
-                          <Text className="text-sm text-gray-500">
-                            Percentage Discount:
-                          </Text>
-                          <Text className="text-base font-medium">
-                            {voucher.percentage_discount}%
-                          </Text>
-                        </View>
-
-                        <View className="mb-2 w-1/2">
-                          <Text className="text-sm text-gray-500">
-                            Discount Amount:
-                          </Text>
-                          <Text className="text-base font-medium">
-                            ${voucher.amount_discount}
-                          </Text>
-                        </View>
-
-                        <View className="mb-2 w-1/2">
-                          <Text className="text-sm text-gray-500">
-                            Usage Limit:
-                          </Text>
-                          <Text className="text-base font-medium">
-                            {voucherAssigned.remaining_uses} /{" "}
-                            {voucher.usage_limit}
-                          </Text>
-                        </View>
-
-                        <View className="mb-2 w-1/2">
-                          <Text className="text-sm text-gray-500">
-                            Valid Until:
-                          </Text>
-                          <Text className="text-base font-medium">
-                            {format(
-                              new Date(voucher.expiry_date),
-                              "dd MMM yyyy",
-                            )}
-                          </Text>
-                        </View>
-
-                        <View className="mb-2 w-1/2">
-                          <Text className="text-sm text-gray-500">Status:</Text>
-                          <Text
-                            className={`text-base font-medium ${
-                              voucher.is_active
-                                ? "text-green-600"
-                                : "text-red-600"
-                            }`}
-                          >
-                            {voucher.is_active ? "Active" : "Inactive"}
-                          </Text>
-                        </View>
+                      <View
+                        className={`rounded px-1 py-0.5 ${
+                          voucherAssigned.status === "AVAILABLE"
+                            ? "bg-blue-500"
+                            : "bg-gray-500"
+                        }`}
+                      >
+                        <Text className="text-xs font-semibold text-white">
+                          {voucherAssigned.status}
+                        </Text>
                       </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
-            ) : (
-              <Text>No vouchers available.</Text>
-            )}
-            <Button type="ghost" onPress={() => setVoucherModalVisible(false)}>
-              <Text className="font-semibold text-blue-500">Close</Text>
-            </Button>
-          </View>
+                    </View>
+                    <Text className="text-sm text-gray-800">
+                      {voucherAssigned.voucher.description.length > 80
+                        ? voucherAssigned.voucher.description.substring(0, 80) +
+                          "..."
+                        : voucherAssigned.voucher.description}
+                    </Text>
+                    <View className="mt-2 border-t border-gray-200 pt-2">
+                      <Text className="text-xs text-gray-600">
+                        Expires:{" "}
+                        {format(
+                          new Date(voucherAssigned.voucher.expiry_date),
+                          "d MMM yyyy",
+                        )}
+                      </Text>
+                      <Text className="text-xs text-gray-600">
+                        Remaining Uses: {voucherAssigned.remaining_uses}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          ) : (
+            <Text>No vouchers available.</Text>
+          )}
+          <Button type="ghost" onPress={() => setVoucherModalVisible(false)}>
+            <Text className="font-semibold text-blue-500">Close</Text>
+          </Button>
+        </View>
+      </Modal>
+
+      {/* ===== Cashback Modal ===== */}
+      <Modal
+        visible={cashbackModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => {
+          setCashbackModalVisible(false);
+          setCashbackAmount("0");
+        }}
+      >
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setCashbackModalVisible(false);
+            setCashbackAmount("0");
+          }}
+        >
+          <BlurView intensity={10} tint="dark" style={{ flex: 1 }} />
+        </TouchableWithoutFeedback>
+        <View className="absolute bottom-0 left-0 right-0 max-h-3/4 rounded-t-xl bg-white p-4">
+          <Text className="mb-4 text-xl font-bold">Use Cashback</Text>
+          {isCashbackWalletsLoading ? (
+            <ActivityIndicator size="large" />
+          ) : cashbackWalletsError ? (
+            <Text>Error loading cashback wallets. Please try again later.</Text>
+          ) : applicableCashbackWallet ? (
+            <View>
+              {/* Display cashback wallet details */}
+              <View className="mb-4 rounded-lg bg-white p-4">
+                <View className="mb-4 flex-row items-center gap-4">
+                  <View className="h-12 w-12 items-center justify-center rounded-full bg-green-500">
+                    <MaterialCommunityIcons
+                      name="wallet-outline"
+                      size={24}
+                      color="white"
+                    />
+                  </View>
+                  <View>
+                    <Text className="text-2xl font-bold">
+                      {applicableCashbackWallet.merchant.name}
+                    </Text>
+                    <Text className="text-sm text-gray-500">
+                      Cashback Wallet
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="flex gap-2">
+                  <Text>
+                    <Text className="font-bold">Wallet Balance:</Text>{" "}
+                    {formatCurrency(applicableCashbackWallet.wallet_balance)}
+                  </Text>
+                  <Text>
+                    <Text className="font-bold">Updated At:</Text>{" "}
+                    {format(
+                      new Date(applicableCashbackWallet.updatedAt),
+                      "d MMM yyyy"
+                    )}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Calculate maxCashbackUsable here */}
+              {(() => {
+                const maxCashbackUsable = Math.min(
+                  applicableCashbackWallet.wallet_balance,
+                  instalmentPayment.amount_due - voucherDiscount
+                );
+
+                // Update the validation schema
+                const cashbackAmountSchema = z.object({
+                  amount: z
+                    .string()
+                    .min(1, { message: "Amount is required" })
+                    .refine(
+                      (val) => {
+                        const num = parseFloat(val);
+                        return (
+                          !isNaN(num) &&
+                          num >= 0 &&
+                          num <= maxCashbackUsable
+                        );
+                      },
+                      {
+                        message: `Please enter a valid amount between $0 and ${formatCurrency(
+                          maxCashbackUsable
+                        )}`,
+                      }
+                    ),
+                });
+
+                const validateCashbackAmount = (amount: string) => {
+                  try {
+                    cashbackAmountSchema.parse({ amount });
+                    return "";
+                  } catch (e) {
+                    if (e instanceof z.ZodError) {
+                      return e.errors[0].message;
+                    }
+                    return "An unexpected error occurred.";
+                  }
+                };
+
+                const cashbackAmountError = validateCashbackAmount(cashbackAmount);
+
+                return (
+                  <>
+                    {/* Input for cashback amount */}
+                    <View className="mb-4">
+                      <Text className="mb-2 text-base font-semibold">
+                        Enter Amount to Use:
+                      </Text>
+                      <TextInput
+                        keyboardType="numeric"
+                        placeholder="0.00"
+                        value={cashbackAmount}
+                        onChangeText={handleCashbackAmountChange}
+                        className="w-full rounded border border-gray-300 p-2"
+                      />
+                      {cashbackAmountError ? (
+                        <Text className="mt-1 text-sm text-red-500">
+                          {cashbackAmountError}
+                        </Text>
+                      ) : null}
+                      <Text className="mt-2 text-sm text-gray-500">
+                        Maximum amount you can use:{" "}
+                        {formatCurrency(maxCashbackUsable)}
+                      </Text>
+                    </View>
+
+                    {/* Buttons */}
+                    <View className="flex-row justify-end">
+                      <Button
+                        type="ghost"
+                        onPress={() => {
+                          setCashbackModalVisible(false);
+                          setCashbackAmount("0");
+                        }}
+                        style={{ marginRight: 8 }}
+                      >
+                        <Text className="font-semibold text-gray-500">
+                          Cancel
+                        </Text>
+                      </Button>
+                      <Button
+                        type="primary"
+                        onPress={() => {
+                          if (cashbackAmountError) {
+                            Toast.show({
+                              type: "error",
+                              text1: "Invalid Amount",
+                              text2: cashbackAmountError,
+                            });
+                            return;
+                          }
+                          setSelectedCashbackWallet(applicableCashbackWallet);
+                          setCashbackModalVisible(false);
+                        }}
+                      >
+                        <Text className="font-semibold text-white">Apply</Text>
+                      </Button>
+                    </View>
+                  </>
+                );
+              })()}
+            </View>
+          ) : (
+            <Text>No applicable cashback wallet available.</Text>
+          )}
         </View>
       </Modal>
 
