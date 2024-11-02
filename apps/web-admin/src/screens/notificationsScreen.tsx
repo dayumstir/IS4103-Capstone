@@ -24,8 +24,14 @@ import {
   INotification,
   NotificationPriority,
 } from "@repo/interfaces/notificationInterface";
-import { useViewCustomerProfileQuery } from "../redux/services/customerService";
-import { useViewMerchantProfileQuery } from "../redux/services/merchantService";
+import {
+  useGetAllCustomersQuery,
+  useViewCustomerProfileQuery,
+} from "../redux/services/customerService";
+import {
+  useGetAllMerchantsQuery,
+  useViewMerchantProfileQuery,
+} from "../redux/services/merchantService";
 import { useViewAdminProfileQuery } from "../redux/services/adminService";
 import { Link } from "react-router-dom";
 import { PlusOutlined } from "@ant-design/icons";
@@ -43,6 +49,14 @@ const NotificationsScreen = () => {
     useState<INotification | null>(null);
   const { data: notifications } = useGetAllNotificationsQuery(searchTerm);
   const [currentCustomerId, setCurrentCustomerId] = useState("");
+
+  const [currentNotificationId, setCurrentNotificationId] = useState("");
+  const { data: notification } = useViewNotificationDetailsQuery(
+    currentNotificationId,
+    {
+      skip: !currentNotificationId,
+    },
+  );
   const { data: currentCustomer } = useViewCustomerProfileQuery(
     currentCustomerId,
     { skip: !currentCustomerId },
@@ -52,18 +66,13 @@ const NotificationsScreen = () => {
     currentMerchantId,
     { skip: !currentMerchantId },
   );
-  const [currentNotificationId, setCurrentNotificationId] = useState("");
-  const { data: notification } = useViewNotificationDetailsQuery(
-    currentNotificationId,
-    {
-      skip: !currentNotificationId,
-    },
-  );
   const [currentAdminId, setCurrentAdminId] = useState("");
   const { data: currentAdmin } = useViewAdminProfileQuery(currentAdminId, {
     skip: !currentAdminId,
   });
   const [createNotification] = useCreateNotificationMutation();
+  const { data: customerOptions } = useGetAllCustomersQuery(undefined);
+  const { data: merchantOptions } = useGetAllMerchantsQuery(undefined);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -76,20 +85,59 @@ const NotificationsScreen = () => {
     setIsModalVisible(true);
   };
 
-  const handleCreateNotification = async (
-    values: Omit<INotification, "notification_id">,
-  ) => {
+  const showCreateNotificationModal = () => {
+    setCreateModalVisible(true);
+    form.resetFields();
+    setCurrentCustomerId(""); // Clear previous state
+    setCurrentMerchantId("");
+  };
+
+  const handleSelectAll = (field, options) => {
+    const selectedAll = form.getFieldValue(field).length === options.length;
+    form.setFieldsValue({
+      [field]: selectedAll ? [] : options.map((option) => option.value),
+    });
+  };
+
+  const handleCreateNotification = async (values) => {
+    const { customer_ids = [], merchant_ids = [], ...restValues } = values;
+
     try {
-      const result = await createNotification(values).unwrap();
-      message.success(`New notification "${result.title}" has been created.`);
+      // Create notifications for each selected customer
+      const customerNotifications = customer_ids.map((customer_id) => ({
+        ...restValues,
+        customer_id,
+        merchant_id: null, // Ensure only customer is set
+      }));
+
+      // Create notifications for each selected merchant
+      const merchantNotifications = merchant_ids.map((merchant_id) => ({
+        ...restValues,
+        merchant_id,
+        customer_id: null, // Ensure only merchant is set
+      }));
+
+      // Combine customer and merchant notifications
+      const allNotifications = [
+        ...customerNotifications,
+        ...merchantNotifications,
+      ];
+
+      // Create all notifications
+      await Promise.all(
+        allNotifications.map((notification) =>
+          createNotification(notification).unwrap(),
+        ),
+      );
+
+      message.success("Notifications have been created successfully.");
+      setCreateModalVisible(false);
       form.resetFields();
     } catch (error) {
       console.error("Error creating notification:", error);
       message.error("Failed to create notification");
     }
   };
-
- 
 
   const columns = [
     {
@@ -128,46 +176,34 @@ const NotificationsScreen = () => {
         { text: "Merchant", value: "merchant" },
       ],
       onFilter: (value, record: INotification) => {
-        if (value === "customer") {
-          return !!record.customer_id;
-        }
-        return (
-          value === "merchant" && !record.customer_id && !!record.merchant_id
-        );
+        if (value === "customer") return !!record.customer_id;
+        return value === "merchant" && !!record.merchant_id;
       },
       render: (text, record: INotification) => {
-        if (record && record.customer_id) {
-          setCurrentCustomerId(record.customer_id);
-        }
-        if (record && record.merchant_id) {
-          setCurrentMerchantId(record.merchant_id);
-        }
-        if (record && record.admin_id) {
-          setCurrentAdminId(record.admin_id);
-        }
-        if (record.customer_id && record.merchant_id) {
-          return (
-            <>
-              <Tag>Customer</Tag>
-              {currentCustomer?.email}
-            </>
-          );
-        } else if (record.customer_id) {
-          return (
-            <>
-              <Tag>Customer</Tag>
-              {currentCustomer?.email}
-            </>
-          );
-        } else if (record.merchant_id) {
-          return (
-            <>
-              <Tag>Merchant</Tag>
-              {currentMerchant?.email}
-            </>
-          );
-        }
-        return null;
+        return (
+          <>
+            {record.customer_id && (
+              <>
+                <Tag>Customer</Tag>
+                {
+                  customerOptions?.find(
+                    (c) => c.customer_id === record.customer_id,
+                  )?.email
+                }
+              </>
+            )}
+            {record.merchant_id && (
+              <>
+                <Tag>Merchant</Tag>
+                {
+                  merchantOptions?.find(
+                    (m) => m.merchant_id === record.merchant_id,
+                  )?.email
+                }
+              </>
+            )}
+          </>
+        );
       },
     },
     {
@@ -224,7 +260,7 @@ const NotificationsScreen = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => setCreateModalVisible(true)}
+            onClick={showCreateNotificationModal}
           >
             Create Notification
           </Button>
@@ -260,17 +296,25 @@ const NotificationsScreen = () => {
             {currentNotification?.create_time &&
               new Date(currentNotification?.create_time).toLocaleTimeString()}
           </Descriptions.Item>
-          {currentMerchant?.merchant_id && (
+          {currentNotification?.merchant_id && (
             <Descriptions.Item label="Merchant" span={2}>
-              <Link to={`/admin/merchant/${currentMerchant.merchant_id}`}>
-                {currentMerchant.name}
+              <Link to={`/admin/merchant/${currentNotification.merchant_id}`}>
+                {
+                  merchantOptions?.find(
+                    (m) => m.merchant_id === currentNotification.merchant_id,
+                  )?.name
+                }
               </Link>
             </Descriptions.Item>
           )}
-          {currentCustomer?.customer_id && (
+          {currentNotification?.customer_id && (
             <Descriptions.Item label="Customer" span={2}>
-              <Link to={`/admin/customer/${currentCustomer.customer_id}`}>
-                {currentCustomer.name}
+              <Link to={`/admin/customer/${currentNotification.customer_id}`}>
+                {
+                  customerOptions?.find(
+                    (c) => c.customer_id === currentNotification.customer_id,
+                  )?.name
+                }
               </Link>
             </Descriptions.Item>
           )}
@@ -282,63 +326,148 @@ const NotificationsScreen = () => {
         </Descriptions>
       </Modal>
       <Modal
-    title="Create New Notification"
-    visible={isCreateModalVisible}
-    onCancel={() => setCreateModalVisible(false)}
-    footer={null}
-  >
-    <Form form={form} layout="vertical" onFinish={handleCreateNotification}>
-      <Form.Item
-        label="Title"
-        name="title"
-        rules={[{ required: true, message: "Please enter a title" }]}
+        title="Create New Notification"
+        visible={isCreateModalVisible}
+        onCancel={() => setCreateModalVisible(false)}
+        footer={null}
       >
-        <Input />
-      </Form.Item>
+        <Form form={form} layout="vertical" onFinish={handleCreateNotification}>
+          <Form.Item
+            label="Title"
+            name="title"
+            rules={[{ required: true, message: "Please enter a title" }]}
+          >
+            <Input />
+          </Form.Item>
 
-      <Form.Item
-        label="Description"
-        name="description"
-        rules={[{ required: true, message: "Please enter a description" }]}
-      >
-        <Input.TextArea />
-      </Form.Item>
+          <Form.Item
+            label="Description"
+            name="description"
+            rules={[{ required: true, message: "Please enter a description" }]}
+          >
+            <Input.TextArea />
+          </Form.Item>
 
-      <Form.Item
-        label="Priority"
-        name="priority"
-        rules={[{ required: true, message: "Please select a priority" }]}
-      >
-        <Select>
-          <Select.Option value="HIGH">High</Select.Option>
-          <Select.Option value="MEDIUM">Medium</Select.Option>
-          <Select.Option value="LOW">Low</Select.Option>
-        </Select>
-      </Form.Item>
+          <Form.Item
+            label="Priority"
+            name="priority"
+            rules={[{ required: true, message: "Please select a priority" }]}
+          >
+            <Select>
+              <Select.Option value="HIGH">High</Select.Option>
+              <Select.Option value="LOW">Low</Select.Option>
+            </Select>
+          </Form.Item>
 
-      <Form.Item
-        label="Customer ID"
-        name="customer_id"
-        rules={[{ required: false, message: "Enter customer ID if available" }]}
-      >
-        <Input />
-      </Form.Item>
+          <Form.Item
+            name="customer_ids"
+            label="Customer Email"
+            dependencies={["merchant_ids"]}
+            rules={[
+              {
+                validator: (_, value) => {
+                  const merchantEmail = form.getFieldValue("merchant_email");
+                  if (value || merchantEmail) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error(
+                      "Please select at least one customer or merchant",
+                    ),
+                  );
+                },
+              },
+            ]}
+          >
+            <Select
+              mode="multiple"
+              showSearch
+              placeholder="Select customer(s)"
+              onChange={(selected) => {
+                // Check if "Select All" was selected
+                if (selected.includes("all-customers")) {
+                  // Toggle Select All
+                  const allCustomerIds = (customerOptions ?? []).map(
+                    (customer) => customer.customer_id,
+                  );
+                  const isAllSelected =
+                    selected.length - 1 === allCustomerIds.length;
 
-      <Form.Item
-        label="Merchant ID"
-        name="merchant_id"
-        rules={[{ required: false, message: "Enter merchant ID if available" }]}
-      >
-        <Input />
-      </Form.Item>
+                  // Set all customer IDs or clear selection based on current state
+                  form.setFieldsValue({
+                    customer_ids: isAllSelected ? [] : allCustomerIds,
+                  });
+                } else {
+                  // If a regular customer is selected, update form value normally
+                  form.setFieldsValue({ customer_ids: selected });
+                }
+              }}
+              options={[
+                { label: "Select All Customers", value: "all-customers" },
+                ...(customerOptions ?? []).map((customer) => ({
+                  label: customer.email,
+                  value: customer.customer_id,
+                })),
+              ]}
+            />
+          </Form.Item>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
-          Submit
-        </Button>
-      </Form.Item>
-    </Form>
-  </Modal>;
+          <Form.Item
+            name="merchant_ids"
+            label="Merchant Email"
+            dependencies={["customer_ids"]}
+            rules={[
+              {
+                validator: (_, value) => {
+                  const customerEmail = form.getFieldValue("customer_email");
+                  if (value || customerEmail) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error(
+                      "Please select at least one customer or merchant",
+                    ),
+                  );
+                },
+              },
+            ]}
+          >
+            <Select
+              mode="multiple"
+              showSearch
+              placeholder="Select merchant(s)"
+              onChange={(selected) => {
+                if (selected.includes("all-merchants")) {
+                  const allMerchantIds = (merchantOptions ?? []).map(
+                    (merchant) => merchant.merchant_id,
+                  );
+                  const isAllSelected =
+                    selected.length - 1 === allMerchantIds.length;
+
+                  form.setFieldsValue({
+                    merchant_ids: isAllSelected ? [] : allMerchantIds,
+                  });
+                } else {
+                  form.setFieldsValue({ merchant_ids: selected });
+                }
+              }}
+              options={[
+                { label: "Select All Merchants", value: "all-merchants" },
+                ...(merchantOptions ?? []).map((merchant) => ({
+                  label: merchant.email,
+                  value: merchant.merchant_id,
+                })),
+              ]}
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
