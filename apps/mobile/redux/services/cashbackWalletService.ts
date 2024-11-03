@@ -1,14 +1,14 @@
-// app/mobile/redux/services/voucherService.ts
+// app/mobile/redux/services/cashbackWalletService.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_URL } from "../../config/apiConfig";
 import { RootState } from "../store";
-import { IVoucherAssigned } from "@repo/interfaces";
+import { ICashbackWallet } from "@repo/interfaces";
 
 // Define a service using a base URL and expected endpoints
-export const voucherApi = createApi({
-  reducerPath: "voucherApi",
+export const cashbackWalletApi = createApi({
+  reducerPath: "cashbackWalletApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${API_URL}/voucher`,
+    baseUrl: `${API_URL}/cashbackWallet`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).customerAuth.token;
       if (token) {
@@ -17,20 +17,20 @@ export const voucherApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Voucher"],
+  tagTypes: ["CashbackWallet"],
   endpoints: (builder) => ({
 
-    // Get All Customer Vouchers
-    getAllVouchers: builder.query<IVoucherAssigned[], { customer_id: string }>({
+    // Get All Customer Cashback Wallets
+    getAllCashbackWallets: builder.query<ICashbackWallet[], { customer_id: string }>({
       query: ({ customer_id }) => ({
-        url: `/customer/${customer_id}`,
+        url: `/${customer_id}`,
         method: "GET",
       }),
-      providesTags: [{ type: "Voucher", id: "LIST" }],
+      providesTags: [{ type: "CashbackWallet", id: "LIST" }],
     }),
   }),
 });
 
 export const { 
-  useGetAllVouchersQuery
-} = voucherApi;
+  useGetAllCashbackWalletsQuery
+} = cashbackWalletApi;

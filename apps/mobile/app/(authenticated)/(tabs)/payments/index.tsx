@@ -1,4 +1,4 @@
-// payments/index.tsx
+// app/mobile/app/(authenticated)/(tabs)/payments/index.tsx
 import React, { useState, useEffect } from "react";
 import {
   ScrollView,

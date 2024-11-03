@@ -1,4 +1,4 @@
-// src/routes/paymentRoutes.ts
+// app/backend/src/routes/paymentRoutes.ts
 import { Router } from "express";
 import {
     topUpWallet,
