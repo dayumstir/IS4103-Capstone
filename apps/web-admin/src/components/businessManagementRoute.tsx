@@ -38,6 +38,14 @@ export default function BusinessManagementRoute() {
             <Link to="/business-management/transactions">Transactions</Link>
           ),
         },
+        {
+          key: "merchant-payments",
+          label: (
+            <Link to="/business-management/merchant-payments">
+              Merchant Payments
+            </Link>
+          ),
+        },
       ],
     },
   ];

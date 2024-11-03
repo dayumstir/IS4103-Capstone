@@ -38,12 +38,12 @@ model Customer {
   otps                    Otp[]
   passwordResetTokens     PasswordResetToken[]
 
-  paymentHistories        PaymentHistory[]
-  cashbackWallets         CashbackWallet[]
-  issues                  Issue[]
-  vouchersAssigned        VoucherAssigned[]
-  transactions            Transaction[]
-  notifications           Notification[]
+  paymentHistories PaymentHistory[]
+  cashbackWallets  CashbackWallet[]
+  issues           Issue[]
+  vouchersAssigned VoucherAssigned[]
+  transactions     Transaction[]
+  notifications    Notification[]
 }
 
 // Utility Schemas
@@ -115,11 +115,11 @@ enum AdminType {
 }
 
 model Admin {
-  admin_id        String    @id @default(cuid())
+  admin_id        String         @id @default(cuid())
   name            String
-  profile_picture Bytes?    @db.ByteA
-  email           String    @unique
-  username        String    @unique
+  profile_picture Bytes?         @db.ByteA
+  email           String         @unique
+  username        String         @unique
   password        String
   contact_number  String
   address         String
@@ -131,17 +131,17 @@ model Admin {
 }
 
 model Merchant {
-  merchant_id             String                           @id @default(cuid())
-  name                    String
-  email                   String                           @unique
-  password                String
-  contact_number          String
-  address                 String
-  qr_code                 String
-  status                  Status
-  profile_picture         Bytes?                           @db.ByteA
-  cashback                Float
-  wallet_balance          Float                            @default(0)
+  merchant_id     String @id @default(cuid())
+  name            String
+  email           String @unique
+  password        String
+  contact_number  String
+  address         String
+  qr_code         String
+  status          Status
+  profile_picture Bytes? @db.ByteA
+  cashback        Float
+  wallet_balance  Float  @default(0)
 
   // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
@@ -211,17 +211,17 @@ model Issue {
   transaction_id String? // Optional foreign key to Transaction
 
   // Relations
-  merchant    Merchant?    @relation(fields: [merchant_id], references: [merchant_id])
-  customer    Customer?    @relation(fields: [customer_id], references: [customer_id])
-  admin       Admin?       @relation(fields: [admin_id], references: [admin_id])
-  transaction Transaction? @relation(fields: [transaction_id], references: [transaction_id])
-  notifications    Notification[]
+  merchant      Merchant?      @relation(fields: [merchant_id], references: [merchant_id])
+  customer      Customer?      @relation(fields: [customer_id], references: [customer_id])
+  admin         Admin?         @relation(fields: [admin_id], references: [admin_id])
+  transaction   Transaction?   @relation(fields: [transaction_id], references: [transaction_id])
+  notifications Notification[]
 }
 
 // Payments, Wallet and Terms Management Module
 model CreditTier {
-  credit_tier_id   String           @id @default(cuid())
-  name             String           @unique
+  credit_tier_id   String @id @default(cuid())
+  name             String @unique
   min_credit_score Int
   max_credit_score Int
 
@@ -230,14 +230,14 @@ model CreditTier {
 }
 
 model WithdrawalFeeRate {
-  withdrawal_fee_rate_id      String             @id @default(cuid())
-  name                        String
-  wallet_balance_max          Float
-  wallet_balance_min          Float         
-  monthly_revenue_max         Float
-  monthly_revenue_min         Float    
-  percentage_withdrawal_fee   Float
-  percentage_transaction_fee  Float
+  withdrawal_fee_rate_id     String @id @default(cuid())
+  name                       String
+  wallet_balance_max         Float
+  wallet_balance_min         Float
+  monthly_revenue_max        Float
+  monthly_revenue_min        Float
+  percentage_withdrawal_fee  Float
+  percentage_transaction_fee Float
 }
 
 enum PaymentStatus {
@@ -294,7 +294,7 @@ model Transaction {
 
   instalment_payments InstalmentPayment[]
 
-  notifications    Notification[]
+  notifications Notification[]
 }
 
 model InstalmentPlan {
@@ -326,19 +326,19 @@ model InstalmentPayment {
   paid_date               DateTime?
   instalment_number       Int // depends on frequency of instalment plan
 
-  amount_deducted_from_wallet Float?
-  amount_discount_from_voucher    Float?
+  amount_deducted_from_wallet          Float?
+  amount_discount_from_voucher         Float?
   amount_deducted_from_cashback_wallet Float?
 
   // Relationships
   transaction_id String
   transaction    Transaction @relation(fields: [transaction_id], references: [transaction_id])
 
-  voucher_assigned_id             String?            @unique
-  voucher_assigned                VoucherAssigned?   @relation(fields: [voucher_assigned_id], references: [voucher_assigned_id])
-  
-  cashback_wallet_id              String?            
-  cashback_wallet                 CashbackWallet?    @relation(fields: [cashback_wallet_id], references: [cashback_wallet_id])
+  voucher_assigned_id String?          @unique
+  voucher_assigned    VoucherAssigned? @relation(fields: [voucher_assigned_id], references: [voucher_assigned_id])
+
+  cashback_wallet_id String?
+  cashback_wallet    CashbackWallet? @relation(fields: [cashback_wallet_id], references: [cashback_wallet_id])
 }
 
 enum PaymentType {
@@ -349,36 +349,36 @@ enum PaymentType {
 }
 
 model PaymentHistory {
-  payment_history_id   String      @id @default(cuid())
-  amount               Float
-  payment_date         DateTime    @default(now())
-  payment_type         PaymentType
+  payment_history_id String      @id @default(cuid())
+  amount             Float
+  payment_date       DateTime    @default(now())
+  payment_type       PaymentType
 
   // Relationships
-  customer             Customer    @relation(fields: [customer_id], references: [customer_id])
-  customer_id          String
+  customer    Customer @relation(fields: [customer_id], references: [customer_id])
+  customer_id String
 }
 
 model CashbackWallet {
-  cashback_wallet_id   String            @id @default(cuid())
-  wallet_balance       Float             @default(0)
+  cashback_wallet_id String @id @default(cuid())
+  wallet_balance     Float  @default(0)
 
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationships
-  customer             Customer          @relation(fields: [customer_id], references: [customer_id])
-  customer_id          String            @unique
-  merchant             Merchant          @relation(fields: [merchant_id], references: [merchant_id])
-  merchant_id          String            @unique
-  instalment_payments  InstalmentPayment[]
+  customer            Customer            @relation(fields: [customer_id], references: [customer_id])
+  customer_id         String              @unique
+  merchant            Merchant            @relation(fields: [merchant_id], references: [merchant_id])
+  merchant_id         String              @unique
+  instalment_payments InstalmentPayment[]
 
   // TODO: Add cashback wallet history
 }
 
 // Voucher Management Module
 model Voucher {
-  voucher_id          String            @id @default(cuid())
+  voucher_id          String   @id @default(cuid())
   title               String
   description         String
   percentage_discount Float
@@ -386,15 +386,15 @@ model Voucher {
   expiry_date         DateTime
   terms               String
   usage_limit         Int
-  is_active           Boolean           @default(true)
+  is_active           Boolean  @default(true)
 
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relationships
-  admin               Admin             @relation(fields: [created_by_admin], references: [admin_id])
-  created_by_admin    String
-  vouchersAssigned    VoucherAssigned[]
+  admin            Admin             @relation(fields: [created_by_admin], references: [admin_id])
+  created_by_admin String
+  vouchersAssigned VoucherAssigned[]
 }
 
 enum VoucherAssignedStatus {
@@ -405,18 +405,18 @@ enum VoucherAssignedStatus {
 }
 
 model VoucherAssigned {
-  voucher_assigned_id    String             @id @default(cuid())
-  status                 VoucherAssignedStatus
-  remaining_uses         Int
-  date_time_issued       DateTime           @default(now())
+  voucher_assigned_id String                @id @default(cuid())
+  status              VoucherAssignedStatus
+  remaining_uses      Int
+  date_time_issued    DateTime              @default(now())
 
   // Relationships
-  voucher                Voucher            @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
-  voucher_id             String
-  customer               Customer           @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
-  customer_id            String
-  instalment_payment     InstalmentPayment? 
-  instalment_payment_id  String?
+  voucher               Voucher            @relation(fields: [voucher_id], references: [voucher_id], onDelete: Cascade)
+  voucher_id            String
+  customer              Customer           @relation(fields: [customer_id], references: [customer_id], onDelete: Cascade)
+  customer_id           String
+  instalment_payment    InstalmentPayment?
+  instalment_payment_id String?
 }
 
 //Notifications
@@ -426,11 +426,11 @@ enum NotificationPriority {
 }
 
 model Notification {
-  notification_id    String      @id @default(cuid())
-  title       String
-  description String
-  create_time DateTime    @default(now())
-  priority    NotificationPriority
+  notification_id String               @id @default(cuid())
+  title           String
+  description     String
+  create_time     DateTime             @default(now())
+  priority        NotificationPriority
 
   merchant_id    String? // Optional foreign key to Merchant
   customer_id    String? // Optional foreign key to Customer

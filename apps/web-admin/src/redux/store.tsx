@@ -9,6 +9,7 @@ import { merchantApi } from "./services/merchantService";
 import { voucherApi } from "./services/voucherService";
 import { issueApi } from "./services/issueService";
 import { transactionApi } from "./services/transactionService";
+import { merchantPaymentApi } from "./services/merchantPaymentService";
 
 const customSerializableCheck = {
   isSerializable: () => true,
@@ -26,6 +27,7 @@ export const store = configureStore({
     [voucherApi.reducerPath]: voucherApi.reducer,
     [issueApi.reducerPath]: issueApi.reducer,
     [transactionApi.reducerPath]: transactionApi.reducer,
+    [merchantPaymentApi.reducerPath]: merchantPaymentApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: customSerializableCheck }).concat(
@@ -38,6 +40,7 @@ export const store = configureStore({
       voucherApi.middleware,
       issueApi.middleware,
       transactionApi.middleware,
+      merchantPaymentApi.middleware,
     ),
 });
 

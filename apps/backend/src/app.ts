@@ -22,6 +22,7 @@ import paymentRoutes from "./routes/paymentRoutes";
 import transactionRoutes from "./routes/transactionRoutes";
 import voucherRoutes from "./routes/voucherRoutes";
 import withdrawalFeeRateRoutes from "./routes/withdrawalFeeRateRoutes";
+import merchantPaymentRoutes from "./routes/merchantPaymentRoutes";
 
 // Import middleware and utilities
 import { errorHandler } from "./middlewares/errorHandler";
@@ -34,11 +35,15 @@ const app = express();
 app.use(cors());
 
 // Stripe Webhook (raw body parser required by Stripe)
-app.post("/webhook/stripe", express.raw({ type: "application/json" }), handleStripeWebhook);
+app.post(
+    "/webhook/stripe",
+    express.raw({ type: "application/json" }),
+    handleStripeWebhook
+);
 
 // JSON and URL-encoded parsers
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // HTTP request logging with morgan, integrated with custom logger
 app.use(
@@ -64,6 +69,7 @@ app.use("/payment", paymentRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/voucher", voucherRoutes);
 app.use("/withdrawalFeeRate", withdrawalFeeRateRoutes);
+app.use("/merchantPayment", merchantPaymentRoutes);
 
 // Health check route
 app.get("/", (req, res) => {

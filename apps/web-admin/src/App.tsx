@@ -19,6 +19,7 @@ import AllAdminScreen from "./screens/allAdminScreen";
 import VoucherScreen from "./screens/voucherScreen";
 import AllIssuesScreen from "./screens/allIssuesScreen";
 import TransactionsScreen from "./screens/transactionsScreen";
+import MerchantPaymentScreen from "./screens/merchantPaymentScreen";
 
 export default function App() {
   return (
@@ -63,6 +64,10 @@ export default function App() {
             <Route
               path="/business-management/transactions"
               element={<TransactionsScreen />}
+            />
+            <Route
+              path="/business-management/merchant-payments"
+              element={<MerchantPaymentScreen />}
             />
           </Route>
         </Route>
