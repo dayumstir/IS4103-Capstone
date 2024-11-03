@@ -23,6 +23,7 @@ import transactionRoutes from "./routes/transactionRoutes";
 import voucherRoutes from "./routes/voucherRoutes";
 import withdrawalFeeRateRoutes from "./routes/withdrawalFeeRateRoutes";
 import merchantPaymentRoutes from "./routes/merchantPaymentRoutes";
+import merchantSizeRoutes from "./routes/merchantSizeRoutes";
 
 // Import middleware and utilities
 import { errorHandler } from "./middlewares/errorHandler";
@@ -70,6 +71,7 @@ app.use("/transaction", transactionRoutes);
 app.use("/voucher", voucherRoutes);
 app.use("/withdrawalFeeRate", withdrawalFeeRateRoutes);
 app.use("/merchantPayment", merchantPaymentRoutes);
+app.use("/merchantSize", merchantSizeRoutes);
 
 // Health check route
 app.get("/", (req, res) => {

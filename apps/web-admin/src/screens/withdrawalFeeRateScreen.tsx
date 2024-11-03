@@ -11,6 +11,7 @@ import {
   Empty,
   InputNumber,
   FormInstance,
+  Select,
 } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { IWithdrawalFeeRate } from "../interfaces/withdrawalFeeRateInterface";
@@ -19,6 +20,9 @@ import {
   useGetWithdrawalFeeRatesQuery,
   useUpdateWithdrawalFeeRateMutation,
 } from "../redux/services/withdrawalFeeRateService";
+import {
+  useGetMerchantSizesQuery,
+} from "../redux/services/merchantSizeService";
 
 export default function WithdrawalFeeRateScreen() {
   const [form] = Form.useForm();
@@ -27,8 +31,14 @@ export default function WithdrawalFeeRateScreen() {
   const [editingRate, setEditingRate] = useState<IWithdrawalFeeRate | null>(null);
 
   const { data: withdrawalFeeRates, isLoading } = useGetWithdrawalFeeRatesQuery();
+  const { data: merchantSizes } = useGetMerchantSizesQuery(); // Fetch merchant sizes
   const [createWithdrawalFeeRate]  = useCreateWithdrawalFeeRateMutation();
   const [updateWithdrawalFeeRate] = useUpdateWithdrawalFeeRateMutation();
+
+  const merchantSizeMap = merchantSizes?.reduce((acc, size) => {
+    acc[size.merchant_size_id] = size.name;
+    return acc;
+  }, {} as Record<string, string>);
 
   const tableColumns = [
     {
@@ -37,18 +47,10 @@ export default function WithdrawalFeeRateScreen() {
       key: "name",
     },
     {
-      title: <div className="whitespace-nowrap">monthly revenue min</div>,
-      dataIndex: "monthly_revenue_min",
-      key: "monthly_revenue_min",
-      width: 1,
-      render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
-    },
-    {
-      title: <div className="whitespace-nowrap">monthly revenue max</div>,
-      dataIndex: "monthly_revenue_max",
-      key: "monthly_revenue_max",
-      width: 1,
-      render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
+      title: "Merchant Size",
+      dataIndex: "merchant_size_id",
+      key: "merchant_size_id",
+      render: (text: string) => merchantSizeMap[text] || 'N/A', // Display the merchant size name
     },
     {
       title: <div className="whitespace-nowrap">wallet balance min</div>,
@@ -109,6 +111,7 @@ export default function WithdrawalFeeRateScreen() {
   const checkOverlappingRanges = (
     wallet_balance_min: number,
     wallet_balance_max: number,
+    merchant_size_id: string,
     excludeTierId?: string,
   ): boolean => {
     const existingRates = withdrawalFeeRates || [];
@@ -117,15 +120,19 @@ export default function WithdrawalFeeRateScreen() {
         return false; // Skip the current tier being edited
       }
       return (
-        (wallet_balance_min >= tier.wallet_balance_min &&
-          wallet_balance_min <= tier.wallet_balance_max) ||
-        (wallet_balance_max >= tier.wallet_balance_min &&
-          wallet_balance_max <= tier.wallet_balance_max) ||
-        (wallet_balance_min <= tier.wallet_balance_min &&
-          wallet_balance_max >= tier.wallet_balance_max)
+        tier.merchant_size_id.toString() === merchant_size_id && // Check for the same merchant size
+        (
+          (wallet_balance_min >= tier.wallet_balance_min && 
+           wallet_balance_min <= tier.wallet_balance_max) ||
+          (wallet_balance_max >= tier.wallet_balance_min && 
+           wallet_balance_max <= tier.wallet_balance_max) ||
+          (wallet_balance_min <= tier.wallet_balance_min && 
+           wallet_balance_max >= tier.wallet_balance_max)
+        )
       );
     });
   };
+
   
   const handleCreateRate = async (
     newWithdrawalFeeRate: Omit<IWithdrawalFeeRate, "withdrawal_fee_rate_id">,
@@ -138,7 +145,7 @@ export default function WithdrawalFeeRateScreen() {
       return;
     }
     
-    if (checkOverlappingRanges(wallet_balance_min, wallet_balance_max)) {
+    if (checkOverlappingRanges(wallet_balance_min, wallet_balance_max,newWithdrawalFeeRate.merchant_size_id.toString())) {
       message.error(
         "The new wallet balance range overlaps with an existing tier. Please adjust the range.",
       );
@@ -193,6 +200,13 @@ export default function WithdrawalFeeRateScreen() {
       return;
     }
     
+    if (checkOverlappingRanges(wallet_balance_min, wallet_balance_max,editingRate.merchant_size_id.toString())) {
+      message.error(
+        "The new wallet balance range overlaps with an existing tier. Please adjust the range.",
+      );
+      return;
+  
+    }
 
     const updatedRate: IWithdrawalFeeRate = {
       ...values,
@@ -321,7 +335,6 @@ export default function WithdrawalFeeRateScreen() {
           <InputNumber className="w-full" step={1} precision={0} />
         </Form.Item>
 
-
         <Form.Item
           name="percentage_transaction_fee"
           label="Percentage Transaction Fee"
@@ -355,6 +368,20 @@ export default function WithdrawalFeeRateScreen() {
         >
           <InputNumber className="w-full" step={1} precision={0} />
         </Form.Item>
+
+        <Form.Item
+        name="merchant_size_id"
+        label="Merchant Size"
+        rules={[{ required: true, message: "Please select a Merchant Size!" }]}
+      >
+        <Select placeholder="Select Merchant Size">
+          {merchantSizes?.map((size) => (
+            <Select.Option key={size.merchant_size_id} value={size.merchant_size_id}>
+              {size.name}
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
       </div>
 
       <Form.Item>
