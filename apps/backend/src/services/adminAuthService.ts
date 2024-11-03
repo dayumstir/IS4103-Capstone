@@ -1,14 +1,71 @@
-// Contains authentication logic, like JWT generation, verification
+// app/backend/src/services/adminAuthService.ts
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
 
-import { IAdmin } from "../interfaces/adminInterface";
-import { AdminType } from "../interfaces/adminTypeInterface";
+import { AdminType, IAdmin } from "@repo/interfaces";
 import { UserType } from "../interfaces/userType";
 import * as adminRepository from "../repositories/adminRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import logger from "../utils/logger";
+import { BadRequestError, NotFoundError, UnauthorizedError } from "../utils/error";
+
+// Admin Login
+export const login = async (loginData: { username: string; password: string }) => {
+    logger.info("Admin login attempt...");
+
+    const { username, password } = loginData;
+    const admin = await adminRepository.findAdminByUsername(username);
+    if (!admin) throw new UnauthorizedError("Invalid credentials");
+
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    if (!isPasswordValid) throw new UnauthorizedError("Invalid credentials");
+
+    const token = jwt.sign(
+        {
+            role: UserType.ADMIN,
+            admin_id: admin.admin_id,
+            email: admin.email,
+            admin_type: admin.admin_type,
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "1h" }
+    );
+
+    logger.info(`Admin ${username} logged in successfully.`);
+    return token;
+};
+
+// Admin Logout
+export const logout = async (token: string) => {
+    logger.info("Admin logout attempt...");
+    const decoded = jwt.decode(token) as any;
+
+    if (!decoded || !decoded.exp) {
+        throw new BadRequestError("Invalid token");
+    }
+
+    const expiresAt = new Date(decoded.exp * 1000);
+
+    await jwtTokenRepository.blacklistToken(token, expiresAt);
+    logger.info("Admin logged out and token blacklisted successfully.");
+};
+
+// Admin Reset Password
+export const resetPassword = async (email: string, oldPassword: string, newPassword: string) => {
+    logger.info("Resetting admin password...");
+
+    const admin = await adminRepository.findAdminByEmail(email);
+    if (!admin) throw new NotFoundError("Admin not found");
+
+    const isPasswordValid = await bcrypt.compare(oldPassword, admin.password);
+    if (!isPasswordValid) throw new UnauthorizedError("Old password is incorrect");
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await adminRepository.updateAdmin(admin.admin_id, { password: hashedPassword, admin_type: AdminType.NORMAL });
+
+    logger.info("Password reset successfully.");
+};
 
 
 // Function to generate a random password consisting of digits
@@ -76,71 +133,6 @@ export const add = async (adminData: IAdmin) => {
     return { admin: newAdmin, token, password:generatedPassword , username};
 
 };
-
-
-export const login = async (loginData: { username: string; password: string }) => {
-    const { username, password } = loginData;
-
-    // Check for existing admin in db
-    const admin = await adminRepository.findAdminByUsername(username);
-    if (!admin) {
-        throw new Error("Invalid credentials");
-    }
-
-    // Check if passwords match
-    const isPasswordValid = await bcrypt.compare(password, admin.password);
-    if (!isPasswordValid) {
-        throw new Error("Invalid credentials");
-    }
-
-    // Generate JWT
-    const token = jwt.sign({ 
-        role: UserType.ADMIN,
-        admin_id: admin.admin_id, 
-        email : admin.email, 
-        admin_type : admin.admin_type 
-    }, process.env.JWT_SECRET!, { expiresIn: "1h"});
-
-    return token;
-};
-
-
-export const logout= async (token: string) => {
-    try {
-        // Decode the JWT token to extract its expiration time
-        const decoded = jwt.decode(token) as any;
-
-        if (!decoded || !decoded.exp) {
-            throw new Error("Invalid token");
-        }
-
-        const expiresAt = new Date(decoded.exp * 1000);  // Convert expiration time to Date object
-
-        await jwtTokenRepository.blacklistToken(token, expiresAt);
-    } catch (error: any) {
-        throw new Error(error.message || "Failed to log out");
-    }
-};
-
-
-export const resetPassword = async (email: string, oldPassword: string, newPassword: string ) => {
-    logger.info('Executing resetPassword...');
-
-    const admin = await adminRepository.findAdminByEmail(email);
-    if (!admin) {
-        throw new Error("Admin not found");
-    }
-
-        // Verify that old password matches
-    const isPasswordValid = await bcrypt.compare(oldPassword, admin.password);
-    if (!isPasswordValid) {
-        throw new Error("Old password is incorrect");
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await adminRepository.updateAdmin(admin.admin_id, { password: hashedPassword, admin_type: AdminType.NORMAL });
-};
-
 
 export const sendEmailVerification = async (email: string, username: string, password:string) => {
 

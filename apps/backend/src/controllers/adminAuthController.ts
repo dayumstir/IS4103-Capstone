@@ -1,58 +1,59 @@
-// Handles authentication-related actions
-import { Request, Response } from "express";
+// app/backend/src/controllers/adminAuthController.ts
+import { Request, Response, NextFunction } from "express";
 import * as adminAuthService from "../services/adminAuthService";
 import logger from "../utils/logger";
 import jwt from "jsonwebtoken";
+import { BadRequestError } from "../utils/error";
 
-export const add = async (req: Request, res: Response) => {
-  try {
-    const admin = await adminAuthService.add(req.body);
-    // await adminAuthService.sendEmailVerification(admin.admin.email, admin.admin.username, admin.password);
-    res.status(200).json(admin);
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
+// Admin Login
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("Executing admin login...");
+    try {
+        const jwtToken = await adminAuthService.login(req.body);
+        
+        // TODO: Evaluate if needed
+        const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!) as any;
+        const { admin_type, email, admin_id } = decoded;
+
+        res.status(200).json({ jwtToken, admin_type, email, admin_id });
+    } catch (error: any) {
+        logger.error("Error in admin login:", error);
+        next(error);
+    }
 };
 
-export const login = async (req: Request, res: Response) => {
-  try {
-    const token = await adminAuthService.login(req.body);
+// Admin Logout
+export const logout = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("Executing admin logout...");
+    const jwtToken = req.headers.authorization?.split(" ")[1];
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    const admin_type = decoded.admin_type;
-    const email = decoded.email;
-    const admin_id = decoded.admin_id;
-    res.status(200).json({ token, admin_type, email, admin_id });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
+    if (!jwtToken) {
+        return next(new BadRequestError("No token provided"));
+    }
+
+    try {
+        await adminAuthService.logout(jwtToken);
+        res.status(200).json({ message: "Logout successful" });
+    } catch (error: any) {
+        logger.error("Error in admin logout:", error);
+        next(error);
+    }
 };
 
-export const logout = async (req: Request, res: Response) => {
-  const token = req.headers.authorization?.split(" ")[1];
+// Admin Reset Password
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("Executing resetPassword...");
+    const { email, oldPassword, newPassword } = req.body;
 
-  if (!token) {
-    return res.status(400).json({ message: "No token provided" });
-  }
+    if (!email || !oldPassword || !newPassword) {
+        return next(new BadRequestError("Email, old password, and new password are required"));
+    }
 
-  try {
-    await adminAuthService.logout(token);
-    return res.status(200).json({ message: "Logout successful" });
-  } catch (error: any) {
-    return res
-      .status(500)
-      .json({ message: "Could not log out", error: error.message });
-  }
-};
-
-export const resetPassword = async (req: Request, res: Response) => {
-  logger.info("Executing resetPassword...");
-  const { email, oldPassword, newPassword } = req.body;
-
-  try {
-    await adminAuthService.resetPassword(email, oldPassword, newPassword);
-    res.status(200).json({ message: "Password reset successful" });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
+    try {
+        await adminAuthService.resetPassword(email, oldPassword, newPassword);
+        res.status(200).json({ message: "Password reset successful" });
+    } catch (error: any) {
+        logger.error("Error in resetPassword:", error);
+        next(error);
+    }
 };

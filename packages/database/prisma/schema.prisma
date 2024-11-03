@@ -13,6 +13,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Admin Management Module
+enum AdminType {
+  SUPER
+  NORMAL
+  DEACTIVATED
+  UNVERIFIED
+}
+
+model Admin {
+  admin_id         String         @id @default(cuid())
+  name             String
+  profile_picture  Bytes?         @db.ByteA
+  email            String         @unique
+  username         String         @unique
+  password         String
+  contact_number   String
+  address          String
+  date_of_birth    DateTime
+  admin_type       AdminType
+
+  notifications    Notification[]
+  issues           Issue[]
+  vouchersCreated  Voucher[]
+}
+
 enum Status {
   PENDING_EMAIL_VERIFICATION
   PENDING_PHONE_VERIFICATION
@@ -105,29 +130,6 @@ model PasswordResetToken {
   customer_id String
 
   @@index([customer_id])
-}
-
-enum AdminType {
-  SUPER
-  NORMAL
-  DEACTIVATED
-  UNVERIFIED
-}
-
-model Admin {
-  admin_id        String         @id @default(cuid())
-  name            String
-  profile_picture Bytes?         @db.ByteA
-  email           String         @unique
-  username        String         @unique
-  password        String
-  contact_number  String
-  address         String
-  date_of_birth   DateTime
-  admin_type      AdminType // TODO: Implement as enum
-  issues          Issue[]
-  vouchersCreated Voucher[]
-  notifications   Notification[]
 }
 
 model Merchant {
