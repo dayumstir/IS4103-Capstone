@@ -46,6 +46,12 @@ export default function BusinessManagementRoute() {
             </Link>
           ),
         },
+        {
+          key: "withdrawal-fee",
+          label: (
+            <Link to="/business-management/withdrawal-fee">Withdrawal Fee</Link>
+          ),
+        },
       ],
     },
   ];
