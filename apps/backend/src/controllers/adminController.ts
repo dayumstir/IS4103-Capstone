@@ -1,6 +1,7 @@
 // Manages admin-related actions
 import { Request, Response } from "express";
 import * as adminService from "../services/adminService";
+import * as adminAuthService from "../services/adminAuthService";
 
 export const get = async (req: Request, res: Response) => {
     try {
@@ -79,6 +80,16 @@ export const edit = async (req: Request, res: Response) => {
 
         const updatedAdmin = await adminService.update(admin_id, req.body);
         res.status(200).json(updatedAdmin);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const add = async (req: Request, res: Response) => {
+    try {
+        const admin = await adminAuthService.add(req.body);
+        await adminAuthService.sendEmailVerification(admin.admin.email, admin.admin.username, admin.password);
+        res.status(200).json(admin);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }

@@ -1,4 +1,7 @@
 // packages/interfaces/index.ts
+export type { IAdmin } from "./adminInterface";
+export { AdminType } from "./adminInterface";
+
 export type { ICashbackWallet } from "./cashbackWalletInterface";
 
 export type { ICreditTier } from "./creditTierInterface";

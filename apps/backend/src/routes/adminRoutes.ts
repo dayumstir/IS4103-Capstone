@@ -1,6 +1,7 @@
 // Defines routes related to admin actions
 import { Router } from "express";
 import {
+    add,
     get,
     edit,
     getAll,
@@ -9,7 +10,6 @@ import {
     getAdminProfile,
     getAdminByPathVariable,
 } from "../controllers/adminController";
-import { add } from "../controllers/adminAuthController";
 import {
     listAllCustomers,
     getCustomerProfile,
