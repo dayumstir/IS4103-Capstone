@@ -6,7 +6,13 @@ import logger from "../utils/logger";
 // Create Withdrawal Fee Rate
 export const createWithdrawalFeeRate = async (req: Request, res: Response) => {
     try {
+        const merchant_size_id = req.body.merchant_size_id;
+        if (!merchant_size_id) {
+            return res.status(400).json({ error: "merchant_size_id is required" });
+        }
+
         const withdrawalFeeRate = await withdrawalFeeRateService.createWithdrawalFeeRate(
+            merchant_size_id,
             req.body
         );
         res.status(201).json(withdrawalFeeRate);

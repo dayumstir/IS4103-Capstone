@@ -238,6 +238,18 @@ model WithdrawalFeeRate {
   monthly_revenue_min        Float
   percentage_withdrawal_fee  Float
   percentage_transaction_fee Float
+
+  merchant_size_id  String
+  merchantSize    MerchantSize @relation(fields: [merchant_size_id], references: [merchant_size_id])
+}
+
+model MerchantSize{
+  merchant_size_id           String @id @default(cuid())
+  name         String
+  monthly_revenue_max        Float
+  monthly_revenue_min        Float
+
+  withdrawalFeeRates        WithdrawalFeeRate[]
 }
 
 enum PaymentStatus {

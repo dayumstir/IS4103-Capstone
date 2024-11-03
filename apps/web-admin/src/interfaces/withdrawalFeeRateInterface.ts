@@ -7,5 +7,5 @@ export interface IWithdrawalFeeRate {
   percentage_withdrawal_fee: number;
   monthly_revenue_min: number;
   percentage_transaction_fee: number;
-
+  merchant_size_id: number;
 }

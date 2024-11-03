@@ -4,11 +4,13 @@ import { IWithdrawalFeeRate } from "@repo/interfaces/withdrawalFeeRateInterface"
 
 // Create a new withdrawal Fee Rate in db
 export const createWithdrawalFeeRate= async (
-    withdrawalFeeRateData: IWithdrawalFeeRate
+    merchant_size_id: string,
+    withdrawalFeeRateData: Omit<IWithdrawalFeeRate, "merchantSize">
 ) => {
     return prisma.withdrawalFeeRate.create({
         data: {
-            ...withdrawalFeeRateData,
+            ...withdrawalFeeRateData, 
+            merchant_size_id
         },
     });
 };
