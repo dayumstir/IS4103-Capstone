@@ -22,6 +22,7 @@ import TransactionsScreen from "./screens/transactionsScreen";
 import WithdrawalFeeRateScreen from "./screens/withdrawalFeeRateScreen";
 import MerchantPaymentScreen from "./screens/merchantPaymentScreen";
 import MerchantSizeScreen from "./screens/merchantSizeScreen";
+import NotificationsScreen from "./screens/notificationsScreen";
 
 export default function App() {
   return (
@@ -39,11 +40,17 @@ export default function App() {
           <Route path="/admins/add" element={<AddAdminScreen />} />
           <Route path="/admins" element={<AllAdminScreen />} />
 
-          <Route path="/customers" element={<AllCustomersScreen />} />
-          <Route path="/customer/:id" element={<CustomerProfileScreen />} />
+          <Route path="/admin/customers" element={<AllCustomersScreen />} />
+          <Route
+            path="/admin/customer/:id"
+            element={<CustomerProfileScreen />}
+          />
 
-          <Route path="/merchants" element={<AllMerchantsScreen />} />
-          <Route path="/merchant/:id" element={<MerchantProfileScreen />} />
+          <Route path="/admin/merchants" element={<AllMerchantsScreen />} />
+          <Route
+            path="/admin/merchant/:id"
+            element={<MerchantProfileScreen />}
+          />
 
           <Route element={<BusinessManagementRoute />}>
             {/* ===== Business Management ===== */}
@@ -78,6 +85,10 @@ export default function App() {
            <Route
               path="/business-management/merchant-size"
               element={<MerchantSizeScreen />}
+            />
+            <Route
+              path="/business-management/notifications"
+              element={<NotificationsScreen />}
             />
           </Route>
 

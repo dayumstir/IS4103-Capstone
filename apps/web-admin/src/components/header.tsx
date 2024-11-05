@@ -13,8 +13,14 @@ export default function Header({ isSuperAdmin }: { isSuperAdmin: boolean }) {
     ...(isSuperAdmin
       ? [{ label: <a href="/admins">Admins</a>, key: "/admins" }]
       : []),
-    { label: <a href="/customers">Customers</a>, key: "/customers" },
-    { label: <a href="/merchants">Merchants</a>, key: "/merchants" },
+    {
+      label: <a href="/admin/customers">Customers</a>,
+      key: "/admin/customers",
+    },
+    {
+      label: <a href="/admin/merchants">Merchants</a>,
+      key: "/admin/merchants",
+    },
     {
       label: (
         <a href="/business-management/instalment-plan">Business Management</a>

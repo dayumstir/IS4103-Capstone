@@ -58,6 +58,12 @@ export default function BusinessManagementRoute() {
             <Link to="/business-management/merchant-size">Merchant Size</Link>
           ),
         },
+        {
+          key: "notifications",
+          label: (
+            <Link to="/business-management/notifications">Notifications</Link>
+          ),
+        },
       ],
     },
   ];

@@ -21,6 +21,7 @@ import merchantRoutes from "./routes/merchantRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
 import transactionRoutes from "./routes/transactionRoutes";
 import voucherRoutes from "./routes/voucherRoutes";
+import notificationRoutes from "./routes/notificationRoutes";
 import withdrawalFeeRateRoutes from "./routes/withdrawalFeeRateRoutes";
 import merchantPaymentRoutes from "./routes/merchantPaymentRoutes";
 import merchantSizeRoutes from "./routes/merchantSizeRoutes";
@@ -29,6 +30,9 @@ import merchantSizeRoutes from "./routes/merchantSizeRoutes";
 import { errorHandler } from "./middlewares/errorHandler";
 import logger from "./utils/logger";
 import { handleStripeWebhook } from "./controllers/webhookController";
+
+// Load environment variables at the start
+dotenv.config();
 
 const app = express();
 
@@ -69,14 +73,15 @@ app.use("/merchant", merchantRoutes);
 app.use("/payment", paymentRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/voucher", voucherRoutes);
+app.use("/notification", notificationRoutes);
 app.use("/withdrawalFeeRate", withdrawalFeeRateRoutes);
 app.use("/merchantPayment", merchantPaymentRoutes);
 app.use("/merchantSize", merchantSizeRoutes);
 
 // Health check route
 app.get("/", (req, res) => {
-    res.status(200).json({ message: "Backend server is running!" });
-    logger.info("Health check route accessed");
+  res.status(200).json({ message: "Backend server is running!" });
+  logger.info("Health check route accessed");
 });
 
 // Error handling middleware
