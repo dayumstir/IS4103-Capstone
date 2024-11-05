@@ -44,7 +44,7 @@ export default function WithdrawalFeeRateScreen() {
 
   const tableColumns = [
     {
-      title: "Name",
+      title: "Fee Name",
       dataIndex: "name",
       key: "name",
     },
@@ -55,28 +55,28 @@ export default function WithdrawalFeeRateScreen() {
       render: (text: string) => merchantSizeMap[text] || 'N/A', // Display the merchant size name
     },
     {
-      title: <div className="whitespace-nowrap">wallet balance min</div>,
+      title: <div className="whitespace-nowrap">wallet balance min  ($)</div>,
       dataIndex: "wallet_balance_min",
       key: "wallet_balance_min",
       width: 1,
       render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
     },
     {
-      title: <div className="whitespace-nowrap">wallet balance max</div>,
+      title: <div className="whitespace-nowrap">wallet balance max ($)</div>,
       dataIndex: "wallet_balance_max",
       key: "wallet_balance_max",
       width: 1,
       render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
     },
     {
-      title: <div className="whitespace-nowrap">transaction fee</div>,
+      title: <div className="whitespace-nowrap">transaction fee (%)</div>,
       dataIndex: "percentage_transaction_fee",
       key: "transaction_fee",
       width: 1,
       render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
     },
     {
-      title: <div className="whitespace-nowrap">withdrawal fee</div>,
+      title: <div className="whitespace-nowrap">withdrawal fee (%)</div>,
       dataIndex: "percentage_withdrawal_fee",
       key: "withdrawal_fee",
       width: 1,
@@ -250,7 +250,7 @@ export default function WithdrawalFeeRateScreen() {
       <div className="grid grid-cols-2 gap-x-8">
         <Form.Item
           name="wallet_balance_min"
-          label="Minimum Wallet Balance"
+          label="Minimum Wallet Balance ($)"
           rules={[
             {
               required: true,
@@ -267,7 +267,7 @@ export default function WithdrawalFeeRateScreen() {
 
         <Form.Item
           name="wallet_balance_max"
-          label="Maximum Wallet Balance"
+          label="Maximum Wallet Balance ($)"
           rules={[
             {
               required: true,
@@ -293,52 +293,8 @@ export default function WithdrawalFeeRateScreen() {
         </Form.Item>
 
         <Form.Item
-          name="monthly_revenue_min"
-          label="Monthly Revenue Min"
-          rules={[
-            {
-              required: true,
-              message: "Please input the Minimum Monthly Revenue",
-            },
-            {
-              type: "number",
-              message: "Minimum Monthly Revenue must be a number",
-            },
-          ]}
-        >
-          <InputNumber className="w-full" step={1} precision={0} />
-        </Form.Item>
-
-        <Form.Item
-          name="monthly_revenue_max"
-          label="Monthly Revenue Max"
-          rules={[
-            {
-              required: true,
-              message: "Please input the Monthly Revenue Max!",
-            },
-            {
-              type: "number",
-              message: "Monthly Revenue Max must be a number",
-            },
-            ({ getFieldValue }) => ({
-              validator(_, value) {
-                if (!value || getFieldValue("monthly_revenue_min") < value) {
-                  return Promise.resolve();
-                }
-                return Promise.reject(
-                  new Error("Monthly Revenue Max must be Bigger than Monthly Revenue Min!"),
-                );
-              },
-            }),
-          ]}
-        >    
-          <InputNumber className="w-full" step={1} precision={0} />
-        </Form.Item>
-
-        <Form.Item
           name="percentage_transaction_fee"
-          label="Percentage Transaction Fee"
+          label="Percentage Transaction Fee (%)"
           rules={[
             {
               required: true,
@@ -346,16 +302,18 @@ export default function WithdrawalFeeRateScreen() {
             },
             {
               type: "number",
+              min: 0,
+              max: 100,
               message: "Percentage Transaction Fee must be a number",
             },
           ]}
         >
-          <InputNumber className="w-full" step={1} precision={0} />
+          <InputNumber className="w-full" step={0.01} precision={2} />
         </Form.Item>
 
         <Form.Item
           name="percentage_withdrawal_fee"
-          label="Percentage Withdrawal Fee"
+          label="Percentage Withdrawal Fee (%)" 
           rules={[
             {
               required: true,
@@ -363,11 +321,13 @@ export default function WithdrawalFeeRateScreen() {
             },
             {
               type: "number",
+              min: 0,
+              max: 100,
               message: "Percentage Withdrawal Fee must be a number",
             },
           ]}
         >
-          <InputNumber className="w-full" step={1} precision={0} />
+           <InputNumber className="w-full" step={0.01} precision={2} />
         </Form.Item>
 
         <Form.Item

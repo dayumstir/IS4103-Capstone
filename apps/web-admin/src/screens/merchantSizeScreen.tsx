@@ -217,7 +217,7 @@ export default function MerchantSizeScreen() {
 
         <Form.Item
           name="monthly_revenue_min"
-          label="Monthly Revenue Min"
+          label="Monthly Revenue Min ($)"
           rules={[
             {
               required: true,
@@ -234,7 +234,7 @@ export default function MerchantSizeScreen() {
 
         <Form.Item
           name="monthly_revenue_max"
-          label="Monthly Revenue Max"
+          label="Monthly Revenue Max ($)"
           rules={[
             {
               required: true,

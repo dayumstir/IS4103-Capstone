@@ -234,8 +234,6 @@ model WithdrawalFeeRate {
   name                       String
   wallet_balance_max         Float
   wallet_balance_min         Float
-  monthly_revenue_max        Float
-  monthly_revenue_min        Float
   percentage_withdrawal_fee  Float
   percentage_transaction_fee Float
 

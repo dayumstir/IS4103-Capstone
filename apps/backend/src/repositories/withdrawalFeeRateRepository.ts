@@ -19,7 +19,7 @@ export const createWithdrawalFeeRate= async (
 export const findAllWithdrawalFeeRate = async () => {
     return prisma.withdrawalFeeRate.findMany({
         orderBy: {
-            monthly_revenue_max: "asc",
+            name : "desc",
         },
     });
 };
