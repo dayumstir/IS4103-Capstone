@@ -45,3 +45,15 @@ export const updateMerchantSize = async (
     }
     return merchantSize;
 };
+
+// Delete merchant size
+export const deleteMerchantSize= async (merchant_size_id: string) => {
+    logger.info(`Delete merchant size id: ${merchant_size_id}`, merchant_size_id);
+
+    const merchantSize = await merchantSizeRepository.deleteMerchantSize(merchant_size_id);
+    if (!merchantSize) {
+        throw new Error("Merchant Size not found");
+    }
+
+    return merchantSize;
+};

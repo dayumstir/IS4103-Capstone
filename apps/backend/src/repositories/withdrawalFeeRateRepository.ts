@@ -19,7 +19,7 @@ export const createWithdrawalFeeRate= async (
 export const findAllWithdrawalFeeRate = async () => {
     return prisma.withdrawalFeeRate.findMany({
         orderBy: {
-            monthly_revenue_max: "asc",
+            name : "desc",
         },
     });
 };
@@ -43,3 +43,13 @@ export const updateWithdrawalFeeRate = async (
         },
     });
 };
+
+
+export const deleteWithdrawalFeeRate = async (
+    withdrawal_fee_rate_id: string,
+) => {
+    return prisma.withdrawalFeeRate.delete({
+        where: { withdrawal_fee_rate_id: withdrawal_fee_rate_id },
+    });
+};
+

@@ -5,6 +5,7 @@ import {
     getAllWithdrawalFeeRate,
     getWithdrawalFeeRate,
     editWithdrawalFeeRate,
+    deleteWithdrawalFeeRate,
 } from "../controllers/withdrawalFeeRateController";
 //import { adminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
 
@@ -15,4 +16,6 @@ router.post("/", createWithdrawalFeeRate);
 router.get("/", getAllWithdrawalFeeRate);
 router.get("/:withdrawal_fee_rate_id", getWithdrawalFeeRate);
 router.put("/:withdrawal_fee_rate_id", editWithdrawalFeeRate);
+router.delete("/:withdrawal_fee_rate_id", deleteWithdrawalFeeRate);
+
 export default router;

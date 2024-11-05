@@ -18,6 +18,7 @@ import {
   useCreateMerchantSizeMutation,
   useGetMerchantSizesQuery,
   useUpdateMerchantSizeMutation,
+  useDeleteMerchantSizeMutation,
 } from "../redux/services/merchantSizeService";
 
 export default function MerchantSizeScreen() {
@@ -29,6 +30,7 @@ export default function MerchantSizeScreen() {
   const { data: merchantSizes, isLoading } = useGetMerchantSizesQuery();
   const [createMerchantSize]  = useCreateMerchantSizeMutation();
   const [updateMerchantSize] = useUpdateMerchantSizeMutation();
+  const [deleteMerchantSize] = useDeleteMerchantSizeMutation(); 
 
   const tableColumns = [
     {
@@ -182,9 +184,16 @@ export default function MerchantSizeScreen() {
     }
   };
 
-  // TODO: Implement delete  wallet balance
-  const handleDeleteRate = (id: string) => {
-    //message.success("Merchant Size has been deleted.");
+  // TODO: Implement delete 
+  const handleDeleteRate = async (id: string) => {
+    try {
+      await deleteMerchantSize(id).unwrap(); // Call the delete mutation
+      message.success("Merchant Size has been deleted.");
+      //refetch(); // Refresh the data after deletion
+    } catch (error) {
+      console.error("Error deleting  Merchant Size:", error);
+      message.error("Failed to delete Merchant Size");
+    }
   };
 
   const renderForm = (formInstance: FormInstance) => (
@@ -208,7 +217,7 @@ export default function MerchantSizeScreen() {
 
         <Form.Item
           name="monthly_revenue_min"
-          label="Monthly Revenue Min"
+          label="Monthly Revenue Min ($)"
           rules={[
             {
               required: true,
@@ -225,7 +234,7 @@ export default function MerchantSizeScreen() {
 
         <Form.Item
           name="monthly_revenue_max"
-          label="Monthly Revenue Max"
+          label="Monthly Revenue Max ($)"
           rules={[
             {
               required: true,

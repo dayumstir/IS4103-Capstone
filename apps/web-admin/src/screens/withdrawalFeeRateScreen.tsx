@@ -19,6 +19,7 @@ import {
   useCreateWithdrawalFeeRateMutation,
   useGetWithdrawalFeeRatesQuery,
   useUpdateWithdrawalFeeRateMutation,
+  useDeleteWithdrawalFeeRateMutation,
 } from "../redux/services/withdrawalFeeRateService";
 import {
   useGetMerchantSizesQuery,
@@ -34,6 +35,7 @@ export default function WithdrawalFeeRateScreen() {
   const { data: merchantSizes } = useGetMerchantSizesQuery(); // Fetch merchant sizes
   const [createWithdrawalFeeRate]  = useCreateWithdrawalFeeRateMutation();
   const [updateWithdrawalFeeRate] = useUpdateWithdrawalFeeRateMutation();
+  const [deleteWithdrawalFeeRate] = useDeleteWithdrawalFeeRateMutation(); 
 
   const merchantSizeMap = merchantSizes?.reduce((acc, size) => {
     acc[size.merchant_size_id] = size.name;
@@ -42,43 +44,50 @@ export default function WithdrawalFeeRateScreen() {
 
   const tableColumns = [
     {
-      title: "Name",
+      title: "Fee Name",
       dataIndex: "name",
       key: "name",
+      sorter: (a: IWithdrawalFeeRate, b: IWithdrawalFeeRate) => a.name.localeCompare(b.name),
     },
     {
       title: "Merchant Size",
       dataIndex: "merchant_size_id",
       key: "merchant_size_id",
-      render: (text: string) => merchantSizeMap[text] || 'N/A', // Display the merchant size name
+      render: (text: string) => merchantSizeMap[text] || 'N/A',
+      sorter: (a: IWithdrawalFeeRate, b: IWithdrawalFeeRate) =>
+        (merchantSizeMap[a.merchant_size_id] || '').localeCompare(merchantSizeMap[b.merchant_size_id] || ''),
     },
     {
-      title: <div className="whitespace-nowrap">wallet balance min</div>,
+      title: <div className="whitespace-nowrap">Wallet Balance Min ($)</div>,
       dataIndex: "wallet_balance_min",
       key: "wallet_balance_min",
       width: 1,
       render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
+      sorter: (a: IWithdrawalFeeRate, b: IWithdrawalFeeRate) => a.wallet_balance_min - b.wallet_balance_min,
     },
     {
-      title: <div className="whitespace-nowrap">wallet balance max</div>,
+      title: <div className="whitespace-nowrap">Wallet Balance Max ($)</div>,
       dataIndex: "wallet_balance_max",
       key: "wallet_balance_max",
       width: 1,
       render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
+      sorter: (a: IWithdrawalFeeRate, b: IWithdrawalFeeRate) => a.wallet_balance_max - b.wallet_balance_max,
     },
     {
-      title: <div className="whitespace-nowrap">transaction fee</div>,
+      title: <div className="whitespace-nowrap">Transaction Fee (%)</div>,
       dataIndex: "percentage_transaction_fee",
       key: "transaction_fee",
       width: 1,
       render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
+      sorter: (a: IWithdrawalFeeRate, b: IWithdrawalFeeRate) => a.percentage_transaction_fee - b.percentage_transaction_fee,
     },
     {
-      title: <div className="whitespace-nowrap">withdrawal fee</div>,
+      title: <div className="whitespace-nowrap">Withdrawal Fee (%)</div>,
       dataIndex: "percentage_withdrawal_fee",
       key: "withdrawal_fee",
       width: 1,
       render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
+      sorter: (a: IWithdrawalFeeRate, b: IWithdrawalFeeRate) => a.percentage_withdrawal_fee - b.percentage_withdrawal_fee,
     },
     {
       title: "Actions",
@@ -111,7 +120,7 @@ export default function WithdrawalFeeRateScreen() {
   const checkOverlappingRanges = (
     wallet_balance_min: number,
     wallet_balance_max: number,
-    merchant_size_id: string,
+    merchant_size_id?: string,
     excludeTierId?: string,
   ): boolean => {
     const existingRates = withdrawalFeeRates || [];
@@ -145,7 +154,7 @@ export default function WithdrawalFeeRateScreen() {
       return;
     }
     
-    if (checkOverlappingRanges(wallet_balance_min, wallet_balance_max,newWithdrawalFeeRate.merchant_size_id.toString())) {
+    if (checkOverlappingRanges(wallet_balance_min, wallet_balance_max, newWithdrawalFeeRate.merchant_size_id.toString())) {
       message.error(
         "The new wallet balance range overlaps with an existing tier. Please adjust the range.",
       );
@@ -191,6 +200,7 @@ export default function WithdrawalFeeRateScreen() {
       checkOverlappingRanges(
         wallet_balance_min,
         wallet_balance_max,
+        editingRate.merchant_size_id.toString(),
         editingRate.withdrawal_fee_rate_id,
       )
     ) {
@@ -198,14 +208,6 @@ export default function WithdrawalFeeRateScreen() {
         "The updated wallet balance range overlaps with an existing tier. Please adjust the range.",
       );
       return;
-    }
-    
-    if (checkOverlappingRanges(wallet_balance_min, wallet_balance_max,editingRate.merchant_size_id.toString())) {
-      message.error(
-        "The new wallet balance range overlaps with an existing tier. Please adjust the range.",
-      );
-      return;
-  
     }
 
     const updatedRate: IWithdrawalFeeRate = {
@@ -224,9 +226,15 @@ export default function WithdrawalFeeRateScreen() {
     }
   };
 
-  // TODO: Implement delete  wallet balance
-  const handleDeleteRate = (id: string) => {
-    //message.success("Withdrawal Fee Ratehas been deleted.");
+  const handleDeleteRate = async (id: string) => {
+    try {
+      await deleteWithdrawalFeeRate(id).unwrap(); // Call the delete mutation
+      message.success("Withdrawal Fee Rate has been deleted.");
+      //refetch(); // Refresh the data after deletion
+    } catch (error) {
+      console.error("Error deleting withdrawal fee rate:", error);
+      message.error("Failed to delete withdrawal fee rate");
+    }
   };
 
   const renderForm = (formInstance: FormInstance) => (
@@ -249,7 +257,7 @@ export default function WithdrawalFeeRateScreen() {
       <div className="grid grid-cols-2 gap-x-8">
         <Form.Item
           name="wallet_balance_min"
-          label="Minimum Wallet Balance"
+          label="Minimum Wallet Balance ($)"
           rules={[
             {
               required: true,
@@ -266,7 +274,7 @@ export default function WithdrawalFeeRateScreen() {
 
         <Form.Item
           name="wallet_balance_max"
-          label="Maximum Wallet Balance"
+          label="Maximum Wallet Balance ($)"
           rules={[
             {
               required: true,
@@ -292,52 +300,8 @@ export default function WithdrawalFeeRateScreen() {
         </Form.Item>
 
         <Form.Item
-          name="monthly_revenue_min"
-          label="Monthly Revenue Min"
-          rules={[
-            {
-              required: true,
-              message: "Please input the Minimum Monthly Revenue",
-            },
-            {
-              type: "number",
-              message: "Minimum Monthly Revenue must be a number",
-            },
-          ]}
-        >
-          <InputNumber className="w-full" step={1} precision={0} />
-        </Form.Item>
-
-        <Form.Item
-          name="monthly_revenue_max"
-          label="Monthly Revenue Max"
-          rules={[
-            {
-              required: true,
-              message: "Please input the Monthly Revenue Max!",
-            },
-            {
-              type: "number",
-              message: "Monthly Revenue Max must be a number",
-            },
-            ({ getFieldValue }) => ({
-              validator(_, value) {
-                if (!value || getFieldValue("monthly_revenue_min") < value) {
-                  return Promise.resolve();
-                }
-                return Promise.reject(
-                  new Error("Monthly Revenue Max must be Bigger than Monthly Revenue Min!"),
-                );
-              },
-            }),
-          ]}
-        >    
-          <InputNumber className="w-full" step={1} precision={0} />
-        </Form.Item>
-
-        <Form.Item
           name="percentage_transaction_fee"
-          label="Percentage Transaction Fee"
+          label="Percentage Transaction Fee (%)"
           rules={[
             {
               required: true,
@@ -345,16 +309,18 @@ export default function WithdrawalFeeRateScreen() {
             },
             {
               type: "number",
+              min: 0,
+              max: 100,
               message: "Percentage Transaction Fee must be a number",
             },
           ]}
         >
-          <InputNumber className="w-full" step={1} precision={0} />
+          <InputNumber className="w-full" step={0.01} precision={2} />
         </Form.Item>
 
         <Form.Item
           name="percentage_withdrawal_fee"
-          label="Percentage Withdrawal Fee"
+          label="Percentage Withdrawal Fee (%)" 
           rules={[
             {
               required: true,
@@ -362,11 +328,13 @@ export default function WithdrawalFeeRateScreen() {
             },
             {
               type: "number",
+              min: 0,
+              max: 100,
               message: "Percentage Withdrawal Fee must be a number",
             },
           ]}
         >
-          <InputNumber className="w-full" step={1} precision={0} />
+           <InputNumber className="w-full" step={0.01} precision={2} />
         </Form.Item>
 
         <Form.Item

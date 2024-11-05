@@ -43,6 +43,15 @@ export const withdrawalFeeRateApi = createApi({
       }),
       invalidatesTags: ["WithdrawalFeeRateList"],
     }),
+
+      // Delete Withdrawal Fee Rate
+      deleteWithdrawalFeeRate: builder.mutation<void, string>({
+        query: (id) => ({
+          url: `/withdrawalFeeRate/${id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["WithdrawalFeeRateList"],
+      }),
   }),
 });
 
@@ -50,4 +59,5 @@ export const {
   useGetWithdrawalFeeRatesQuery,
   useCreateWithdrawalFeeRateMutation,
   useUpdateWithdrawalFeeRateMutation,
+  useDeleteWithdrawalFeeRateMutation,
 } = withdrawalFeeRateApi;

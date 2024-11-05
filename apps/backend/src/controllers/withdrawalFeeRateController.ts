@@ -69,3 +69,12 @@ export const editWithdrawalFeeRate = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+export const deleteWithdrawalFeeRate= async (req: Request, res: Response) => {
+    try {
+        const withdrawalFeeRate = await withdrawalFeeRateService.deleteWithdrawalFeeRate(req.params.withdrawal_fee_rate_id);
+        res.status(200).json(withdrawalFeeRate);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};

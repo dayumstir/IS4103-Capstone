@@ -43,6 +43,15 @@ export const merchantSizeApi = createApi({
       }),
       invalidatesTags: ["MerchantSizeList"],
     }),
+    
+    // Delete Withdrawal Fee Rate
+    deleteMerchantSize: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/merchantSize/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["MerchantSizeList"],
+    }),
   }),
 });
 
@@ -50,4 +59,5 @@ export const {
   useGetMerchantSizesQuery,
   useCreateMerchantSizeMutation,
   useUpdateMerchantSizeMutation,
+  useDeleteMerchantSizeMutation,
 } = merchantSizeApi;
