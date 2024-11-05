@@ -46,3 +46,15 @@ export const updateWithdrawalFeeRate = async (
     }
     return withdrawalFeeRate;
 };
+
+// Delete WithdrawalFeeRate
+export const deleteWithdrawalFeeRate = async (withdrawal_fee_rate_id: string) => {
+    logger.info(`Delete withdrawal fee rate: ${withdrawal_fee_rate_id}`, withdrawal_fee_rate_id);
+
+    const withdrawalFeeRate = await withdrawalFeeRepository.deleteWithdrawalFeeRate(withdrawal_fee_rate_id);
+    if (!withdrawalFeeRate) {
+        throw new Error("withdrawalFeeRate not found");
+    }
+
+    return withdrawalFeeRate;
+};

@@ -5,6 +5,7 @@ import {
     getAllMerchantSize,
     getMerchantSize,
     editMerchantSize,
+    deleteMerchantSize,
 } from "../controllers/merchantSizeController";
 //import { adminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
 
@@ -15,4 +16,6 @@ router.post("/", createMerchantSize);
 router.get("/", getAllMerchantSize);
 router.get("/:merchant_size_id", getMerchantSize);
 router.put("/:merchant_size_id", editMerchantSize);
+router.delete("/:merchant_size_id", deleteMerchantSize);
+
 export default router;

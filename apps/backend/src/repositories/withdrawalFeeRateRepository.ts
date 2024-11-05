@@ -43,3 +43,13 @@ export const updateWithdrawalFeeRate = async (
         },
     });
 };
+
+
+export const deleteWithdrawalFeeRate = async (
+    withdrawal_fee_rate_id: string,
+) => {
+    return prisma.withdrawalFeeRate.delete({
+        where: { withdrawal_fee_rate_id: withdrawal_fee_rate_id },
+    });
+};
+

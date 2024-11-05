@@ -19,6 +19,7 @@ import {
   useCreateWithdrawalFeeRateMutation,
   useGetWithdrawalFeeRatesQuery,
   useUpdateWithdrawalFeeRateMutation,
+  useDeleteWithdrawalFeeRateMutation,
 } from "../redux/services/withdrawalFeeRateService";
 import {
   useGetMerchantSizesQuery,
@@ -34,6 +35,7 @@ export default function WithdrawalFeeRateScreen() {
   const { data: merchantSizes } = useGetMerchantSizesQuery(); // Fetch merchant sizes
   const [createWithdrawalFeeRate]  = useCreateWithdrawalFeeRateMutation();
   const [updateWithdrawalFeeRate] = useUpdateWithdrawalFeeRateMutation();
+  const [deleteWithdrawalFeeRate] = useDeleteWithdrawalFeeRateMutation(); 
 
   const merchantSizeMap = merchantSizes?.reduce((acc, size) => {
     acc[size.merchant_size_id] = size.name;
@@ -217,9 +219,15 @@ export default function WithdrawalFeeRateScreen() {
     }
   };
 
-  // TODO: Implement delete  wallet balance
-  const handleDeleteRate = (id: string) => {
-    //message.success("Withdrawal Fee Ratehas been deleted.");
+  const handleDeleteRate = async (id: string) => {
+    try {
+      await deleteWithdrawalFeeRate(id).unwrap(); // Call the delete mutation
+      message.success("Withdrawal Fee Rate has been deleted.");
+      //refetch(); // Refresh the data after deletion
+    } catch (error) {
+      console.error("Error deleting withdrawal fee rate:", error);
+      message.error("Failed to delete withdrawal fee rate");
+    }
   };
 
   const renderForm = (formInstance: FormInstance) => (

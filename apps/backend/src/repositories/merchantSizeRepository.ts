@@ -41,3 +41,12 @@ export const updateMerchantSize = async (
         },
     });
 };
+
+
+export const deleteMerchantSize = async (
+    merchant_size_id: string,
+) => {
+    return prisma.merchantSize.delete({
+        where: { merchant_size_id: merchant_size_id },
+    });
+};
