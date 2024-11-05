@@ -1,4 +1,4 @@
-// src/controllers/voucherController.ts
+// app/backend/src/controllers/voucherController.ts
 import { Request, Response, NextFunction } from "express";
 import * as voucherService from '../services/voucherService';
 import * as customerService from '../services/customerService';
@@ -115,8 +115,8 @@ export const getCustomerVouchers = async (req: Request, res: Response, next: Nex
     }
 
     try {
-        const vouchers = await voucherService.getCustomerVouchers(customer_id);
-        res.status(200).json(vouchers);
+        const voucherAssigned = await voucherService.getCustomerVouchers(customer_id);
+        res.status(200).json(voucherAssigned);
     } catch (error) {
         logger.error("Error while retrieving customer vouchers:", error);
         next(error);

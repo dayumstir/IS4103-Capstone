@@ -13,6 +13,7 @@ import ViewQRCodeScreen from "./screens/viewQRCodeScreen";
 import TransactionScreen from "./screens/transactionScreen";
 import FinancialManagementRoute from "./components/financialManagementRoute";
 import TransactionDetailsScreen from "./screens/transactionDetailsScreen";
+import MerchantPaymentsScreen from "./screens/merchantPaymentsScreen";
 
 // import "./App.css";
 
@@ -46,6 +47,10 @@ const App = () => {
             <Route
               path="/financial-management/transactions/:transactionId"
               element={<TransactionDetailsScreen />}
+            />
+            <Route
+              path="/financial-management/merchant-payments"
+              element={<MerchantPaymentsScreen />}
             />
           </Route>
         </Route>

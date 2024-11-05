@@ -1,14 +1,17 @@
-// src/controllers/paymentController.ts
-import { Request, Response, NextFunction } from "express";
-import * as customerService from '../services/customerService';
-import * as instalmentPaymentService from '../services/instalmentPaymentService';
-import * as paymentHistoryService from '../services/paymentHistoryService';
-import * as voucherService from "../services/voucherService";
+// app/backend/src/controllers/paymentController.ts
+import { NextFunction, Request, Response } from "express";
+import { PaymentType, InstalmentPaymentStatus } from "@repo/interfaces";
+import { stripe } from "../utils/stripe";
 import logger from "../utils/logger";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../utils/error";
-import { stripe } from "../utils/stripe";
-import { PaymentType, InstalmentPaymentStatus } from '@repo/interfaces';
 
+import * as customerService from "../services/customerService";
+import * as instalmentPaymentService from "../services/instalmentPaymentService";
+import * as paymentHistoryService from "../services/paymentHistoryService";
+import * as voucherService from "../services/voucherService";
+import * as cashbackWalletService from "../services/cashbackWalletService";
+
+// Top Up Wallet
 export const topUpWallet = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("Executing topUpWallet...");
 
@@ -23,40 +26,31 @@ export const topUpWallet = async (req: Request, res: Response, next: NextFunctio
     }
 
     try {
-        // Get customer from database
+        // Fetch customer from database
         const customer = await customerService.getCustomerById(customer_id);
         if (!customer) {
             return next(new NotFoundError("Customer not found"));
         }
 
-        // Check if customer exists in Stripe
-        let stripeCustomer;
-
-        const existingCustomers = await stripe.customers.list({
-            email: customer.email,
-            limit: 1,
-        });
-
-        if (existingCustomers.data.length > 0) {
-            stripeCustomer = existingCustomers.data[0];
-        } else {
-            // Create a new customer in Stripe
-            stripeCustomer = await stripe.customers.create({
+        // Check if customer exists in Stripe, or create a new one
+        const existingCustomers = await stripe.customers.list({ email: customer.email, limit: 1 });
+        const stripeCustomer = existingCustomers.data.length > 0
+            ? existingCustomers.data[0]
+            : await stripe.customers.create({
                 email: customer.email,
                 name: customer.name,
                 phone: customer.contact_number,
             });
-        }
 
-        // Create ephemeral key
+        // Create ephemeral key for Stripe API
         const ephemeralKey = await stripe.ephemeralKeys.create(
             { customer: stripeCustomer.id },
             { apiVersion: "2024-09-30.acacia" }
         );
 
-        // Create PaymentIntent
+        // Create PaymentIntent for top-up
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount * 100,
+            amount: amount,
             currency: "sgd",
             customer: stripeCustomer.id,
             automatic_payment_methods: { 
@@ -83,7 +77,7 @@ export const topUpWallet = async (req: Request, res: Response, next: NextFunctio
 export const getPaymentHistoryByCustomerId = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("Executing getPaymentHistoryByCustomerId...");
 
-    const customer_id = req.customer_id;
+    const { customer_id } = req;
     if (!customer_id) {
         return next(new UnauthorizedError("Unauthorized: customer_id is missing"));
     }
@@ -101,7 +95,7 @@ export const getPaymentHistoryByCustomerId = async (req: Request, res: Response,
 export const makePayment = async (req: Request, res: Response, next: NextFunction) => {
     logger.info("Executing makePayment...");
 
-    const customer_id = req.customer_id;
+    const { customer_id } = req;
     if (!customer_id) {
         return next(new UnauthorizedError("Unauthorized: customer_id is missing"));
     }
@@ -111,10 +105,12 @@ export const makePayment = async (req: Request, res: Response, next: NextFunctio
         voucher_assigned_id,
         amount_discount_from_voucher = 0,
         amount_deducted_from_wallet = 0,
+        cashback_wallet_id,
+        amount_deducted_from_cashback_wallet = 0,
     } = req.body;
 
     try {
-        // Get Instalment Payment from database
+        // Fetch instalment payment details from the database
         const instalmentPayment = await instalmentPaymentService.getInstalmentPayment(instalment_payment_id);
         
         if (!instalmentPayment) {
@@ -125,24 +121,39 @@ export const makePayment = async (req: Request, res: Response, next: NextFunctio
             throw new BadRequestError("Instalment payment is already paid");
         }
 
-        // Deduct amount from wallet
+        // Calculate total payment amount
+        const totalPayment = amount_deducted_from_wallet + amount_deducted_from_cashback_wallet + amount_discount_from_voucher;
+
+        // Validate total payment does not exceed amount due
+        if (totalPayment > instalmentPayment.amount_due) {
+            throw new BadRequestError("Total payment amount exceeds amount due");
+        }
+
+        // Deduct specified amount from wallet, if applicable
         if (amount_deducted_from_wallet > 0) {
             await customerService.topUpWallet(customer_id, -amount_deducted_from_wallet);
         }
 
-        // Mark voucher as used
+        // Deduct specified amount from cashback wallet, if applicable
+        if (amount_deducted_from_cashback_wallet > 0 && cashback_wallet_id) {
+            await cashbackWalletService.updateCashbackWalletBalance(cashback_wallet_id, -amount_deducted_from_cashback_wallet);
+        }
+
+        // Mark voucher as used, if applicable
         if (voucher_assigned_id) {
             await voucherService.useVoucher(voucher_assigned_id);
         }
 
-        // Create payment history record
-        await paymentHistoryService.createPaymentHistory(customer_id, amount_deducted_from_wallet, PaymentType.INSTALMENT_PAYMENT);
+        // Record payment history for the transaction
+        await paymentHistoryService.createPaymentHistory(amount_deducted_from_wallet, PaymentType.INSTALMENT_PAYMENT, customer_id);
 
-        // Update instalment payment in database
+        // Update instalment payment details in the database
         await instalmentPaymentService.editInstalmentPayment(instalment_payment_id, {
-            voucher_assigned_id: voucher_assigned_id,
-            amount_discount_from_voucher: amount_discount_from_voucher,
-            amount_deducted_from_wallet: amount_deducted_from_wallet,
+            voucher_assigned_id,
+            amount_discount_from_voucher,
+            amount_deducted_from_wallet,
+            cashback_wallet_id,
+            amount_deducted_from_cashback_wallet,
             status: InstalmentPaymentStatus.PAID,
             paid_date: new Date(),
         });

@@ -8,7 +8,7 @@ export const instalmentPaymentApi = createApi({
   reducerPath: "instalmentPaymentApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: `${API_URL}/instalment-payment`,
+    baseUrl: `${API_URL}/instalmentPayment`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).customerAuth.token;
       if (token) {

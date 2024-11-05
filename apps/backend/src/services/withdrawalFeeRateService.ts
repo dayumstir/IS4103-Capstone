@@ -4,11 +4,12 @@ import * as withdrawalFeeRepository from "../repositories/withdrawalFeeRateRepos
 import logger from "../utils/logger";
 
 export const createWithdrawalFeeRate = async (
-    withdrawalFeeRateData: IWithdrawalFeeRate
+    merchant_size_id: string,
+    withdrawalFeeRateData: Omit<IWithdrawalFeeRate, "merchantSize">
 ) => {
     logger.info("Executing createWithdrawalFeeRate...");
     const withdrawalFeeRate =
-        await withdrawalFeeRepository.createWithdrawalFeeRate(withdrawalFeeRateData);
+        await withdrawalFeeRepository.createWithdrawalFeeRate(merchant_size_id, withdrawalFeeRateData);
     return withdrawalFeeRate;
 };
 

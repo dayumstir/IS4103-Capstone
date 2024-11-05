@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IMerchant } from "../../interfaces/models/merchantInterface";
+import { IMerchant } from "@repo/interfaces";
 
 export interface ProfileState {
   merchant: IMerchant | undefined;

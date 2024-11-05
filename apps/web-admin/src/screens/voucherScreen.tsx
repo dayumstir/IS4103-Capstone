@@ -1,32 +1,35 @@
+// apps/web-admin/src/screens/voucherScreen.tsx
 import { useState } from "react";
 import {
-  Form,
-  Input,
   Button,
-  Table,
   Card,
-  message,
-  Popconfirm,
-  Empty,
-  InputNumber,
   DatePicker,
-  FormInstance,
-  Modal,
   Descriptions,
   Divider,
+  Empty,
+  Form,
+  FormInstance,
+  Input,
+  InputNumber,
+  message,
+  Modal,
+  Popconfirm,
+  Select,
   Spin,
-  Select
+  Table,
 } from "antd";
-import { PlusOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
+import { EyeOutlined, PlusOutlined, StopOutlined } from "@ant-design/icons";
+
 import { 
-  useGetVouchersQuery, 
   useCreateVoucherMutation, 
+  useAssignVoucherMutation,
   useDeactivateVoucherMutation,
+  useGetAllVouchersQuery,
   useGetVoucherDetailsQuery, 
-  useAssignVoucherMutation
 } from "../redux/services/voucherService";
 import { useGetAllCustomersQuery } from "../redux/services/customerService";
-import { IVoucher } from "../interfaces/voucherInterface";
+
+import { IVoucher } from "@repo/interfaces";
 
 const { Search } = Input;
 
@@ -43,7 +46,12 @@ export default function VoucherScreen() {
   const [deactivateVoucher] = useDeactivateVoucherMutation();
   const [assignVoucher] = useAssignVoucherMutation();
   
-  // Handle voucher creation
+  const { data: vouchers, isLoading } = useGetAllVouchersQuery(voucherSearch);
+  const { data: customerOptions, isLoading: isCustomersLoading } = useGetAllCustomersQuery(undefined, { skip: !isModalOpen });
+  const { data: voucherDetails, refetch: fetchVoucherDetails } = useGetVoucherDetailsQuery(selectedVoucherId ?? "", { skip: !selectedVoucherId });
+
+  // ==================== Handlers ====================  
+
   const handleCreateVoucher = async (newVoucher: Partial<IVoucher>) => {
     try {
       const result = await createVoucher(newVoucher).unwrap();
@@ -55,7 +63,6 @@ export default function VoucherScreen() {
     }
   };
 
-  // Handle voucher deactivation
   const handleDeactivateVoucher = async (voucher: IVoucher) => {
     if (!voucher.is_active) {
       message.warning(`The voucher "${voucher.title}" is already deactivated.`);
@@ -71,11 +78,6 @@ export default function VoucherScreen() {
     }
   };
 
-  // Handle assign voucher to customer
-  const { data: customerOptions, isLoading: isCustomersLoading } = useGetAllCustomersQuery(undefined, {
-    skip: !isModalOpen,
-  });
-
   const handleAssignVoucher = async (values: { customer_email: string }) => {
     if (!selectedVoucherId) {
       message.error("No voucher selected.");
@@ -83,41 +85,31 @@ export default function VoucherScreen() {
     }
 
     try {
-      await assignVoucher({ voucher_id: selectedVoucherId, email: values.customer_email }).unwrap();
+      await assignVoucher({ email: values.customer_email, voucher_id: selectedVoucherId }).unwrap();
       message.success(`Voucher assigned to customer "${values.customer_email}".`);
-      assignVoucherForm.resetFields(); // Clear the form
-      fetchVoucherDetails(); // Refetch the voucher details
+      assignVoucherForm.resetFields();
+      fetchVoucherDetails();
     } catch (error) {
       console.error("Error assigning voucher:", error);
       message.error("Failed to assign voucher");
     }
   };
 
-  // Handle search/get vouchers
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVoucherSearch(e.target.value);
-  };
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => setVoucherSearch(e.target.value);
 
-  const { data: vouchers, isLoading } = useGetVouchersQuery(voucherSearch);
-  
-  // Fetch the voucher details
-  const { data: voucherDetails, refetch: fetchVoucherDetails } = useGetVoucherDetailsQuery(selectedVoucherId ?? "", {
-    skip: !selectedVoucherId, // Only fetch when a voucher is selected
-  });
-
-  // Open modal and fetch voucher details
   const handleViewDetails = (voucher_id: string) => {
     setSelectedVoucherId(voucher_id);
     setIsModalOpen(true);
     fetchVoucherDetails();
   };
 
-  // Close the modal
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedVoucherId(null);
-    assignVoucherForm.resetFields(); // Clear the assign form fields
+    assignVoucherForm.resetFields();
   };
+
+  // ==================== Columns Config ====================
 
   const voucherColumns = [
     { title: "Title", dataIndex: "title", key: "title", sorter: (a: IVoucher, b: IVoucher) => a.title.localeCompare(b.title) },
@@ -132,12 +124,7 @@ export default function VoucherScreen() {
       sorter: (a: IVoucher, b: IVoucher) => (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1),
       render: (_: string, voucher: IVoucher) => (
         <div className="flex flex-col gap-2">
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => handleViewDetails(voucher.voucher_id)}
-          >
-            View Voucher Details
-          </Button>
+          <Button icon={<EyeOutlined />} onClick={() => handleViewDetails(voucher.voucher_id)}>View Voucher Details</Button>
           <Popconfirm
             title={`Are you sure you want to deactivate this voucher?`}
             onConfirm={() => handleDeactivateVoucher(voucher)}
@@ -160,6 +147,8 @@ export default function VoucherScreen() {
     { title: "Remaining Uses", dataIndex: "remaining_uses", key: "remaining_uses" },
   ];
 
+   // ==================== Render Functions ====================
+
   const renderCreateVoucherForm = (formInstance: FormInstance) => (
     <Form
       form={formInstance}
@@ -176,25 +165,15 @@ export default function VoucherScreen() {
       layout="vertical"
     >
       <div className="grid grid-cols-2 gap-x-8">
-        <Form.Item
-          name="title"
-          label="Voucher Title"
-          rules={[{ required: true, message: "Please input the voucher title!" }]}
-        >
+        <Form.Item name="title" label="Voucher Title" rules={[{ required: true, message: "Please input the voucher title!" }]}>
           <Input placeholder="Enter voucher title" />
         </Form.Item>
 
-        <Form.Item
-          name="description"
-          label="Description"
-          rules={[{ required: true, message: "Please input the description!" }]}
-        >
+        <Form.Item name="description" label="Description" rules={[{ required: true, message: "Please input the description!" }]}>
           <Input placeholder="Enter description" />
         </Form.Item>
 
-        <Form.Item
-          name="percentage_discount"
-          label="Percentage Discount (Choose 1)"
+        <Form.Item name="percentage_discount" label="Percentage Discount (Choose 1)"
           rules={[
             {
               validator: (_, value) => {
@@ -216,9 +195,7 @@ export default function VoucherScreen() {
           <InputNumber className="w-full" step={1} placeholder="Enter percentage discount (0-100)" />
         </Form.Item>
 
-        <Form.Item
-          name="amount_discount"
-          label="Amount Discount (Choose 1)"
+        <Form.Item name="amount_discount" label="Amount Discount (Choose 1)"
           rules={[
             {
               validator: (_, value) => {
@@ -240,17 +217,11 @@ export default function VoucherScreen() {
           <InputNumber className="w-full" step={1} placeholder="Enter amount discount (>= 0)" />
         </Form.Item>
 
-        <Form.Item
-          name="expiry_date"
-          label="Expiry Date"
-          rules={[{ required: true, message: "Please select the expiry date!" }]}
-        >
+        <Form.Item name="expiry_date" label="Expiry Date" rules={[{ required: true, message: "Please select the expiry date!" }]}>
           <DatePicker className="w-full" />
         </Form.Item>
 
-        <Form.Item
-          name="usage_limit"
-          label="Usage Limit"
+        <Form.Item name="usage_limit" label="Usage Limit"
           rules={[
             { required: true, message: "Please input the usage limit!" },
             {
@@ -263,25 +234,77 @@ export default function VoucherScreen() {
           <InputNumber className="w-full" step={1} placeholder="Enter usage limit (>= 1)" />
         </Form.Item>
 
-        <Form.Item
-          name="terms"
-          label="Terms"
-          rules={[{ required: true, message: "Please input the terms!" }]}
-        >
+        <Form.Item name="terms" label="Terms" rules={[{ required: true, message: "Please input the terms!" }]}>
           <Input placeholder="Enter terms" />
         </Form.Item>
       </div>
 
       <Form.Item>
-        <Button
-          type="primary"
-          htmlType="submit"
-          icon={<PlusOutlined />}
-        >
-          Create Voucher
-        </Button>
+        <Button type="primary" htmlType="submit" icon={<PlusOutlined />}>Create Voucher</Button>
       </Form.Item>
     </Form>
+  );
+
+  const renderVoucherDetails = () => (
+    voucherDetails ? (
+      <>
+        <Descriptions bordered column={2}>
+          <Descriptions.Item label="Title">{voucherDetails.title}</Descriptions.Item>
+          <Descriptions.Item label="Description">{voucherDetails.description}</Descriptions.Item>
+          <Descriptions.Item label="Percentage Discount">{voucherDetails.percentage_discount}%</Descriptions.Item>
+          <Descriptions.Item label="Amount Discount">${voucherDetails.amount_discount}</Descriptions.Item>
+          <Descriptions.Item label="Expiry Date">{new Date(voucherDetails.expiry_date).toLocaleDateString()}</Descriptions.Item>
+          <Descriptions.Item label="Usage Limit">{voucherDetails.usage_limit}</Descriptions.Item>
+          <Descriptions.Item label="Terms">{voucherDetails.terms}</Descriptions.Item>
+        </Descriptions>
+
+        <Divider />
+
+        {/* Assigned Vouchers Table */}
+        <Table
+          columns={assignedVoucherColumns}
+          dataSource={voucherDetails.vouchersAssigned}
+          rowKey="voucher_assigned_id"
+          pagination={false}
+          locale={{
+            emptyText: <Empty description="No assigned vouchers found" />,
+          }}
+        />
+
+        <Divider />
+
+        {/* Assign Voucher */}
+        {voucherDetails.is_active && (
+          <Card className="mb-8 border border-gray-300" title="Assign Voucher">
+            {isCustomersLoading ? (
+              <Spin />
+            ) : (
+              <Form
+                form={assignVoucherForm}
+                layout="vertical"
+                onFinish={handleAssignVoucher}
+              >
+                <Form.Item name="customer_email" label="Customer Email" rules={[{ required: true, message: "Please select the customer!" }]}>
+                  <Select
+                    showSearch
+                    placeholder="Select a customer"
+                    options={customerOptions?.map((customer) => ({
+                      label: customer.email,
+                      value: customer.email,
+                    }))}
+                  />
+                </Form.Item>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit">
+                    Assign Voucher
+                  </Button>
+                </Form.Item>
+              </Form>
+            )}
+          </Card>
+        )}
+      </>
+    ) : <Spin />
   );
 
   return (
@@ -293,12 +316,7 @@ export default function VoucherScreen() {
 
       {/* ===== View and Manage Vouchers ===== */}
       <Card className="mb-8 border border-gray-300" title="View and Manage Vouchers">
-        <Search
-          placeholder="Search by title"
-          onChange={handleSearchChange}
-          value={voucherSearch}
-          style={{ marginBottom: 16 }}
-        />
+        <Search placeholder="Search by title" onChange={handleSearchChange} value={voucherSearch} style={{ marginBottom: 16 }}/>
         <Table
           dataSource={vouchers}
           columns={voucherColumns}
@@ -307,10 +325,7 @@ export default function VoucherScreen() {
             current: currentPage,
             pageSize: pageSize,
             total: vouchers ? vouchers.length : 0, // Assuming total count of vouchers is known
-            onChange: (page, pageSize) => {
-              setCurrentPage(page);
-              setPageSize(pageSize);
-            },
+            onChange: (page, pageSize) => { setCurrentPage(page); setPageSize(pageSize); },
             showSizeChanger: true, // Show option to change page size
             pageSizeOptions: ['5', '10', '20', '50'], // Page size options
           }}
@@ -321,79 +336,8 @@ export default function VoucherScreen() {
         />
       </Card>
 
-      <Modal
-        title="Voucher Details"
-        open={isModalOpen}
-        onCancel={handleModalClose}
-        width={1000}
-        centered
-        footer={false}
-      >
-        {voucherDetails ? (
-          <>
-            <Descriptions bordered column={2}>
-              <Descriptions.Item label="Title">{voucherDetails.title}</Descriptions.Item>
-              <Descriptions.Item label="Description">{voucherDetails.description}</Descriptions.Item>
-              <Descriptions.Item label="Percentage Discount">{voucherDetails.percentage_discount}%</Descriptions.Item>
-              <Descriptions.Item label="Amount Discount">${voucherDetails.amount_discount}</Descriptions.Item>
-              <Descriptions.Item label="Expiry Date">{new Date(voucherDetails.expiry_date).toLocaleDateString()}</Descriptions.Item>
-              <Descriptions.Item label="Usage Limit">{voucherDetails.usage_limit}</Descriptions.Item>
-              <Descriptions.Item label="Terms">{voucherDetails.terms}</Descriptions.Item>
-            </Descriptions>
-
-            <Divider />
-
-            {/* Assigned Vouchers Table */}
-            <Table
-              columns={assignedVoucherColumns}
-              dataSource={voucherDetails.vouchersAssigned}
-              rowKey="voucher_assigned_id"
-              pagination={false}
-              locale={{
-                emptyText: <Empty description="No assigned vouchers found" />,
-              }}
-            />
-
-            <Divider />
-
-            {/* Assign Voucher */}
-            {voucherDetails.is_active && (
-              <Card className="mb-8 border border-gray-300" title="Assign Voucher">
-                {isCustomersLoading ? (
-                  <Spin />
-                ) : (
-                  <Form
-                    form={assignVoucherForm}
-                    layout="vertical"
-                    onFinish={handleAssignVoucher}
-                  >
-                    <Form.Item
-                      name="customer_email"
-                      label="Customer Email"
-                      rules={[{ required: true, message: "Please select the customer!" }]}
-                    >
-                      <Select
-                        showSearch
-                        placeholder="Select a customer"
-                        options={customerOptions?.map((customer) => ({
-                          label: customer.email,
-                          value: customer.email,
-                        }))}
-                      />
-                    </Form.Item>
-                    <Form.Item>
-                      <Button type="primary" htmlType="submit">
-                        Assign Voucher
-                      </Button>
-                    </Form.Item>
-                  </Form>
-                )}
-              </Card>
-            )}
-          </>
-        ) : (
-          <Spin />
-        )}
+      <Modal title="Voucher Details" open={isModalOpen} onCancel={handleModalClose} width={1000} centered footer={false}>
+        {renderVoucherDetails()}
       </Modal>
     </div>
   );

@@ -15,6 +15,14 @@ export default function FinancialManagementRoute() {
             <Link to="/financial-management/transactions">Transactions</Link>
           ),
         },
+        {
+          key: "Merchant Payments",
+          label: (
+            <Link to="/financial-management/merchant-payments">
+              Merchant Payments
+            </Link>
+          ),
+        },
       ],
     },
   ];

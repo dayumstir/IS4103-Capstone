@@ -39,6 +39,26 @@ export default function BusinessManagementRoute() {
           ),
         },
         {
+          key: "merchant-payments",
+          label: (
+            <Link to="/business-management/merchant-payments">
+              Merchant Payments
+            </Link>
+          ),
+        },
+        {
+          key: "withdrawal-fee",
+          label: (
+            <Link to="/business-management/withdrawal-fee">Withdrawal Fee</Link>
+          ),
+        },
+        {
+          key: "merchant-size",
+          label: (
+            <Link to="/business-management/merchant-size">Merchant Size</Link>
+          ),
+        },
+        {
           key: "notifications",
           label: (
             <Link to="/business-management/notifications">Notifications</Link>

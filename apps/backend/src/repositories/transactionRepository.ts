@@ -57,7 +57,6 @@ export const createTransaction = async (transactionData: ITransaction) => {
             late_payment_amount_due: 0,
             status: InstalmentPaymentStatus.UNPAID,
             due_date: dueDates[i - 1],
-            paid_date: null,
             instalment_number: i,
             amount_deducted_from_wallet: 0,
 
@@ -73,7 +72,8 @@ export const createTransaction = async (transactionData: ITransaction) => {
         ...transactionDataWithoutRelations
     } = transactionData;
 
-    return prisma.transaction.create({
+    // Create transaction
+    const transaction = await prisma.transaction.create({
         data: {
             ...transactionDataWithoutRelations,
             customer: { connect: { customer_id: transactionData.customer_id } },
@@ -92,6 +92,18 @@ export const createTransaction = async (transactionData: ITransaction) => {
             instalment_payments: true,
         },
     });
+
+    // Add transaction amount to merchant's wallet balance
+    await prisma.merchant.update({
+        where: { merchant_id: transactionData.merchant_id },
+        data: {
+            wallet_balance: {
+                increment: transactionData.amount,
+            },
+        },
+    });
+
+    return transaction;
 };
 
 // Find all transactions in db
@@ -376,7 +388,7 @@ export const updateTransaction = async (
     updateData: Partial<ITransaction>
 ) => {
     return prisma.transaction.update({
-        where: { transaction_id: transaction_id },
+        where: { transaction_id },
         data: updateData,
     });
 };
