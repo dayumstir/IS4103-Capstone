@@ -111,7 +111,7 @@ export default function WithdrawalFeeRateScreen() {
   const checkOverlappingRanges = (
     wallet_balance_min: number,
     wallet_balance_max: number,
-    merchant_size_id: string,
+    merchant_size_id?: string,
     excludeTierId?: string,
   ): boolean => {
     const existingRates = withdrawalFeeRates || [];
@@ -145,7 +145,7 @@ export default function WithdrawalFeeRateScreen() {
       return;
     }
     
-    if (checkOverlappingRanges(wallet_balance_min, wallet_balance_max,newWithdrawalFeeRate.merchant_size_id.toString())) {
+    if (checkOverlappingRanges(wallet_balance_min, wallet_balance_max, newWithdrawalFeeRate.merchant_size_id.toString())) {
       message.error(
         "The new wallet balance range overlaps with an existing tier. Please adjust the range.",
       );
@@ -191,6 +191,7 @@ export default function WithdrawalFeeRateScreen() {
       checkOverlappingRanges(
         wallet_balance_min,
         wallet_balance_max,
+        editingRate.merchant_size_id.toString(),
         editingRate.withdrawal_fee_rate_id,
       )
     ) {
@@ -198,14 +199,6 @@ export default function WithdrawalFeeRateScreen() {
         "The updated wallet balance range overlaps with an existing tier. Please adjust the range.",
       );
       return;
-    }
-    
-    if (checkOverlappingRanges(wallet_balance_min, wallet_balance_max,editingRate.merchant_size_id.toString())) {
-      message.error(
-        "The new wallet balance range overlaps with an existing tier. Please adjust the range.",
-      );
-      return;
-  
     }
 
     const updatedRate: IWithdrawalFeeRate = {
