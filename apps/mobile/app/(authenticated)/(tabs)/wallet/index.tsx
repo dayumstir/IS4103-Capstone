@@ -385,7 +385,7 @@ export default function WalletPage() {
           ) : (
             <View className="items-center gap-2 px-8 py-4">
               <Text className="text-center font-medium leading-6 text-gray-500">
-                You have no recent payments/topUps
+                You have no recent payments/top ups
               </Text>
               <Text className="text-center text-4xl">😊</Text>
             </View>

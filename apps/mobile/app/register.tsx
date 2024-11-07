@@ -59,19 +59,11 @@ export default function Register() {
 
   // Form submit handler
   const onSubmit = async (data: RegisterFormValues) => {
-    // TODO: Use default profile picture and credit score
-    const registrationData = {
-      ...data,
-      profile_picture: "Picture of Green",
-      status: "Active",
-      credit_score: 3,
-      credit_tier_id: 3,
-    };
     try {
-      const result = await registerMutation(registrationData).unwrap();
+      const result = await registerMutation(data).unwrap();
 
       // Sore customer data in redux
-      dispatch(setCustomer(result))
+      dispatch(setCustomer(result));
 
       router.replace("/confirmation");
     } catch (err: any) {

@@ -74,6 +74,10 @@ export default function HomePage() {
   };
 
   const getProgressValue = () => {
+    if (getTotalOutstandingPayments() === 0) {
+      return 1;
+    }
+
     return Math.min(
       1,
       (profile?.wallet_balance ?? 0) / getTotalOutstandingPayments(),
