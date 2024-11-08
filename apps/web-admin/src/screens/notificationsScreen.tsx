@@ -32,7 +32,7 @@ import {
   useGetAllMerchantsQuery,
   useViewMerchantProfileQuery,
 } from "../redux/services/merchantService";
-import { useViewAdminProfileQuery } from "../redux/services/adminService";
+import { useGetProfileByIdQuery } from "../redux/services/adminService";
 import { Link } from "react-router-dom";
 import { PlusOutlined } from "@ant-design/icons";
 
@@ -67,7 +67,7 @@ const NotificationsScreen = () => {
     { skip: !currentMerchantId },
   );
   const [currentAdminId, setCurrentAdminId] = useState("");
-  const { data: currentAdmin } = useViewAdminProfileQuery(currentAdminId, {
+  const { data: currentAdmin } = useGetProfileByIdQuery(currentAdminId, {
     skip: !currentAdminId,
   });
   const [createNotification] = useCreateNotificationMutation();
