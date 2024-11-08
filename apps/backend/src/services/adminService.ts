@@ -53,7 +53,7 @@ const generateRandomPassword = (length = 8) => {
 export const add = async (adminData: IAdmin) => {
   logger.info(`Adding new admin with username: ${adminData.username}`);
 
-  const { username, email, password } = adminData;
+  const { username, email, password, admin_type } = adminData;
   const existingAdminEmail = await adminRepository.findAdminByEmail(email);
   const existingAdminUsername = await adminRepository.findAdminByUsername(username);
   
@@ -70,7 +70,7 @@ export const add = async (adminData: IAdmin) => {
   const newAdmin = await adminRepository.createAdmin({
       ...adminData,
       password: hashedPassword,
-      admin_type: AdminType.UNVERIFIED,
+      admin_type: admin_type || AdminType.UNVERIFIED,
   });
 
   const jwtToken = jwt.sign(

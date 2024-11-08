@@ -1,6 +1,7 @@
 // app/backend/src/controllers/adminController.ts
 import { Request, Response, NextFunction } from "express";
 import * as adminService from "../services/adminService";
+import { AdminType } from "@repo/interfaces";
 import logger from "../utils/logger";
 import { BadRequestError, UnauthorizedError } from "../utils/error";
 
@@ -60,7 +61,11 @@ export const addAdmin = async (req: Request, res: Response, next: NextFunction) 
     logger.info("Executing addAdmin...");
     try {
         const admin = await adminService.add(req.body);
-        await adminService.sendEmailVerification(admin.admin.email, admin.admin.username, admin.password);
+
+        if (admin.admin.admin_type === AdminType.UNVERIFIED) {
+            await adminService.sendEmailVerification(admin.admin.email, admin.admin.username, admin.password);
+        }
+        
         res.status(201).json(admin);
     } catch (error: any) {
         logger.error("Error in addAdmin:", error);
