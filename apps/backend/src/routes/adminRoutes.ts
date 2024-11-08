@@ -26,17 +26,10 @@ import {
 } from "../controllers/issueController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { superAdminAuthMiddleware } from "../middlewares/superAdminAuthMiddleware";
-<<<<<<< HEAD
-<<<<<<< HEAD
-import { editIssue, getIssue, getIssues } from "../controllers/issueController";
 import {
   getNotification,
   getNotifications,
 } from "../controllers/notificationController";
-=======
->>>>>>> 2786a05 (Remove admin interfaces from backend)
-=======
->>>>>>> 1ee6aa398c170c5dc7798342365d0a4dc93cc0a8
 
 const router = Router()
 
