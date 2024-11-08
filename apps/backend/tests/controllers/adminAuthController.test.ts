@@ -119,4 +119,40 @@ describe("AdminAuth Controller Tests", () => {
             expect(next).toHaveBeenCalledWith(new Error(errorMessage));
         });
     });
+
+    // ==================== 4. forgetPassword ====================
+    describe("forgetPassword", () => {
+        it("should send a password reset email and return 200 status", async () => {
+            req.body = { email: "admin@example.com" };
+
+            (adminAuthService.forgetPassword as jest.Mock).mockResolvedValue(undefined);
+
+            await adminAuthController.forgetPassword(req as Request, res as Response, next);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith({
+                message: "Password reset email sent successfully",
+            });
+        });
+
+        it("should handle error if email is missing", async () => {
+            req.body = {}; // No email provided
+
+            await adminAuthController.forgetPassword(req as Request, res as Response, next);
+
+            expect(next).toHaveBeenCalledWith(new BadRequestError("Email is required"));
+        });
+
+        it("should handle error if forgetPassword service fails", async () => {
+            req.body = { email: "admin@example.com" };
+            const errorMessage = "Admin not found";
+            (adminAuthService.forgetPassword as jest.Mock).mockRejectedValue(
+                new Error(errorMessage)
+            );
+
+            await adminAuthController.forgetPassword(req as Request, res as Response, next);
+
+            expect(next).toHaveBeenCalledWith(new Error(errorMessage));
+        });
+    });
 });
