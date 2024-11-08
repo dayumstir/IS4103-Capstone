@@ -1,9 +1,8 @@
 // app/backend/src/services/adminAuthService.ts
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
 
-import { AdminType, IAdmin } from "@repo/interfaces";
+import { AdminType } from "@repo/interfaces";
 import { UserType } from "../interfaces/userType";
 import * as adminRepository from "../repositories/adminRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
@@ -65,90 +64,4 @@ export const resetPassword = async (email: string, oldPassword: string, newPassw
     await adminRepository.updateAdmin(admin.admin_id, { password: hashedPassword, admin_type: AdminType.NORMAL });
 
     logger.info("Password reset successfully.");
-};
-
-
-// Function to generate a random password consisting of digits
-const generateRandomPassword = (length = 8) => {
-    const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
-    const upperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const digits = '0123456789';
-    const specialChars = '!@#$%^&*';
-
-    const allChars = lowerCase + upperCase + digits + specialChars;
-    let password = '';
-
-    // Ensure at least one character from each category is included
-    password += lowerCase[Math.floor(Math.random() * lowerCase.length)];
-    password += upperCase[Math.floor(Math.random() * upperCase.length)];
-    password += digits[Math.floor(Math.random() * digits.length)];
-    password += specialChars[Math.floor(Math.random() * specialChars.length)];
-
-    // Fill the remaining length with random characters
-    for (let i = 4; i < length; i++) {
-        password += allChars[Math.floor(Math.random() * allChars.length)];
-    }
-
-    // Shuffle the password to ensure randomness
-    return password.split('').sort(() => 0.5 - Math.random()).join('');
-};
-
-
-export const add = async (adminData: IAdmin) => {
-    const { username, email, password } = adminData;
-
-    // Check for existing admin in db
-    const existingAdminEmail = await adminRepository.findAdminByEmail(email);
-    const existingAdminUsername = await adminRepository.findAdminByUsername(username);
-    if (existingAdminEmail) {
-        throw new Error("Admin Email already exists");
-    } else if (existingAdminUsername) {
-        throw new Error("Admin Username already exists");
-    }
-
-    // Generate a random password
-    var generatedPassword =  generateRandomPassword();
-    var hashedPassword = await bcrypt.hash(generatedPassword, 10);
-    if(password && password.trim() !== "") {
-         hashedPassword = await bcrypt.hash(password, 10);
-    }
-
-    // Create admin record in db
-    const newAdmin= await adminRepository.createAdmin({
-        ...adminData,
-        password: hashedPassword,
-        admin_type: AdminType.UNVERIFIED,
-    });
-
-    // Generate JWT
-    // TODO: Create .env folder with JWT Secret
-    const token = jwt.sign({ 
-        role: UserType.ADMIN,
-        admin_id: newAdmin.admin_id , 
-        email: newAdmin.email
-    }, process.env.JWT_SECRET!, { expiresIn: "1h"});
-    if(password && password.trim() !== "") {
-        return { admin: newAdmin, token, password:password, username};
-    }
-    return { admin: newAdmin, token, password:generatedPassword , username};
-
-};
-
-export const sendEmailVerification = async (email: string, username: string, password:string) => {
-
-    const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: parseInt(process.env.EMAIL_PORT || "2525"),
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
-
-    await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Admin Account Created",
-        text: `The username to your account is ${username} and the password is: ${password}`,
-    });
 };

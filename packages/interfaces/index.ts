@@ -21,6 +21,7 @@ export type { IMerchant } from "./merchantInterface";
 export { MerchantStatus } from "./merchantInterface";
 
 export type { IPaymentHistory } from "./paymentHistoryInterface";
+export { PaymentType } from "./paymentHistoryInterface";
 export type {
     ITransaction,
     TransactionFilter,
