@@ -27,6 +27,7 @@ import {
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { superAdminAuthMiddleware } from "../middlewares/superAdminAuthMiddleware";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { editIssue, getIssue, getIssues } from "../controllers/issueController";
 import {
   getNotification,
@@ -34,6 +35,8 @@ import {
 } from "../controllers/notificationController";
 =======
 >>>>>>> 2786a05 (Remove admin interfaces from backend)
+=======
+>>>>>>> 1ee6aa398c170c5dc7798342365d0a4dc93cc0a8
 
 const router = Router()
 
@@ -63,31 +66,8 @@ router.put("/merchant/:merchant_id", authMiddleware, editMerchantProfile);
 router.get("/allIssues", authMiddleware, getIssues);
 router.get("/issue/:issue_id", authMiddleware, getIssue);
 router.put("/issue/:issue_id", authMiddleware, editIssue);
-<<<<<<< HEAD
+
 router.get("/allNotifications", authMiddleware, getNotifications);
 router.get("/notification/:notification_id", authMiddleware, getNotification);
-
-router.post("/add", add);
-router.get("/get-all", authMiddleware, superAdminAuthMiddleware, getAll);
-router.put(
-  "/deactivate-admin",
-  authMiddleware,
-  superAdminAuthMiddleware,
-  deactivateAdmin
-);
-router.put(
-  "/activate-admin",
-  authMiddleware,
-  superAdminAuthMiddleware,
-  activateAdmin
-);
-router.get(
-  "/:admin_id",
-  authMiddleware,
-  superAdminAuthMiddleware,
-  getAdminProfile
-);
-=======
->>>>>>> 2786a05 (Remove admin interfaces from backend)
 
 export default router;
