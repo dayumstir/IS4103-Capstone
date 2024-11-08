@@ -1,9 +1,15 @@
-import { AdminType } from "./adminTypeInterface";
+// packages/interfaces/adminInterface.ts
+export enum AdminType {
+    SUPER = "SUPER",
+    NORMAL = "NORMAL",
+    DEACTIVATED = "DEACTIVATED",
+    UNVERIFIED = "UNVERIFIED",
+}
 
 export interface IAdmin {
     admin_id: string;
     name: string;
-    profile_picture: string;
+    profile_picture: Buffer;
     email: string;
     username: string;
     password: string;

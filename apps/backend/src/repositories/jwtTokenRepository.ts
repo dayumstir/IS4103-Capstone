@@ -1,7 +1,6 @@
 // Handles database operations related to tokens
 import { prisma } from "./db";
 
-
 // Blacklist a token
 export const blacklistToken = async (token: string, expiresAt: Date) => {
     try {
@@ -15,7 +14,6 @@ export const blacklistToken = async (token: string, expiresAt: Date) => {
         throw new Error("Failed to blacklist the token");
     }
 };
-
 
 // Find token
 export const findToken = async (token: string) => {

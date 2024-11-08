@@ -1,7 +1,7 @@
+// app/web-admin/src/redux/services/adminService.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IAdmin } from "../../interfaces/adminInterface";
+import { IAdmin } from "@repo/interfaces";
 
-// Define a service using a base URL and expected endpoints
 export const adminApi = createApi({
   reducerPath: "adminApi",
   baseQuery: fetchBaseQuery({
@@ -20,6 +20,15 @@ export const adminApi = createApi({
     viewProfile: builder.query<IAdmin, void>({
       query: () => ({
         url: "/profile",
+        method: "GET",
+      }),
+      providesTags: ["AdminProfile"],
+    }),
+
+    // Get Admin with ID
+    viewAdminProfile: builder.query<IAdmin, string>({
+      query: (admin_id) => ({
+        url: `/profile/${admin_id}`,
         method: "GET",
       }),
       providesTags: ["AdminProfile"],
@@ -76,14 +85,7 @@ export const adminApi = createApi({
       }),
     }),
 
-    // Get Admin with ID
-    viewAdminProfile: builder.query<IAdmin, string>({
-      query: (admin_id) => ({
-        url: `/profile/${admin_id}`,
-        method: "GET",
-      }),
-      providesTags: ["AdminProfile"],
-    }),
+    
   }),
 });
 
