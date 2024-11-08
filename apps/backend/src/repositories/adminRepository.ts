@@ -1,4 +1,4 @@
-// src/backend/src/repositories/adminRepository.ts
+// app/backend/src/repositories/adminRepository.ts
 import { prisma } from "./db";
 import { IAdmin } from "@repo/interfaces";
 
@@ -30,15 +30,16 @@ export const updateAdmin = async (admin_id: string, updateData: Partial<IAdmin>)
     });
 };
 
+// Retrieve all admins except those with admin_type "SUPER", ordered by name
 export const findAllAdmins = async () => {
     return prisma.admin.findMany({
         where: {
             admin_type: {
-                not: "SUPER", // Exclude admins with admin_type "super"
+                not: "SUPER",
             },
         },
         orderBy: {
-            name : "asc",
+            name: "asc",
         },
     });
 };
