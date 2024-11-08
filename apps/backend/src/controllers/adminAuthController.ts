@@ -1,8 +1,9 @@
 // app/backend/src/controllers/adminAuthController.ts
+import jwt from "jsonwebtoken";
+
 import { Request, Response, NextFunction } from "express";
 import * as adminAuthService from "../services/adminAuthService";
 import logger from "../utils/logger";
-import jwt from "jsonwebtoken";
 import { BadRequestError } from "../utils/error";
 
 // Admin Login
@@ -54,6 +55,24 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
         res.status(200).json({ message: "Password reset successful" });
     } catch (error: any) {
         logger.error("Error in resetPassword:", error);
+        next(error);
+    }
+};
+
+// Admin Forget Password
+export const forgetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("Executing forgetPassword...");
+    const { email } = req.body;
+
+    if (!email) {
+        return next(new BadRequestError("Email is required"));
+    }
+
+    try {
+        await adminAuthService.forgetPassword(email);
+        res.status(200).json({ message: "Password reset email sent successfully" });
+    } catch (error: any) {
+        logger.error("Error in forgetPassword:", error);
         next(error);
     }
 };

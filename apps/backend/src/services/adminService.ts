@@ -3,11 +3,11 @@ import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import { IAdmin, AdminType } from "@repo/interfaces";
-import { UserType } from "../interfaces/userType";
 import * as adminRepository from "../repositories/adminRepository";
 import logger from "../utils/logger";
 import { NotFoundError, BadRequestError } from "../utils/error";
+import { IAdmin, AdminType } from "@repo/interfaces";
+import { UserType } from "../interfaces/userType";
 
 // Get admin by ID
 export const getById = async (admin_id: string) => {
@@ -30,7 +30,7 @@ export const update = async (admin_id: string, updateData: Partial<IAdmin>) => {
 };
 
 // Generate random password with specified character sets
-const generateRandomPassword = (length = 8) => {
+export const generateRandomPassword = (length = 8) => {
   const lowerCase = "abcdefghijklmnopqrstuvwxyz";
   const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const digits = "0123456789";

@@ -1,12 +1,15 @@
 // app/backend/src/services/adminAuthService.ts
+import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
+import * as adminService from "../services/adminService";
 import * as adminRepository from "../repositories/adminRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import logger from "../utils/logger";
+import { BadRequestError, NotFoundError, UnauthorizedError } from "../utils/error";
 import { AdminType } from "@repo/interfaces";
 import { UserType } from "../interfaces/userType";
-import { BadRequestError, NotFoundError, UnauthorizedError } from "../utils/error";
 
 // Admin Login
 export const login = async (loginData: { username: string; password: string }) => {
@@ -68,4 +71,40 @@ export const resetPassword = async (email: string, oldPassword: string, newPassw
     await adminRepository.updateAdmin(admin.admin_id, updateData);
 
     logger.info("Password reset successfully.");
+};
+
+// Admin Forget Password
+export const forgetPassword = async (email: string) => {
+    logger.info(`Processing forget password request for email: ${email}`);
+
+    const admin = await adminRepository.findAdminByEmail(email);
+    if (!admin) throw new NotFoundError("Admin not found");
+
+    const generatedPassword = adminService.generateRandomPassword();
+    const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+
+    await adminRepository.updateAdmin(admin.admin_id, { password: hashedPassword });
+    await sendResetEmail(email, generatedPassword);
+
+    logger.info("Forget password email sent successfully.");
+};
+
+const sendResetEmail = async (email: string, generatedPassword: string) => {
+    logger.info(`Sending password reset email to ${email}`);
+    
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: parseInt(process.env.EMAIL_PORT || "2525"),
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Password Reset Request",
+        text: `New password: ${generatedPassword}`,
+    });
 };

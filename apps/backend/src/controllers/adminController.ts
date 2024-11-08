@@ -1,9 +1,9 @@
 // app/backend/src/controllers/adminController.ts
 import { Request, Response, NextFunction } from "express";
 import * as adminService from "../services/adminService";
-import { AdminType } from "@repo/interfaces";
 import logger from "../utils/logger";
 import { BadRequestError, UnauthorizedError } from "../utils/error";
+import { AdminType } from "@repo/interfaces";
 
 // Get own admin profile
 export const getProfile = async (req: Request, res: Response, next: NextFunction) => {
