@@ -1,12 +1,11 @@
 // app/backend/src/services/adminAuthService.ts
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
-import { AdminType } from "@repo/interfaces";
-import { UserType } from "../interfaces/userType";
 import * as adminRepository from "../repositories/adminRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import logger from "../utils/logger";
+import { AdminType } from "@repo/interfaces";
+import { UserType } from "../interfaces/userType";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../utils/error";
 
 // Admin Login
@@ -20,7 +19,7 @@ export const login = async (loginData: { username: string; password: string }) =
     const isPasswordValid = await bcrypt.compare(password, admin.password);
     if (!isPasswordValid) throw new UnauthorizedError("Invalid credentials");
 
-    const token = jwt.sign(
+    const jwtToken = jwt.sign(
         {
             role: UserType.ADMIN,
             admin_id: admin.admin_id,
@@ -32,13 +31,13 @@ export const login = async (loginData: { username: string; password: string }) =
     );
 
     logger.info(`Admin ${username} logged in successfully.`);
-    return token;
+    return jwtToken;
 };
 
 // Admin Logout
-export const logout = async (token: string) => {
+export const logout = async (jwtToken: string) => {
     logger.info("Admin logout attempt...");
-    const decoded = jwt.decode(token) as any;
+    const decoded = jwt.decode(jwtToken) as any;
 
     if (!decoded || !decoded.exp) {
         throw new BadRequestError("Invalid token");
@@ -46,7 +45,7 @@ export const logout = async (token: string) => {
 
     const expiresAt = new Date(decoded.exp * 1000);
 
-    await jwtTokenRepository.blacklistToken(token, expiresAt);
+    await jwtTokenRepository.blacklistToken(jwtToken, expiresAt);
     logger.info("Admin logged out and token blacklisted successfully.");
 };
 
@@ -61,7 +60,12 @@ export const resetPassword = async (email: string, oldPassword: string, newPassw
     if (!isPasswordValid) throw new UnauthorizedError("Old password is incorrect");
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await adminRepository.updateAdmin(admin.admin_id, { password: hashedPassword, admin_type: AdminType.NORMAL });
+
+    const updateData = admin.admin_type === AdminType.UNVERIFIED
+        ? { password: hashedPassword, admin_type: AdminType.NORMAL }
+        : { password: hashedPassword };
+
+    await adminRepository.updateAdmin(admin.admin_id, updateData);
 
     logger.info("Password reset successfully.");
 };

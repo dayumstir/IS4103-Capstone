@@ -23,7 +23,7 @@ export const getProfile = async (req: Request, res: Response, next: NextFunction
 
 // Get admin profile by ID
 export const getProfileById = async (req: Request, res: Response, next: NextFunction) => {
-    logger.info(`Executing getProfileById for admin_id: ${req.params.admin_id}`);
+    logger.info("Executing getProfileById...");
     try {
         const admin_id = req.params.admin_id;
         if (!admin_id) {
@@ -70,7 +70,7 @@ export const addAdmin = async (req: Request, res: Response, next: NextFunction) 
 
 // Get all admins
 export const getAllAdmins = async (req: Request, res: Response, next: NextFunction) => {
-    logger.info("Executing getAll...");
+    logger.info("Executing getAllAdmins...");
     try {
         const admins = await adminService.getAllAdmins();
         res.status(200).json(admins);

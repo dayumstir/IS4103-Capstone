@@ -13,9 +13,9 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         
         // TODO: Evaluate if needed
         const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!) as any;
-        const { admin_type, email, admin_id } = decoded;
+        const { admin_id, email, admin_type} = decoded;
 
-        res.status(200).json({ jwtToken, admin_type, email, admin_id });
+        res.status(200).json({ jwtToken, admin_id, email, admin_type });
     } catch (error: any) {
         logger.error("Error in admin login:", error);
         next(error);

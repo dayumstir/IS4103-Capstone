@@ -24,12 +24,12 @@ import {
     getIssue,
     editIssue  
 } from "../controllers/issueController";
-import { authMiddleware } from "../middlewares/authMiddleware";
-import { superAdminAuthMiddleware } from "../middlewares/superAdminAuthMiddleware";
 import {
   getNotification,
   getNotifications,
 } from "../controllers/notificationController";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { superAdminAuthMiddleware } from "../middlewares/superAdminAuthMiddleware";
 
 const router = Router()
 
@@ -39,7 +39,7 @@ router.get("/profile/:admin_id", authMiddleware, getProfileById);
 router.put("/profile", authMiddleware, editProfile);
 
 // Super Admin Routes
-router.post("/add", addAdmin);
+router.post("/add", addAdmin);    // TODO: Data initialization/seeding before enabling authMiddleware
 router.get("/get-all", authMiddleware, superAdminAuthMiddleware, getAllAdmins);
 router.put("/deactivate-admin", authMiddleware, superAdminAuthMiddleware, deactivateAdmin);
 router.put("/activate-admin", authMiddleware, superAdminAuthMiddleware, activateAdmin);
