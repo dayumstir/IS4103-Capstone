@@ -1,5 +1,5 @@
 // payments/allTransactions.tsx
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -38,13 +38,11 @@ export default function AllTransactions() {
     isFetching,
     isLoading: isTransactionsLoading,
     refetch,
-  } = useGetCustomerTransactionsQuery(
-    debouncedSearchQuery +
-      "&date_filter=" +
-      dateFilter +
-      "&status_filter=" +
-      statusFilter,
-  );
+  } = useGetCustomerTransactionsQuery({
+    search: debouncedSearchQuery,
+    dateFilter: dateFilter,
+    statusFilter: statusFilter,
+  });
 
   const [refreshing, setRefreshing] = useState(false);
 

@@ -219,7 +219,7 @@ export const findTransactionsByCustomerId = async (
                 break;
             default:
                 startDate = new Date(0); // Beginning of time
-                endDate = currentDate;
+                endDate = new Date(8640000000000000); // End of time
         }
 
         whereClause.date_of_transaction = {
