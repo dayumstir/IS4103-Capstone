@@ -1,5 +1,5 @@
 // app/mobile/app/(authenticated)/(tabs)/payments/index.tsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   ScrollView,
   View,
@@ -12,16 +12,13 @@ import { Button } from "@ant-design/react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from "@react-navigation/native";
 
 import { useGetCustomerTransactionsQuery } from "../../../../redux/services/transactionService";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
 import { useGetProfileQuery } from "../../../../redux/services/customerService";
 import { formatCurrency } from "../../../../utils/formatCurrency";
 import { format } from "date-fns";
-
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../redux/store";
 
 export default function PaymentsPage() {
   const [isInstalmentsExpanded, setIsInstalmentsExpanded] = useState(true);
@@ -40,7 +37,7 @@ export default function PaymentsPage() {
     data: transactions,
     isLoading: isTransactionsLoading,
     refetch: refetchTransactions,
-  } = useGetCustomerTransactionsQuery("");
+  } = useGetCustomerTransactionsQuery({});
 
   // Fetch outstanding instalment payments
   const {
@@ -162,7 +159,7 @@ export default function PaymentsPage() {
                     key={payment.instalment_payment_id}
                     onPress={() =>
                       router.push(
-                        `/payments/instalments/${payment.instalment_payment_id}`
+                        `/payments/instalments/${payment.instalment_payment_id}`,
                       )
                     }
                     className={`flex-row items-center justify-between border-t border-gray-200 ${
@@ -181,7 +178,10 @@ export default function PaymentsPage() {
                       </Text>
                       <Text className="text-sm font-medium text-blue-500">
                         Instalment {payment.instalment_number} of{" "}
-                        {payment.transaction.instalment_plan.number_of_instalments}
+                        {
+                          payment.transaction.instalment_plan
+                            .number_of_instalments
+                        }
                       </Text>
                       <Text
                         className={`text-sm ${
