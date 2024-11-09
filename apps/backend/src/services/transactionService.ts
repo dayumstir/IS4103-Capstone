@@ -68,3 +68,8 @@ export const updateTransaction = async (
     }
     return transaction;
 };
+
+export const getTransactionStats = async () => {
+    const stats = await transactionRepository.getTransactionStats();
+    return stats;
+};

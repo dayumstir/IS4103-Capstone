@@ -26,6 +26,7 @@ export type {
     ITransaction,
     TransactionFilter,
     TransactionResult,
+    TransactionStats,
 } from "./transactionInterface";
 export { TransactionStatus } from "./transactionInterface";
 
