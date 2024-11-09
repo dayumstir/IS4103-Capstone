@@ -6,7 +6,7 @@ import {
   RefreshControl,
   Image,
 } from "react-native";
-import { addMonths, addWeeks, addYears, format } from "date-fns";
+import { addDays, addMonths, addWeeks, addYears, format } from "date-fns";
 import { router } from "expo-router";
 import { formatCurrency } from "../../../utils/formatCurrency";
 import { useGetProfileQuery } from "../../../redux/services/customerService";
@@ -237,6 +237,7 @@ export default function HomePage() {
           <ActivityIndicator />
         ) : transactions && transactions.length > 0 ? (
           <View className="rounded-xl bg-white p-4">
+            {/* ===== Generate the bar chart data ===== */}
             {(() => {
               const dates = transactions.map(
                 (t) => new Date(t.date_of_transaction),
@@ -319,42 +320,86 @@ export default function HomePage() {
                 Math.max(...barData.map((item) => item.value), 1),
               );
 
+              // Calculate average spending
+              const totalSpending = barData.reduce(
+                (sum, item) => sum + item.value,
+                0,
+              );
+              const averageSpending = totalSpending / barData.length;
+
+              // Get the date range text
+              let dateRangeText = "";
+              switch (timeFrame) {
+                case "week":
+                  dateRangeText = `${format(periods[periods.length - 1], "d MMM")} - ${format(addDays(periods[periods.length - 1], 6), "d MMM yyyy")}`;
+                  break;
+                case "month":
+                  dateRangeText = format(
+                    periods[periods.length - 1],
+                    "MMMM yyyy",
+                  );
+                  break;
+                case "year":
+                  dateRangeText = format(periods[0], "yyyy");
+                  break;
+              }
+
               return (
-                <BarChart
-                  data={barData}
-                  width={280}
-                  height={200}
-                  barWidth={20}
-                  spacing={timeFrame === "month" ? 8 : 20}
-                  barBorderTopLeftRadius={4}
-                  barBorderTopRightRadius={4}
-                  xAxisThickness={1}
-                  yAxisThickness={1}
-                  yAxisTextStyle={{ color: "#666", fontSize: 12 }}
-                  xAxisLabelTextStyle={{
-                    color: "#666",
-                    fontSize: 10,
-                  }}
-                  noOfSections={4}
-                  maxValue={maxAmount}
-                  labelWidth={0}
-                  renderTooltip={(item: any, index: number) => {
-                    return (
-                      <View
-                        style={{
-                          paddingHorizontal: 6,
-                          paddingVertical: 4,
-                          backgroundColor: "#1e40af",
-                          borderRadius: 4,
-                        }}
-                      >
-                        <Text className="font-semibold text-white">
-                          {formatCurrency(item.value)}
-                        </Text>
-                      </View>
-                    );
-                  }}
-                />
+                <>
+                  <View className="mb-4 flex-row justify-between">
+                    <View>
+                      <Text className="text-base font-semibold text-gray-600">
+                        {dateRangeText}
+                      </Text>
+                      <Text className="text-2xl font-bold text-blue-600">
+                        {formatCurrency(totalSpending)}
+                      </Text>
+                    </View>
+                    <View>
+                      <Text className="text-base font-semibold text-gray-600">
+                        Average per {timeFrame}
+                      </Text>
+                      <Text className="text-2xl font-bold text-blue-600">
+                        {formatCurrency(averageSpending)}
+                      </Text>
+                    </View>
+                  </View>
+                  <BarChart
+                    data={barData}
+                    width={280}
+                    height={200}
+                    barWidth={20}
+                    spacing={timeFrame === "month" ? 8 : 20}
+                    barBorderTopLeftRadius={4}
+                    barBorderTopRightRadius={4}
+                    xAxisThickness={1}
+                    yAxisThickness={1}
+                    yAxisTextStyle={{ color: "#666", fontSize: 12 }}
+                    xAxisLabelTextStyle={{
+                      color: "#666",
+                      fontSize: 10,
+                    }}
+                    noOfSections={4}
+                    maxValue={maxAmount}
+                    labelWidth={0}
+                    renderTooltip={(item: any, index: number) => {
+                      return (
+                        <View
+                          style={{
+                            paddingHorizontal: 6,
+                            paddingVertical: 4,
+                            backgroundColor: "#1e40af",
+                            borderRadius: 4,
+                          }}
+                        >
+                          <Text className="font-semibold text-white">
+                            {formatCurrency(item.value)}
+                          </Text>
+                        </View>
+                      );
+                    }}
+                  />
+                </>
               );
             })()}
           </View>
