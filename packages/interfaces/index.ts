@@ -1,4 +1,7 @@
 // packages/interfaces/index.ts
+export type { IAdmin } from "./adminInterface";
+export { AdminType } from "./adminInterface";
+
 export type { ICashbackWallet } from "./cashbackWalletInterface";
 
 export type { ICreditTier } from "./creditTierInterface";
@@ -18,6 +21,7 @@ export type { IMerchant } from "./merchantInterface";
 export { MerchantStatus } from "./merchantInterface";
 
 export type { IPaymentHistory } from "./paymentHistoryInterface";
+export { PaymentType } from "./paymentHistoryInterface";
 export type {
     ITransaction,
     TransactionFilter,
