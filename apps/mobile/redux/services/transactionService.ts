@@ -35,8 +35,16 @@ export const transactionApi = createApi({
     }),
 
     // Get Customer Transactions
-    getCustomerTransactions: builder.query<TransactionResult[], string>({
-      query: (searchQuery = "") => `customer?search=${searchQuery}`,
+    getCustomerTransactions: builder.query<
+      TransactionResult[],
+      {
+        search?: string;
+        dateFilter?: string;
+        statusFilter?: string;
+      }
+    >({
+      query: ({ search = "", dateFilter = "all", statusFilter = "all" }) =>
+        `/customer?search=${search}&date_filter=${dateFilter}&status_filter=${statusFilter}`,
       providesTags: ["TransactionsList"],
       keepUnusedDataFor: 0,
     }),
