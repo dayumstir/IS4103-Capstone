@@ -88,3 +88,22 @@ export const editTransaction = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+// Get Transaction Stats
+export const getTransactionStats = async (req: Request, res: Response) => {
+    const admin_id = req.admin_id; // from authMiddleware
+    if (!admin_id) {
+        return res
+            .status(401)
+            .json({ error: "Unauthorized: No admin ID provided" });
+    }
+
+    console.log("Admin ID:", admin_id);
+
+    try {
+        const stats = await transactionService.getTransactionStats();
+        res.status(200).json(stats);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};

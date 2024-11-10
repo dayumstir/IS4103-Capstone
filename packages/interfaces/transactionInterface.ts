@@ -73,3 +73,26 @@ export const transactionStatusColorMap: Record<TransactionStatus, string> = {
     [TransactionStatus.IN_PROGRESS]: "orange",
     [TransactionStatus.FULLY_PAID]: "green",
 };
+
+export interface TransactionStats {
+    volumeIncrease: number;
+    activeCustomers: number;
+    totalCustomers: number;
+    customerGrowth: number;
+    avgTransactionSize: number;
+    avgTransactionChange: number;
+    currentDefaultRate: number;
+    defaultRateChange: number;
+    dailyVolume: {
+        date: string;
+        volume: number;
+    }[];
+    monthlyVolume: {
+        date: string;
+        volume: number;
+    }[];
+    yearlyVolume: {
+        date: string;
+        volume: number;
+    }[];
+}

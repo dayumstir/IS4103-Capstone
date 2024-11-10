@@ -48,3 +48,10 @@ export const updateCreditTier = async (
         },
     });
 };
+
+// Delete credit tier in db
+export const deleteCreditTier = async (credit_tier_id: string) => {
+    return prisma.creditTier.delete({
+        where: { credit_tier_id: credit_tier_id },
+    });
+};

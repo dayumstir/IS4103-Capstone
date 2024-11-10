@@ -18,6 +18,7 @@ import {
   useGetCreditTiersQuery,
   useCreateCreditTierMutation,
   useUpdateCreditTierMutation,
+  useDeleteCreditTierMutation,
 } from "../redux/services/creditTierService";
 
 export default function CreditTierScreen() {
@@ -29,6 +30,7 @@ export default function CreditTierScreen() {
   const { data: creditTiers, isLoading } = useGetCreditTiersQuery();
   const [createCreditTier] = useCreateCreditTierMutation();
   const [updateCreditTier] = useUpdateCreditTierMutation();
+  const [deleteCreditTier] = useDeleteCreditTierMutation();
 
   const tableColumns = [
     {
@@ -179,9 +181,14 @@ export default function CreditTierScreen() {
     }
   };
 
-  // TODO: Implement delete credit tier
-  const handleDeleteTier = (id: string) => {
-    message.success("Credit tier has been deleted.");
+  const handleDeleteTier = async (id: string) => {
+    try {
+      await deleteCreditTier(id).unwrap();
+      message.success("Credit tier has been deleted.");
+    } catch (error) {
+      console.error("Error deleting credit tier:", error);
+      message.error("Failed to delete credit tier");
+    }
   };
 
   const renderForm = (formInstance: FormInstance) => (

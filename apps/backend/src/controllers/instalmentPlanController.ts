@@ -56,3 +56,18 @@ export const editInstalmentPlan = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+// Delete Instalment Plan
+export const deleteInstalmentPlan = async (req: Request, res: Response) => {
+    try {
+        await instalmentPlanService.deleteInstalmentPlan(
+            req.params.instalment_plan_id
+        );
+        res.status(200).json({
+            message: "Instalment plan deleted successfully",
+        });
+    } catch (error: any) {
+        logger.error(`Error in deleteInstalmentPlan: ${error.message}`);
+        res.status(400).json({ error: error.message });
+    }
+};

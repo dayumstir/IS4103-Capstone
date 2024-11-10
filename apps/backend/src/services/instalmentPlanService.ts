@@ -45,3 +45,10 @@ export const updateInstalmentPlan = async (
     }
     return instalmentPlan;
 };
+
+export const deleteInstalmentPlan = async (instalment_plan_id: string) => {
+    logger.info("Executing deleteInstalmentPlan...");
+    const instalmentPlan =
+        await instalmentPlanRepository.deleteInstalmentPlan(instalment_plan_id);
+    return instalmentPlan;
+};

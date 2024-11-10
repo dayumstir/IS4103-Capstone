@@ -1,10 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { TransactionResult } from "@repo/interfaces";
+import { TransactionResult, TransactionStats } from "@repo/interfaces";
 
 export const transactionApi = createApi({
   reducerPath: "transactionApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000",
+    baseUrl: "http://localhost:3000/transaction",
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) {
@@ -18,7 +18,7 @@ export const transactionApi = createApi({
     // Get all transactions
     getTransactions: builder.query<TransactionResult[], string>({
       query: (search) => ({
-        url: "/transaction",
+        url: "/",
         params: { search },
       }),
       providesTags: ["TransactionList"],
@@ -26,11 +26,23 @@ export const transactionApi = createApi({
 
     // Get transaction by id
     getTransactionById: builder.query<TransactionResult, string>({
-      query: (id) => `/transaction/${id}`,
+      query: (id) => `/${id}`,
       providesTags: (result, error, id) => [{ type: "TransactionList", id }],
+    }),
+
+    // Get transaction stats
+    getTransactionStats: builder.query<TransactionStats, void>({
+      query: () => "/stats",
+      transformResponse: (response: TransactionStats) => {
+        console.log("Transaction stats response:", response);
+        return response;
+      },
     }),
   }),
 });
 
-export const { useGetTransactionsQuery, useGetTransactionByIdQuery } =
-  transactionApi;
+export const {
+  useGetTransactionsQuery,
+  useGetTransactionByIdQuery,
+  useGetTransactionStatsQuery,
+} = transactionApi;
