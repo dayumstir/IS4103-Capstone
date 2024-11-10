@@ -8,6 +8,7 @@ import { customerApi } from "./services/customer";
 import profileReducer from "./features/profileSlice";
 import { transactionApi } from "./services/transaction";
 import { merchantPaymentApi } from "./services/merchantPayment";
+import { instalmentPaymentApi } from "./services/instalmentPayment";
 
 const customSerializableCheck = {
   isSerializable: () => true,
@@ -23,6 +24,7 @@ export const store = configureStore({
     [customerApi.reducerPath]: customerApi.reducer,
     [transactionApi.reducerPath]: transactionApi.reducer,
     [merchantPaymentApi.reducerPath]: merchantPaymentApi.reducer,
+    [instalmentPaymentApi.reducerPath]: instalmentPaymentApi.reducer,
     profile: profileReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -34,6 +36,7 @@ export const store = configureStore({
       customerApi.middleware,
       transactionApi.middleware,
       merchantPaymentApi.middleware,
+      instalmentPaymentApi.middleware,
     ),
 });
 

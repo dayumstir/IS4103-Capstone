@@ -31,7 +31,7 @@ export default function Header({ isSuperAdmin }: { isSuperAdmin: boolean }) {
 
   const handleLogout = async () => {
     try {
-      await logout({ reason: "User requested logout" }).unwrap();
+      await logout().unwrap();
 
       localStorage.removeItem("token");
       navigate("/login");
