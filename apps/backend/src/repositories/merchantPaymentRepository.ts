@@ -1,4 +1,5 @@
 // Handles database operations related to merchant payments
+import { subMonths } from "date-fns";
 import { prisma } from "./db";
 import { IMerchantPayment } from "@repo/interfaces/merchantPaymentInterface";
 
@@ -85,4 +86,42 @@ export const updateMerchantPayment = async (
         },
     });
     return payment;
+};
+
+// Calculate Withdrawal Info
+export const calculateWithdrawalInfo = async (merchant_id: string) => {
+    const transactionsWithinLastMonth = await prisma.transaction.findMany({
+        where: {
+            merchant_id,
+            date_of_transaction: {
+                gte: subMonths(new Date(), 1),
+            },
+        },
+    });
+
+    const monthlyRevenue = transactionsWithinLastMonth.reduce(
+        (acc, transaction) => acc + transaction.amount,
+        0
+    );
+
+    const merchant = await prisma.merchant.findUnique({
+        where: { merchant_id: merchant_id },
+    });
+
+    const merchantSize = await prisma.merchantSize.findFirst({
+        where: {
+            monthly_revenue_min: { lte: monthlyRevenue },
+            monthly_revenue_max: { gte: monthlyRevenue },
+        },
+    });
+
+    const withdrawalFeeRate = await prisma.withdrawalFeeRate.findFirst({
+        where: {
+            merchant_size_id: merchantSize?.merchant_size_id,
+            wallet_balance_min: { lte: merchant?.wallet_balance },
+            wallet_balance_max: { gte: merchant?.wallet_balance },
+        },
+    });
+
+    return { withdrawalFeeRate, monthlyRevenue, merchantSize };
 };

@@ -104,12 +104,12 @@ const Header: React.FC = () => {
   );
 
   return (
-    <Header className="fixed top-0 z-10 flex w-full items-center bg-gray-100 shadow-sm">
+    <Header className="fixed top-0 z-10 flex w-full items-center bg-gray-200 shadow-sm">
       <Menu
         mode="horizontal"
         defaultSelectedKeys={["2"]}
         items={items}
-        style={{ flex: 1, backgroundColor: "#F5F5F5", border: "none" }}
+        style={{ flex: 1, backgroundColor: "#e5e7eb", border: "none" }}
         onClick={(menuInfo) => navigateToScreen(menuInfo.key)}
       />
       <GlobalSearchBar />

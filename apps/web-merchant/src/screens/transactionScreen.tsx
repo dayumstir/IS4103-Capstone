@@ -120,7 +120,6 @@ const TransactionScreen: React.FC = () => {
   const fetchFilteredTransactions = async () => {
     try {
       if (merchant && merchant.merchant_id) {
-        console.log(merchant.merchant_id);
         const data = await getTransactionsByFilter(filter).unwrap();
         const mappedData: TransactionTableInterface[] = data.map(
           (transaction) => ({

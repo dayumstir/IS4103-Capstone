@@ -21,13 +21,16 @@ import {
   LineChartOutlined,
 } from "@ant-design/icons";
 import { format } from "date-fns";
-import { useCreateMerchantPaymentMutation } from "../redux/services/merchantPayment";
-import { useState, useEffect } from "react";
+import {
+  useCalculateWithdrawalInfoQuery,
+  useCreateMerchantPaymentMutation,
+  useGetMerchantSizesQuery,
+  useGetWithdrawalFeeRatesQuery,
+} from "../redux/services/merchantPayment";
+import React, { useState } from "react";
 import { RootState } from "../redux/store";
 import { useSelector } from "react-redux";
-import { useGetTransactionsByFilterMutation } from "../redux/services/transaction";
-import { subMonths } from "date-fns";
-import { IMerchantPayment, TransactionFilter } from "@repo/interfaces";
+import { IMerchantPayment } from "@repo/interfaces";
 
 enum PaymentStatus {
   PAID = "PAID",
@@ -39,29 +42,7 @@ export default function MerchantPaymentsScreen() {
   const [form] = Form.useForm();
   const [createPayment] = useCreateMerchantPaymentMutation();
   const { merchant } = useSelector((state: RootState) => state.profile);
-  const [getTransactionsByFilter] = useGetTransactionsByFilterMutation();
-  const [monthlyRevenue, setMonthlyRevenue] = useState(0);
-
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      if (merchant?.merchant_id) {
-        const filter: TransactionFilter = {
-          merchant_id: merchant.merchant_id,
-          create_from: subMonths(new Date(), 1),
-          create_to: new Date(),
-        };
-
-        const data = await getTransactionsByFilter(filter).unwrap();
-        const totalAmount = data.reduce(
-          (sum, transaction) => sum + transaction.amount,
-          0,
-        );
-        setMonthlyRevenue(totalAmount);
-      }
-    };
-
-    fetchTransactions();
-  }, [merchant]);
+  const { data: withdrawalInfo } = useCalculateWithdrawalInfoQuery();
 
   const columns = [
     {
@@ -131,10 +112,12 @@ export default function MerchantPaymentsScreen() {
     to_merchant_bank_account_no: string;
   }) => {
     // Calculate fees
-    const transaction_fee_percentage = 0.015;
+    const transaction_fee_percentage =
+      withdrawalInfo?.withdrawalFeeRate?.percentage_transaction_fee || 0;
     const transaction_fees =
       values.total_amount_from_transactions * transaction_fee_percentage;
-    const withdrawal_fee_percentage = calculateWithdrawalFeeRate();
+    const withdrawal_fee_percentage =
+      withdrawalInfo?.withdrawalFeeRate?.percentage_withdrawal_fee || 0;
     const withdrawal_fee =
       values.total_amount_from_transactions * withdrawal_fee_percentage;
     const final_payment_amount =
@@ -168,24 +151,6 @@ export default function MerchantPaymentsScreen() {
     }
   };
 
-  const calculateWithdrawalFeeRate = () => {
-    if (!merchant) {
-      return 0.05; // default highest withdrawal fee rate
-    }
-
-    if (monthlyRevenue >= 25000) {
-      if (merchant.wallet_balance >= 200000) return 0.028;
-      if (merchant.wallet_balance >= 100000) return 0.03;
-      if (merchant.wallet_balance >= 50000) return 0.035;
-    } else {
-      if (merchant.wallet_balance >= 50000) return 0.028;
-      if (merchant.wallet_balance >= 25000) return 0.03;
-      if (merchant.wallet_balance >= 5000) return 0.035;
-    }
-
-    return 0.05;
-  };
-
   return (
     <div className="w-full px-8 py-4">
       <Card>
@@ -205,7 +170,7 @@ export default function MerchantPaymentsScreen() {
           <Card className="flex-1">
             <Statistic
               title="Monthly Revenue"
-              value={monthlyRevenue}
+              value={withdrawalInfo?.monthlyRevenue ?? 0}
               precision={2}
               prefix={
                 <>
@@ -221,7 +186,7 @@ export default function MerchantPaymentsScreen() {
               precision={2}
               prefix={
                 <>
-                  <WalletOutlined className="text-green-500" /> $
+                  <WalletOutlined className="text-blue-500" /> $
                 </>
               }
             />
@@ -275,108 +240,51 @@ export default function MerchantPaymentsScreen() {
             </Form.Item>
 
             <Form.Item
-              label="Fees"
+              label={
+                <span className="font-bold">
+                  Fees
+                  <FeeTooltip />
+                </span>
+              }
               dependencies={["total_amount_from_transactions"]}
             >
               {() => {
                 const amount =
                   form.getFieldValue("total_amount_from_transactions") || 0;
-                const transactionFee = amount * 0.015;
-                const withdrawalFee = amount * calculateWithdrawalFeeRate();
+                const transactionFee =
+                  (amount *
+                    (withdrawalInfo?.withdrawalFeeRate
+                      ?.percentage_transaction_fee || 0)) /
+                  100;
+                const withdrawalFee =
+                  (amount *
+                    (withdrawalInfo?.withdrawalFeeRate
+                      ?.percentage_withdrawal_fee || 0)) /
+                  100;
                 const finalAmount = amount - transactionFee - withdrawalFee;
 
                 return (
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span>Transaction Fee (1.5%):</span>
+                      <span>
+                        Transaction Fee (
+                        {withdrawalInfo?.withdrawalFeeRate
+                          ? withdrawalInfo.withdrawalFeeRate
+                              .percentage_transaction_fee
+                          : 0}
+                        %):
+                      </span>
                       <span>${transactionFee.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <div className="flex items-center gap-1">
-                        <Tooltip
-                          title={
-                            <div className="space-y-4">
-                              <div>
-                                <p className="mb-2 font-bold">
-                                  Big Businesses (Monthly Revenue ≥ $25,000)
-                                </p>
-                                <table className="w-full text-sm">
-                                  <thead>
-                                    <tr>
-                                      <th className="w-1/2 text-left">
-                                        Wallet Balance
-                                      </th>
-                                      <th className="w-1/2 text-left">
-                                        Withdrawal Fee
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    <tr>
-                                      <td>≥ $200,000</td>
-                                      <td>2.8%</td>
-                                    </tr>
-                                    <tr>
-                                      <td>$100,000 - $199,999</td>
-                                      <td>3.0%</td>
-                                    </tr>
-                                    <tr>
-                                      <td>$50,000 - $99,999</td>
-                                      <td>3.5%</td>
-                                    </tr>
-                                    <tr>
-                                      <td>$0 - $49,999</td>
-                                      <td>5.0%</td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </div>
-                              <div>
-                                <p className="mb-2 font-bold">
-                                  Small Businesses (Monthly Revenue ≤ $25,000)
-                                </p>
-                                <table className="w-full text-sm">
-                                  <thead>
-                                    <tr>
-                                      <th className="w-1/2 text-left">
-                                        Wallet Balance
-                                      </th>
-                                      <th className="w-1/2 text-left">
-                                        Withdrawal Fee
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    <tr>
-                                      <td>≥ $50,000</td>
-                                      <td>2.8%</td>
-                                    </tr>
-                                    <tr>
-                                      <td>$25,000 - $49,999</td>
-                                      <td>3.0%</td>
-                                    </tr>
-                                    <tr>
-                                      <td>$5,000 - $24,999</td>
-                                      <td>3.5%</td>
-                                    </tr>
-                                    <tr>
-                                      <td>$0 - $4,999</td>
-                                      <td>5.0%</td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          }
-                          overlayStyle={{ maxWidth: "500px" }}
-                        >
-                          <QuestionCircleOutlined className="text-gray-500" />
-                        </Tooltip>
-                        <span>
-                          Withdrawal Fee ({calculateWithdrawalFeeRate() * 100}
-                          %):
-                        </span>
-                      </div>
+                      <span>
+                        Withdrawal Fee (
+                        {withdrawalInfo?.withdrawalFeeRate
+                          ? withdrawalInfo.withdrawalFeeRate
+                              .percentage_withdrawal_fee
+                          : 0}
+                        %):
+                      </span>
                       <span>${withdrawalFee.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-bold">
@@ -404,3 +312,57 @@ export default function MerchantPaymentsScreen() {
     </div>
   );
 }
+
+const FeeTooltip = () => {
+  const { data: merchantSizes } = useGetMerchantSizesQuery();
+  const { data: withdrawalFeeRates } = useGetWithdrawalFeeRatesQuery();
+
+  return (
+    <Tooltip
+      title={
+        <div className="m-2 space-y-4">
+          {merchantSizes?.map((merchantSize) => (
+            <React.Fragment key={merchantSize.merchant_size_id}>
+              <p className="font-bold">
+                {merchantSize.name} (Monthly Revenue: $
+                {merchantSize.monthly_revenue_min} - $
+                {merchantSize.monthly_revenue_max})
+              </p>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr>
+                    <th className="w-1/4 text-left">Wallet Balance</th>
+                    <th className="w-1/4 text-left">Transaction Fee</th>
+                    <th className="w-1/4 text-left">Withdrawal Fee</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {withdrawalFeeRates?.map(
+                    (withdrawalFeeRate) =>
+                      withdrawalFeeRate.merchantSize.merchant_size_id ===
+                        merchantSize.merchant_size_id && (
+                        <tr key={withdrawalFeeRate.withdrawal_fee_rate_id}>
+                          <td>
+                            {`$${withdrawalFeeRate.wallet_balance_min} - $${withdrawalFeeRate.wallet_balance_max}`}
+                          </td>
+                          <td>
+                            {withdrawalFeeRate.percentage_transaction_fee}%
+                          </td>
+                          <td>
+                            {withdrawalFeeRate.percentage_withdrawal_fee}%
+                          </td>
+                        </tr>
+                      ),
+                  )}
+                </tbody>
+              </table>
+            </React.Fragment>
+          ))}
+        </div>
+      }
+      overlayStyle={{ maxWidth: "600px" }}
+    >
+      <QuestionCircleOutlined className="ml-1 text-gray-500" />
+    </Tooltip>
+  );
+};

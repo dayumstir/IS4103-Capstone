@@ -7,15 +7,18 @@ import {
     editWithdrawalFeeRate,
     deleteWithdrawalFeeRate,
 } from "../controllers/withdrawalFeeRateController";
-//import { adminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-// TODO: Add adminAuthMiddleware
-router.post("/", createWithdrawalFeeRate);
-router.get("/", getAllWithdrawalFeeRate);
-router.get("/:withdrawal_fee_rate_id", getWithdrawalFeeRate);
-router.put("/:withdrawal_fee_rate_id", editWithdrawalFeeRate);
-router.delete("/:withdrawal_fee_rate_id", deleteWithdrawalFeeRate);
+router.post("/", authMiddleware, createWithdrawalFeeRate);
+router.get("/", authMiddleware, getAllWithdrawalFeeRate);
+router.get("/:withdrawal_fee_rate_id", authMiddleware, getWithdrawalFeeRate);
+router.put("/:withdrawal_fee_rate_id", authMiddleware, editWithdrawalFeeRate);
+router.delete(
+    "/:withdrawal_fee_rate_id",
+    authMiddleware,
+    deleteWithdrawalFeeRate
+);
 
 export default router;

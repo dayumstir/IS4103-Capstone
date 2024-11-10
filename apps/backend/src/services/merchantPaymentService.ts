@@ -43,3 +43,10 @@ export const updateMerchantPayment = async (
         );
     return merchantPayment;
 };
+
+// Calculate Withdrawal Info
+export const calculateWithdrawalInfo = async (merchant_id: string) => {
+    const info =
+        await merchantPaymentRepository.calculateWithdrawalInfo(merchant_id);
+    return info;
+};

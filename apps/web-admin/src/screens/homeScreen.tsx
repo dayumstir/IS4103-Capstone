@@ -1,4 +1,4 @@
-import { Card, Row, Col, Statistic, Table, Select } from "antd";
+import { Card, Row, Col, Statistic, Table, Select, Button } from "antd";
 import { ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons";
 import {
   useGetTransactionsQuery,
@@ -7,17 +7,20 @@ import {
 import { formatCurrency } from "../utils/formatCurrency";
 import { format } from "date-fns";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  AreaChart,
+  Area,
+  CartesianGrid,
 } from "recharts";
 import { ICustomer, IMerchant } from "@repo/interfaces";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function HomeScreen() {
+  const navigate = useNavigate();
   const { data: transactions } = useGetTransactionsQuery("");
   const { data: stats } = useGetTransactionStatsQuery();
 
@@ -25,8 +28,6 @@ export default function HomeScreen() {
     if (!transactions) return 0;
     return transactions.reduce((acc, curr) => acc + curr.amount, 0);
   };
-
-  console.log(stats);
 
   const recentTransactions = transactions?.slice(0, 5) || [];
 
@@ -203,11 +204,13 @@ export default function HomeScreen() {
         {stats?.dailyVolume && stats.dailyVolume.length > 0 ? (
           <div style={{ height: 300 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={stats[`${timeFrame}Volume`]}>
+              <AreaChart data={stats[`${timeFrame}Volume`]}>
+                <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="date"
                   tickFormatter={formatChartDate}
                   fontSize={12}
+                  minTickGap={20}
                 />
                 <YAxis tickFormatter={(value) => `${formatCurrency(value)}`} />
                 <Tooltip
@@ -217,14 +220,14 @@ export default function HomeScreen() {
                   ]}
                   labelFormatter={(date) => formatChartDate(date)}
                 />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="volume"
                   stroke="#3b82f6"
-                  strokeWidth={2}
-                  dot={false}
+                  fill="#3b82f6"
+                  fillOpacity={0.2}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         ) : (
@@ -234,7 +237,15 @@ export default function HomeScreen() {
 
       {/* ===== Recent Transactions ===== */}
       <Card>
-        <h1 className="mb-4 text-lg font-bold">Recent Transactions</h1>
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-lg font-bold">Recent Transactions</h1>
+          <Button
+            type="link"
+            onClick={() => navigate("/business-management/transactions")}
+          >
+            View All Transactions
+          </Button>
+        </div>
         <Table
           columns={columns}
           dataSource={recentTransactions}
