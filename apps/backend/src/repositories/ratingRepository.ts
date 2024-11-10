@@ -31,5 +31,8 @@ export const getRatings = async () => {
 export const findRatingById = async (rating_id: string) => {
     return await prisma.rating.findUnique({
         where: { rating_id },
+        include: {
+            transaction: true,
+        }
     });
 };

@@ -24,6 +24,7 @@ import MerchantPaymentScreen from "./screens/merchantPaymentScreen";
 import MerchantSizeScreen from "./screens/merchantSizeScreen";
 import NotificationsScreen from "./screens/notificationsScreen";
 import ForgetPasswordScreen from "./screens/forgetPasswordScreen";
+import RatingsScreen from "./screens/ratingScreen";
 
 export default function App() {
   return (
@@ -91,6 +92,10 @@ export default function App() {
             <Route
               path="/business-management/notifications"
               element={<NotificationsScreen />}
+            />
+            <Route 
+              path="/business-management/ratings"
+              element={<RatingsScreen />}
             />
           </Route>
 
