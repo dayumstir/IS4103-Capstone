@@ -15,15 +15,14 @@ export const adminAuthApi = createApi({
   }),
 
   endpoints: (builder) => ({
-    
     // Login
-    login: builder.mutation<{ jwtToken: string, admin_type: string, email: string, admin_id: string}, { username: string; password: string }>({
+    login: builder.mutation<{ jwtToken: string, admin_id: string, email: string, admin_type: string }, { username: string; password: string }>({
       query: (credentials) => ({
         url: "/login",
         method: "POST",
         body: credentials,
       }),
-      transformResponse: (response: { jwtToken: string, admin_type: string, email: string, admin_id: string}) => {
+      transformResponse: (response: { jwtToken: string, admin_id: string, email: string, admin_type: string }) => {
         localStorage.setItem("token", response.jwtToken);
         localStorage.setItem("adminId", response.admin_id);
         return response;
@@ -37,9 +36,13 @@ export const adminAuthApi = createApi({
         method: "POST",
       }),
       onQueryStarted: async (_, { queryFulfilled }) => {
-        await queryFulfilled;
-        localStorage.removeItem("token");
-        localStorage.removeItem("adminId");
+        try {
+          await queryFulfilled;
+        } finally {
+          // Clear local storage regardless of success
+          localStorage.removeItem("token");
+          localStorage.removeItem("adminId");
+        }
       },
     }),
 
@@ -51,11 +54,21 @@ export const adminAuthApi = createApi({
         body: passwordData,
       }),
     }),
+
+    // Forget Password
+    forgetPassword: builder.mutation<void, { email: string }>({
+      query: (email) => ({
+        url: "/forget-password",
+        method: "POST",
+        body: email,
+      }),
+    }),
   }),
 });
 
 export const { 
   useLoginMutation,
   useLogoutMutation,
-  useResetPasswordMutation
+  useResetPasswordMutation,
+  useForgetPasswordMutation,
 } = adminAuthApi;

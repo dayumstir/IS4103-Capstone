@@ -18,14 +18,14 @@ import { UserOutlined, UploadOutlined } from "@ant-design/icons";
 import { Buffer } from "buffer";
 import {
   useUpdateProfileMutation,
-  useViewProfileQuery,
+  useGetProfileQuery,
 } from "../redux/services/adminService";
 
 const { Title } = Typography;
 
 export default function EditProfileScreen() {
   const navigate = useNavigate();
-  const { data: profileData, isLoading, error } = useViewProfileQuery();
+  const { data: profileData, isLoading, error } = useGetProfileQuery();
   const [updateProfile] = useUpdateProfileMutation();
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePictureDisplay, setProfilePictureDisplay] = useState("");
