@@ -87,7 +87,7 @@ export default function HomeScreen() {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Total Transaction Volume"
+              title="Total Transaction Volume (All Time)"
               value={getTransactionVolume()}
               precision={2}
               prefix="$"
@@ -127,7 +127,10 @@ export default function HomeScreen() {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Average Transaction Size"
+              title={`Average Transaction Size (${format(
+                new Date(),
+                "MMM yyyy",
+              )})`}
               value={stats?.avgTransactionSize || 0}
               prefix="$"
               precision={2}
@@ -155,7 +158,7 @@ export default function HomeScreen() {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Default Rate"
+              title={`Default Rate (${format(new Date(), "MMM yyyy")})`}
               value={stats?.currentDefaultRate || 0}
               suffix="%"
               precision={2}
