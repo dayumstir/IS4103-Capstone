@@ -4,6 +4,7 @@ import {
     createMerchantPayment,
     getMerchantPayments,
     getMerchantPaymentById,
+    getMerchantPaymentsByFilter,
     updateMerchantPayment,
 } from "../controllers/merchantPaymentController";
 import { authMiddleware } from "../middlewares/authMiddleware";
@@ -14,5 +15,6 @@ router.get("/", authMiddleware, getMerchantPayments);
 router.get("/:id", authMiddleware, getMerchantPaymentById);
 router.post("/", authMiddleware, createMerchantPayment);
 router.put("/:id", authMiddleware, updateMerchantPayment);
+router.post("/list", authMiddleware, getMerchantPaymentsByFilter);
 
 export default router;

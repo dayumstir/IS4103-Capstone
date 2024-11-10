@@ -193,6 +193,7 @@ enum IssueStatus {
 enum IssueCategory {
   ACCOUNT
   TRANSACTION
+  MERCHANT_PAYMENT
   OTHERS
 }
 
@@ -211,12 +212,14 @@ model Issue {
   customer_id    String? // Optional foreign key to Customer
   admin_id       String? // Optional foreign key to Admin
   transaction_id String? // Optional foreign key to Transaction
+  merchant_payment_id String? // Optional foreign key to Merchant Payment
 
   // Relations
   merchant      Merchant?      @relation(fields: [merchant_id], references: [merchant_id])
   customer      Customer?      @relation(fields: [customer_id], references: [customer_id])
   admin         Admin?         @relation(fields: [admin_id], references: [admin_id])
   transaction   Transaction?   @relation(fields: [transaction_id], references: [transaction_id])
+  merchantPayment   MerchantPayment?   @relation(fields: [merchant_payment_id], references: [merchant_payment_id])
   notifications Notification[]
 }
 
@@ -274,6 +277,8 @@ model MerchantPayment {
 
   merchant_id String
   merchant    Merchant @relation(fields: [merchant_id], references: [merchant_id])
+
+  issues Issue[]
 }
 
 enum TransactionStatus {

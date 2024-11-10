@@ -1,5 +1,8 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { IMerchantPayment } from "@repo/interfaces/merchantPaymentInterface";
+import {
+  IMerchantPayment,
+  IMerchantPaymentFilter,
+} from "@repo/interfaces/merchantPaymentInterface";
 import BaseQueryWithAuthCheck from "../utils.tsx/baseQuery";
 
 export const merchantPaymentApi = createApi({
@@ -19,7 +22,27 @@ export const merchantPaymentApi = createApi({
       }),
       invalidatesTags: ["MerchantPaymentList"],
     }),
+    getMerchantPayments: builder.mutation<
+      IMerchantPayment[],
+      IMerchantPaymentFilter
+    >({
+      query: (body) => ({
+        url: "/list",
+        method: "POST",
+        body: body,
+      }),
+    }),
+    getMerchantPayment: builder.query<IMerchantPayment, string>({
+      query: (id) => ({
+        url: `/${id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useCreateMerchantPaymentMutation } = merchantPaymentApi;
+export const {
+  useCreateMerchantPaymentMutation,
+  useGetMerchantPaymentsMutation,
+  useGetMerchantPaymentQuery,
+} = merchantPaymentApi;

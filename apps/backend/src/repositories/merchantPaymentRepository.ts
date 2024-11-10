@@ -1,6 +1,9 @@
 // Handles database operations related to merchant payments
 import { prisma } from "./db";
-import { IMerchantPayment } from "@repo/interfaces/merchantPaymentInterface";
+import {
+    IMerchantPayment,
+    IMerchantPaymentFilter,
+} from "@repo/interfaces/merchantPaymentInterface";
 
 // Create Merchant Payment
 export const createMerchantPayment = async (
@@ -60,10 +63,50 @@ export const getMerchantPayments = async (search: string) => {
     return payments;
 };
 
+export const getMerchantPaymentsByFilter = async (paymentFilter: IMerchantPaymentFilter) => {
+    const { sorting, create_from, create_to, search_term, ...filter } = paymentFilter;
+
+    let parsedAmount: number | undefined;
+
+    // Attempt to parse the search_term as a float
+    if (search_term) {
+        const parsed = parseFloat(search_term);
+        // Only assign if parsed is a valid number
+        if (!isNaN(parsed)) {
+            parsedAmount = parsed;
+        }
+    }
+
+    return prisma.merchantPayment.findMany({
+        where: {
+            ...filter,
+            AND: [{ created_at: { lte: create_to } }, { created_at: { gte: create_from } }],
+            ...(search_term && {
+                OR: [
+                    { total_amount_from_transactions: { equals: parsedAmount } },
+                    { final_payment_amount: { equals: parsedAmount } },
+                ],
+            }),
+        },
+        orderBy: sorting ? { [sorting.sortBy]: sorting.sortDirection } : { created_at: "desc" },
+    });
+};
+
 // Get Merchant Payment by ID
 export const getMerchantPaymentById = async (merchant_payment_id: string) => {
     const payment = await prisma.merchantPayment.findUnique({
         where: { merchant_payment_id },
+        include: {
+            issues: {
+                select: {
+                    issue_id: true,
+                    create_time: true,
+                    status: true,
+                    title: true,
+                    description: true,
+                },
+            },
+        },
     });
     return payment;
 };
@@ -78,9 +121,7 @@ export const updateMerchantPayment = async (
         data: {
             ...paymentData,
             evidence: {
-                set: paymentData.evidence
-                    ? Buffer.from(paymentData.evidence)
-                    : undefined,
+                set: paymentData.evidence ? Buffer.from(paymentData.evidence) : undefined,
             },
         },
     });
