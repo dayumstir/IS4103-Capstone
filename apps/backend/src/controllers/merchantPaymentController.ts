@@ -67,3 +67,14 @@ export const updateMerchantPayment = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+// Calculate Withdrawal Info
+export const calculateWithdrawalInfo = async (req: Request, res: Response) => {
+    const merchant_id = req.merchant_id;
+    if (!merchant_id) {
+        return res.status(400).json({ error: "merchant_id is required" });
+    }
+    const info =
+        await merchantPaymentService.calculateWithdrawalInfo(merchant_id);
+    res.status(200).json(info);
+};

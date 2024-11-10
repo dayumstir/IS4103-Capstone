@@ -13,7 +13,7 @@ import {
   FormInstance,
 } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { IMerchantSize  } from "@repo/interfaces";
+import { IMerchantSize } from "@repo/interfaces";
 import {
   useCreateMerchantSizeMutation,
   useGetMerchantSizesQuery,
@@ -28,9 +28,9 @@ export default function MerchantSizeScreen() {
   const [editingRate, setEditingRate] = useState<IMerchantSize | null>(null);
 
   const { data: merchantSizes, isLoading } = useGetMerchantSizesQuery();
-  const [createMerchantSize]  = useCreateMerchantSizeMutation();
+  const [createMerchantSize] = useCreateMerchantSizeMutation();
   const [updateMerchantSize] = useUpdateMerchantSizeMutation();
-  const [deleteMerchantSize] = useDeleteMerchantSizeMutation(); 
+  const [deleteMerchantSize] = useDeleteMerchantSizeMutation();
 
   const tableColumns = [
     {
@@ -39,14 +39,14 @@ export default function MerchantSizeScreen() {
       key: "name",
     },
     {
-      title: <div className="whitespace-nowrap">monthly revenue min</div>,
+      title: <div className="whitespace-nowrap">Monthly Revenue Min ($)</div>,
       dataIndex: "monthly_revenue_min",
       key: "monthly_revenue_min",
       width: 1,
       render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
     },
     {
-      title: <div className="whitespace-nowrap">monthly revenue max</div>,
+      title: <div className="whitespace-nowrap">Monthly Revenue Max ($)</div>,
       dataIndex: "monthly_revenue_max",
       key: "monthly_revenue_max",
       width: 1,
@@ -79,7 +79,7 @@ export default function MerchantSizeScreen() {
       ),
     },
   ];
-  
+
   const checkOverlappingRanges = (
     monthly_revenue_min: number,
     monthly_revenue_max: number,
@@ -100,7 +100,7 @@ export default function MerchantSizeScreen() {
       );
     });
   };
-  
+
   const handleCreateRate = async (
     newMerchantSize: Omit<IMerchantSize, "merchant_size_id">,
   ) => {
@@ -111,13 +111,12 @@ export default function MerchantSizeScreen() {
       );
       return;
     }
-    
+
     if (checkOverlappingRanges(monthly_revenue_min, monthly_revenue_max)) {
       message.error(
-        "The new wallet balance range overlaps with an existing tier. Please adjust the range.",
+        "The monthly revenue range overlaps with an existing merchant size. Please adjust the range.",
       );
       return;
-  
     }
     try {
       await createMerchantSize(newMerchantSize).unwrap();
@@ -137,7 +136,6 @@ export default function MerchantSizeScreen() {
     setIsModalOpen(true);
   };
 
-
   const handleUpdateRate = async (
     values: Omit<IMerchantSize, "merchant_size_id">,
   ) => {
@@ -153,7 +151,7 @@ export default function MerchantSizeScreen() {
       );
       return;
     }
-    
+
     if (
       checkOverlappingRanges(
         monthly_revenue_min,
@@ -166,7 +164,6 @@ export default function MerchantSizeScreen() {
       );
       return;
     }
-    
 
     const updatedRate: IMerchantSize = {
       ...values,
@@ -184,7 +181,7 @@ export default function MerchantSizeScreen() {
     }
   };
 
-  // TODO: Implement delete 
+  // TODO: Implement delete
   const handleDeleteRate = async (id: string) => {
     try {
       await deleteMerchantSize(id).unwrap(); // Call the delete mutation
@@ -214,7 +211,6 @@ export default function MerchantSizeScreen() {
       </Form.Item>
 
       <div className="grid grid-cols-2 gap-x-8">
-
         <Form.Item
           name="monthly_revenue_min"
           label="Monthly Revenue Min ($)"
@@ -250,12 +246,14 @@ export default function MerchantSizeScreen() {
                   return Promise.resolve();
                 }
                 return Promise.reject(
-                  new Error("Monthly Revenue Max must be Bigger than Monthly Revenue Min!"),
+                  new Error(
+                    "Monthly Revenue Max must be Bigger than Monthly Revenue Min!",
+                  ),
                 );
               },
             }),
           ]}
-        >    
+        >
           <InputNumber className="w-full" step={1} precision={0} />
         </Form.Item>
       </div>
@@ -266,7 +264,9 @@ export default function MerchantSizeScreen() {
           htmlType="submit"
           icon={formInstance === form ? <PlusOutlined /> : <EditOutlined />}
         >
-          {formInstance === form ? "Create Merchant Size" : "Update Merchant Size"}
+          {formInstance === form
+            ? "Create Merchant Size"
+            : "Update Merchant Size"}
         </Button>
       </Form.Item>
     </Form>
@@ -312,5 +312,3 @@ export default function MerchantSizeScreen() {
     </div>
   );
 }
-
-

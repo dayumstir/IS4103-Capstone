@@ -21,6 +21,9 @@ export const findAllWithdrawalFeeRate = async () => {
         orderBy: {
             name : "desc",
         },
+        include: {
+            merchantSize: true,
+        },
     });
 };
 
