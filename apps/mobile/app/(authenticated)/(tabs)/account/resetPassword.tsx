@@ -17,7 +17,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Toast from "react-native-toast-message";
 
 // Zod schema for validation
-const resetPasswordSchema = z
+export const resetPasswordSchema = z
   .object({
     oldPassword: z
       .string()

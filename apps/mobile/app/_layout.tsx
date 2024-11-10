@@ -64,7 +64,15 @@ export default function RootLayout() {
             />
             <Stack.Screen
               name="forgetPassword"
-              options={{ headerTitle: "Forget Password" }}
+              options={{ title: "Forget Password" }}
+            />
+            <Stack.Screen
+              name="temporaryLogin"
+              options={{ title: "Login with Temporary Password" }}
+            />
+            <Stack.Screen
+              name="resetPassword"
+              options={{ title: "Reset Password" }}
             />
             <Stack.Screen
               name="(authenticated)"
