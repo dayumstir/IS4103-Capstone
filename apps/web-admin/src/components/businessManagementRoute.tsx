@@ -64,6 +64,12 @@ export default function BusinessManagementRoute() {
             <Link to="/business-management/notifications">Notifications</Link>
           ),
         },
+        {
+          key: "ratings",
+          label: (
+            <Link to="/business-management/ratings">Ratings</Link>
+          ),
+        },
       ],
     },
   ];
