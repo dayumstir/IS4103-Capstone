@@ -40,3 +40,7 @@ export type { IMerchantPayment } from "./merchantPaymentInterface";
 export { PaymentStatus } from "./merchantPaymentInterface";
 
 export type { IMerchantSize } from "./merchantSizeInterface";
+
+export type { IWithdrawalFeeRate } from "./withdrawalFeeRateInterface";
+
+export { IRating } from "./ratingInterface";

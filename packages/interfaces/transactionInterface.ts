@@ -4,6 +4,7 @@ import { IInstalmentPlan } from "./instalmentPlanInterface";
 import { IMerchant } from "./merchantInterface";
 import { IssueStatus } from "./issueInterface";
 import { Sorting } from "./sortingInterface";
+import { IRating } from "./ratingInterface";
 
 export enum TransactionStatus {
     FULLY_PAID = "FULLY_PAID",
@@ -22,6 +23,7 @@ export interface ITransaction {
     merchant_id: string;
     instalment_plan_id: string;
     merchant_payment_id?: string;
+    rating?: IRating;
 }
 
 export interface TransactionFilter {
@@ -53,6 +55,7 @@ export interface TransactionResult {
     instalment_plan: IInstalmentPlan;
     issues: IssueInfo[];
     instalment_payments: IInstalmentPayment[];
+    rating?: IRating;
 }
 
 interface CustomerInfo {

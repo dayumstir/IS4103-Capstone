@@ -79,6 +79,14 @@ export const authApi = createApi({
         body: body,
       }),
     }),
+    // Forget Password
+    forgetPassword: builder.mutation<void, { email: string }>({
+      query: (email) => ({
+        url: "/forget-password",
+        method: "POST",
+        body: email,
+      }),
+    }),
   }),
 });
 
@@ -94,4 +102,5 @@ export const {
   useVerifyPhoneNumberOTPMutation,
   useConfirmEmailMutation,
   useResendEmailConfirmationMutation,
+  useForgetPasswordMutation,
 } = authApi;

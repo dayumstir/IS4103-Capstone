@@ -1,3 +1,4 @@
+// apps/web-admin/src/screens/loginScreen.tsx
 import { useState } from "react";
 import {
   Button,
@@ -11,79 +12,80 @@ import {
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
-import { useLoginMutation } from "../redux/services/adminAuthService";
-import { useLogoutMutation } from "../redux/services/adminAuthService";
-import { useResetPasswordMutation } from "../redux/services/adminAuthService";
+import { 
+  useLoginMutation, 
+  useLogoutMutation, 
+  useResetPasswordMutation 
+} from "../redux/services/adminAuthService";
 
 export default function LoginScreen() {
   const navigate = useNavigate();
   const { Text, Title } = Typography;
+
+  // States
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Form
+  const [form] = Form.useForm();
+
+  // Mutations
   const [login, { isLoading }] = useLoginMutation();
   const [logout] = useLogoutMutation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form] = Form.useForm();
-  const [resetPassword, { isLoading: isResetting }] =
-    useResetPasswordMutation();
+  const [resetPassword, { isLoading: isResetting }] = useResetPasswordMutation();
 
-  const validatePassword = (password: string) => {
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-    return passwordRegex.test(password);
-  };
+  // Password validation
+  const validatePassword = (password: string) =>
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/.test(password);
 
-  const onFinish = async (values: { username: string; password: string }) => {
+  // Login handler
+  const handleLogin = async (values: { username: string; password: string }) => {
     try {
       const response = await login(values).unwrap();
       setEmail(response.email);
       setPassword(values.password);
-      const admin_type = response.admin_type;
-      if (admin_type === "DEACTIVATED") {
+
+      if (response.admin_type === "DEACTIVATED") {
         setError("Account Deactivated");
-        await logout(response.token).unwrap();
+        await logout().unwrap();
         localStorage.removeItem("token");
         navigate("/login");
-      }
-      else if (admin_type === "UNVERIFIED") {
-        setError("");
+      } else if (response.admin_type === "UNVERIFIED") {
+        setError(null);
         setIsModalOpen(true);
       } else {
         navigate("/");
       }
-    } catch (error) {
-      console.error("Error:", error);
+    } catch {
       setError("Invalid username or password. Please try again.");
     }
   };
 
-  const onFinish2 = async (values: { newPassword: string }) => {
+  // Password reset handler
+  const handlePasswordReset = async (values: { newPassword: string }) => {
     const { newPassword } = values;
 
     if (!email) {
       message.error("User email not available");
       return;
     }
-    console.log(password);
-    if(newPassword==password) {
+
+    if (newPassword === password) {
       message.error("Please key in a new password");
       return;
     }
+
     try {
-      await resetPassword({
-        email: email,
-        oldPassword: password,
-        newPassword,
-      }).unwrap();
+      await resetPassword({ email, oldPassword: password, newPassword }).unwrap();
       message.success("Password changed successfully!");
       setIsModalOpen(false);
       setEmail("");
       setPassword("");
       form.resetFields();
       navigate("/");
-    } catch (error) {
-      console.error("Error updating password:", error);
+    } catch {
       message.error("Could not update password. Please try again.");
     }
   };
@@ -93,17 +95,16 @@ export default function LoginScreen() {
       direction="vertical"
       className="flex h-screen items-center justify-center"
     >
-      <img src={logo} width="100%" style={{ alignSelf: "center" }} />
+      <img src={logo} width="100%" style={{ alignSelf: "center" }} alt="PandaPay Logo" />
       <Title>PandaPay Admin</Title>
       <Title level={3}>Staff Login</Title>
       <Card style={{ backgroundColor: "#F5F5F5" }}>
         <Form
-          name="basic"
+          name="loginForm"
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
           style={{ minWidth: 600 }}
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
+          onFinish={handleLogin}
           autoComplete="off"
         >
           <Form.Item
@@ -137,13 +138,20 @@ export default function LoginScreen() {
             >
               Login
             </Button>
+            <Button
+                type="link"
+                onClick={() => navigate("/forget-password")}
+                className="ml-2"
+              >
+                Forget Password?
+              </Button>
           </Form.Item>
         </Form>
       </Card>
+
       <Modal
         title="Reset Password"
         open={isModalOpen}
-        onOk={() => setIsModalOpen(false)}
         onCancel={() => {
           setIsModalOpen(false);
           form.resetFields();
@@ -152,10 +160,10 @@ export default function LoginScreen() {
       >
         <Form
           form={form}
-          name="resetPassword"
+          name="resetPasswordForm"
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
-          onFinish={onFinish2}
+          onFinish={handlePasswordReset}
           autoComplete="off"
         >
           <Form.Item
@@ -165,27 +173,19 @@ export default function LoginScreen() {
               { required: true, message: "Please input your new password" },
               {
                 validator: (_, value) => {
-                  const oldPassword = form.getFieldValue("oldPassword"); // Get the old password
-
-                  // Check if the new password is the same as the old password
-                  if (value === oldPassword) {
+                  if (value === form.getFieldValue("oldPassword")) {
                     return Promise.reject(
-                      new Error(
-                        "New password cannot be the same as the old password.",
-                      ),
+                      new Error("New password cannot be the same as the old password.")
                     );
                   }
-
-                  // Check the password validation criteria
                   if (!validatePassword(value)) {
                     return Promise.reject(
                       new Error(
-                        "New password must have at least 1 lowercase letter, 1 uppercase letter, 1 digit, 1 special character, and be at least 8 characters long.",
-                        ),
+                        "Password must have at least 1 lowercase, 1 uppercase, 1 digit, 1 special character, and 8 characters minimum."
+                      )
                     );
                   }
-
-                  return Promise.resolve(); // If all checks pass
+                  return Promise.resolve();
                 },
               },
             ]}
@@ -197,14 +197,11 @@ export default function LoginScreen() {
             label="Confirm Password"
             name="confirmPassword"
             rules={[
-              { required: true, message: "Please input your new password" },
+              { required: true, message: "Please confirm your new password" },
               {
                 validator: (_, value) => {
-                  const newPassword = form.getFieldValue("newPassword");
-                  if (value && value !== newPassword) {
-                    return Promise.reject(
-                      new Error("New password fields do not match"),
-                    );
+                  if (value !== form.getFieldValue("newPassword")) {
+                    return Promise.reject(new Error("Passwords do not match"));
                   }
                   return Promise.resolve();
                 },

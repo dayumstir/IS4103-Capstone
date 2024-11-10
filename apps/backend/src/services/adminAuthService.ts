@@ -84,12 +84,12 @@ export const forgetPassword = async (email: string) => {
     const hashedPassword = await bcrypt.hash(generatedPassword, 10);
 
     await adminRepository.updateAdmin(admin.admin_id, { password: hashedPassword });
-    await sendResetEmail(email, generatedPassword);
+    await sendResetEmail(email, admin.name, generatedPassword);
 
     logger.info("Forget password email sent successfully.");
 };
 
-const sendResetEmail = async (email: string, generatedPassword: string) => {
+const sendResetEmail = async (email: string, name: string, generatedPassword: string) => {
     logger.info(`Sending password reset email to ${email}`);
     
     const transporter = nodemailer.createTransport({
@@ -105,6 +105,6 @@ const sendResetEmail = async (email: string, generatedPassword: string) => {
         from: process.env.EMAIL_USER,
         to: email,
         subject: "Password Reset Request",
-        text: `New password: ${generatedPassword}`,
+        text: `Username: ${name}, New password: ${generatedPassword}`,
     });
 };

@@ -18,9 +18,10 @@ import * as customerRepository from "../repositories/customerRepository";
 import * as emailVerificationTokenRepository from "../repositories/emailVerificationTokenRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import * as otpRepository from "../repositories/otpRepository";
-import * as passwordResetTokenRepository from "../repositories/passwordResetTokenRepository";
 
 import logger from "../utils/logger";
+
+import { NotFoundError } from "../utils/error";
 
 // Step 1: Register customer with basic information
 export const registerCustomer = async (customerData: ICustomer) => {
@@ -64,9 +65,9 @@ export const registerCustomer = async (customerData: ICustomer) => {
     const customer = await customerRepository.createCustomer({
         ...customerData,
         password: hashedPassword,
-        status: CustomerStatus.PENDING_EMAIL_VERIFICATION, // Set status as pending verification
-        credit_score: 0, // Default value
-        profile_picture: defaultProfilePicture,
+        status: CustomerStatus.PENDING_EMAIL_VERIFICATION,  // Set status as pending verification
+        credit_score: 0,                                    // Default value
+        profile_picture: defaultProfilePicture
     });
 
     return customer;
@@ -342,29 +343,47 @@ export const resetPassword = async (
     });
 };
 
-export const sendPasswordResetEmail = async (email: string) => {
-    logger.info("Executing sendPasswordResetEmail...");
+// Generate random password with specified character sets
+export const generateRandomPassword = (length = 8) => {
+    const lowerCase = "abcdefghijklmnopqrstuvwxyz";
+    const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const digits = "0123456789";
+    const specialChars = "!@#$%^&*";
+    const allChars = lowerCase + upperCase + digits + specialChars;
+    
+    let password = lowerCase[Math.floor(Math.random() * lowerCase.length)] +
+                   upperCase[Math.floor(Math.random() * upperCase.length)] +
+                   digits[Math.floor(Math.random() * digits.length)] +
+                   specialChars[Math.floor(Math.random() * specialChars.length)];
+  
+    for (let i = 4; i < length; i++) {
+        password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+  
+    return password.split("").sort(() => 0.5 - Math.random()).join("");
+  };
 
-    // Find customer by email
+// Customer Forget Password
+export const forgetPassword = async (email: string) => {
+    logger.info(`Processing forget password request for email: ${email}`);
+
     const customer = await customerRepository.findCustomerByEmail(email);
     if (!customer) {
-        throw new Error("Customer not found");
+        throw new NotFoundError("Customer not found");
     }
 
-    // Generate unique reset token
-    const token = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // Token expires in 1h
+    const generatedPassword = generateRandomPassword();
+    const hashedPassword = await bcrypt.hash(generatedPassword, 10);
 
-    // Save reset token to database
-    await passwordResetTokenRepository.createToken(
-        email,
-        token,
-        expiresAt,
-        customer.customer_id
-    );
+    await customerRepository.updateCustomer(customer.customer_id, { password: hashedPassword });
+    await sendResetEmail(email, generatedPassword);
 
-    // Send password reset link using nodemailer
-    const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+    logger.info("Forget password email sent successfully.");
+};
+
+const sendResetEmail = async (email: string, generatedPassword: string) => {
+    logger.info(`Sending password reset email to ${email}`);
+
     const transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
         port: parseInt(process.env.EMAIL_PORT || "2525"),
@@ -378,39 +397,6 @@ export const sendPasswordResetEmail = async (email: string) => {
         from: process.env.EMAIL_USER,
         to: email,
         subject: "Password Reset Request",
-        text: `Please confirm your email by clicking this link: ${resetLink}`,
+        text: `Your new password is: ${generatedPassword}`,
     });
-};
-
-export const resetPasswordWithToken = async (
-    token: string,
-    newPassword: string
-) => {
-    logger.info("Executing resetPasswordWithToken...");
-
-    // Find password reset token
-    const passwordResetToken =
-        await passwordResetTokenRepository.findToken(token);
-    if (!passwordResetToken) {
-        throw new Error("Invalid or expired password reset token.");
-    }
-
-    // Find customer
-    const customer = await customerRepository.findCustomerById(
-        passwordResetToken.customer_id
-    );
-    if (!customer) {
-        throw new Error("Customer not found.");
-    }
-
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update customer password
-    await customerRepository.updateCustomer(customer.customer_id, {
-        password: hashedPassword,
-    });
-
-    // Delete the password reset token
-    await passwordResetTokenRepository.deleteToken(token);
 };

@@ -43,7 +43,6 @@ router.post("/add", addAdmin);    // TODO: Data initialization/seeding before en
 router.get("/get-all", authMiddleware, superAdminAuthMiddleware, getAllAdmins);
 router.put("/deactivate-admin", authMiddleware, superAdminAuthMiddleware, deactivateAdmin);
 router.put("/activate-admin", authMiddleware, superAdminAuthMiddleware, activateAdmin);
-// router.get("/:admin_id", authMiddleware, superAdminAuthMiddleware, getAdminProfile);
 
 // Customer Routes
 router.get("/allCustomers", authMiddleware, listAllCustomers);

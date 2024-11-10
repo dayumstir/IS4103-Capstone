@@ -4,10 +4,11 @@ import {
   IMerchantPaymentFilter,
 } from "@repo/interfaces/merchantPaymentInterface";
 import BaseQueryWithAuthCheck from "../utils.tsx/baseQuery";
+import { IMerchantSize, IWithdrawalFeeRate } from "@repo/interfaces";
 
 export const merchantPaymentApi = createApi({
   reducerPath: "merchantPaymentApi",
-  baseQuery: BaseQueryWithAuthCheck("/merchantPayment"),
+  baseQuery: BaseQueryWithAuthCheck(""),
   tagTypes: ["MerchantPaymentList"],
   endpoints: (builder) => ({
     // Create merchant payment
@@ -16,7 +17,7 @@ export const merchantPaymentApi = createApi({
       Partial<IMerchantPayment>
     >({
       query: (payment) => ({
-        url: "/",
+        url: "/merchantPayment",
         method: "POST",
         body: payment,
       }),
@@ -27,14 +28,44 @@ export const merchantPaymentApi = createApi({
       IMerchantPaymentFilter
     >({
       query: (body) => ({
-        url: "/list",
+        url: "/merchantPayment/list",
         method: "POST",
         body: body,
       }),
     }),
     getMerchantPayment: builder.query<IMerchantPayment, string>({
       query: (id) => ({
-        url: `/${id}`,
+        url: `/merchantPayment/${id}`,
+        method: "GET",
+      }),
+    }),
+    // Calculate withdrawal info
+    calculateWithdrawalInfo: builder.query<
+      {
+        withdrawalFeeRate: IWithdrawalFeeRate;
+        monthlyRevenue: number;
+        merchantSize: IMerchantSize;
+      },
+      void
+    >({
+      query: () => ({
+        url: "/merchantPayment/withdrawal-info",
+        method: "GET",
+      }),
+    }),
+
+    // Get all merchant sizes
+    getMerchantSizes: builder.query<IMerchantSize[], void>({
+      query: () => ({
+        url: "/merchantSize",
+        method: "GET",
+      }),
+    }),
+
+    // Get all withdrawal fee rates
+    getWithdrawalFeeRates: builder.query<IWithdrawalFeeRate[], void>({
+      query: () => ({
+        url: "/withdrawalFeeRate",
         method: "GET",
       }),
     }),
@@ -45,4 +76,7 @@ export const {
   useCreateMerchantPaymentMutation,
   useGetMerchantPaymentsMutation,
   useGetMerchantPaymentQuery,
+  useCalculateWithdrawalInfoQuery,
+  useGetMerchantSizesQuery,
+  useGetWithdrawalFeeRatesQuery,
 } = merchantPaymentApi;
