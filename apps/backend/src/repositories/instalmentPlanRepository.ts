@@ -60,3 +60,18 @@ export const updateInstalmentPlan = async (
         },
     });
 };
+
+// Delete instalment plan in db
+export const deleteInstalmentPlan = async (instalment_plan_id: string) => {
+    // Check if there are transactions linked to the instalment plan
+    const transactions = await prisma.transaction.findMany({
+        where: { instalment_plan_id: instalment_plan_id },
+    });
+    if (transactions.length > 0) {
+        throw new Error("There are transactions linked to this plan");
+    }
+
+    return prisma.instalmentPlan.delete({
+        where: { instalment_plan_id: instalment_plan_id },
+    });
+};

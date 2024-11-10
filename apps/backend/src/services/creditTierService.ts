@@ -28,7 +28,7 @@ export const getCreditTierById = async (credit_tier_id: string) => {
 
 export const updateCreditTier = async (
     credit_tier_id: string,
-    updateData: Partial<ICreditTier>
+    updateData: Omit<ICreditTier, "instalment_plans">
 ) => {
     logger.info("Executing updateCreditTier...");
     const creditTier = await creditTierRepository.updateCreditTier(
@@ -39,4 +39,9 @@ export const updateCreditTier = async (
         throw new Error("Credit Tier not found");
     }
     return creditTier;
+};
+
+export const deleteCreditTier = async (credit_tier_id: string) => {
+    logger.info("Executing deleteCreditTier...");
+    await creditTierRepository.deleteCreditTier(credit_tier_id);
 };

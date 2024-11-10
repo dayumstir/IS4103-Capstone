@@ -5,14 +5,15 @@ import {
     getAllInstalmentPlans,
     getInstalmentPlan,
     editInstalmentPlan,
+    deleteInstalmentPlan,
 } from "../controllers/instalmentPlanController";
-// import { adminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-// TODO: Add adminAuthMiddleware
-router.post("/", createInstalmentPlan);
-router.get("/", getAllInstalmentPlans);
-router.get("/:instalment_plan_id", getInstalmentPlan);
-router.put("/:instalment_plan_id", editInstalmentPlan);
+router.post("/", authMiddleware, createInstalmentPlan);
+router.get("/", authMiddleware, getAllInstalmentPlans);
+router.get("/:instalment_plan_id", authMiddleware, getInstalmentPlan);
+router.put("/:instalment_plan_id", authMiddleware, editInstalmentPlan);
+router.delete("/:instalment_plan_id", authMiddleware, deleteInstalmentPlan);
 export default router;

@@ -4,7 +4,7 @@ import { IInstalmentPlan } from "../../interfaces/instalmentPlanInterface";
 export const instalmentPlanApi = createApi({
   reducerPath: "instalmentPlanApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000",
+    baseUrl: "http://localhost:3000/instalmentPlan",
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) {
@@ -17,7 +17,7 @@ export const instalmentPlanApi = createApi({
   endpoints: (builder) => ({
     // Get all instalment plans
     getInstalmentPlans: builder.query<IInstalmentPlan[], void>({
-      query: () => "/instalmentPlan",
+      query: () => "/",
       providesTags: ["InstalmentPlanList"],
     }),
 
@@ -27,7 +27,7 @@ export const instalmentPlanApi = createApi({
       Omit<IInstalmentPlan, "instalment_plan_id">
     >({
       query: (instalmentPlan) => ({
-        url: "/instalmentPlan",
+        url: "/",
         method: "POST",
         body: instalmentPlan,
       }),
@@ -37,9 +37,18 @@ export const instalmentPlanApi = createApi({
     // Update instalment plan
     updateInstalmentPlan: builder.mutation<IInstalmentPlan, IInstalmentPlan>({
       query: (instalmentPlan) => ({
-        url: `/instalmentPlan/${instalmentPlan.instalment_plan_id}`,
+        url: `/${instalmentPlan.instalment_plan_id}`,
         method: "PUT",
         body: instalmentPlan,
+      }),
+      invalidatesTags: ["InstalmentPlanList"],
+    }),
+
+    // Delete instalment plan
+    deleteInstalmentPlan: builder.mutation<void, string>({
+      query: (instalment_plan_id) => ({
+        url: `/${instalment_plan_id}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["InstalmentPlanList"],
     }),
@@ -50,4 +59,5 @@ export const {
   useGetInstalmentPlansQuery,
   useCreateInstalmentPlanMutation,
   useUpdateInstalmentPlanMutation,
+  useDeleteInstalmentPlanMutation,
 } = instalmentPlanApi;

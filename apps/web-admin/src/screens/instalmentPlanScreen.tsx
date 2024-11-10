@@ -20,6 +20,7 @@ import {
   useGetInstalmentPlansQuery,
   useCreateInstalmentPlanMutation,
   useUpdateInstalmentPlanMutation,
+  useDeleteInstalmentPlanMutation,
 } from "../redux/services/instalmentPlanService";
 import { formatCurrency } from "../utils/formatCurrency";
 import { useGetCreditTiersQuery } from "../redux/services/creditTierService";
@@ -33,6 +34,8 @@ export default function InstalmentPlanScreen() {
   const { data: instalmentPlans, isLoading } = useGetInstalmentPlansQuery();
   const [createInstalmentPlan] = useCreateInstalmentPlanMutation();
   const [updateInstalmentPlan] = useUpdateInstalmentPlanMutation();
+  const [deleteInstalmentPlan] = useDeleteInstalmentPlanMutation();
+
   const { data: creditTiers } = useGetCreditTiersQuery();
 
   const handleCreatePlan = async (
@@ -111,9 +114,16 @@ export default function InstalmentPlanScreen() {
     }
   };
 
-  // TODO: Implement delete instalment plan
-  const handleDeletePlan = (id: string) => {
-    message.success("Instalment plan has been deleted.");
+  const handleDeletePlan = async (id: string) => {
+    try {
+      await deleteInstalmentPlan(id).unwrap();
+      message.success("Instalment plan has been deleted.");
+    } catch (error) {
+      console.error("Error deleting instalment plan:", error);
+      message.error(
+        "Failed to delete instalment plan: There are transactions linked to this plan.",
+      );
+    }
   };
 
   const tableColumns = [

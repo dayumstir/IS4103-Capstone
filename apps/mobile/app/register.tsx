@@ -66,11 +66,12 @@ export default function Register() {
       status: "Active",
       credit_score: 3,
     };
+
     try {
-      const result = await registerMutation(registrationData).unwrap();
+      const result = await registerMutation(data).unwrap();
 
       // Sore customer data in redux
-      dispatch(setCustomer(result))
+      dispatch(setCustomer(result));
 
       router.replace("/confirmation");
     } catch (err: any) {

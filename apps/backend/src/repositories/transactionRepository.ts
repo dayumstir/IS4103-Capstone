@@ -7,7 +7,17 @@ import {
     IInstalmentPayment,
     InstalmentPaymentStatus,
 } from "@repo/interfaces";
-import { addMilliseconds, endOfDay } from "date-fns";
+import {
+    addMilliseconds,
+    endOfDay,
+    endOfMonth,
+    startOfDay,
+    startOfMonth,
+    startOfYear,
+    subDays,
+    subMonths,
+    subYears,
+} from "date-fns";
 
 // Create a new transaction in db
 export const createTransaction = async (transactionData: ITransaction) => {
@@ -219,7 +229,7 @@ export const findTransactionsByCustomerId = async (
                 break;
             default:
                 startDate = new Date(0); // Beginning of time
-                endDate = currentDate;
+                endDate = new Date(8640000000000000); // End of time
         }
 
         whereClause.date_of_transaction = {
@@ -391,4 +401,269 @@ export const updateTransaction = async (
         where: { transaction_id },
         data: updateData,
     });
+};
+
+// Get transaction stats
+export const getTransactionStats = async () => {
+    const currentDate = new Date();
+    const thirtyDaysAgo = subDays(currentDate, 30);
+    const previousThirtyDays = subDays(thirtyDaysAgo, 30);
+
+    // Current month range
+    const currentMonthStart = startOfMonth(currentDate);
+    const currentMonthEnd = endOfMonth(currentDate);
+
+    // Previous month range
+    const previousMonthStart = startOfMonth(subDays(currentMonthStart, 1));
+    const previousMonthEnd = endOfMonth(previousMonthStart);
+
+    // Get current month's total volume
+    const currentMonthVolume = await prisma.transaction.aggregate({
+        where: {
+            date_of_transaction: {
+                gte: currentMonthStart,
+                lte: currentMonthEnd,
+            },
+        },
+        _sum: {
+            amount: true,
+        },
+    });
+
+    // Get previous month's total volume
+    const previousMonthVolume = await prisma.transaction.aggregate({
+        where: {
+            date_of_transaction: {
+                gte: previousMonthStart,
+                lte: previousMonthEnd,
+            },
+        },
+        _sum: {
+            amount: true,
+        },
+    });
+
+    // Calculate volume increase percentage
+    const currentVolume = currentMonthVolume._sum.amount || 0;
+    const previousVolume = previousMonthVolume._sum.amount || 0;
+    const volumeIncrease =
+        previousVolume === 0
+            ? 0
+            : ((currentVolume - previousVolume) / previousVolume) * 100;
+
+    // Get active customers (customers with transactions in last 30 days)
+    const activeCustomers = await prisma.transaction.groupBy({
+        by: ["customer_id"],
+        where: {
+            date_of_transaction: {
+                gte: thirtyDaysAgo,
+            },
+        },
+        _count: true,
+    });
+
+    // Get previous period's active customers
+    const previousActiveCustomers = await prisma.transaction.groupBy({
+        by: ["customer_id"],
+        where: {
+            date_of_transaction: {
+                gte: previousThirtyDays,
+                lt: thirtyDaysAgo,
+            },
+        },
+        _count: true,
+    });
+
+    // Get total number of customers
+    const totalCustomers = await prisma.customer.count();
+
+    // Calculate customer growth
+    const currentActiveCount = activeCustomers.length;
+    const previousActiveCount = previousActiveCustomers.length;
+    const customerGrowth =
+        previousActiveCount === 0
+            ? 0
+            : ((currentActiveCount - previousActiveCount) /
+                  previousActiveCount) *
+              100;
+
+    // Calculate current month's average transaction size
+    const currentAvgTransactionSize = await prisma.transaction.aggregate({
+        where: {
+            date_of_transaction: {
+                gte: currentMonthStart,
+                lte: currentMonthEnd,
+            },
+        },
+        _avg: {
+            amount: true,
+        },
+    });
+
+    // Calculate previous month's average transaction size
+    const previousAvgTransactionSize = await prisma.transaction.aggregate({
+        where: {
+            date_of_transaction: {
+                gte: previousMonthStart,
+                lte: previousMonthEnd,
+            },
+        },
+        _avg: {
+            amount: true,
+        },
+    });
+
+    const currentAvg = currentAvgTransactionSize._avg.amount || 0;
+    const previousAvg = previousAvgTransactionSize._avg.amount || 0;
+    const avgTransactionChange =
+        previousAvg === 0
+            ? 0
+            : ((currentAvg - previousAvg) / previousAvg) * 100;
+
+    // Calculate default rate based on instalment payments
+    const defaultedInstalments = await prisma.instalmentPayment.count({
+        where: {
+            due_date: {
+                gte: currentMonthStart,
+                lte: currentMonthEnd,
+            },
+            AND: [
+                { paid_date: null },
+                { due_date: { lt: currentDate } },
+                { status: "UNPAID" },
+            ],
+        },
+    });
+
+    const totalInstalments = await prisma.instalmentPayment.count({
+        where: {
+            due_date: {
+                gte: currentMonthStart,
+                lte: currentMonthEnd,
+            },
+        },
+    });
+
+    // Previous month default rate
+    const previousDefaultedInstalments = await prisma.instalmentPayment.count({
+        where: {
+            due_date: {
+                gte: previousMonthStart,
+                lte: previousMonthEnd,
+            },
+            AND: [
+                { paid_date: null },
+                { due_date: { lt: currentDate } },
+                { status: "UNPAID" },
+            ],
+        },
+    });
+
+    const previousTotalInstalments = await prisma.instalmentPayment.count({
+        where: {
+            due_date: {
+                gte: previousMonthStart,
+                lte: previousMonthEnd,
+            },
+        },
+    });
+
+    const currentDefaultRate =
+        totalInstalments === 0
+            ? 0
+            : (defaultedInstalments / totalInstalments) * 100;
+    const previousDefaultRate =
+        previousTotalInstalments === 0
+            ? 0
+            : (previousDefaultedInstalments / previousTotalInstalments) * 100;
+    const defaultRateChange =
+        previousDefaultRate === 0
+            ? 0
+            : currentDefaultRate - previousDefaultRate;
+
+    // Get transactions within last 30 days
+    const transactionsWithinLast30Days = await prisma.transaction.findMany({
+        where: {
+            date_of_transaction: {
+                gte: startOfDay(thirtyDaysAgo),
+            },
+        },
+    });
+
+    // Get transactions within last 12 months
+    const twelveMonthsAgo = subMonths(currentDate, 12);
+    const transactionsWithinLast12Months = await prisma.transaction.findMany({
+        where: {
+            date_of_transaction: {
+                gte: startOfMonth(twelveMonthsAgo),
+            },
+        },
+    });
+
+    // Get transactions within last 5 years
+    const fiveYearsAgo = subYears(currentDate, 5);
+    const transactionsWithinLast5Years = await prisma.transaction.findMany({
+        where: {
+            date_of_transaction: {
+                gte: startOfYear(fiveYearsAgo),
+            },
+        },
+    });
+
+    // Fill in all days with volume 0
+    let dailyVolume: { date: Date; volume: number }[] = [];
+    for (let i = 0; i <= 30; i++) {
+        const date = startOfDay(subDays(currentDate, i));
+        dailyVolume.push({ date, volume: 0 });
+    }
+
+    // Fill in all months with volume 0
+    let monthlyVolume: { date: Date; volume: number }[] = [];
+    for (let i = 0; i <= 12; i++) {
+        const date = startOfMonth(subMonths(currentDate, i));
+        monthlyVolume.push({ date, volume: 0 });
+    }
+
+    // Fill in all years with volume 0
+    let yearlyVolume: { date: Date; volume: number }[] = [];
+    for (let i = 0; i <= 5; i++) {
+        const date = startOfYear(subYears(currentDate, i));
+        yearlyVolume.push({ date, volume: 0 });
+    }
+
+    // Add up the volume for each day
+    for (const transaction of transactionsWithinLast30Days) {
+        const date = startOfDay(transaction.date_of_transaction);
+        dailyVolume.find((v) => v.date.getTime() === date.getTime())!.volume +=
+            transaction.amount;
+    }
+
+    // Add up the volume for each month
+    for (const transaction of transactionsWithinLast12Months) {
+        const date = startOfMonth(transaction.date_of_transaction);
+        monthlyVolume.find(
+            (v) => v.date.getTime() === date.getTime()
+        )!.volume += transaction.amount;
+    }
+
+    // Add up the volume for each year
+    for (const transaction of transactionsWithinLast5Years) {
+        const date = startOfYear(transaction.date_of_transaction);
+        yearlyVolume.find((v) => v.date.getTime() === date.getTime())!.volume +=
+            transaction.amount;
+    }
+
+    return {
+        volumeIncrease,
+        activeCustomers: activeCustomers.length,
+        totalCustomers,
+        customerGrowth,
+        avgTransactionSize: currentAvg,
+        avgTransactionChange,
+        currentDefaultRate,
+        defaultRateChange,
+        dailyVolume: dailyVolume.reverse(),
+        monthlyVolume: monthlyVolume.reverse(),
+        yearlyVolume: yearlyVolume.reverse(),
+    };
 };
