@@ -22,20 +22,20 @@ enum AdminType {
 }
 
 model Admin {
-  admin_id         String         @id @default(cuid())
-  name             String
-  profile_picture  Bytes?         @db.ByteA
-  email            String         @unique
-  username         String         @unique
-  password         String
-  contact_number   String
-  address          String
-  date_of_birth    DateTime
-  admin_type       AdminType
+  admin_id        String    @id @default(cuid())
+  name            String
+  profile_picture Bytes?    @db.ByteA
+  email           String    @unique
+  username        String    @unique
+  password        String
+  contact_number  String
+  address         String
+  date_of_birth   DateTime
+  admin_type      AdminType
 
-  notifications    Notification[]
-  issues           Issue[]
-  vouchersCreated  Voucher[]
+  notifications   Notification[]
+  issues          Issue[]
+  vouchersCreated Voucher[]
 }
 
 enum Status {
@@ -221,17 +221,17 @@ model WithdrawalFeeRate {
   percentage_withdrawal_fee  Float
   percentage_transaction_fee Float
 
-  merchant_size_id  String
-  merchantSize    MerchantSize @relation(fields: [merchant_size_id], references: [merchant_size_id])
+  merchant_size_id String
+  merchantSize     MerchantSize @relation(fields: [merchant_size_id], references: [merchant_size_id])
 }
 
-model MerchantSize{
-  merchant_size_id           String @id @default(cuid())
-  name         String
-  monthly_revenue_max        Float
-  monthly_revenue_min        Float
+model MerchantSize {
+  merchant_size_id    String @id @default(cuid())
+  name                String
+  monthly_revenue_max Float
+  monthly_revenue_min Float
 
-  withdrawalFeeRates        WithdrawalFeeRate[]
+  withdrawalFeeRates WithdrawalFeeRate[]
 }
 
 enum PaymentStatus {
@@ -289,6 +289,8 @@ model Transaction {
   instalment_payments InstalmentPayment[]
 
   notifications Notification[]
+
+  rating    Rating? 
 }
 
 model InstalmentPlan {
@@ -438,4 +440,17 @@ model Notification {
   admin       Admin?       @relation(fields: [admin_id], references: [admin_id])
   transaction Transaction? @relation(fields: [transaction_id], references: [transaction_id])
   issues      Issue?       @relation(fields: [issue_id], references: [issue_id])
+}
+
+model Rating {
+  rating_id   String @id @default(cuid())
+  title       String
+  description String
+  rating      String
+
+  createdAt DateTime @default(now())
+
+  // Relationships
+  transaction_id String?   @unique
+  transaction    Transaction? @relation(fields: [transaction_id], references: [transaction_id])
 }
