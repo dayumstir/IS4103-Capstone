@@ -145,6 +145,12 @@ export default function Login() {
           Register
         </Text>
       </View>
+
+      <View className="mt-2 flex flex-row items-center justify-center gap-1">
+        <TouchableOpacity onPress={() => router.push("/forgetPassword")} className="mt-4">
+          <Text className="text-blue-500 underline">Forgot Password?</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

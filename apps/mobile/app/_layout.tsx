@@ -63,6 +63,10 @@ export default function RootLayout() {
               options={{ headerTitle: "Email Confirmation" }}
             />
             <Stack.Screen
+              name="forgetPassword"
+              options={{ headerTitle: "Forget Password" }}
+            />
+            <Stack.Screen
               name="(authenticated)"
               options={{ headerShown: false, title: "Back" }}
             />
