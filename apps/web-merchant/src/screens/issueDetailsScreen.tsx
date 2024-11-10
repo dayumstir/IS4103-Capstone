@@ -18,6 +18,10 @@ import {
   TransactionStatus,
   transactionStatusColorMap,
 } from "../../../../packages/interfaces/transactionInterface";
+import {
+  merchantPaymentStatusColorMap,
+  PaymentStatus,
+} from "@repo/interfaces/merchantPaymentInterface";
 
 const IssueDetailsScreen: React.FC = () => {
   const { issueId } = useParams<{ issueId: string }>();
@@ -35,18 +39,14 @@ const IssueDetailsScreen: React.FC = () => {
       label: "Created At",
       children:
         issue?.create_time &&
-        new Date(issue?.create_time).toDateString() +
-          ", " +
-          issue?.create_time &&
-        new Date(issue?.create_time).toLocaleTimeString(),
+        `${new Date(issue?.create_time).toDateString()}, ${new Date(issue?.create_time).toLocaleTimeString()}`,
     },
     {
       key: "3",
       label: "Updated At",
       children:
         issue?.updated_at &&
-        new Date(issue?.updated_at).toDateString() + ", " + issue?.updated_at &&
-        new Date(issue?.updated_at).toLocaleTimeString(),
+        `${new Date(issue?.updated_at).toDateString()}, ${new Date(issue?.updated_at).toLocaleTimeString()}`,
     },
   ];
 
@@ -96,6 +96,52 @@ const IssueDetailsScreen: React.FC = () => {
               "IN PROGRESS"}
             {issue.transaction.status == TransactionStatus.FULLY_PAID &&
               "FULLY PAID"}
+          </Tag>
+        ),
+      },
+    ];
+
+  const merchantPaymentItems: DescriptionsProps["items"] = issue &&
+    issue.merchantPayment && [
+      {
+        key: "1",
+        label: "Merchant Payment ID",
+        children: issue.merchantPayment.merchant_payment_id,
+      },
+      {
+        key: "2",
+        label: "Created At",
+        children: (
+          <div>
+            {issue.merchantPayment.created_at &&
+              `${new Date(issue.merchantPayment.created_at).toDateString()}, ${new Date(issue.merchantPayment.created_at).toLocaleTimeString()}`}
+          </div>
+        ),
+      },
+      {
+        key: "3",
+        label: "Withdrawal Amount",
+        children: "SGD " + issue.merchantPayment.total_amount_from_transactions,
+      },
+      {
+        key: "4",
+        label: "Final Payment",
+        children: "SGD " + issue.merchantPayment.final_payment_amount,
+      },
+      {
+        key: "5",
+        label: "Status",
+        children: (
+          <Tag
+            color={
+              merchantPaymentStatusColorMap[issue.merchantPayment.status] ||
+              "default"
+            }
+            key={issue.merchantPayment.status}
+          >
+            {issue.merchantPayment.status == PaymentStatus.PENDING_PAYMENT &&
+              "PENDING PAYMENT"}
+            {issue.merchantPayment.status == PaymentStatus.PAID && "PAID"}
           </Tag>
         ),
       },
@@ -166,6 +212,22 @@ const IssueDetailsScreen: React.FC = () => {
               </Link>
             </div>
             <Descriptions items={transactionItems} />
+          </>
+        )}
+        {merchantPaymentItems && (
+          <>
+            <div className="mt-10 flex items-center gap-x-10">
+              <p className="text-base font-semibold">
+                Merchant Payment Details
+              </p>
+              <Link
+                to={`/financial-management/merchant-payments/${issue?.merchantPayment.merchant_payment_id}`}
+                className="text-blue-500 hover:underline"
+              >
+                View Details
+              </Link>
+            </div>
+            <Descriptions items={merchantPaymentItems} />
           </>
         )}
       </Card>

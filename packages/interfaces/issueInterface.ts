@@ -1,4 +1,5 @@
 // packages/interfaces/issueInterface.ts
+import { IMerchantPayment } from "./merchantPaymentInterface";
 import { Sorting } from "./sortingInterface";
 import { ITransaction } from "./transactionInterface";
 
@@ -17,6 +18,7 @@ export const statusColorMap: Record<IssueStatus, string> = {
 export enum IssueCategory {
     ACCOUNT = "ACCOUNT",
     TRANSACTION = "TRANSACTION",
+    MERCHANT_PAYMENT = "MERCHANT_PAYMENT",
     OTHERS = "OTHERS",
 }
 
@@ -35,6 +37,7 @@ export interface IIssue {
     customer_id?: string; // Optional foreign key to Customer
     admin_id?: string; // Optional foreign key to Admin
     transaction_id?: string; // Optional foreign key to Transaction
+    merchant_payment_id?: string;
 }
 
 export interface IssueFilter {
@@ -67,4 +70,5 @@ export interface IssueResult {
     updated_at: Date;
 
     transaction: ITransaction;
+    merchantPayment: IMerchantPayment;
 }

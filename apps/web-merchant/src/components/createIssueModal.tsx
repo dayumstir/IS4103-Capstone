@@ -28,18 +28,22 @@ interface CreateIssueModalProps {
   isModalOpen: boolean;
   setModalOpen: (isOpen: boolean) => void;
   transactionId?: string;
+  merchantPaymentId?: string;
 }
 const CreateIssueModal = ({
   isModalOpen,
   setModalOpen,
   transactionId,
+  merchantPaymentId,
 }: CreateIssueModalProps) => {
   const [form] = Form.useForm();
   const [createIssueMutation, { isLoading }] = useCreateIssueMutation();
   const merchant = useSelector((state: RootState) => state.profile.merchant);
 
   const initialValues = {
-    category: transactionId && IssueCategory.TRANSACTION,
+    category:
+      (transactionId && IssueCategory.TRANSACTION) ||
+      (merchantPaymentId && IssueCategory.MERCHANT_PAYMENT),
   };
 
   const [imagesDisplays, setImagesDisplay] = useState<string[]>(
@@ -139,6 +143,7 @@ const CreateIssueModal = ({
   const navigate = useNavigate();
 
   const onFinish: FormProps<IIssue>["onFinish"] = async (data) => {
+    console.log("data.category", data.category);
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("description", data.description);
@@ -149,6 +154,8 @@ const CreateIssueModal = ({
     });
     formData.append("category", data.category);
     transactionId && formData.append("transaction_id", transactionId);
+    merchantPaymentId &&
+      formData.append("merchant_payment_id", merchantPaymentId);
     merchant
       ? formData.append("merchant_id", merchant.merchant_id)
       : message.error("Merchant ID not found");
@@ -210,14 +217,14 @@ const CreateIssueModal = ({
             showSearch
             placeholder="Select a category"
             optionFilterProp="label"
-            disabled={transactionId ? true : false}
+            disabled={transactionId || merchantPaymentId ? true : false}
             // onChange={(value:string)=>{
 
             // }}
             // onSearch={onSearch}
             options={Object.values(IssueCategory).map((category) => ({
               value: category,
-              label: category.charAt(0) + category.slice(1).toLowerCase(), // Format label (e.g., "Account")
+              label: (merchantPaymentId && "PAYMENT") || category,
             }))}
           />
         </Form.Item>
@@ -225,6 +232,16 @@ const CreateIssueModal = ({
         {transactionId && (
           <Form.Item<IIssue> label="Transaction ID" name="transaction_id">
             <Input disabled placeholder={transactionId} value={transactionId} />
+          </Form.Item>
+        )}
+
+        {merchantPaymentId && (
+          <Form.Item<IIssue> label="Payment ID" name="merchant_payment_id">
+            <Input
+              disabled
+              placeholder={merchantPaymentId}
+              value={merchantPaymentId}
+            />
           </Form.Item>
         )}
 

@@ -1,5 +1,8 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { IMerchantPayment } from "@repo/interfaces/merchantPaymentInterface";
+import {
+  IMerchantPayment,
+  IMerchantPaymentFilter,
+} from "@repo/interfaces/merchantPaymentInterface";
 import BaseQueryWithAuthCheck from "../utils.tsx/baseQuery";
 import { IMerchantSize, IWithdrawalFeeRate } from "@repo/interfaces";
 
@@ -20,7 +23,22 @@ export const merchantPaymentApi = createApi({
       }),
       invalidatesTags: ["MerchantPaymentList"],
     }),
-
+    getMerchantPayments: builder.mutation<
+      IMerchantPayment[],
+      IMerchantPaymentFilter
+    >({
+      query: (body) => ({
+        url: "/merchantPayment/list",
+        method: "POST",
+        body: body,
+      }),
+    }),
+    getMerchantPayment: builder.query<IMerchantPayment, string>({
+      query: (id) => ({
+        url: `/merchantPayment/${id}`,
+        method: "GET",
+      }),
+    }),
     // Calculate withdrawal info
     calculateWithdrawalInfo: builder.query<
       {
@@ -56,6 +74,8 @@ export const merchantPaymentApi = createApi({
 
 export const {
   useCreateMerchantPaymentMutation,
+  useGetMerchantPaymentsMutation,
+  useGetMerchantPaymentQuery,
   useCalculateWithdrawalInfoQuery,
   useGetMerchantSizesQuery,
   useGetWithdrawalFeeRatesQuery,
