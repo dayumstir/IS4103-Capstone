@@ -1,7 +1,8 @@
 // Handles authentication-related actions
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import * as customerAuthService from "../services/customerAuthService";
 import logger from "../utils/logger";
+import { BadRequestError } from "../utils/error";
 import jwt from "jsonwebtoken";
 
 
@@ -135,33 +136,20 @@ export const resendEmailVerification = async (req: Request, res: Response) => {
 };
 
 
-// Customer Forget Password: Send reset password link
-export const forgetPassword = async (req: Request, res: Response) => {
+// Customer Forget Password
+export const forgetPassword = async (req: Request, res: Response, next: NextFunction) => {
     logger.info('Executing forgetPassword...');
-
     const { email } = req.body;
 
-    try {
-        await customerAuthService.sendPasswordResetEmail(email);
-        res.status(200).json({ message: "Password reset email sent" });
-    } catch (error: any) {
-        logger.error('An error occurred:', error);
-        res.status(400).json({ error: error.message });
+    if (!email) {
+        return next(new BadRequestError("Email is required"));
     }
-}
-
-
-// Customer Forget Password: Reset password via token
-export const resetPasswordWithToken = async (req: Request, res: Response) => {
-    logger.info('Executing resetPasswordWithToken...');
-
-    const { token, newPassword } = req.body;
 
     try {
-        await customerAuthService.resetPasswordWithToken(token, newPassword);
-        res.status(200).json({ message: "Password reset successfully."});
+        await customerAuthService.forgetPassword(email);
+        res.status(200).json({ message: "Password reset email sent successfully" });
     } catch (error: any) {
-        logger.error('An error occurred:', error);
-        res.status(400).json({ error: error.message });
+        logger.error("Error in forgetPassword:", error);
+        next(error);
     }
 };
