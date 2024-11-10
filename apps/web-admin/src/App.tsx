@@ -23,6 +23,7 @@ import WithdrawalFeeRateScreen from "./screens/withdrawalFeeRateScreen";
 import MerchantPaymentScreen from "./screens/merchantPaymentScreen";
 import MerchantSizeScreen from "./screens/merchantSizeScreen";
 import NotificationsScreen from "./screens/notificationsScreen";
+import ForgetPasswordScreen from "./screens/forgetPasswordScreen";
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
       <Routes>
         {/* ===== Public routes ===== */}
         <Route path="/login" element={<LoginScreen />} />
+        <Route path="/forget-password" element={<ForgetPasswordScreen />} />
         <Route element={<ProtectedRoute />}>
           {/* ===== Protected routes ===== */}
           <Route path="/" element={<HomeScreen />} />

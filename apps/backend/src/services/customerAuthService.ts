@@ -56,7 +56,6 @@ export const registerCustomer = async (customerData: ICustomer) => {
         password: hashedPassword,
         status: CustomerStatus.PENDING_EMAIL_VERIFICATION,  // Set status as pending verification
         credit_score: 0,                                    // Default value
-        credit_tier_id: "tier_1",                            // Default credit tier
         profile_picture: defaultProfilePicture
     });
 

@@ -65,7 +65,6 @@ export default function Register() {
       profile_picture: "Picture of Green",
       status: "Active",
       credit_score: 3,
-      credit_tier_id: 3,
     };
     try {
       const result = await registerMutation(registrationData).unwrap();
