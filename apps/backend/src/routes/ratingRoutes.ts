@@ -10,7 +10,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 const router = Router();
 
 router.post("/add", authMiddleware, createRating);
-router.post("list", authMiddleware, getRatings);
+router.post("/list", authMiddleware, getRatings);
 router.get("/:rating_id", authMiddleware, getRating);
 
 export default router;
