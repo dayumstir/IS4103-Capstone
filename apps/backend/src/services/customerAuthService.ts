@@ -64,9 +64,9 @@ export const registerCustomer = async (customerData: ICustomer) => {
     const customer = await customerRepository.createCustomer({
         ...customerData,
         password: hashedPassword,
-        status: CustomerStatus.PENDING_EMAIL_VERIFICATION, // Set status as pending verification
-        credit_score: 0, // Default value
-        profile_picture: defaultProfilePicture,
+        status: CustomerStatus.PENDING_EMAIL_VERIFICATION,  // Set status as pending verification
+        credit_score: 0,                                    // Default value
+        profile_picture: defaultProfilePicture
     });
 
     return customer;

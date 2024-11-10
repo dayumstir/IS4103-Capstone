@@ -59,6 +59,14 @@ export default function Register() {
 
   // Form submit handler
   const onSubmit = async (data: RegisterFormValues) => {
+    // TODO: Use default profile picture and credit score
+    const registrationData = {
+      ...data,
+      profile_picture: "Picture of Green",
+      status: "Active",
+      credit_score: 3,
+    };
+
     try {
       const result = await registerMutation(data).unwrap();
 

@@ -13,13 +13,13 @@ import {
 import { useNavigate } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
 import { Buffer } from "buffer";
-import { useViewProfileQuery } from "../redux/services/adminService";
+import { useGetProfileQuery } from "../redux/services/adminService";
 import { useResetPasswordMutation } from "../redux/services/adminAuthService";
 
 const { Title, Text } = Typography;
 
 export default function ProfileScreen() {
-  const { data: user, isLoading } = useViewProfileQuery();
+  const { data: user, isLoading } = useGetProfileQuery();
   const [resetPassword, { isLoading: isResetting }] =
     useResetPasswordMutation();
 
