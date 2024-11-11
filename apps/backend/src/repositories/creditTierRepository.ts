@@ -3,9 +3,7 @@ import { prisma } from "./db";
 import { ICreditTier } from "../interfaces/creditTierInterface";
 
 // Create a new credit tier in db
-export const createCreditTier = async (
-    creditTierData: Omit<ICreditTier, "instalment_plans">
-) => {
+export const createCreditTier = async (creditTierData: Omit<ICreditTier, "instalment_plans">) => {
     return prisma.creditTier.create({
         data: {
             ...creditTierData,
