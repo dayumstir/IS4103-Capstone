@@ -92,6 +92,9 @@ export const listAllIssuesWithSearch = async (search: string) => {
             merchant_id: true,
             customer_id: true,
             admin_id: true,
+            
+            transaction: true,
+            merchantPayment: true,
         },
     });
 };
