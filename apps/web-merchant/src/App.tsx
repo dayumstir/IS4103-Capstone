@@ -15,6 +15,7 @@ import FinancialManagementRoute from "./components/financialManagementRoute";
 import TransactionDetailsScreen from "./screens/transactionDetailsScreen";
 import MerchantPaymentsScreen from "./screens/merchantPaymentsScreen";
 import ForgetPasswordScreen from "./screens/forgetPasswordScreen";
+import NotificationScreen from "./screens/notificationScreen";
 
 // import "./App.css";
 
@@ -39,6 +40,10 @@ const App = () => {
             <Route
               path="/business-management/issues/:issueId"
               element={<IssueDetailsScreen />}
+            />
+            <Route
+              path="/business-management/notifications"
+              element={<NotificationScreen />}
             />
           </Route>
           <Route element={<FinancialManagementRoute />}>

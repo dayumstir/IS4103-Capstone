@@ -45,3 +45,9 @@ export const searchNotifications = async (searchQuery: string) => {
   }
   return notifications;
 };
+
+export const getMerchantNotifications = async (merchantId: string, searchQuery: string) => {
+  logger.info(`Searching for notifications with query: ${searchQuery}`);
+  const notifications = await notificationRepository.getMerchantNotifications(merchantId, searchQuery);
+  return notifications;
+};

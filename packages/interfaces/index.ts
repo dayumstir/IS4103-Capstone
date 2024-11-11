@@ -42,3 +42,6 @@ export { PaymentStatus } from "./merchantPaymentInterface";
 export type { IMerchantSize } from "./merchantSizeInterface";
 
 export type { IWithdrawalFeeRate } from "./withdrawalFeeRateInterface";
+
+export type { INotification } from "./notificationInterface";
+export { NotificationPriority } from "./notificationInterface";
