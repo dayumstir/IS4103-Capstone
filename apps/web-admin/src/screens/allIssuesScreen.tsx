@@ -22,6 +22,8 @@ import { useViewMerchantProfileQuery } from "../redux/services/merchantService";
 import { useViewAdminProfileQuery } from "../redux/services/adminService";
 import { Link } from "react-router-dom";
 import { Buffer } from "buffer";
+import { useCreateNotificationMutation } from "../redux/services/notificationService";
+import { NotificationPriority } from "@repo/interfaces/notificationInterface";
 
 
 const { Search } = Input;
@@ -31,6 +33,7 @@ const AllIssuesScreen = () => {
   const adminId = localStorage.getItem("adminId") as string;
   const [searchTerm, setSearchTerm] = useState('');
   const [updateIssue] = useUpdateIssueOutcomeMutation();
+  const [createNotification] = useCreateNotificationMutation();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [isModified, setIsModified] = useState(false);
@@ -80,8 +83,20 @@ const AllIssuesScreen = () => {
     };
     try {
       await updateIssue(updatedIssue).unwrap();
+      const notificationPayload = {
+        title: "Issue Resolved",
+        description: `Issue ${currentIssue.title} has been updated with a new outcome "${values.outcome}".`,
+        customer_id: currentIssue.customer_id || null,
+        merchant_id: currentIssue.merchant_id || null,
+        issue_id: currentIssue.issue_id,
+        priority: "LOW",
+        admin_id: adminId,
+      };
+      
+      const notificationResponse = await createNotification(notificationPayload).unwrap();
+      console.log("Notification created successfully:", notificationResponse);
       setIsModalVisible(false);
-      message.success("Issue updated successfully");
+      message.success("Issue updated successfully and notification has been sent to user");
       setCurrentIssue(null);
     } catch (error) {
       console.error("Error updating issue:", error);
