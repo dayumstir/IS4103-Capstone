@@ -8,10 +8,8 @@ import {
     login, 
     logout, 
     resetPassword, 
-    
     resendEmailVerification,
     forgetPassword, 
-    resetPasswordWithToken 
 } from "../controllers/customerAuthController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -27,6 +25,5 @@ router.post("/reset-password", authMiddleware, resetPassword);
 
 router.post("/resend-email", resendEmailVerification);
 router.post('/forget-password', forgetPassword);
-router.post('/reset-password-with-token', resetPasswordWithToken);
 
 export default router;

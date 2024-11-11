@@ -19,7 +19,7 @@ import { IIssue, IssueStatus } from "../interfaces/issueInterface";
 import TextArea from "antd/es/input/TextArea";
 import { useViewCustomerProfileQuery } from "../redux/services/customerService";
 import { useViewMerchantProfileQuery } from "../redux/services/merchantService";
-import { useViewAdminProfileQuery } from "../redux/services/adminService";
+import { useGetProfileByIdQuery } from "../redux/services/adminService";
 import { Link } from "react-router-dom";
 import { Buffer } from "buffer";
 import { useCreateNotificationMutation } from "../redux/services/notificationService";
@@ -46,7 +46,7 @@ const AllIssuesScreen = () => {
   const [currentIssueId, setCurrentIssueId] = useState('');
   const { data: issue } = useViewIssueDetailsQuery(currentIssueId, { skip: !currentIssueId });
   const [currentAdminId, setCurrentAdminId] = useState('');
-  const { data: currentAdmin } = useViewAdminProfileQuery(currentAdminId, { skip: !currentAdminId });
+  const { data: currentAdmin } = useGetProfileByIdQuery(currentAdminId, { skip: !currentAdminId });
 
 
 

@@ -15,15 +15,15 @@ export const withdrawalFeeRateApi = createApi({
   }),
   tagTypes: ["WithdrawalFeeRateList"],
   endpoints: (builder) => ({
-    // Get all Withdrawal Fee Rate 
+    // Get all Withdrawal Fee Rate
     getWithdrawalFeeRates: builder.query<IWithdrawalFeeRate[], void>({
       query: () => "/withdrawalFeeRate",
       providesTags: ["WithdrawalFeeRateList"],
     }),
 
-    // Create Withdrawal Fee Rate 
+    // Create Withdrawal Fee Rate
     createWithdrawalFeeRate: builder.mutation<
-    IWithdrawalFeeRate,
+      IWithdrawalFeeRate,
       Omit<IWithdrawalFeeRate, "withdrawal_fee_rate_id">
     >({
       query: (withdrawalFeeRate) => ({
@@ -35,11 +35,23 @@ export const withdrawalFeeRateApi = createApi({
     }),
 
     // Update Withdrawal Fee Rate
-    updateWithdrawalFeeRate: builder.mutation<IWithdrawalFeeRate, IWithdrawalFeeRate>({
+    updateWithdrawalFeeRate: builder.mutation<
+      IWithdrawalFeeRate,
+      IWithdrawalFeeRate
+    >({
       query: (withdrawalFeeRate) => ({
         url: `/withdrawalFeeRate/${withdrawalFeeRate.withdrawal_fee_rate_id}`,
         method: "PUT",
         body: withdrawalFeeRate,
+      }),
+      invalidatesTags: ["WithdrawalFeeRateList"],
+    }),
+
+    // Delete Withdrawal Fee Rate
+    deleteWithdrawalFeeRate: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/withdrawalFeeRate/${id}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["WithdrawalFeeRateList"],
     }),
@@ -50,4 +62,5 @@ export const {
   useGetWithdrawalFeeRatesQuery,
   useCreateWithdrawalFeeRateMutation,
   useUpdateWithdrawalFeeRateMutation,
+  useDeleteWithdrawalFeeRateMutation,
 } = withdrawalFeeRateApi;

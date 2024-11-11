@@ -63,6 +63,18 @@ export default function RootLayout() {
               options={{ headerTitle: "Email Confirmation" }}
             />
             <Stack.Screen
+              name="forgetPassword"
+              options={{ title: "Forget Password" }}
+            />
+            <Stack.Screen
+              name="temporaryLogin"
+              options={{ title: "Login with Temporary Password" }}
+            />
+            <Stack.Screen
+              name="resetPassword"
+              options={{ title: "Reset Password" }}
+            />
+            <Stack.Screen
               name="(authenticated)"
               options={{ headerShown: false, title: "Back" }}
             />

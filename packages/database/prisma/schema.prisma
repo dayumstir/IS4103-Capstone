@@ -13,6 +13,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Admin Management Module
+enum AdminType {
+  SUPER
+  NORMAL
+  DEACTIVATED
+  UNVERIFIED
+}
+
+model Admin {
+  admin_id        String    @id @default(cuid())
+  name            String
+  profile_picture Bytes?    @db.ByteA
+  email           String    @unique
+  username        String    @unique
+  password        String
+  contact_number  String
+  address         String
+  date_of_birth   DateTime
+  admin_type      AdminType
+
+  notifications   Notification[]
+  issues          Issue[]
+  vouchersCreated Voucher[]
+}
+
 enum Status {
   PENDING_EMAIL_VERIFICATION
   PENDING_PHONE_VERIFICATION
@@ -36,7 +61,6 @@ model Customer {
   // Relationships
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
-  passwordResetTokens     PasswordResetToken[]
 
   paymentHistories PaymentHistory[]
   cashbackWallets  CashbackWallet[]
@@ -88,46 +112,6 @@ model TokenBlackList {
 
   expiresAt DateTime
   createdAt DateTime @default(now())
-}
-
-// Customer Forget Password Use Case: Store PasswordResetTokens
-model PasswordResetToken {
-  id    String @id @default(cuid())
-  email String
-  token String @unique
-
-  expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  customer    Customer @relation(fields: [customer_id], references: [customer_id])
-  customer_id String
-
-  @@index([customer_id])
-}
-
-enum AdminType {
-  SUPER
-  NORMAL
-  DEACTIVATED
-  UNVERIFIED
-}
-
-model Admin {
-  admin_id        String         @id @default(cuid())
-  name            String
-  profile_picture Bytes?         @db.ByteA
-  email           String         @unique
-  username        String         @unique
-  password        String
-  contact_number  String
-  address         String
-  date_of_birth   DateTime
-  admin_type      AdminType // TODO: Implement as enum
-  issues          Issue[]
-  vouchersCreated Voucher[]
-  notifications   Notification[]
 }
 
 model Merchant {
@@ -191,6 +175,7 @@ enum IssueStatus {
 enum IssueCategory {
   ACCOUNT
   TRANSACTION
+  MERCHANT_PAYMENT
   OTHERS
 }
 
@@ -209,12 +194,14 @@ model Issue {
   customer_id    String? // Optional foreign key to Customer
   admin_id       String? // Optional foreign key to Admin
   transaction_id String? // Optional foreign key to Transaction
+  merchant_payment_id String? // Optional foreign key to Merchant Payment
 
   // Relations
   merchant      Merchant?      @relation(fields: [merchant_id], references: [merchant_id])
   customer      Customer?      @relation(fields: [customer_id], references: [customer_id])
   admin         Admin?         @relation(fields: [admin_id], references: [admin_id])
   transaction   Transaction?   @relation(fields: [transaction_id], references: [transaction_id])
+  merchantPayment   MerchantPayment?   @relation(fields: [merchant_payment_id], references: [merchant_payment_id])
   notifications Notification[]
 }
 
@@ -234,22 +221,20 @@ model WithdrawalFeeRate {
   name                       String
   wallet_balance_max         Float
   wallet_balance_min         Float
-  monthly_revenue_max        Float
-  monthly_revenue_min        Float
   percentage_withdrawal_fee  Float
   percentage_transaction_fee Float
 
-  merchant_size_id  String
-  merchantSize    MerchantSize @relation(fields: [merchant_size_id], references: [merchant_size_id])
+  merchant_size_id String
+  merchantSize     MerchantSize @relation(fields: [merchant_size_id], references: [merchant_size_id])
 }
 
-model MerchantSize{
-  merchant_size_id           String @id @default(cuid())
-  name         String
-  monthly_revenue_max        Float
-  monthly_revenue_min        Float
+model MerchantSize {
+  merchant_size_id    String @id @default(cuid())
+  name                String
+  monthly_revenue_max Float
+  monthly_revenue_min Float
 
-  withdrawalFeeRates        WithdrawalFeeRate[]
+  withdrawalFeeRates WithdrawalFeeRate[]
 }
 
 enum PaymentStatus {
@@ -274,6 +259,8 @@ model MerchantPayment {
 
   merchant_id String
   merchant    Merchant @relation(fields: [merchant_id], references: [merchant_id])
+
+  issues Issue[]
 }
 
 enum TransactionStatus {
@@ -307,6 +294,8 @@ model Transaction {
   instalment_payments InstalmentPayment[]
 
   notifications Notification[]
+
+  rating    Rating? 
 }
 
 model InstalmentPlan {
@@ -456,4 +445,17 @@ model Notification {
   admin       Admin?       @relation(fields: [admin_id], references: [admin_id])
   transaction Transaction? @relation(fields: [transaction_id], references: [transaction_id])
   issues      Issue?       @relation(fields: [issue_id], references: [issue_id])
+}
+
+model Rating {
+  rating_id   String @id @default(cuid())
+  title       String
+  description String
+  rating      String
+
+  createdAt DateTime @default(now())
+
+  // Relationships
+  transaction_id String?   @unique
+  transaction    Transaction? @relation(fields: [transaction_id], references: [transaction_id])
 }

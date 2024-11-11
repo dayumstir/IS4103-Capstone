@@ -15,9 +15,11 @@ export const findAllInstalmentPayments = async () => {
 };
 
 // Find instalment payment by id (unique attribute) in db
-export const findInstalmentPaymentById = async (instalment_payment_id: string) => {
+export const findInstalmentPaymentById = async (
+    instalment_payment_id: string
+) => {
     return prisma.instalmentPayment.findUnique({
-      where: { instalment_payment_id: instalment_payment_id },
+        where: { instalment_payment_id: instalment_payment_id },
         include: {
             transaction: {
                 include: {
@@ -27,7 +29,7 @@ export const findInstalmentPaymentById = async (instalment_payment_id: string) =
             },
         },
     });
-};  
+};
 
 export const findCustomerOutstandingInstalmentPayments = async (
     customer_id: string
@@ -51,40 +53,48 @@ export const findCustomerOutstandingInstalmentPayments = async (
     });
 };
 
+export const findMerchantInstalmentPayments = async (merchant_id: string) => {
+    return prisma.instalmentPayment.findMany({
+        where: { transaction: { merchant_id: merchant_id } },
+        orderBy: {
+            due_date: "desc",
+        },
+    });
+};
+
 // Update instalment payment in db
 export const updateInstalmentPayment = async (
     instalment_payment_id: string,
     updateData: Partial<IInstalmentPayment>
-  ) => {
-    const {
-      voucher_assigned_id,
-      cashback_wallet_id,
-      ...otherUpdateData
-    } = updateData;
-  
+) => {
+    const { voucher_assigned_id, cashback_wallet_id, ...otherUpdateData } =
+        updateData;
+
     // Prepare the data object for the update
     const dataToUpdate: any = {
-      ...otherUpdateData,
+        ...otherUpdateData,
     };
-  
+
     // Conditionally include the voucher_assigned update
     if (voucher_assigned_id) {
-      dataToUpdate.voucher_assigned = { connect: { voucher_assigned_id } };
+        dataToUpdate.voucher_assigned = { connect: { voucher_assigned_id } };
     }
-  
+
     // Conditionally include the cashback_wallet update
     if (cashback_wallet_id) {
-      dataToUpdate.cashback_wallet = { connect: { cashback_wallet_id } };
+        dataToUpdate.cashback_wallet = { connect: { cashback_wallet_id } };
     }
-  
+
     return await prisma.instalmentPayment.update({
-      where: { instalment_payment_id },
-      data: dataToUpdate,
+        where: { instalment_payment_id },
+        data: dataToUpdate,
     });
-  };
+};
 
 // Find all instalment payments by transaction_id
-export const findInstalmentPaymentsByTransactionId = async (transaction_id: string) => {
+export const findInstalmentPaymentsByTransactionId = async (
+    transaction_id: string
+) => {
     return prisma.instalmentPayment.findMany({
         where: { transaction_id },
     });

@@ -57,3 +57,13 @@ export const editMerchantSize = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+
+export const deleteMerchantSize = async (req: Request, res: Response) => {
+    try {
+        const merchantSize = await merchantSizeService.deleteMerchantSize(req.params.merchant_size_id);
+        res.status(200).json(merchantSize);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};

@@ -8,6 +8,8 @@ import * as merchantEmailVerificationTokenRepository from "../repositories/merch
 import * as merchantOtpRepository from "../repositories/merchantOtpRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
 import { UserType } from "../interfaces/userType";
+import logger from "../utils/logger";
+import { BadRequestError, NotFoundError } from "../utils/error";
 
 import crypto from "crypto";
 const nodemailer = require("nodemailer");
@@ -294,4 +296,62 @@ export const resetPassword = async (id: string, oldPassword: string, newPassword
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await merchantRepository.updateMerchant(merchant.merchant_id, { password: hashedPassword });
+};
+
+// Generate random password with specified character sets
+export const generateRandomPassword = (length = 8) => {
+    const lowerCase = "abcdefghijklmnopqrstuvwxyz";
+    const upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const digits = "0123456789";
+    const specialChars = "!@#$%^&*";
+    const allChars = lowerCase + upperCase + digits + specialChars;
+    
+    let password = lowerCase[Math.floor(Math.random() * lowerCase.length)] +
+                   upperCase[Math.floor(Math.random() * upperCase.length)] +
+                   digits[Math.floor(Math.random() * digits.length)] +
+                   specialChars[Math.floor(Math.random() * specialChars.length)];
+  
+    for (let i = 4; i < length; i++) {
+        password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+  
+    return password.split("").sort(() => 0.5 - Math.random()).join("");
+  };
+
+// Merchant Forget Password
+export const forgetPassword = async (email: string) => {
+    logger.info(`Processing forget password request for email: ${email}`);
+
+    const merchant = await merchantRepository.findMerchantByEmail(email);
+    if (!merchant) {
+        throw new Error("Merchant not found");
+    }
+
+    const generatedPassword = generateRandomPassword();
+    const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+
+    await merchantRepository.updateMerchant(merchant.merchant_id, { password: hashedPassword });
+    await sendResetEmail(email, generatedPassword);
+
+    logger.info("Forget password email sent successfully.");
+};
+
+const sendResetEmail = async (email: string, generatedPassword: string) => {
+    logger.info(`Sending password reset email to ${email}`);
+    
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: parseInt(process.env.EMAIL_PORT || "2525"),
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Password Reset Request",
+        text: `New password: ${generatedPassword}`,
+    });
 };

@@ -3,9 +3,7 @@ import { prisma } from "./db";
 import { IMerchantSize } from "@repo/interfaces/merchantSizeInterface";
 
 // Create a new Merchant Size in db
-export const createMerchantSize= async (
-    merchantSizeData: IMerchantSize
-) => {
+export const createMerchantSize = async (merchantSizeData: IMerchantSize) => {
     return prisma.merchantSize.create({
         data: {
             ...merchantSizeData,
@@ -18,6 +16,9 @@ export const findAllMerchantSize = async () => {
     return prisma.merchantSize.findMany({
         orderBy: {
             monthly_revenue_max: "asc",
+        },
+        include: {
+            withdrawalFeeRates: true,
         },
     });
 };
@@ -39,5 +40,11 @@ export const updateMerchantSize = async (
         data: {
             ...updateData,
         },
+    });
+};
+
+export const deleteMerchantSize = async (merchant_size_id: string) => {
+    return prisma.merchantSize.delete({
+        where: { merchant_size_id: merchant_size_id },
     });
 };

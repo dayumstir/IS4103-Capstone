@@ -41,7 +41,7 @@ const LoginScreen: React.FC = () => {
         console.log("Success:", data);
       })
       .catch((error) => {
-        if (error.data.error == "Email pending verification" && data.email) {
+        if (error.data.error === "Email pending verification" && data.email) {
           localStorage.setItem("email", data.email);
           setPendingEmailConfirmationModalOpen(true);
         }
@@ -60,7 +60,7 @@ const LoginScreen: React.FC = () => {
           setModalOpen={setPendingEmailConfirmationModalOpen}
         />
       )}
-      <img src={logo} width="100%" style={{ alignSelf: "center" }} />
+      <img src={logo} width="100%" style={{ alignSelf: "center" }} alt="PandaPay Logo" />
       <Title>PandaPay</Title>
       <Title level={3}>Your ultimate BNPL Provider</Title>
       <Card style={{ backgroundColor: "#F5F5F5" }}>
@@ -69,7 +69,6 @@ const LoginScreen: React.FC = () => {
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
           style={{ minWidth: 600 }}
-          // initialValues={{ remember: true }}
           onFinish={onFinish}
           autoComplete="off"
         >
@@ -97,6 +96,13 @@ const LoginScreen: React.FC = () => {
                 Login
               </Button>
             )}
+            <Button
+              type="link"
+              onClick={() => navigate("/forget-password")}
+              className="ml-2"
+            >
+              Forget Password?
+            </Button>
           </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 6, span: 30 }}>

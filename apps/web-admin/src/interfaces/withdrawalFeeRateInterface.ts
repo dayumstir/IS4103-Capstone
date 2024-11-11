@@ -3,9 +3,7 @@ export interface IWithdrawalFeeRate {
   name: string;
   wallet_balance_max: number;
   wallet_balance_min: number;
-  monthly_revenue_max: number;
   percentage_withdrawal_fee: number;
-  monthly_revenue_min: number;
   percentage_transaction_fee: number;
   merchant_size_id: number;
 }

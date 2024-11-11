@@ -39,6 +39,32 @@ export const getCustomerOutstandingInstalmentPayments = async (
     }
 };
 
+export const getMerchantInstalmentPayments = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const merchant_id = req.merchant_id;
+
+        if (!merchant_id) {
+            return res
+                .status(401)
+                .json({ error: "Unauthorized: No merchant ID provided" });
+        }
+
+        const instalmentPayments =
+            await instalmentPaymentService.getMerchantInstalmentPayments(
+                merchant_id
+            );
+        res.status(200).json(instalmentPayments);
+    } catch (error: any) {
+        logger.error(
+            `Error in getMerchantInstalmentPayments: ${error.message}`
+        );
+        res.status(400).json({ error: error.message });
+    }
+};
+
 export const getInstalmentPayment = async (req: Request, res: Response) => {
     try {
         const { instalment_payment_id } = req.params;

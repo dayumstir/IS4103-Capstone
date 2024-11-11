@@ -1,4 +1,7 @@
 // packages/interfaces/index.ts
+export type { IAdmin } from "./adminInterface";
+export { AdminType } from "./adminInterface";
+
 export type { ICashbackWallet } from "./cashbackWalletInterface";
 
 export type { ICreditTier } from "./creditTierInterface";
@@ -18,10 +21,12 @@ export type { IMerchant } from "./merchantInterface";
 export { MerchantStatus } from "./merchantInterface";
 
 export type { IPaymentHistory } from "./paymentHistoryInterface";
+export { PaymentType } from "./paymentHistoryInterface";
 export type {
     ITransaction,
     TransactionFilter,
     TransactionResult,
+    TransactionStats,
 } from "./transactionInterface";
 export { TransactionStatus } from "./transactionInterface";
 
@@ -35,3 +40,7 @@ export type { IMerchantPayment } from "./merchantPaymentInterface";
 export { PaymentStatus } from "./merchantPaymentInterface";
 
 export type { IMerchantSize } from "./merchantSizeInterface";
+
+export type { IWithdrawalFeeRate } from "./withdrawalFeeRateInterface";
+
+export { IRating } from "./ratingInterface";

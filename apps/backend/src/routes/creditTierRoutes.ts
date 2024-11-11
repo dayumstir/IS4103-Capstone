@@ -5,14 +5,15 @@ import {
     getAllCreditTiers,
     getCreditTier,
     editCreditTier,
+    deleteCreditTier,
 } from "../controllers/creditTierController";
-// import { adminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-// TODO: Add adminAuthMiddleware
-router.post("/", createCreditTier);
-router.get("/", getAllCreditTiers);
-router.get("/:credit_tier_id", getCreditTier);
-router.put("/:credit_tier_id", editCreditTier);
+router.post("/", authMiddleware, createCreditTier);
+router.get("/", authMiddleware, getAllCreditTiers);
+router.get("/:credit_tier_id", authMiddleware, getCreditTier);
+router.put("/:credit_tier_id", authMiddleware, editCreditTier);
+router.delete("/:credit_tier_id", authMiddleware, deleteCreditTier);
 export default router;

@@ -15,13 +15,13 @@ export const merchantSizeApi = createApi({
   }),
   tagTypes: ["MerchantSizeList"],
   endpoints: (builder) => ({
-    // Get all merchant Size
+    // Get all merchant size
     getMerchantSizes: builder.query<IMerchantSize[], void>({
       query: () => "/merchantSize",
       providesTags: ["MerchantSizeList"],
     }),
 
-    // Create merchant Size
+    // Create merchant size
     createMerchantSize: builder.mutation<
     IMerchantSize,
       Omit<IMerchantSize, "merchant_size_id">
@@ -34,12 +34,21 @@ export const merchantSizeApi = createApi({
       invalidatesTags: ["MerchantSizeList"],
     }),
 
-    // Update merchant Size
+    // Update merchant size
     updateMerchantSize: builder.mutation<IMerchantSize, IMerchantSize>({
       query: (merchantSize) => ({
         url: `/merchantSize/${merchantSize.merchant_size_id}`,
         method: "PUT",
         body: merchantSize,
+      }),
+      invalidatesTags: ["MerchantSizeList"],
+    }),
+    
+    // Delete merchant size
+    deleteMerchantSize: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/merchantSize/${id}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["MerchantSizeList"],
     }),
@@ -50,4 +59,5 @@ export const {
   useGetMerchantSizesQuery,
   useCreateMerchantSizeMutation,
   useUpdateMerchantSizeMutation,
+  useDeleteMerchantSizeMutation,
 } = merchantSizeApi;

@@ -1,15 +1,14 @@
-// Defines routes related to admin actions
+// app/backend/src/routes/adminRoutes.ts
 import { Router } from "express";
 import {
-  get,
-  edit,
-  getAll,
-  deactivateAdmin,
-  activateAdmin,
-  getAdminProfile,
-  getAdminByPathVariable,
+    getProfile,
+    getProfileById,
+    editProfile,
+    addAdmin,
+    getAllAdmins,
+    deactivateAdmin,
+    activateAdmin,
 } from "../controllers/adminController";
-import { add } from "../controllers/adminAuthController";
 import {
   listAllCustomers,
   getCustomerProfile,
@@ -20,51 +19,47 @@ import {
   getMerchantProfile,
   editMerchantProfile,
 } from "../controllers/merchantController";
-import { authMiddleware } from "../middlewares/authMiddleware";
-import { superAdminAuthMiddleware } from "../middlewares/superAdminAuthMiddleware";
-import { editIssue, getIssue, getIssues } from "../controllers/issueController";
+import { 
+    getIssues,
+    getIssue,
+    editIssue  
+} from "../controllers/issueController";
 import {
   getNotification,
   getNotifications,
 } from "../controllers/notificationController";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { superAdminAuthMiddleware } from "../middlewares/superAdminAuthMiddleware";
 
-const router = Router();
+const router = Router()
 
-router.get("/profile", authMiddleware, get);
-router.get("/profile/:admin_id", authMiddleware, getAdminByPathVariable);
-router.put("/profile", authMiddleware, edit);
+// Admin Routes
+router.get("/profile", authMiddleware, getProfile);
+router.get("/profile/:admin_id", authMiddleware, getProfileById);
+router.put("/profile", authMiddleware, editProfile);
 
+// Super Admin Routes
+router.post("/add", addAdmin);    // TODO: Data initialization/seeding before enabling authMiddleware
+router.get("/get-all", authMiddleware, superAdminAuthMiddleware, getAllAdmins);
+router.put("/deactivate-admin", authMiddleware, superAdminAuthMiddleware, deactivateAdmin);
+router.put("/activate-admin", authMiddleware, superAdminAuthMiddleware, activateAdmin);
+
+// Customer Routes
 router.get("/allCustomers", authMiddleware, listAllCustomers);
 router.get("/customer/:customer_id", authMiddleware, getCustomerProfile);
 router.put("/customer/:customer_id", authMiddleware, editCustomerProfile);
+
+// Merchant Routes
 router.get("/allMerchants", authMiddleware, listAllMerchants);
 router.get("/merchant/:merchant_id", authMiddleware, getMerchantProfile);
 router.put("/merchant/:merchant_id", authMiddleware, editMerchantProfile);
+
+// Issue Routes
 router.get("/allIssues", authMiddleware, getIssues);
 router.get("/issue/:issue_id", authMiddleware, getIssue);
 router.put("/issue/:issue_id", authMiddleware, editIssue);
+
 router.get("/allNotifications", authMiddleware, getNotifications);
 router.get("/notification/:notification_id", authMiddleware, getNotification);
-
-router.post("/add", add);
-router.get("/get-all", authMiddleware, superAdminAuthMiddleware, getAll);
-router.put(
-  "/deactivate-admin",
-  authMiddleware,
-  superAdminAuthMiddleware,
-  deactivateAdmin
-);
-router.put(
-  "/activate-admin",
-  authMiddleware,
-  superAdminAuthMiddleware,
-  activateAdmin
-);
-router.get(
-  "/:admin_id",
-  authMiddleware,
-  superAdminAuthMiddleware,
-  getAdminProfile
-);
 
 export default router;

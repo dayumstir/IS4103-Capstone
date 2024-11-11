@@ -14,6 +14,8 @@ import TransactionScreen from "./screens/transactionScreen";
 import FinancialManagementRoute from "./components/financialManagementRoute";
 import TransactionDetailsScreen from "./screens/transactionDetailsScreen";
 import MerchantPaymentsScreen from "./screens/merchantPaymentsScreen";
+import MerchantPaymentDetailsScreen from "./screens/merchantPaymentDetailsScreen";
+import ForgetPasswordScreen from "./screens/forgetPasswordScreen";
 
 // import "./App.css";
 
@@ -25,6 +27,7 @@ const App = () => {
         <Route path="/register" element={<RegisterScreen />} />
         <Route path="/register-confirm" element={<RegisterConfirmScreen />} />
         <Route path="/login" element={<LoginScreen />} />
+        <Route path="/forget-password" element={<ForgetPasswordScreen />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
@@ -51,6 +54,10 @@ const App = () => {
             <Route
               path="/financial-management/merchant-payments"
               element={<MerchantPaymentsScreen />}
+            />
+            <Route
+              path="/financial-management/merchant-payments/:merchantPaymentId"
+              element={<MerchantPaymentDetailsScreen />}
             />
           </Route>
         </Route>

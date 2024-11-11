@@ -11,11 +11,10 @@ export const createMerchantPayment = async (req: Request, res: Response) => {
             return res.status(400).json({ error: "merchant_id is required" });
         }
 
-        const merchantPayment =
-            await merchantPaymentService.createMerchantPayment(
-                merchant_id,
-                req.body
-            );
+        const merchantPayment = await merchantPaymentService.createMerchantPayment(
+            merchant_id,
+            req.body
+        );
         res.status(200).json(merchantPayment);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
@@ -30,9 +29,17 @@ export const getMerchantPayments = async (req: Request, res: Response) => {
             return res.status(400).json({ error: "admin_id is required" });
         }
         const { search } = req.query;
-        const payments = await merchantPaymentService.getMerchantPayments(
-            search as string
-        );
+        const payments = await merchantPaymentService.getMerchantPayments(search as string);
+        res.status(200).json(payments);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+// Get Merchant Payments By Filter
+export const getMerchantPaymentsByFilter = async (req: Request, res: Response) => {
+    try {
+        const payments = await merchantPaymentService.getMerchantPaymentsByFilter(req.body);
         res.status(200).json(payments);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
@@ -58,12 +65,20 @@ export const updateMerchantPayment = async (req: Request, res: Response) => {
     }
     try {
         const { id } = req.params;
-        const payment = await merchantPaymentService.updateMerchantPayment(
-            id,
-            req.body
-        );
+        const payment = await merchantPaymentService.updateMerchantPayment(id, req.body);
         res.status(200).json(payment);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }
+};
+
+// Calculate Withdrawal Info
+export const calculateWithdrawalInfo = async (req: Request, res: Response) => {
+    const merchant_id = req.merchant_id;
+    if (!merchant_id) {
+        return res.status(400).json({ error: "merchant_id is required" });
+    }
+    const info =
+        await merchantPaymentService.calculateWithdrawalInfo(merchant_id);
+    res.status(200).json(info);
 };

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { AdminType } from "../interfaces/adminTypeInterface";
+import { AdminType } from "@repo/interfaces";
 
 export const superAdminAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const admin_type = req.admin_type;

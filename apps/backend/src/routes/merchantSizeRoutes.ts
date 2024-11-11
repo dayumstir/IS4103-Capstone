@@ -5,14 +5,16 @@ import {
     getAllMerchantSize,
     getMerchantSize,
     editMerchantSize,
+    deleteMerchantSize,
 } from "../controllers/merchantSizeController";
-//import { adminAuthMiddleware } from "../middlewares/adminAuthMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-// TODO: Add adminAuthMiddleware
-router.post("/", createMerchantSize);
-router.get("/", getAllMerchantSize);
-router.get("/:merchant_size_id", getMerchantSize);
-router.put("/:merchant_size_id", editMerchantSize);
+router.post("/", authMiddleware, createMerchantSize);
+router.get("/", authMiddleware, getAllMerchantSize);
+router.get("/:merchant_size_id", authMiddleware, getMerchantSize);
+router.put("/:merchant_size_id", authMiddleware, editMerchantSize);
+router.delete("/:merchant_size_id", authMiddleware, deleteMerchantSize);
+
 export default router;

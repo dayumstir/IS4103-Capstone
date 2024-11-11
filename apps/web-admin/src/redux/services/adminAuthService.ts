@@ -1,7 +1,6 @@
-// Need to use the React-specific entry point to import createApi
+// app/web-admin/src/redux/services/adminAuthService.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// Define a service using a base URL and expected endpoints
 export const adminAuthApi = createApi({
   reducerPath: "adminAuthApi",
   baseQuery: fetchBaseQuery({
@@ -14,48 +13,62 @@ export const adminAuthApi = createApi({
       return headers;
     },
   }),
+
   endpoints: (builder) => ({
     // Login
-    login: builder.mutation<
-      { token: string, admin_type:string, email:string, admin_id:string},
-      { username: string; password: string }
-    >({
-      query: (body) => ({
+    login: builder.mutation<{ jwtToken: string, admin_id: string, email: string, admin_type: string }, { username: string; password: string }>({
+      query: (credentials) => ({
         url: "/login",
         method: "POST",
-        body,
+        body: credentials,
       }),
-      transformResponse: (response: { token: string, admin_type:string, email:string, admin_id:string}) => {
-        localStorage.setItem("token", response.token);
+      transformResponse: (response: { jwtToken: string, admin_id: string, email: string, admin_type: string }) => {
+        localStorage.setItem("token", response.jwtToken);
         localStorage.setItem("adminId", response.admin_id);
         return response;
       },
     }),
 
+    // Logout
+    logout: builder.mutation<void, void>({
+      query: () => ({
+        url: "/logout",
+        method: "POST",
+      }),
+      onQueryStarted: async (_, { queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+        } finally {
+          // Clear local storage regardless of success
+          localStorage.removeItem("token");
+          localStorage.removeItem("adminId");
+        }
+      },
+    }),
+
     // Reset Password
-    resetPassword: builder.mutation<
-      void,
-      { email: string; oldPassword: string; newPassword: string }
-    >({
-      query: ({ email, oldPassword, newPassword }) => ({
+    resetPassword: builder.mutation<void, { email: string; oldPassword: string; newPassword: string }>({
+      query: (passwordData) => ({
         url: "/reset-password",
         method: "POST",
-        body: { email, oldPassword, newPassword },
+        body: passwordData,
       }),
     }),
 
-    // Logout
-    logout: builder.mutation<void, { reason: string }>({
-      query: (body) => ({
-        url: "/logout",
+    // Forget Password
+    forgetPassword: builder.mutation<void, { email: string }>({
+      query: (email) => ({
+        url: "/forget-password",
         method: "POST",
-        body,
+        body: email,
       }),
     }),
   }),
 });
 
-// Export hooks for usage in functional components, which are
-// auto-generated based on the defined endpoints
-export const { useLoginMutation, useResetPasswordMutation, useLogoutMutation } =
-  adminAuthApi;
+export const { 
+  useLoginMutation,
+  useLogoutMutation,
+  useResetPasswordMutation,
+  useForgetPasswordMutation,
+} = adminAuthApi;

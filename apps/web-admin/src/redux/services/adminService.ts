@@ -1,7 +1,7 @@
+// app/web-admin/src/redux/services/adminService.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IAdmin } from "../../interfaces/adminInterface";
+import { IAdmin } from "@repo/interfaces";
 
-// Define a service using a base URL and expected endpoints
 export const adminApi = createApi({
   reducerPath: "adminApi",
   baseQuery: fetchBaseQuery({
@@ -14,10 +14,12 @@ export const adminApi = createApi({
       return headers;
     },
   }),
+
   tagTypes: ["AdminProfile"],
+
   endpoints: (builder) => ({
-    // View Profile
-    viewProfile: builder.query<IAdmin, void>({
+    // Get own admin profile
+    getProfile: builder.query<IAdmin, void>({
       query: () => ({
         url: "/profile",
         method: "GET",
@@ -25,45 +27,22 @@ export const adminApi = createApi({
       providesTags: ["AdminProfile"],
     }),
 
-    // Update Profile
+    // Get admin profile by ID
+    getProfileById: builder.query<IAdmin, string>({
+      query: (admin_id) => ({
+        url: `/profile/${admin_id}`,
+        method: "GET",
+      }),
+      providesTags: ["AdminProfile"],
+    }),
+
+    // Edit admin profile
     updateProfile: builder.mutation<IAdmin, Partial<IAdmin>>({
       query: (updatedProfile) => ({
         url: "/profile",
         method: "PUT",
         body: updatedProfile,
       }),
-      invalidatesTags: ["AdminProfile"],
-    }),
-
-    // View all admins
-    viewAllAdmin: builder.query<IAdmin, void>({
-      query: () => ({
-        url: "/get-all",
-        method: "GET",
-      }),
-      providesTags: ["AdminProfile"],
-    }),
-
-    // Update admin status
-    updateStatus: builder.mutation<
-      String,
-      { updatedAdminId: string; admin_type: string }
-    >({
-      query: ({ updatedAdminId, admin_type }) => {
-        console.log("Updating admin ID:", updatedAdminId); // Log the updated admin ID
-        if (admin_type == "DEACTIVATED") {
-          return {
-            url: "/deactivate-admin",
-            method: "PUT",
-            body: { admin_id: updatedAdminId },
-          };
-        } else if (admin_type == "ACTIVATE") {
-        return {
-          url: "/activate-admin",
-          method: "PUT",
-          body: { admin_id: updatedAdminId },
-        };}
-      },
       invalidatesTags: ["AdminProfile"],
     }),
 
@@ -74,29 +53,35 @@ export const adminApi = createApi({
         method: "POST",
         body: newAdmin,
       }),
+      invalidatesTags: ["AdminProfile"],
     }),
 
-    // Get Admin with ID
-    viewAdminProfile: builder.query<IAdmin, string>({
-      query: (admin_id) => ({
-        url: `/profile/${admin_id}`,
+    // View all admins
+    viewAllAdmin: builder.query<IAdmin[], void>({
+      query: () => ({
+        url: "/get-all",
         method: "GET",
       }),
       providesTags: ["AdminProfile"],
     }),
+
+    // Update admin status (Activate/Deactivate)
+    updateStatus: builder.mutation<string, { updatedAdminId: string; admin_type: "DEACTIVATED" | "ACTIVATE" }>({
+      query: ({ updatedAdminId, admin_type }) => ({
+        url: admin_type === "DEACTIVATED" ? "/deactivate-admin" : "/activate-admin",
+        method: "PUT",
+        body: { admin_id: updatedAdminId },
+      }),
+      invalidatesTags: ["AdminProfile"],
+    }),  
   }),
 });
 
-
-
-
-// Export hooks for usage in functional components, which are
-// auto-generated based on the defined endpoints
 export const {
-  useViewProfileQuery,
+  useGetProfileQuery,
+  useGetProfileByIdQuery,
   useUpdateProfileMutation,
+  useAddAdminMutation,
   useViewAllAdminQuery,
   useUpdateStatusMutation,
-  useAddAdminMutation,
-  useViewAdminProfileQuery
 } = adminApi;

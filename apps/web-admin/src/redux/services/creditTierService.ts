@@ -4,7 +4,7 @@ import { ICreditTier } from "../../interfaces/creditTierInterface";
 export const creditTierApi = createApi({
   reducerPath: "creditTierApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000",
+    baseUrl: "http://localhost:3000/creditTier",
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) {
@@ -17,7 +17,7 @@ export const creditTierApi = createApi({
   endpoints: (builder) => ({
     // Get all credit tiers
     getCreditTiers: builder.query<ICreditTier[], void>({
-      query: () => "/creditTier",
+      query: () => "/",
       providesTags: ["CreditTierList"],
     }),
 
@@ -27,7 +27,7 @@ export const creditTierApi = createApi({
       Omit<ICreditTier, "credit_tier_id">
     >({
       query: (creditTier) => ({
-        url: "/creditTier",
+        url: "/",
         method: "POST",
         body: creditTier,
       }),
@@ -37,9 +37,18 @@ export const creditTierApi = createApi({
     // Update credit tier
     updateCreditTier: builder.mutation<ICreditTier, ICreditTier>({
       query: (creditTier) => ({
-        url: `/creditTier/${creditTier.credit_tier_id}`,
+        url: `/${creditTier.credit_tier_id}`,
         method: "PUT",
         body: creditTier,
+      }),
+      invalidatesTags: ["CreditTierList"],
+    }),
+
+    // Delete credit tier
+    deleteCreditTier: builder.mutation<void, string>({
+      query: (credit_tier_id) => ({
+        url: `/${credit_tier_id}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["CreditTierList"],
     }),
@@ -50,4 +59,5 @@ export const {
   useGetCreditTiersQuery,
   useCreateCreditTierMutation,
   useUpdateCreditTierMutation,
+  useDeleteCreditTierMutation,
 } = creditTierApi;

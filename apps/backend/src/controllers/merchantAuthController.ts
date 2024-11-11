@@ -1,6 +1,8 @@
 // Handles authentication-related actions
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import * as merchantAuthService from "../services/merchantAuthService";
+import logger from "../utils/logger";
+import { BadRequestError } from "../utils/error";
 
 // Merchant Sign Up
 export const register = async (req: Request, res: Response) => {
@@ -116,3 +118,21 @@ export const resetPassword = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+// Merchant Forget Password
+export const forgetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    logger.info("Executing forgetPassword...");
+    const { email } = req.body;
+
+    if (!email) {
+        return next(new BadRequestError("Email is required"));
+    }
+
+    try {
+        await merchantAuthService.forgetPassword(email);
+        res.status(200).json({ message: "Password reset email sent successfully" });
+    } catch (error: any) {
+        logger.error("Error in forgetPassword:", error);
+        next(error);
+    }
+}
