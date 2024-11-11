@@ -379,7 +379,7 @@ const HomeScreen = () => {
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={transactionStats.timeFrameData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
+              <XAxis dataKey="date" fontSize={12} minTickGap={20} />
               <YAxis />
               <Tooltip
                 formatter={(value) => [
