@@ -58,6 +58,9 @@ model Customer {
   wallet_balance  Float    @default(0)
   credit_score    Int      @default(0)
 
+  credit_tier_id  String
+  credit_tier     CreditTier @relation(fields: [credit_tier_id], references: [credit_tier_id])
+
   // Relationships
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
@@ -211,9 +214,11 @@ model CreditTier {
   name             String @unique
   min_credit_score Int
   max_credit_score Int
+  credit_limit     Int
 
   // Relationships
   instalment_plans InstalmentPlan[]
+  customers        Customer[]
 }
 
 model WithdrawalFeeRate {
