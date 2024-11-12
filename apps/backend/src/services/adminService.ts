@@ -78,7 +78,8 @@ export const add = async (adminData: IAdmin) => {
           role: UserType.ADMIN, 
           admin_id: newAdmin.admin_id, 
           email: newAdmin.email,
-          admin_type: newAdmin.admin_type  
+          admin_type: newAdmin.admin_type,
+          forgot_password: newAdmin.forgot_password,
       },
       process.env.JWT_SECRET!,
       { expiresIn: "1h" }

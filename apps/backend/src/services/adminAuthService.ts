@@ -28,6 +28,7 @@ export const login = async (loginData: { username: string; password: string }) =
             admin_id: admin.admin_id,
             email: admin.email,
             admin_type: admin.admin_type,
+            forgot_password: admin.forgot_password,
         },
         process.env.JWT_SECRET!,
         { expiresIn: "1h" }

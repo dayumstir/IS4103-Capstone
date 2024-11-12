@@ -16,13 +16,13 @@ export const adminAuthApi = createApi({
 
   endpoints: (builder) => ({
     // Login
-    login: builder.mutation<{ jwtToken: string, admin_id: string, email: string, admin_type: string }, { username: string; password: string }>({
+    login: builder.mutation<{ jwtToken: string, admin_id: string, email: string, admin_type: string, forgot_password: boolean }, { username: string; password: string }>({
       query: (credentials) => ({
         url: "/login",
         method: "POST",
         body: credentials,
       }),
-      transformResponse: (response: { jwtToken: string, admin_id: string, email: string, admin_type: string }) => {
+      transformResponse: (response: { jwtToken: string, admin_id: string, email: string, admin_type: string, forgot_password: boolean }) => {
         localStorage.setItem("token", response.jwtToken);
         localStorage.setItem("adminId", response.admin_id);
         return response;
