@@ -1,4 +1,4 @@
-// app/web-admin/src/redux/services/adminAuthService.ts
+// apps/web-admin/src/redux/services/adminAuthService.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const adminAuthApi = createApi({
