@@ -12,10 +12,10 @@ import {
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
-import { 
-  useLoginMutation, 
-  useLogoutMutation, 
-  useResetPasswordMutation 
+import {
+  useLoginMutation,
+  useLogoutMutation,
+  useResetPasswordMutation,
 } from "../redux/services/adminAuthService";
 
 export default function LoginScreen() {
@@ -50,11 +50,13 @@ export default function LoginScreen() {
       if (response.admin_type === "DEACTIVATED") {
         setError("Account Deactivated");
         await logout().unwrap();
-        localStorage.removeItem("token");
         navigate("/login");
-      } else if (response.admin_type === "UNVERIFIED") {
+      } else if (response.forgot_password) {
         setError(null);
         setIsModalOpen(true);
+      } else if (response.admin_type === "UNVERIFIED") {
+        setError(null);
+        setIsModalOpen(true); 
       } else {
         navigate("/");
       }
@@ -95,7 +97,12 @@ export default function LoginScreen() {
       direction="vertical"
       className="flex h-screen items-center justify-center"
     >
-      <img src={logo} width="100%" style={{ alignSelf: "center" }} alt="PandaPay Logo" />
+      <img
+        src={logo}
+        width="100%"
+        style={{ alignSelf: "center" }}
+        alt="PandaPay Logo"
+      />
       <Title>PandaPay Admin</Title>
       <Title level={3}>Staff Login</Title>
       <Card style={{ backgroundColor: "#F5F5F5" }}>
@@ -139,12 +146,12 @@ export default function LoginScreen() {
               Login
             </Button>
             <Button
-                type="link"
-                onClick={() => navigate("/forget-password")}
-                className="ml-2"
-              >
-                Forget Password?
-              </Button>
+              type="link"
+              onClick={() => navigate("/forget-password")}
+              className="ml-2"
+            >
+              Forget Password?
+            </Button>
           </Form.Item>
         </Form>
       </Card>

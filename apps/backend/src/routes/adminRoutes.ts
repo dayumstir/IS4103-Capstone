@@ -1,4 +1,4 @@
-// app/backend/src/routes/adminRoutes.ts
+// apps/backend/src/routes/adminRoutes.ts
 import { Router } from "express";
 import {
     getProfile,
@@ -59,6 +59,7 @@ router.get("/allIssues", authMiddleware, getIssues);
 router.get("/issue/:issue_id", authMiddleware, getIssue);
 router.put("/issue/:issue_id", authMiddleware, editIssue);
 
+// Notification Routes
 router.get("/allNotifications", authMiddleware, getNotifications);
 router.get("/notification/:notification_id", authMiddleware, getNotification);
 
