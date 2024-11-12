@@ -1,7 +1,7 @@
-// app/backend/src/services/adminService.ts
-import nodemailer from "nodemailer";
+// apps/backend/src/services/adminService.ts
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 
 import * as adminRepository from "../repositories/adminRepository";
 import logger from "../utils/logger";

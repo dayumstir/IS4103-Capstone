@@ -1,4 +1,4 @@
-// app/backend/src/controllers/adminController.ts
+// apps/backend/src/controllers/adminController.ts
 import { Request, Response, NextFunction } from "express";
 import * as adminService from "../services/adminService";
 import logger from "../utils/logger";
