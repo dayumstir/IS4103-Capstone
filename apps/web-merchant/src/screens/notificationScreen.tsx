@@ -42,11 +42,6 @@ export default function NotificationsScreen() {
 
   const columns = [
     {
-      title: "Notification ID",
-      dataIndex: "notification_id",
-      key: "notification_id",
-    },
-    {
       title: "Title",
       dataIndex: "title",
       key: "title",
@@ -102,7 +97,7 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <div className="w-full px-8 py-4">
+    <div className="w-full">
       <Card>
         <div className="flex items-center justify-between pb-4">
           <h1 className="text-2xl font-bold">Notifications</h1>

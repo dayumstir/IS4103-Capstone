@@ -357,7 +357,7 @@ export default function MerchantPaymentsScreen() {
                 <h3 className="mb-4 font-medium">Payment Details</h3>
                 <Form form={form} layout="vertical">
                   <Form.Item
-                    label="Bank Account Number"
+                    label="From Admin Bank Account Number"
                     name="from_bank"
                     rules={[
                       {
@@ -370,7 +370,7 @@ export default function MerchantPaymentsScreen() {
                       },
                     ]}
                   >
-                    <Input placeholder="Enter bank account number" />
+                    <Input placeholder="Enter admin bank account number" />
                   </Form.Item>
 
                   <Form.Item

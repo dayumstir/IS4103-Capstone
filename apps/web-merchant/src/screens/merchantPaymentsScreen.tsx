@@ -152,7 +152,7 @@ export default function MerchantPaymentsScreen() {
   };
 
   return (
-    <div className="w-full px-8 py-4">
+    <div className="w-full">
       <Card>
         <div className="flex items-center justify-between pb-4">
           <h1 className="text-2xl font-bold">Merchant Payments</h1>
@@ -242,7 +242,7 @@ export default function MerchantPaymentsScreen() {
             <Form.Item
               label={
                 <span className="font-bold">
-                  Fees
+                  Fees ({withdrawalInfo?.merchantSize?.name})
                   <FeeTooltip />
                 </span>
               }

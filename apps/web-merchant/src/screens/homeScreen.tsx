@@ -10,8 +10,7 @@ import {
 } from "antd";
 import {
   UserOutlined,
-  CheckCircleOutlined,
-  WarningOutlined,
+  SwapOutlined,
   WalletOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
@@ -39,18 +38,12 @@ import {
 } from "date-fns";
 
 import { useGetTransactionsByFilterMutation } from "../redux/services/transaction";
-import { useGetMerchantInstalmentPaymentsQuery } from "../redux/services/instalmentPayment";
-import {
-  ICustomer,
-  IInstalmentPayment,
-  TransactionResult,
-} from "@repo/interfaces";
+import { ICustomer, TransactionResult } from "@repo/interfaces";
 import { formatCurrency } from "../utils/formatCurrency";
 
 interface TransactionStats {
-  totalAmount: number;
-  completedPayments: number;
-  latePayments: number;
+  totalRevenue: number;
+  totalTransactions: number;
   averageTransactionValue: number;
   timeFrameData: { date: string; amount: number }[];
 }
@@ -69,12 +62,10 @@ const HomeScreen = () => {
   >([]);
 
   const { data: profile } = useGetProfileQuery(merchantId ?? "");
-  const { data: instalmentPayments } = useGetMerchantInstalmentPaymentsQuery();
 
   const [transactionStats, setTransactionStats] = useState<TransactionStats>({
-    totalAmount: 0,
-    latePayments: 0,
-    completedPayments: 0,
+    totalRevenue: 0,
+    totalTransactions: 0,
     averageTransactionValue: 0,
     timeFrameData: [],
   });
@@ -106,73 +97,52 @@ const HomeScreen = () => {
 
     const fetchTransactionData = async () => {
       try {
-        const transactions = await getTransactionsByFilter({
+        const allTransactions = await getTransactionsByFilter({
           merchant_id: merchantId,
           create_from: new Date(0),
           create_to: new Date(),
         }).unwrap();
 
-        setRecentTransactions(transactions.slice(0, 5));
+        setRecentTransactions(allTransactions.slice(0, 5));
 
         // Process transaction data
         const stats = {
-          totalAmount: transactions.reduce(
+          totalRevenue: allTransactions.reduce(
             (sum: number, t: TransactionResult) => sum + t.amount,
             0,
           ),
-          completedPayments:
-            instalmentPayments?.filter(
-              (p: IInstalmentPayment) => p.status === "PAID",
-            ).length || 0,
-          latePayments:
-            instalmentPayments?.filter(
-              (p: IInstalmentPayment) =>
-                new Date(p.due_date) < new Date() && p.status === "UNPAID",
-            ).length || 0,
-          averageTransactionValue: transactions.length
-            ? transactions.reduce(
+          totalTransactions: allTransactions.length,
+          averageTransactionValue: allTransactions.length
+            ? allTransactions.reduce(
                 (sum: number, t: TransactionResult) => sum + t.amount,
                 0,
-              ) / transactions.length
+              ) / allTransactions.length
             : 0,
-          timeFrameData: processTimeFrameData(transactions),
         };
 
-        setTransactionStats(stats);
+        const dateRange = {
+          daily: 30,
+          monthly: 365,
+          yearly: 365 * 5,
+        };
+
+        const graphTransactions = await getTransactionsByFilter({
+          merchant_id: merchantId ?? "",
+          create_from: subDays(new Date(), dateRange[timeFrame]),
+          create_to: new Date(),
+        }).unwrap();
+
+        setTransactionStats({
+          ...stats,
+          timeFrameData: processTimeFrameData(graphTransactions),
+        });
       } catch (error) {
         console.error("Error fetching transaction data:", error);
       }
     };
 
     fetchTransactionData();
-  }, [merchantId, profile]);
-
-  const columns = [
-    {
-      title: "Customer",
-      dataIndex: "customer",
-      key: "customer",
-      render: (customer: ICustomer) => customer.name,
-    },
-    {
-      title: "Amount",
-      dataIndex: "amount",
-      key: "amount",
-      render: (amount: number) => formatCurrency(amount),
-    },
-    {
-      title: "Date",
-      dataIndex: "date_of_transaction",
-      key: "date",
-      render: (date: string) => format(new Date(date), "dd MMM yyyy, HH:mm"),
-    },
-    {
-      title: "Reference",
-      dataIndex: "reference_no",
-      key: "reference",
-      render: (reference: string) => reference,
-    },
-  ];
+  }, [merchantId, profile, timeFrame]);
 
   const processTimeFrameData = (transactions: TransactionResult[]) => {
     const groupedData: Record<string, number> = {};
@@ -249,54 +219,32 @@ const HomeScreen = () => {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   };
 
-  const fetchTransactionData = async () => {
-    try {
-      const dateRange = {
-        daily: 30,
-        monthly: 365,
-        yearly: 365 * 5,
-      };
-
-      const transactions = await getTransactionsByFilter({
-        merchant_id: merchantId ?? "",
-        create_from: subDays(new Date(), dateRange[timeFrame]),
-        create_to: new Date(),
-      }).unwrap();
-
-      const totalAmount = transactions.reduce(
-        (sum: number, t: TransactionResult) => sum + t.amount,
-        0,
-      );
-
-      const stats = {
-        totalAmount,
-        latePayments:
-          instalmentPayments?.filter(
-            (p: IInstalmentPayment) =>
-              new Date(p.due_date) < new Date() && p.status !== "PAID",
-          ).length || 0,
-        completedPayments:
-          instalmentPayments?.filter(
-            (p: IInstalmentPayment) => p.status === "PAID",
-          ).length || 0,
-        averageTransactionValue: transactions.length
-          ? totalAmount / transactions.length
-          : 0,
-        timeFrameData: processTimeFrameData(transactions),
-      };
-
-      setTransactionStats(stats);
-    } catch (error) {
-      console.error("Error fetching transaction data:", error);
-    }
-  };
-
-  // Refetch when timeFrame changes
-  useEffect(() => {
-    if (merchantId) {
-      fetchTransactionData();
-    }
-  }, [merchantId, timeFrame]);
+  const columns = [
+    {
+      title: "Customer",
+      dataIndex: "customer",
+      key: "customer",
+      render: (customer: ICustomer) => customer.name,
+    },
+    {
+      title: "Amount",
+      dataIndex: "amount",
+      key: "amount",
+      render: (amount: number) => formatCurrency(amount),
+    },
+    {
+      title: "Date",
+      dataIndex: "date_of_transaction",
+      key: "date",
+      render: (date: string) => format(new Date(date), "dd MMM yyyy, HH:mm"),
+    },
+    {
+      title: "Reference",
+      dataIndex: "reference_no",
+      key: "reference",
+      render: (reference: string) => reference,
+    },
+  ];
 
   return (
     <div className="w-full flex-col bg-gray-100 p-6">
@@ -325,27 +273,20 @@ const HomeScreen = () => {
       </Card>
 
       {/* ===== Stats Cards ===== */}
-      <div className="mb-6 grid grid-cols-4 gap-4">
+      <div className="mb-6 grid grid-cols-3 gap-4">
         <Card>
           <Statistic
             title="Total Revenue (All Time)"
-            value={formatCurrency(transactionStats.totalAmount)}
+            value={formatCurrency(transactionStats.totalRevenue)}
             prefix={<WalletOutlined />}
             precision={2}
           />
         </Card>
         <Card>
           <Statistic
-            title="Completed Payments"
-            value={transactionStats.completedPayments}
-            prefix={<CheckCircleOutlined className="text-green-500" />}
-          />
-        </Card>
-        <Card>
-          <Statistic
-            title="Late Payments"
-            value={transactionStats.latePayments}
-            prefix={<WarningOutlined className="text-red-500" />}
+            title="Total Transactions"
+            value={transactionStats.totalTransactions}
+            prefix={<SwapOutlined className="text-green-500" />}
           />
         </Card>
         <Card>

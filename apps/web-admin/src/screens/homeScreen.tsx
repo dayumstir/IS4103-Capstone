@@ -103,7 +103,7 @@ export default function HomeScreen() {
                 ) : (
                   <ArrowUpOutlined />
                 )}{" "}
-                {Math.abs(stats?.volumeIncrease || 0)}% vs last month
+                {Math.abs(stats?.volumeIncrease || 0).toFixed(1)}% vs last month
               </p>
             </div>
           </Card>
@@ -121,7 +121,7 @@ export default function HomeScreen() {
               ) : (
                 <ArrowDownOutlined />
               )}{" "}
-              {Math.abs(stats?.customerGrowth || 0)}% growth
+              {Math.abs(stats?.customerGrowth || 0).toFixed(1)}% growth
             </p>
           </Card>
         </Col>
@@ -150,8 +150,9 @@ export default function HomeScreen() {
                   <ArrowUpOutlined />
                 ) : (
                   <ArrowDownOutlined />
-                )}{" "}
-                {Math.abs(stats?.avgTransactionChange || 0)}% vs last month
+                )}{" "} 
+                {Math.abs(stats?.avgTransactionChange || 0).toFixed(1)}% vs last
+                month
               </p>
             </div>
           </Card>
@@ -183,7 +184,7 @@ export default function HomeScreen() {
               ) : (
                 <ArrowDownOutlined />
               )}{" "}
-              {Math.abs(stats?.defaultRateChange || 0)}% vs last month
+              {Math.abs(stats?.defaultRateChange || 0).toFixed(1)}% vs last month
             </p>
           </Card>
         </Col>

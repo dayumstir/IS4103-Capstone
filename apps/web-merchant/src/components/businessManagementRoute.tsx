@@ -10,14 +10,22 @@ export default function BusinessManagementRoute() {
       type: "group",
       children: [
         {
-          key: "Issues",
-          label: <Link to="/business-management/issues">Issues</Link>,
+          key: "Transactions",
+          label: (
+            <Link to="/business-management/transactions">Transactions</Link>
+          ),
         },
         {
-          key: "Notifications",
+          key: "Merchant Payments",
           label: (
-            <Link to="/business-management/notifications">Notifications</Link>
+            <Link to="/business-management/merchant-payments">
+              Merchant Payments
+            </Link>
           ),
+        },
+        {
+          key: "Issues",
+          label: <Link to="/business-management/issues">Issues</Link>,
         },
       ],
     },
@@ -27,7 +35,7 @@ export default function BusinessManagementRoute() {
     <Layout>
       {/* Tailwind not supported */}
       <Sider style={{ backgroundColor: "#fff" }}>
-        <Menu items={items} defaultSelectedKeys={["Issues"]} />
+        <Menu items={items} defaultSelectedKeys={["Transactions"]} />
       </Sider>
       <div className="flex-grow p-5">
         <Outlet />
