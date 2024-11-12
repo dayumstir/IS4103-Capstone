@@ -39,6 +39,13 @@ export default function CreditTierScreen() {
       key: "name",
     },
     {
+      title: <div className="whitespace-nowrap">Credit Limit</div>,
+      dataIndex: "credit_limit",
+      key: "credit_limit",
+      width: 1,
+      render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
+    },
+    {
       title: <div className="whitespace-nowrap">Min Credit Score</div>,
       dataIndex: "min_credit_score",
       key: "min_credit_score",
@@ -198,15 +205,32 @@ export default function CreditTierScreen() {
       onFinish={formInstance === form ? handleCreateTier : handleUpdateTier}
       layout="vertical"
     >
-      <Form.Item
-        name="name"
-        label="Credit Tier Name"
-        rules={[
-          { required: true, message: "Please input the credit tier name!" },
-        ]}
-      >
-        <Input />
-      </Form.Item>
+      <div className="grid grid-cols-2 gap-x-8">
+        <Form.Item
+          name="name"
+          label="Credit Tier Name"
+          rules={[
+            { required: true, message: "Please input the credit tier name!" },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          name="credit_limit"
+          label="Credit Limit"
+          rules={[
+            { required: true, message: "Please input the credit limit!" },
+            {
+              type: "number",
+              min: 0,
+              message: "Credit score must not be less than 0",
+            },
+          ]}
+        >
+          <InputNumber className="w-full" step={1} precision={0} />
+        </Form.Item>
+      </div>
 
       <div className="grid grid-cols-2 gap-x-8">
         <Form.Item

@@ -5,6 +5,7 @@ import {
     getMerchantPayments,
     calculateWithdrawalInfo,
     getMerchantPaymentById,
+    getMerchantPaymentsByFilter,
     updateMerchantPayment,
 } from "../controllers/merchantPaymentController";
 import { authMiddleware } from "../middlewares/authMiddleware";
@@ -16,5 +17,6 @@ router.post("/", authMiddleware, createMerchantPayment);
 router.get("/withdrawal-info", authMiddleware, calculateWithdrawalInfo);
 router.get("/:id", authMiddleware, getMerchantPaymentById);
 router.put("/:id", authMiddleware, updateMerchantPayment);
+router.post("/list", authMiddleware, getMerchantPaymentsByFilter);
 
 export default router;

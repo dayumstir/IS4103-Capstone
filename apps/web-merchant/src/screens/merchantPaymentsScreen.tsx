@@ -24,13 +24,20 @@ import { format } from "date-fns";
 import {
   useCalculateWithdrawalInfoQuery,
   useCreateMerchantPaymentMutation,
+  useGetMerchantPaymentsMutation,
   useGetMerchantSizesQuery,
   useGetWithdrawalFeeRatesQuery,
 } from "../redux/services/merchantPayment";
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { RootState } from "../redux/store";
 import { useSelector } from "react-redux";
-import { IMerchantPayment } from "@repo/interfaces";
+import { useGetTransactionsByFilterMutation } from "../redux/services/transaction";
+import { subMonths } from "date-fns";
+import { IMerchantPayment, TransactionFilter } from "@repo/interfaces";
+import { IMerchantPaymentFilter } from "@repo/interfaces/merchantPaymentInterface";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ApiError } from "../interfaces/errorInterface";
+import { sortDirection } from "../interfaces/sortingInterface";
 
 enum PaymentStatus {
   PAID = "PAID",
@@ -42,6 +49,33 @@ export default function MerchantPaymentsScreen() {
   const [form] = Form.useForm();
   const [createPayment] = useCreateMerchantPaymentMutation();
   const { merchant } = useSelector((state: RootState) => state.profile);
+  const [getTransactionsByFilter] = useGetTransactionsByFilterMutation();
+  const [monthlyRevenue, setMonthlyRevenue] = useState(0);
+  const navigate = useNavigate();
+  const location = useLocation();
+  console.log(location.pathname);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      if (merchant?.merchant_id) {
+        const filter: TransactionFilter = {
+          merchant_id: merchant.merchant_id,
+          create_from: subMonths(new Date(), 1),
+          create_to: new Date(),
+        };
+
+        const data = await getTransactionsByFilter(filter).unwrap();
+        const totalAmount = data.reduce(
+          (sum, transaction) => sum + transaction.amount,
+          0,
+        );
+        setMonthlyRevenue(totalAmount);
+      }
+    };
+
+    fetchTransactions();
+    fetchFilteredMerchantPayments();
+  }, [merchant]);
   const { data: withdrawalInfo } = useCalculateWithdrawalInfoQuery();
 
   const columns = [
@@ -49,6 +83,7 @@ export default function MerchantPaymentsScreen() {
       title: "Payment ID",
       dataIndex: "merchant_payment_id",
       key: "merchant_payment_id",
+      className: "w-1/6",
     },
     {
       title: "Created At",
@@ -57,14 +92,16 @@ export default function MerchantPaymentsScreen() {
       render: (date: string) => format(new Date(date), "d MMM yyyy, h:mm a"),
       sorter: (a: IMerchantPayment, b: IMerchantPayment) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      className: "w-1/6",
     },
     {
-      title: "Total Amount",
+      title: "Requested Withdrawal Amount",
       dataIndex: "total_amount_from_transactions",
       key: "total_amount_from_transactions",
       render: (amount: number) => `SGD ${amount.toFixed(2)}`,
       sorter: (a: IMerchantPayment, b: IMerchantPayment) =>
         a.total_amount_from_transactions - b.total_amount_from_transactions,
+      className: "w-1/6",
     },
     {
       title: "Final Payment",
@@ -73,6 +110,7 @@ export default function MerchantPaymentsScreen() {
       render: (amount: number) => `SGD ${amount.toFixed(2)}`,
       sorter: (a: IMerchantPayment, b: IMerchantPayment) =>
         a.final_payment_amount - b.final_payment_amount,
+      className: "w-1/6",
     },
     {
       title: "Status",
@@ -80,7 +118,8 @@ export default function MerchantPaymentsScreen() {
       key: "status",
       render: (status: PaymentStatus) => (
         <Tag color={status === PaymentStatus.PAID ? "green" : "gold"}>
-          {status}
+          {status == PaymentStatus.PENDING_PAYMENT && "PENDING PAYMENT"}
+          {status == PaymentStatus.PAID && "PAID"}
         </Tag>
       ),
       filters: [
@@ -92,6 +131,7 @@ export default function MerchantPaymentsScreen() {
       ],
       onFilter: (value: React.Key | boolean, record: IMerchantPayment) =>
         record.status === value,
+      className: "w-1/6",
     },
     {
       title: "Action",
@@ -99,11 +139,14 @@ export default function MerchantPaymentsScreen() {
       render: (_: IMerchantPayment, record: IMerchantPayment) => (
         <Button
           icon={<EyeOutlined />}
-          // onClick={() => setSelectedPayment(record)}
+          onClick={() =>
+            navigate(`${location.pathname}/${record.merchant_payment_id}`)
+          }
         >
           View Details
         </Button>
       ),
+      className: "w-1/6",
     },
   ];
 
@@ -151,6 +194,94 @@ export default function MerchantPaymentsScreen() {
     }
   };
 
+  const calculateWithdrawalFeeRate = () => {
+    if (!merchant) {
+      return 0.05; // default highest withdrawal fee rate
+    }
+
+    if (monthlyRevenue >= 25000) {
+      if (merchant.wallet_balance >= 200000) return 0.028;
+      if (merchant.wallet_balance >= 100000) return 0.03;
+      if (merchant.wallet_balance >= 50000) return 0.035;
+    } else {
+      if (merchant.wallet_balance >= 50000) return 0.028;
+      if (merchant.wallet_balance >= 25000) return 0.03;
+      if (merchant.wallet_balance >= 5000) return 0.035;
+    }
+
+    return 0.05;
+  };
+
+  const { search, filteredMerchantPayments } = location.state || {};
+  const [merchantPayments, setMerchantPayments] = useState<IMerchantPayment[]>(
+    filteredMerchantPayments || [],
+  );
+  const { Search } = Input;
+
+  const [searchTerm, setSearchTerm] = useState(search || "");
+  const [filter, setFilter] = useState<IMerchantPaymentFilter>({
+    merchant_id: merchant?.merchant_id,
+    search_term: searchTerm,
+    sorting: {
+      sortBy: "created_at",
+      sortDirection: sortDirection.DESC,
+    },
+  });
+  const [getMerchantPaymentsMutation, { isLoading }] =
+    useGetMerchantPaymentsMutation();
+
+  const fetchFilteredMerchantPayments = async () => {
+    try {
+      if (merchant && merchant.merchant_id) {
+        console.log(merchant.merchant_id);
+        const data = await getMerchantPaymentsMutation(filter).unwrap();
+        // const mappedData: IMerchantPayment[] = data.map(
+        //   (merchantPayment) => ({
+        //     key: merchantPayment.merchant_payment_id,
+        //     merchant_payment_id: merchantPayment.merchant_payment_id,
+        //     created_at: merchantPayment.created_at,
+        //     total_amount_from_transactions: merchantPayment.total_amount_from_transactions,
+        //     final_payment_amount: merchantPayment.final_payment_amount,
+        //     status: merchantPayment.status,
+        //   }),
+        // );
+        setMerchantPayments(data);
+      }
+    } catch (error) {
+      const err = error as ApiError;
+      message.error(
+        err.data?.error || "Unable to fetch merchant payments based on filter",
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchFilteredMerchantPayments();
+    if (filteredMerchantPayments) {
+      setMerchantPayments(filteredMerchantPayments);
+    }
+    if (search) {
+      setSearchTerm(search);
+    }
+  }, [filter, search, filteredMerchantPayments]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setFilter((currentFilter) => ({
+        ...currentFilter,
+        search_term: searchTerm,
+      }));
+    }, 1000); // 1 second delay for debounce search term
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
   return (
     <div className="w-full">
       <Card>
@@ -193,10 +324,17 @@ export default function MerchantPaymentsScreen() {
           </Card>
         </div>
 
+        {/* ===== Search Bar ===== */}
+        <Search
+          placeholder="Search by withdrawal amount or final payment"
+          onChange={handleSearchChange}
+          value={searchTerm}
+          className="my-3"
+        />
         {/* ===== Merchant Payments Table ===== */}
         <Table
           columns={columns}
-          dataSource={[]}
+          dataSource={merchantPayments}
           loading={false}
           rowKey="merchant_payment_id"
           locale={{

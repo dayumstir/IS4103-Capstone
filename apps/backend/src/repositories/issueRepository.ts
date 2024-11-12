@@ -4,6 +4,7 @@ import { IIssue, IssueFilter } from "../../../../packages/interfaces/issueInterf
 
 // Create a new instalment plan in db
 export const createIssue = async (issueData: IIssue) => {
+    console.log(issueData);
     return prisma.issue.create({ data: issueData });
 };
 
@@ -41,12 +42,16 @@ export const getIssues = async (issueFilter: IssueFilter) => {
             admin_id: true,
 
             transaction: true,
+            merchantPayment: true,
         },
     });
 };
 
 export const findIssueById = async (issue_id: string) => {
-    return prisma.issue.findUnique({ where: { issue_id }, include: { transaction: true } });
+    return prisma.issue.findUnique({
+        where: { issue_id },
+        include: { transaction: true, merchantPayment: true },
+    });
 };
 
 // update issue
@@ -87,6 +92,9 @@ export const listAllIssuesWithSearch = async (search: string) => {
             merchant_id: true,
             customer_id: true,
             admin_id: true,
+            
+            transaction: true,
+            merchantPayment: true,
         },
     });
 };

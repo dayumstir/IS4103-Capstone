@@ -361,6 +361,7 @@ export const findTransactionById = async (transaction_id: string) => {
         where: { transaction_id },
         include: {
             instalment_plan: true,
+            rating: true,
             customer: {
                 select: {
                     name: true,

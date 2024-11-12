@@ -58,10 +58,12 @@ model Customer {
   wallet_balance  Float    @default(0)
   credit_score    Int      @default(0)
 
+  credit_tier_id  String
+  credit_tier     CreditTier @relation(fields: [credit_tier_id], references: [credit_tier_id])
+
   // Relationships
   emailVerificationTokens EmailVerificationToken[]
   otps                    Otp[]
-  passwordResetTokens     PasswordResetToken[]
 
   paymentHistories PaymentHistory[]
   cashbackWallets  CashbackWallet[]
@@ -113,23 +115,6 @@ model TokenBlackList {
 
   expiresAt DateTime
   createdAt DateTime @default(now())
-}
-
-// Customer Forget Password Use Case: Store PasswordResetTokens
-model PasswordResetToken {
-  id    String @id @default(cuid())
-  email String
-  token String @unique
-
-  expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  customer    Customer @relation(fields: [customer_id], references: [customer_id])
-  customer_id String
-
-  @@index([customer_id])
 }
 
 model Merchant {
@@ -193,6 +178,7 @@ enum IssueStatus {
 enum IssueCategory {
   ACCOUNT
   TRANSACTION
+  MERCHANT_PAYMENT
   OTHERS
 }
 
@@ -211,12 +197,14 @@ model Issue {
   customer_id    String? // Optional foreign key to Customer
   admin_id       String? // Optional foreign key to Admin
   transaction_id String? // Optional foreign key to Transaction
+  merchant_payment_id String? // Optional foreign key to Merchant Payment
 
   // Relations
   merchant      Merchant?      @relation(fields: [merchant_id], references: [merchant_id])
   customer      Customer?      @relation(fields: [customer_id], references: [customer_id])
   admin         Admin?         @relation(fields: [admin_id], references: [admin_id])
   transaction   Transaction?   @relation(fields: [transaction_id], references: [transaction_id])
+  merchantPayment   MerchantPayment?   @relation(fields: [merchant_payment_id], references: [merchant_payment_id])
   notifications Notification[]
 }
 
@@ -226,9 +214,11 @@ model CreditTier {
   name             String @unique
   min_credit_score Int
   max_credit_score Int
+  credit_limit     Int
 
   // Relationships
   instalment_plans InstalmentPlan[]
+  customers        Customer[]
 }
 
 model WithdrawalFeeRate {
@@ -274,6 +264,8 @@ model MerchantPayment {
 
   merchant_id String
   merchant    Merchant @relation(fields: [merchant_id], references: [merchant_id])
+
+  issues Issue[]
 }
 
 enum TransactionStatus {
@@ -307,6 +299,8 @@ model Transaction {
   instalment_payments InstalmentPayment[]
 
   notifications Notification[]
+
+  rating    Rating? 
 }
 
 model InstalmentPlan {
@@ -457,4 +451,17 @@ model Notification {
   admin       Admin?       @relation(fields: [admin_id], references: [admin_id])
   transaction Transaction? @relation(fields: [transaction_id], references: [transaction_id])
   issues      Issue?       @relation(fields: [issue_id], references: [issue_id])
+}
+
+model Rating {
+  rating_id   String @id @default(cuid())
+  title       String
+  description String
+  rating      String
+
+  createdAt DateTime @default(now())
+
+  // Relationships
+  transaction_id String?   @unique
+  transaction    Transaction? @relation(fields: [transaction_id], references: [transaction_id])
 }

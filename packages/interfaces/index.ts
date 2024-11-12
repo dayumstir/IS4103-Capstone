@@ -45,3 +45,5 @@ export type { IWithdrawalFeeRate } from "./withdrawalFeeRateInterface";
 
 export type { INotification } from "./notificationInterface";
 export { NotificationPriority } from "./notificationInterface";
+
+export type { IRating } from "./ratingInterface";

@@ -13,6 +13,7 @@ import ViewQRCodeScreen from "./screens/viewQRCodeScreen";
 import TransactionScreen from "./screens/transactionScreen";
 import TransactionDetailsScreen from "./screens/transactionDetailsScreen";
 import MerchantPaymentsScreen from "./screens/merchantPaymentsScreen";
+import MerchantPaymentDetailsScreen from "./screens/merchantPaymentDetailsScreen";
 import ForgetPasswordScreen from "./screens/forgetPasswordScreen";
 import NotificationScreen from "./screens/notificationScreen";
 
@@ -50,6 +51,10 @@ const App = () => {
             <Route
               path="/business-management/merchant-payments"
               element={<MerchantPaymentsScreen />}
+            />
+            <Route
+              path="/financial-management/merchant-payments/:merchantPaymentId"
+              element={<MerchantPaymentDetailsScreen />}
             />
           </Route>
           <Route path="/notifications" element={<NotificationScreen />} />

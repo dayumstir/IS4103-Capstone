@@ -25,6 +25,7 @@ import notificationRoutes from "./routes/notificationRoutes";
 import withdrawalFeeRateRoutes from "./routes/withdrawalFeeRateRoutes";
 import merchantPaymentRoutes from "./routes/merchantPaymentRoutes";
 import merchantSizeRoutes from "./routes/merchantSizeRoutes";
+import ratingRoutes from "./routes/ratingRoutes";
 
 // Import middleware and utilities
 import { errorHandler } from "./middlewares/errorHandler";
@@ -77,6 +78,7 @@ app.use("/notification", notificationRoutes);
 app.use("/withdrawalFeeRate", withdrawalFeeRateRoutes);
 app.use("/merchantPayment", merchantPaymentRoutes);
 app.use("/merchantSize", merchantSizeRoutes);
+app.use("/rating", ratingRoutes);
 
 // Health check route
 app.get("/", (req, res) => {

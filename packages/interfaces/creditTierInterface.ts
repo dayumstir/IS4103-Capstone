@@ -6,6 +6,7 @@ export interface ICreditTier {
     name: string;
     min_credit_score: number;
     max_credit_score: number;
+    credit_limit: number;
 
     instalment_plans: IInstalmentPlan[];
 }
