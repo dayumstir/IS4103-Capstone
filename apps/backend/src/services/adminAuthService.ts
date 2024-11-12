@@ -1,7 +1,7 @@
-// app/backend/src/services/adminAuthService.ts
-import nodemailer from "nodemailer";
+// apps/backend/src/services/adminAuthService.ts
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 
 import * as adminService from "../services/adminService";
 import * as adminRepository from "../repositories/adminRepository";
@@ -64,9 +64,14 @@ export const resetPassword = async (email: string, oldPassword: string, newPassw
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    const updateData = admin.admin_type === AdminType.UNVERIFIED
-        ? { password: hashedPassword, admin_type: AdminType.NORMAL }
-        : { password: hashedPassword };
+    let updateData;
+    if (admin.forgot_password === true) {
+        updateData = { password: hashedPassword, forgot_password: false };
+    } else {
+        updateData = admin.admin_type === AdminType.UNVERIFIED
+            ? { password: hashedPassword, admin_type: AdminType.NORMAL }
+            : { password: hashedPassword };
+    }
 
     await adminRepository.updateAdmin(admin.admin_id, updateData);
 
@@ -83,7 +88,7 @@ export const forgetPassword = async (email: string) => {
     const generatedPassword = adminService.generateRandomPassword();
     const hashedPassword = await bcrypt.hash(generatedPassword, 10);
 
-    await adminRepository.updateAdmin(admin.admin_id, { password: hashedPassword });
+    await adminRepository.updateAdmin(admin.admin_id, { password: hashedPassword, forgot_password: true });
     await sendResetEmail(email, admin.name, generatedPassword);
 
     logger.info("Forget password email sent successfully.");

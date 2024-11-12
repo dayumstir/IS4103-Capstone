@@ -1,4 +1,4 @@
-// app/backend/src/controllers/adminAuthController.ts
+// apps/backend/src/controllers/adminAuthController.ts
 import jwt from "jsonwebtoken";
 
 import { Request, Response, NextFunction } from "express";
