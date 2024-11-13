@@ -58,6 +58,24 @@ export default function NotificationsScreen() {
     });
   };
 
+  const handleMarkAllAsRead = async () => {
+    const unreadNotifications =
+      notifications?.filter((notification) => !notification.is_read) || [];
+
+    try {
+      await Promise.all(
+        unreadNotifications.map((notification) =>
+          updateNotification({
+            ...notification,
+            is_read: true,
+          }),
+        ),
+      );
+    } catch (error) {
+      console.error("Error marking notifications as read:", error);
+    }
+  };
+
   const columns = [
     {
       title: "Title",
@@ -122,6 +140,15 @@ export default function NotificationsScreen() {
       <Card>
         <div className="flex items-center justify-between pb-4">
           <h1 className="text-2xl font-bold">Notifications</h1>
+          <Button
+            type="primary"
+            onClick={handleMarkAllAsRead}
+            disabled={
+              !notifications?.some((notification) => !notification.is_read)
+            }
+          >
+            Mark All as Read
+          </Button>
         </div>
 
         <Search

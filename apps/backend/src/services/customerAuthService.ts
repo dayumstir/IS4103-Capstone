@@ -2,7 +2,6 @@
 // External dependencies
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import twilio from "twilio";
 import validator from "validator";
 import * as fs from "fs";
@@ -10,8 +9,8 @@ import * as path from "path";
 const nodemailer = require("nodemailer");
 
 // Internal dependencies
-import { CustomerStatus } from "../interfaces/customerStatusInterface";
-import { ICustomer } from "../interfaces/customerInterface";
+import { CustomerStatus } from "@repo/interfaces";
+import { ICustomer } from "@repo/interfaces";
 import { UserType } from "../interfaces/userType";
 
 import * as customerRepository from "../repositories/customerRepository";
@@ -65,9 +64,9 @@ export const registerCustomer = async (customerData: ICustomer) => {
     const customer = await customerRepository.createCustomer({
         ...customerData,
         password: hashedPassword,
-        status: CustomerStatus.PENDING_EMAIL_VERIFICATION,  // Set status as pending verification
-        credit_score: 0,                                    // Default value
-        profile_picture: defaultProfilePicture
+        status: CustomerStatus.PENDING_EMAIL_VERIFICATION, // Set status as pending verification
+        credit_score: 0, // Default value
+        profile_picture: defaultProfilePicture,
     });
 
     return customer;
@@ -350,18 +349,22 @@ export const generateRandomPassword = (length = 8) => {
     const digits = "0123456789";
     const specialChars = "!@#$%^&*";
     const allChars = lowerCase + upperCase + digits + specialChars;
-    
-    let password = lowerCase[Math.floor(Math.random() * lowerCase.length)] +
-                   upperCase[Math.floor(Math.random() * upperCase.length)] +
-                   digits[Math.floor(Math.random() * digits.length)] +
-                   specialChars[Math.floor(Math.random() * specialChars.length)];
-  
+
+    let password =
+        lowerCase[Math.floor(Math.random() * lowerCase.length)] +
+        upperCase[Math.floor(Math.random() * upperCase.length)] +
+        digits[Math.floor(Math.random() * digits.length)] +
+        specialChars[Math.floor(Math.random() * specialChars.length)];
+
     for (let i = 4; i < length; i++) {
         password += allChars[Math.floor(Math.random() * allChars.length)];
     }
-  
-    return password.split("").sort(() => 0.5 - Math.random()).join("");
-  };
+
+    return password
+        .split("")
+        .sort(() => 0.5 - Math.random())
+        .join("");
+};
 
 // Customer Forget Password
 export const forgetPassword = async (email: string) => {
@@ -375,7 +378,9 @@ export const forgetPassword = async (email: string) => {
     const generatedPassword = generateRandomPassword();
     const hashedPassword = await bcrypt.hash(generatedPassword, 10);
 
-    await customerRepository.updateCustomer(customer.customer_id, { password: hashedPassword });
+    await customerRepository.updateCustomer(customer.customer_id, {
+        password: hashedPassword,
+    });
     await sendResetEmail(email, generatedPassword);
 
     logger.info("Forget password email sent successfully.");

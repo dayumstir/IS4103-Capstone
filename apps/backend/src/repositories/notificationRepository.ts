@@ -10,7 +10,7 @@ export const createNotification = async (notificationData: INotification) => {
 export const getNotifications = async () => {
     return prisma.notification.findMany({
         orderBy: {
-            title: "asc",
+            create_time: "desc",
         },
     });
 };
@@ -53,6 +53,9 @@ export const listAllNotificationsWithSearch = async (search: string) => {
             customer_id: true,
             admin_id: true,
         },
+        orderBy: {
+            create_time: "desc",
+        },
     });
 };
 
@@ -67,6 +70,9 @@ export const getMerchantNotifications = async (
                 { title: { contains: searchQuery, mode: "insensitive" } },
                 { description: { contains: searchQuery, mode: "insensitive" } },
             ],
+        },
+        orderBy: {
+            create_time: "desc",
         },
     });
 };

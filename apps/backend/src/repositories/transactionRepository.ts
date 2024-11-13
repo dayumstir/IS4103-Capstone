@@ -6,6 +6,7 @@ import {
     TransactionFilter,
     IInstalmentPayment,
     InstalmentPaymentStatus,
+    NotificationPriority,
 } from "@repo/interfaces";
 import {
     addMilliseconds,
@@ -96,6 +97,7 @@ export const createTransaction = async (transactionData: ITransaction) => {
             instalment_payments: {
                 createMany: { data: instalmentPayments },
             },
+            rating: undefined,
         },
         include: {
             instalment_plan: true,
@@ -110,6 +112,17 @@ export const createTransaction = async (transactionData: ITransaction) => {
             wallet_balance: {
                 increment: transactionData.amount,
             },
+        },
+    });
+
+    // Create notification for merchant
+    await prisma.notification.create({
+        data: {
+            title: "New Transaction",
+            description: `A new transaction has been created for $${transactionData.amount.toFixed(2)}`,
+            priority: NotificationPriority.LOW,
+            merchant_id: transactionData.merchant_id,
+            transaction_id: transactionData.transaction_id,
         },
     });
 
@@ -400,7 +413,10 @@ export const updateTransaction = async (
 ) => {
     return prisma.transaction.update({
         where: { transaction_id },
-        data: updateData,
+        data: {
+            ...updateData,
+            rating: undefined,
+        },
     });
 };
 
