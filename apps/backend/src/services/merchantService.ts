@@ -1,5 +1,5 @@
 // Contains the business logic related to merchants
-import { IMerchant } from "../interfaces/merchantInterface";
+import { IMerchant } from "@repo/interfaces";
 import * as merchantReporsitory from "../repositories/merchantRepository";
 import logger from "../utils/logger";
 

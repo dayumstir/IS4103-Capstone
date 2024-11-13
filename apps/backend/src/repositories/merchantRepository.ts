@@ -1,6 +1,6 @@
-// Handles database operations related to merchants
+// apps/backend/src/repositories/merchantRepository.ts
 import { prisma } from "./db";
-import { IMerchant } from "../interfaces/merchantInterface";
+import { IMerchant } from "@repo/interfaces";
 
 // Create a new merchant in db
 export const createMerchant = async (merchantData: IMerchant) => {
@@ -31,7 +31,7 @@ export const listAllMerchants = async () => {
 };
 
 // Search Merchants
-export const listAllMerchantsWithSearch = async (search) => {
+export const listAllMerchantsWithSearch = async (search: string) => {
     return prisma.merchant.findMany({
         where: {
             OR: [

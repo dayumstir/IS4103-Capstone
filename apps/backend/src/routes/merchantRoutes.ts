@@ -1,4 +1,4 @@
-// Defines routes related to merchant actions
+// src/routes/merchantRoutes.ts
 import { Router } from "express";
 import {
     getMerchantProfile,
