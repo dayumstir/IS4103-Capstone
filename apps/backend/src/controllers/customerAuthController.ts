@@ -42,7 +42,6 @@ export const confirmEmail = async (req: Request, res: Response) => {
 export const sendPhoneNumberOTP = async (req: Request, res: Response) => {
     logger.info('Executing sendPhoneNumberOTP...');
     const { contact_number } = req.body;
-    console.log(contact_number);
 
     try {
         await customerAuthService.sendPhoneNumberOTP(contact_number);

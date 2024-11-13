@@ -33,10 +33,6 @@ export const transactionApi = createApi({
     // Get transaction stats
     getTransactionStats: builder.query<TransactionStats, void>({
       query: () => "/stats",
-      transformResponse: (response: TransactionStats) => {
-        console.log("Transaction stats response:", response);
-        return response;
-      },
     }),
   }),
 });

@@ -54,7 +54,6 @@ export default function MerchantPaymentsScreen() {
   const [monthlyRevenue, setMonthlyRevenue] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
-  console.log(location.pathname);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -234,7 +233,6 @@ export default function MerchantPaymentsScreen() {
   const fetchFilteredMerchantPayments = async () => {
     try {
       if (merchant && merchant.merchant_id) {
-        console.log(merchant.merchant_id);
         const data = await getMerchantPaymentsMutation(filter).unwrap();
         // const mappedData: IMerchantPayment[] = data.map(
         //   (merchantPayment) => ({

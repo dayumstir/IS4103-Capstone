@@ -98,8 +98,6 @@ export const getTransactionStats = async (req: Request, res: Response) => {
             .json({ error: "Unauthorized: No admin ID provided" });
     }
 
-    console.log("Admin ID:", admin_id);
-
     try {
         const stats = await transactionService.getTransactionStats();
         res.status(200).json(stats);
