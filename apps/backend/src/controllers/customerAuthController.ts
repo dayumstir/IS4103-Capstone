@@ -72,8 +72,8 @@ export const verifyPhoneNumberOTP = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
     logger.info('Executing login...');
     try {
-        const jwtToken = await customerAuthService.login(req.body);
-        res.status(200).json({ jwtToken });
+        const { jwtToken, forgot_password } = await customerAuthService.login(req.body);
+        res.status(200).json({ jwtToken, forgot_password });
     } catch (error: any) {
         logger.error('An error occurred:', error);
         res.status(400).json({ error: error.message });

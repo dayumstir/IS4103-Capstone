@@ -58,6 +58,7 @@ model Customer {
   status          Status
   wallet_balance  Float    @default(0)
   credit_score    Int      @default(0)
+  forgot_password Boolean  @default(false)
 
   // Relationships
   emailVerificationTokens EmailVerificationToken[]

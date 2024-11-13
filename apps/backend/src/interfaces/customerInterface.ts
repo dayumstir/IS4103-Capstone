@@ -12,6 +12,7 @@ export interface ICustomer {
     status: CustomerStatus;  
     wallet_balance: number; 
     credit_score: number;
+    forgot_password: boolean;
     
     credit_tier_id: string;
 }
