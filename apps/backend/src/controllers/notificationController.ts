@@ -78,3 +78,15 @@ export const getMerchantNotifications = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+// Update Notification
+export const updateNotification = async (req: Request, res: Response) => {
+    try {
+        const notification = await notificationService.updateNotification(
+            req.body
+        );
+        res.status(200).json(notification);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};

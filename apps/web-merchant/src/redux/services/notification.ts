@@ -7,6 +7,7 @@ import { INotification } from "@repo/interfaces";
 export const notificationApi = createApi({
   reducerPath: "notificationApi",
   baseQuery: BaseQueryWithAuthCheck("/notification"),
+  tagTypes: ["NotificationList"],
   endpoints: (builder) => ({
     // Get merchant notifications
     getMerchantNotifications: builder.query<INotification[], string>({
@@ -15,6 +16,7 @@ export const notificationApi = createApi({
         method: "GET",
         params: { search: searchTerm },
       }),
+      providesTags: ["NotificationList"],
     }),
 
     // Get notification by id
@@ -24,10 +26,23 @@ export const notificationApi = createApi({
         method: "GET",
       }),
     }),
+
+    // Update notification
+    updateNotification: builder.mutation<INotification, INotification>({
+      query: (notification) => ({
+        url: `/${notification.notification_id}`,
+        method: "PUT",
+        body: notification,
+      }),
+      invalidatesTags: ["NotificationList"],
+    }),
   }),
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useGetMerchantNotificationsQuery, useGetNotificationQuery } =
-  notificationApi;
+export const {
+  useGetMerchantNotificationsQuery,
+  useGetNotificationQuery,
+  useUpdateNotificationMutation,
+} = notificationApi;

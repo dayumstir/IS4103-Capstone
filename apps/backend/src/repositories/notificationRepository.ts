@@ -18,6 +18,10 @@ export const getNotifications = async () => {
 export const findNotificationById = async (notification_id: string) => {
     return prisma.notification.findUnique({
         where: { notification_id },
+        include: {
+            transaction: true,
+            issues: true,
+        },
     });
 };
 
@@ -64,5 +68,13 @@ export const getMerchantNotifications = async (
                 { description: { contains: searchQuery, mode: "insensitive" } },
             ],
         },
+    });
+};
+
+// Update Notification
+export const updateNotification = async (notificationData: INotification) => {
+    return prisma.notification.update({
+        where: { notification_id: notificationData.notification_id },
+        data: notificationData,
     });
 };

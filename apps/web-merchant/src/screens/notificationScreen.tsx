@@ -13,10 +13,11 @@ import { INotification } from "@repo/interfaces";
 import {
   useGetMerchantNotificationsQuery,
   useGetNotificationQuery,
+  useUpdateNotificationMutation,
 } from "../redux/services/notification";
 import { useState } from "react";
-import { EyeOutlined } from "@ant-design/icons";
-
+import { EyeOutlined, RightOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 const { Search } = Input;
 
 enum NotificationPriority {
@@ -25,6 +26,8 @@ enum NotificationPriority {
 }
 
 export default function NotificationsScreen() {
+  const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState("");
   const { data: notifications, isLoading } =
     useGetMerchantNotificationsQuery(searchTerm);
@@ -37,25 +40,50 @@ export default function NotificationsScreen() {
     },
   );
 
+  const [updateNotification] = useUpdateNotificationMutation();
+
   const [isNotificationModalVisible, setIsNotificationModalVisible] =
     useState(false);
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+  };
+
+  const handleViewNotificationDetails = (notification: INotification) => {
+    setSelectedNotificationId(notification.notification_id);
+    setIsNotificationModalVisible(true);
+    updateNotification({
+      ...notification,
+      is_read: true,
+    });
+  };
 
   const columns = [
     {
       title: "Title",
       dataIndex: "title",
       key: "title",
+      render: (text: string, record: INotification) => (
+        <span className={!record.is_read ? "font-bold" : ""}>{text}</span>
+      ),
     },
     {
       title: "Description",
       dataIndex: "description",
       key: "description",
+      render: (text: string, record: INotification) => (
+        <span className={!record.is_read ? "font-bold" : ""}>{text}</span>
+      ),
     },
     {
       title: "Created At",
       dataIndex: "create_time",
       key: "create_time",
-      render: (date: string) => format(new Date(date), "d MMM yyyy, h:mm a"),
+      render: (date: string, record: INotification) => (
+        <span className={!record.is_read ? "font-bold" : ""}>
+          {format(new Date(date), "d MMM yyyy, h:mm a")}
+        </span>
+      ),
       sorter: (a: INotification, b: INotification) =>
         new Date(a.create_time).getTime() - new Date(b.create_time).getTime(),
     },
@@ -80,10 +108,7 @@ export default function NotificationsScreen() {
       key: "actions",
       render: (notification: INotification) => (
         <Button
-          onClick={() => {
-            setSelectedNotificationId(notification.notification_id);
-            setIsNotificationModalVisible(true);
-          }}
+          onClick={() => handleViewNotificationDetails(notification)}
           icon={<EyeOutlined />}
         >
           View Details
@@ -91,10 +116,6 @@ export default function NotificationsScreen() {
       ),
     },
   ];
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-  };
 
   return (
     <div className="w-full">
@@ -118,6 +139,7 @@ export default function NotificationsScreen() {
           locale={{
             emptyText: <Empty description="No notifications found" />,
           }}
+          rowClassName={(record) => (!record.is_read ? "bg-blue-50" : "")}
         />
       </Card>
 
@@ -149,6 +171,36 @@ export default function NotificationsScreen() {
             {notification?.create_time &&
               format(new Date(notification.create_time), "PPpp")}
           </Descriptions.Item>
+          {notification?.transaction_id && (
+            <Descriptions.Item label="Related Transaction">
+              <Button
+                type="link"
+                onClick={() =>
+                  navigate(
+                    `/business-management/transactions/${notification?.transaction_id}`,
+                  )
+                }
+              >
+                View Transaction Details
+                <RightOutlined />
+              </Button>
+            </Descriptions.Item>
+          )}
+          {notification?.issue_id && (
+            <Descriptions.Item label="Related Issue">
+              <Button
+                type="link"
+                onClick={() =>
+                  navigate(
+                    `/business-management/issues/${notification?.issue_id}`,
+                  )
+                }
+              >
+                View Issue Details
+                <RightOutlined />
+              </Button>
+            </Descriptions.Item>
+          )}
         </Descriptions>
       </Modal>
     </div>

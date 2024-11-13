@@ -13,6 +13,6 @@ export interface INotification {
     merchant_id?: string;
     customer_id?: string;
     admin_id?: string;
-    //transaction_id?: string;
-    //issue_id?: string;
+    transaction_id?: string;
+    issue_id?: string;
 }
