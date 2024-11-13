@@ -1,4 +1,4 @@
-// Need to use the React-specific entry point to import createApi
+// apps/web-merchant/src/redux/services/auth.ts
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { IMerchant } from "../../interfaces/models/merchantInterface";
 import { ResetPasswordValues } from "../../interfaces/screens/resetPasswordInterface";
@@ -10,7 +10,7 @@ export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: BaseQueryWithAuthCheck("/merchant/auth"),
   endpoints: (builder) => ({
-    login: builder.mutation<{ id: string; token: string }, LoginFormValues>({
+    login: builder.mutation<{ id: string; token: string; forgot_password: boolean }, LoginFormValues>({
       query: (credentials) => ({
         url: "/login",
         method: "POST",

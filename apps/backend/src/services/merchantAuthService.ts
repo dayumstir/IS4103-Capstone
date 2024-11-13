@@ -1,9 +1,8 @@
-// Contains authentication logic, like JWT generation, verification
+// apps/backend/src/controllers/merchantAuthController.ts
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { IMerchant } from "../interfaces/merchantInterface";
+import { IMerchant, MerchantStatus } from "@repo/interfaces";
 import * as merchantRepository from "../repositories/merchantRepository";
-import { MerchantStatus } from "../interfaces/merchantStatus";
 import * as merchantEmailVerificationTokenRepository from "../repositories/merchantEmailVerificationTokenRepository";
 import * as merchantOtpRepository from "../repositories/merchantOtpRepository";
 import * as jwtTokenRepository from "../repositories/jwtTokenRepository";
@@ -255,7 +254,7 @@ export const login = async (loginData: { email: string; password: string }) => {
         { expiresIn: "1h" }
     );
 
-    return { id: merchant.merchant_id, token };
+    return { id: merchant.merchant_id, token, forgot_password: merchant.forgot_password };
 };
 
 export const logout = async (token: string) => {
@@ -295,7 +294,15 @@ export const resetPassword = async (id: string, oldPassword: string, newPassword
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await merchantRepository.updateMerchant(merchant.merchant_id, { password: hashedPassword });
+
+    if (merchant.forgot_password) {
+        await merchantRepository.updateMerchant(merchant.merchant_id, {
+            password: hashedPassword,
+            forgot_password: false,
+        });
+    } else {
+        await merchantRepository.updateMerchant(merchant.merchant_id, { password: hashedPassword });
+    }
 };
 
 // Generate random password with specified character sets
@@ -330,7 +337,7 @@ export const forgetPassword = async (email: string) => {
     const generatedPassword = generateRandomPassword();
     const hashedPassword = await bcrypt.hash(generatedPassword, 10);
 
-    await merchantRepository.updateMerchant(merchant.merchant_id, { password: hashedPassword });
+    await merchantRepository.updateMerchant(merchant.merchant_id, { password: hashedPassword, forgot_password: true });
     await sendResetEmail(email, generatedPassword);
 
     logger.info("Forget password email sent successfully.");

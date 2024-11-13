@@ -17,4 +17,5 @@ export interface IMerchant {
     profile_picture?: Buffer;
     cashback: number;
     wallet_balance: number;
+    forgot_password: boolean
 }

@@ -127,6 +127,7 @@ model Merchant {
   profile_picture Bytes? @db.ByteA
   cashback        Float
   wallet_balance  Float  @default(0)
+  forgot_password Boolean @default(false)
 
   // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
