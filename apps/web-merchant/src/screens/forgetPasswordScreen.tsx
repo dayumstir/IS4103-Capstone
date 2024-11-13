@@ -34,7 +34,7 @@ const ForgetPasswordScreen: React.FC = () => {
       setTimeout(() => {
         setIsSending(false); // End loading state after minimum duration
         message.success(
-          "If the email exists, a password reset link has been sent. Please check your inbox."
+          "A new username and password has been sent to your email. Please check your inbox."
         );
         form.resetFields(); // Reset the form fields
       }, remainingTime > 0 ? remainingTime : 0);
