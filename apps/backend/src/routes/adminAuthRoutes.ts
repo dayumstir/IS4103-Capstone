@@ -1,4 +1,4 @@
-// app/backend/src/routes/adminAuthRoutes.ts
+// apps/backend/src/routes/adminAuthRoutes.ts
 import { Router } from "express";
 import { 
     login, 

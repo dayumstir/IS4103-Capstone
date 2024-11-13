@@ -32,6 +32,7 @@ model Admin {
   address         String
   date_of_birth   DateTime
   admin_type      AdminType
+  forgot_password Boolean   @default(false)
 
   notifications   Notification[]
   issues          Issue[]

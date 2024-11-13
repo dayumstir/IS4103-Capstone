@@ -9,7 +9,7 @@ export enum AdminType {
 export interface IAdmin {
     admin_id: string;
     name: string;
-    profile_picture: Buffer;
+    profile_picture?: Buffer;
     email: string;
     username: string;
     password: string;
@@ -17,4 +17,5 @@ export interface IAdmin {
     address: string;
     date_of_birth: Date;
     admin_type: AdminType;
+    forgot_password: boolean;
 }

@@ -1,4 +1,4 @@
-// app/backend/src/controllers/adminAuthController.ts
+// apps/backend/src/controllers/adminAuthController.ts
 import jwt from "jsonwebtoken";
 
 import { Request, Response, NextFunction } from "express";
@@ -13,10 +13,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         const jwtToken = await adminAuthService.login(req.body);
         
         // TODO: Evaluate if needed
+        // Email, admin_type, and forgot_password are used in login screen to determine whether to show reset password modal
         const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!) as any;
-        const { admin_id, email, admin_type} = decoded;
+        const { admin_id, email, admin_type, forgot_password} = decoded;
 
-        res.status(200).json({ jwtToken, admin_id, email, admin_type });
+        res.status(200).json({ jwtToken, admin_id, email, admin_type, forgot_password });
     } catch (error: any) {
         logger.error("Error in admin login:", error);
         next(error);
