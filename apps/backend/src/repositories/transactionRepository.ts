@@ -122,7 +122,7 @@ export const createTransaction = async (transactionData: ITransaction) => {
             description: `A new transaction has been created for $${transactionData.amount.toFixed(2)}`,
             priority: NotificationPriority.LOW,
             merchant_id: transactionData.merchant_id,
-            transaction_id: transactionData.transaction_id,
+            transaction_id: transaction.transaction_id,
         },
     });
 
