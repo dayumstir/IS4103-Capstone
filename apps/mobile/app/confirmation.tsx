@@ -52,7 +52,6 @@ export default function ConfirmationScreen() {
       await confirmEmailMutation(data).unwrap();
 
       // After email confirmation, send OTP to phone number
-      console.log(customer);
       if (customer?.contact_number) {
         await sendPhoneNumberOTPMutation({
           contact_number: customer.contact_number,

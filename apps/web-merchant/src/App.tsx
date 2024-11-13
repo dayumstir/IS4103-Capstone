@@ -11,13 +11,11 @@ import RegisterConfirmScreen from "./screens/registerConfirmScreen";
 import RegisterScreen from "./screens/registerScreen";
 import ViewQRCodeScreen from "./screens/viewQRCodeScreen";
 import TransactionScreen from "./screens/transactionScreen";
-import FinancialManagementRoute from "./components/financialManagementRoute";
 import TransactionDetailsScreen from "./screens/transactionDetailsScreen";
 import MerchantPaymentsScreen from "./screens/merchantPaymentsScreen";
 import MerchantPaymentDetailsScreen from "./screens/merchantPaymentDetailsScreen";
 import ForgetPasswordScreen from "./screens/forgetPasswordScreen";
-
-// import "./App.css";
+import NotificationScreen from "./screens/notificationScreen";
 
 const App = () => {
   return (
@@ -41,18 +39,17 @@ const App = () => {
               path="/business-management/issues/:issueId"
               element={<IssueDetailsScreen />}
             />
-          </Route>
-          <Route element={<FinancialManagementRoute />}>
+
             <Route
-              path="/financial-management/transactions"
+              path="/business-management/transactions"
               element={<TransactionScreen />}
             />
             <Route
-              path="/financial-management/transactions/:transactionId"
+              path="/business-management/transactions/:transactionId"
               element={<TransactionDetailsScreen />}
             />
             <Route
-              path="/financial-management/merchant-payments"
+              path="/business-management/merchant-payments"
               element={<MerchantPaymentsScreen />}
             />
             <Route
@@ -60,9 +57,9 @@ const App = () => {
               element={<MerchantPaymentDetailsScreen />}
             />
           </Route>
+          <Route path="/notifications" element={<NotificationScreen />} />
         </Route>
       </Routes>
-      {/* </div> */}
     </Layout>
   );
 };

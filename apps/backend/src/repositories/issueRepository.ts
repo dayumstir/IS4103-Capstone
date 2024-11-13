@@ -4,7 +4,6 @@ import { IIssue, IssueFilter } from "../../../../packages/interfaces/issueInterf
 
 // Create a new instalment plan in db
 export const createIssue = async (issueData: IIssue) => {
-    console.log(issueData);
     return prisma.issue.create({ data: issueData });
 };
 

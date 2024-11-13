@@ -37,8 +37,6 @@ const LoginScreen: React.FC = () => {
         localStorage.setItem("token", result.token);
         localStorage.setItem("merchantId", result.id);
         navigate("/");
-
-        console.log("Success:", data);
       })
       .catch((error) => {
         if (error.data.error === "Email pending verification" && data.email) {

@@ -66,9 +66,7 @@ export default function BusinessManagementRoute() {
         },
         {
           key: "ratings",
-          label: (
-            <Link to="/business-management/ratings">Ratings</Link>
-          ),
+          label: <Link to="/business-management/ratings">Ratings</Link>,
         },
       ],
     },
@@ -77,7 +75,7 @@ export default function BusinessManagementRoute() {
   return (
     <Layout>
       {/* Tailwind not supported */}
-      <Sider style={{ backgroundColor: "#fff" }}>
+      <Sider style={{ backgroundColor: "#fff", minHeight: "100vh" }}>
         <Menu items={items} selectedKeys={[currentPath || "instalment-plan"]} />
       </Sider>
       <Outlet />
