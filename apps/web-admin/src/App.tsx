@@ -23,6 +23,7 @@ import MerchantSizeScreen from "./screens/merchantSizeScreen";
 import NotificationsScreen from "./screens/notificationsScreen";
 import ProfileScreen from "./screens/profileScreen";
 import RatingsScreen from "./screens/ratingScreen";
+import CreditScoreScreen from "./screens/creditScoreScreen";
 import TransactionsScreen from "./screens/transactionsScreen";
 import VoucherScreen from "./screens/voucherScreen";
 import WithdrawalFeeRateScreen from "./screens/withdrawalFeeRateScreen";
@@ -46,10 +47,16 @@ export default function App() {
           <Route path="/admins" element={<AllAdminScreen />} />
 
           <Route path="/admin/customers" element={<AllCustomersScreen />} />
-          <Route path="/admin/customer/:id" element={<CustomerProfileScreen />} />
+          <Route
+            path="/admin/customer/:id"
+            element={<CustomerProfileScreen />}
+          />
 
           <Route path="/admin/merchants" element={<AllMerchantsScreen />} />
-          <Route path="/admin/merchant/:id" element={<MerchantProfileScreen />} />
+          <Route
+            path="/admin/merchant/:id"
+            element={<MerchantProfileScreen />}
+          />
 
           <Route element={<BusinessManagementRoute />}>
             {/* ===== Business Management ===== */}
@@ -70,6 +77,10 @@ export default function App() {
               element={<MerchantPaymentScreen />}
             />
             <Route
+              path="/business-management/withdrawal-fee"
+              element={<WithdrawalFeeRateScreen />}
+            />
+            <Route
               path="/business-management/merchant-size"
               element={<MerchantSizeScreen />}
             />
@@ -80,6 +91,10 @@ export default function App() {
             <Route
               path="/business-management/ratings"
               element={<RatingsScreen />}
+            />
+            <Route
+              path="/business-management/credit-score"
+              element={<CreditScoreScreen />}
             />
             <Route
               path="/business-management/transactions"
@@ -93,7 +108,7 @@ export default function App() {
               path="/business-management/withdrawal-fee"
               element={<WithdrawalFeeRateScreen />}
             />
-          </Route>       
+          </Route>
         </Route>
       </Routes>
     </Layout>

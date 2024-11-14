@@ -1,23 +1,19 @@
-from flask import jsonify
-from sqlalchemy import text
-from models import Customer, InstalmentPayment, InstalmentPaymentStatus
+from models import Customer, InstalmentPayment, InstalmentPaymentStatus, CreditTier
 from sqlalchemy import func
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-
-# def retrieve_customer(db, customer_id):
-#     try:
-#         result = db.session.execute(text('SELECT * FROM "Customer" c WHERE c.customer_id = :customer_id'), 
-#                                      {'customer_id': customer_id})
-
-#         tables = [row[0] for row in result] 
-#         return jsonify({"tables": tables})
-#     except Exception as e:
-#         return str(e)
     
 def get_customer_credit_limit(customer_id):
     customer = Customer.query.get(customer_id)
-    return customer.credit_tier.credit_limit
+    credit_tiers = CreditTier.query.filter(
+        CreditTier.min_credit_score <= customer.credit_score,
+        CreditTier.max_credit_score >= customer.credit_score
+    ).all()
+    if len(credit_tiers) > 1:
+        raise Exception("More than 1 credit tier exists in database")
+    if len(credit_tiers) == 0:
+        raise Exception("Customer credit score does not belong to any credit tier in database")
+    return credit_tiers[0].credit_limit
 
 def get_customer_outstanding_balance(customer_id):
     today = datetime.now()
@@ -33,10 +29,16 @@ def update_customer_credit_rating(db, customer_id, credit_score):
     customer = Customer.query.get(customer_id)
     customer.credit_score = credit_score
     db.session.commit()
-    print("Commited")
-
-
-from datetime import datetime, timedelta
+    
+def get_lowest_credit_tier(db):
+    credit_tiers = CreditTier.query.all()
+    if len(credit_tiers) == 0 :
+        raise Exception("No credit tier exists in database")
+    lowest = credit_tiers[0]
+    for credit_tier in credit_tiers:
+        if credit_tier.credit_limit < lowest.credit_limit:
+            lowest = credit_tier
+    return lowest
 
 def get_most_recent_6_months_instalment_payments(db, customer_id):
     try:
