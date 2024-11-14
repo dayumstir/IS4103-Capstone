@@ -21,6 +21,11 @@ export const creditTierApi = createApi({
       providesTags: ["CreditTierList"],
     }),
 
+    getCreditTierByScore: builder.query<ICreditTier, number>({
+      query: (creditScore) => `/credit-tier?score=${creditScore}`,
+      providesTags: ["CreditTierList"],
+    }),
+
     // Create credit tier
     createCreditTier: builder.mutation<
       ICreditTier,
@@ -57,6 +62,7 @@ export const creditTierApi = createApi({
 
 export const {
   useGetCreditTiersQuery,
+  useGetCreditTierByScoreQuery,
   useCreateCreditTierMutation,
   useUpdateCreditTierMutation,
   useDeleteCreditTierMutation,

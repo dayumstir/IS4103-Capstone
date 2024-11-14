@@ -66,8 +66,12 @@ export default function BusinessManagementRoute() {
         },
         {
           key: "ratings",
+          label: <Link to="/business-management/ratings">Ratings</Link>,
+        },
+        {
+          key: "Credit Score",
           label: (
-            <Link to="/business-management/ratings">Ratings</Link>
+            <Link to="/business-management/credit-score">Credit Score</Link>
           ),
         },
       ],
