@@ -2,18 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Card, Typography, Spin, Avatar, Descriptions, Tag } from "antd";
 import { EditOutlined, LeftOutlined, UserOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
+import { IMerchant } from "@repo/interfaces";
 const { Title, Text } = Typography;
-
-interface IMerchant {
-  merchant_id: string;
-  name: string;
-  profile_picture: Buffer;
-  email: string;
-  contact_number: string;
-  address: string;
-  date_of_birth: Date;
-  status: string;
-}
 
 const MerchantProfileScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();

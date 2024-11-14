@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { IMerchant } from "../../interfaces/merchantInterface";
+import { IMerchant } from '@repo/interfaces';
 
 export const merchantApi = createApi({
   reducerPath: 'merchantApi',

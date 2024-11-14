@@ -12,7 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useGetAllMerchantsQuery, useUpdateMerchantStatusMutation } from '../redux/services/merchantService';
-import { IMerchant } from "../interfaces/merchantInterface";
+import { IMerchant } from "@repo/interfaces";
 import Search from "antd/es/input/Search";
 
 const AllMerchantsScreen = () => {
