@@ -77,6 +77,24 @@ export const getMerchantNotifications = async (
     });
 };
 
+export const getCustomerNotifications = async (
+    customerId: string,
+    searchQuery: string
+) => {
+    return prisma.notification.findMany({
+        where: {
+            customer_id: customerId,
+            OR: [
+                { title: { contains: searchQuery, mode: "insensitive" } },
+                { description: { contains: searchQuery, mode: "insensitive" } },
+            ],
+        },
+        orderBy: {
+            create_time: "desc",
+        },
+    });
+};
+
 // Update Notification
 export const updateNotification = async (notificationData: INotification) => {
     return prisma.notification.update({

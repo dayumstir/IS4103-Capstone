@@ -1,4 +1,4 @@
-// app/mobile/app/(authenticated)/(tabs)/account/rewards/cashbackWalletDetails.tsx
+// apps/mobile/app/(authenticated)/(tabs)/account/rewards/cashbackWalletDetails.tsx
 import { View, Text } from "react-native";
 import { Button } from "@ant-design/react-native";
 import { format } from "date-fns";
@@ -60,10 +60,6 @@ export default function CashbackWalletDetails() {
           <Text className="text-center text-4xl">😊</Text>
         </View>
       </View>
-
-      <Button type="primary">
-        <Text className="font-semibold text-white">Use Cashback</Text>
-      </Button>
     </View>
   );
 }

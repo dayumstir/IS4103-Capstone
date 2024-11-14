@@ -121,14 +121,6 @@ export const makePayment = async (req: Request, res: Response, next: NextFunctio
             throw new BadRequestError("Instalment payment is already paid");
         }
 
-        // Calculate total payment amount
-        const totalPayment = amount_deducted_from_wallet + amount_deducted_from_cashback_wallet + amount_discount_from_voucher;
-
-        // Validate total payment does not exceed amount due
-        if (totalPayment > instalmentPayment.amount_due) {
-            throw new BadRequestError("Total payment amount exceeds amount due");
-        }
-
         // Deduct specified amount from wallet, if applicable
         if (amount_deducted_from_wallet > 0) {
             await customerService.topUpWallet(customer_id, -amount_deducted_from_wallet);
@@ -156,6 +148,11 @@ export const makePayment = async (req: Request, res: Response, next: NextFunctio
             amount_deducted_from_cashback_wallet,
             status: InstalmentPaymentStatus.PAID,
             paid_date: new Date(),
+        });
+
+        // Update customer savings
+        await customerService.updateCustomer(customer_id, {
+            savings: amount_discount_from_voucher + amount_deducted_from_cashback_wallet,
         });
 
         res.status(200).json({ message: "Payment successful" });

@@ -79,6 +79,27 @@ export const getMerchantNotifications = async (req: Request, res: Response) => {
     }
 };
 
+// Get Customer Notifications
+export const getCustomerNotifications = async (req: Request, res: Response) => {
+    try {
+        const customerId = req.customer_id;
+        if (!customerId) {
+            return res.status(400).json({ error: "Customer ID is required" });
+        }
+
+        const { search } = req.query;
+
+        const notifications =
+            await notificationService.getCustomerNotifications(
+                customerId,
+                search as string
+            );
+        res.status(200).json(notifications);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 // Update Notification
 export const updateNotification = async (req: Request, res: Response) => {
     try {
