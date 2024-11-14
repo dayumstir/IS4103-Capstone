@@ -1,22 +1,24 @@
 // apps/web-merchant/src/redux/services/auth.ts
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { IMerchant } from "../../interfaces/models/merchantInterface";
-import { ResetPasswordValues } from "../../interfaces/screens/resetPasswordInterface";
-import { LoginFormValues } from "../../screens/loginScreen";
 import BaseQueryWithAuthCheck from "../utils.tsx/baseQuery";
+import { IMerchant } from "@repo/interfaces";
+import { ResetPasswordValues } from "../../interfaces/screens/resetPasswordInterface";
 
-// Define a service using a base URL and expected endpoints
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: BaseQueryWithAuthCheck("/merchant/auth"),
+  
   endpoints: (builder) => ({
-    login: builder.mutation<{ id: string; token: string; forgot_password: boolean }, LoginFormValues>({
+    // Login
+    login: builder.mutation<{ id: string; token: string; forgot_password: boolean }, { email: string, password: string }>({
       query: (credentials) => ({
         url: "/login",
         method: "POST",
         body: credentials,
       }),
     }),
+
+    // Logout
     logout: builder.mutation<string, void>({
       query: (credentials) => ({
         url: "/logout",
@@ -24,6 +26,7 @@ export const authApi = createApi({
         body: credentials,
       }),
     }),
+
     checkEmailInUse: builder.mutation<string, { email: string }>({
       query: ({ email }) => ({
         url: "/check-email-status",
@@ -69,16 +72,16 @@ export const authApi = createApi({
         body: body,
       }),
     }),
-    resetPassword: builder.mutation<
-      { error: string },
-      { id: string; body: ResetPasswordValues }
-    >({
+
+    // Reset Password
+    resetPassword: builder.mutation<{ error: string }, { id: string; body: ResetPasswordValues }>({
       query: ({ id, body }) => ({
         url: `/${id}/reset-password`,
         method: "POST",
         body: body,
       }),
     }),
+
     // Forget Password
     forgetPassword: builder.mutation<void, { email: string }>({
       query: (email) => ({
@@ -90,8 +93,6 @@ export const authApi = createApi({
   }),
 });
 
-// Export hooks for usage in functional components, which are
-// auto-generated based on the defined endpoints
 export const {
   useLoginMutation,
   useRegisterMutation,

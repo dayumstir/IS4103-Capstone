@@ -46,12 +46,7 @@ const ForgetPasswordScreen: React.FC = () => {
       direction="vertical"
       className="flex h-screen items-center justify-center"
     >
-      <img
-        src={logo}
-        width="100%"
-        style={{ alignSelf: "center" }}
-        alt="PandaPay Logo"
-      />
+      <img src={logo} width="100%" style={{ alignSelf: "center" }} alt="PandaPay Logo" />
       <Title>PandaPay</Title>
       <Title level={3}>Forget Password</Title>
       <Card style={{ backgroundColor: "#F5F5F5" }}>

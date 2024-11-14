@@ -1,5 +1,4 @@
 // apps/web-merchant/src/screens/loginScreen.tsx
-
 import { useState } from "react";
 import {
   Button,
@@ -16,7 +15,6 @@ import logo from "../assets/pandapay_logo.png";
 import PendingEmailConfirmationModal from "../components/pendingEmailConfirmationModal";
 import {
   useLoginMutation,
-  useLogoutMutation,
   useResetPasswordMutation,
 } from "../redux/services/auth";
 
@@ -26,10 +24,10 @@ export default function LoginScreen() {
 
   // States
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState<string>("");
+  // const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [merchantId, setMerchantId] = useState<string>("");
+  // const [merchantId, setMerchantId] = useState<string>("");
   const [pendingEmailConfirmationModalOpen, setPendingEmailConfirmationModalOpen] = useState(false);
 
   // Form instances
@@ -37,9 +35,8 @@ export default function LoginScreen() {
   const [resetPasswordForm] = Form.useForm();
 
   // Mutations
-  const [loginMutation, { isLoading }] = useLoginMutation();
-  const [logoutMutation] = useLogoutMutation();
-  const [resetPasswordMutation, { isLoading: isResetting }] = useResetPasswordMutation();
+  const [login, { isLoading }] = useLoginMutation();
+  const [resetPassword, { isLoading: isResetting }] = useResetPasswordMutation();
 
   // Password validation
   const validatePassword = (password: string) =>
@@ -48,16 +45,14 @@ export default function LoginScreen() {
   // Login handler
   const handleLogin = async (values: { email: string; password: string }) => {
     try {
-      const result = await loginMutation(values).unwrap();
+      const result = await login(values).unwrap();
 
       // Store token and merchantId
       localStorage.setItem("token", result.token);
       localStorage.setItem("merchantId", result.id);
 
       // Store email and password for reset
-      setEmail(values.email);
       setPassword(values.password);
-      setMerchantId(result.id);
 
       if (result.forgot_password) {
         setError(null);
@@ -78,6 +73,7 @@ export default function LoginScreen() {
   // Password reset handler
   const handlePasswordReset = async (values: { newPassword: string }) => {
     const { newPassword } = values;
+    const merchantId = localStorage.getItem("merchantId");
 
     if (!merchantId) {
       message.error("Merchant ID not available");
@@ -90,8 +86,7 @@ export default function LoginScreen() {
     }
 
     try {
-      await resetPasswordMutation({
-        id: merchantId,
+      await resetPassword({id: merchantId,
         body: {
           oldPassword: password,
           newPassword: newPassword,
@@ -103,9 +98,7 @@ export default function LoginScreen() {
       resetPasswordForm.resetFields();
 
       // Clear stored credentials
-      setEmail("");
       setPassword("");
-      setMerchantId("");
 
       navigate("/");
     } catch {
