@@ -272,7 +272,7 @@ export const login = async (loginData: { email: string; password: string }) => {
     }
 
     // Generate JWT
-    const token = jwt.sign(
+    const jwtToken = jwt.sign(
         {
             role: UserType.CUSTOMER,
             customer_id: customer.customer_id,
@@ -283,7 +283,7 @@ export const login = async (loginData: { email: string; password: string }) => {
     );
 
     logger.info(`Login successful for email: ${email}`);
-    return token;
+    return { jwtToken, forgot_password: customer.forgot_password };
 };
 
 export const logout = async (token: string) => {
@@ -339,6 +339,7 @@ export const resetPassword = async (
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await customerRepository.updateCustomer(customer.customer_id, {
         password: hashedPassword,
+        forgot_password: false,
     });
 };
 
@@ -380,6 +381,7 @@ export const forgetPassword = async (email: string) => {
 
     await customerRepository.updateCustomer(customer.customer_id, {
         password: hashedPassword,
+        forgot_password: true,
     });
     await sendResetEmail(email, generatedPassword);
 

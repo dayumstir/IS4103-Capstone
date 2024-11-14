@@ -51,6 +51,7 @@ export default function ForgetPasswordScreen() {
       <Card style={{ backgroundColor: "#F5F5F5" }}>
         <Form
           name="forgetPasswordForm"
+          form={form}
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
           style={{ minWidth: 600 }}

@@ -20,7 +20,7 @@ import {
   useViewAllAdminQuery,
   useUpdateStatusMutation,
 } from "../redux/services/adminService";
-import { IAdmin } from "../interfaces/adminInterface";
+import { IAdmin } from "@repo/interfaces";
 import { Buffer } from "buffer";
 import { Link } from "react-router-dom";
 import { Descriptions } from "antd";

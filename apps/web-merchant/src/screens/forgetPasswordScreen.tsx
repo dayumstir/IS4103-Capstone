@@ -34,7 +34,7 @@ const ForgetPasswordScreen: React.FC = () => {
       setTimeout(() => {
         setIsSending(false); // End loading state after minimum duration
         message.success(
-          "If the email exists, a password reset link has been sent. Please check your inbox."
+          "A new username and password has been sent to your email. Please check your inbox."
         );
         form.resetFields(); // Reset the form fields
       }, remainingTime > 0 ? remainingTime : 0);
@@ -46,12 +46,7 @@ const ForgetPasswordScreen: React.FC = () => {
       direction="vertical"
       className="flex h-screen items-center justify-center"
     >
-      <img
-        src={logo}
-        width="100%"
-        style={{ alignSelf: "center" }}
-        alt="PandaPay Logo"
-      />
+      <img src={logo} width="100%" style={{ alignSelf: "center" }} alt="PandaPay Logo" />
       <Title>PandaPay</Title>
       <Title level={3}>Forget Password</Title>
       <Card style={{ backgroundColor: "#F5F5F5" }}>

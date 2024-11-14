@@ -1,4 +1,4 @@
-import { ICustomer } from "./customerInterface";
+import { ICustomer } from "@repo/interfaces";
 import { IInstalmentPlan } from "./instalmentPlanInterface";
 
 export interface ICreditTier {

@@ -1,88 +1,108 @@
 // apps/web-merchant/src/screens/loginScreen.tsx
-
-import { LoadingOutlined } from "@ant-design/icons";
-import { Button, Card, Form, Input, message, Modal, Space, Spin, Typography } from "antd";
-import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import {
+  Button,
+  Card,
+  Form,
+  Input,
+  Typography,
+  Space,
+  Modal,
+  message,
+} from "antd";
+import { useNavigate, NavLink } from "react-router-dom";
 import logo from "../assets/pandapay_logo.png";
 import PendingEmailConfirmationModal from "../components/pendingEmailConfirmationModal";
-import { useLoginMutation, useResetPasswordMutation } from "../redux/services/auth";
+import {
+  useLoginMutation,
+  useResetPasswordMutation,
+} from "../redux/services/auth";
 
-export type LoginFormValues = {
-  email?: string;
-  password?: string;
-};
-
-const LoginScreen: React.FC = () => {
-  const { Text, Title } = Typography;
-  const [loginMutation, { isLoading }] = useLoginMutation();
-  const [resetPasswordMutation, { isLoading: isResetting }] = useResetPasswordMutation();
+export default function LoginScreen() {
   const navigate = useNavigate();
-  const [pendingEmailConfirmationModalOpen, setPendingEmailConfirmationModalOpen] = useState(false);
+  const { Text, Title } = Typography;
 
-  // New states for handling password reset
-  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
-  const [email, setEmail] = useState<string>("");
+  // States
+  const [error, setError] = useState<string | null>(null);
+  // const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [merchantId, setMerchantId] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [merchantId, setMerchantId] = useState<string>("");
+  const [pendingEmailConfirmationModalOpen, setPendingEmailConfirmationModalOpen] = useState(false);
 
   // Form instances
   const [loginForm] = Form.useForm();
   const [resetPasswordForm] = Form.useForm();
 
-  const onFinish = async (data: LoginFormValues) => {
+  // Mutations
+  const [login, { isLoading }] = useLoginMutation();
+  const [resetPassword, { isLoading: isResetting }] = useResetPasswordMutation();
+
+  // Password validation
+  const validatePassword = (password: string) =>
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/.test(password);
+
+  // Login handler
+  const handleLogin = async (values: { email: string; password: string }) => {
     try {
-      const result = await loginMutation(data).unwrap();
+      const result = await login(values).unwrap();
 
       // Store token and merchantId
       localStorage.setItem("token", result.token);
       localStorage.setItem("merchantId", result.id);
 
       // Store email and password for reset
-      setEmail(data.email || "");
-      setPassword(data.password || "");
-      setMerchantId(result.id);
+      setPassword(values.password);
 
       if (result.forgot_password) {
-        message.info("Please reset your password.");
-        setIsResetPasswordModalOpen(true);
+        setError(null);
+        setIsModalOpen(true);
       } else {
         navigate("/");
       }
     } catch (error: any) {
-      if (error.data.error === "Email pending verification" && data.email) {
-        localStorage.setItem("email", data.email);
+      if (error.data.error === "Email pending verification" && values.email) {
+        localStorage.setItem("email", values.email);
         setPendingEmailConfirmationModalOpen(true);
       } else {
-        message.error(error.data.error || "Login failed. Please try again.");
+        setError("Invalid email or password. Please try again.");
       }
     }
   };
 
-  // Handler for resetting the password
-  const handleResetPassword = async (values: { newPassword: string; confirmPassword: string }) => {
+  // Password reset handler
+  const handlePasswordReset = async (values: { newPassword: string }) => {
+    const { newPassword } = values;
+    const merchantId = localStorage.getItem("merchantId");
+
+    if (!merchantId) {
+      message.error("Merchant ID not available");
+      return;
+    }
+
+    if (newPassword === password) {
+      message.error("Please key in a new password");
+      return;
+    }
+
     try {
-      await resetPasswordMutation({
-        id: merchantId,
+      await resetPassword({id: merchantId,
         body: {
           oldPassword: password,
-          newPassword: values.newPassword,
+          newPassword: newPassword,
         },
       }).unwrap();
 
-      message.success("Password reset successful!");
-      setIsResetPasswordModalOpen(false);
+      message.success("Password changed successfully!");
+      setIsModalOpen(false);
       resetPasswordForm.resetFields();
 
       // Clear stored credentials
-      setEmail("");
       setPassword("");
-      setMerchantId("");
 
-      // Navigate to home page
       navigate("/");
-    } catch (error: any) {
-      message.error(error.data.error || "Password reset failed. Please try again.");
+    } catch {
+      message.error("Could not update password. Please try again.");
     }
   };
 
@@ -108,31 +128,37 @@ const LoginScreen: React.FC = () => {
       <Card style={{ backgroundColor: "#F5F5F5" }}>
         <Form
           form={loginForm}
-          name="basic"
+          name="loginForm"
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
           style={{ minWidth: 600 }}
-          onFinish={onFinish}
+          onFinish={handleLogin}
           autoComplete="off"
         >
-          <Form.Item<LoginFormValues>
+          <Form.Item
             label="Email"
             name="email"
             rules={[
-              { required: true, message: "Please input your Email!" },
+              { required: true, message: "Please input your email!" },
               { type: "email", message: "Please enter a valid email address!" },
             ]}
           >
             <Input />
           </Form.Item>
 
-          <Form.Item<LoginFormValues>
+          <Form.Item
             label="Password"
             name="password"
             rules={[{ required: true, message: "Please input your password!" }]}
           >
             <Input.Password />
           </Form.Item>
+
+          {error && (
+            <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
+              <Text type="danger">{error}</Text>
+            </Form.Item>
+          )}
 
           <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
             <Button
@@ -141,7 +167,7 @@ const LoginScreen: React.FC = () => {
               loading={isLoading}
               disabled={isLoading}
             >
-              {isLoading ? <Spin indicator={<LoadingOutlined spin />} /> : "Login"}
+              Login
             </Button>
             <Button
               type="link"
@@ -164,9 +190,9 @@ const LoginScreen: React.FC = () => {
       {/* Reset Password Modal */}
       <Modal
         title="Reset Password"
-        open={isResetPasswordModalOpen}
+        open={isModalOpen}
         onCancel={() => {
-          setIsResetPasswordModalOpen(false);
+          setIsModalOpen(false);
           resetPasswordForm.resetFields();
         }}
         footer={null}
@@ -176,7 +202,7 @@ const LoginScreen: React.FC = () => {
           name="resetPasswordForm"
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
-          onFinish={handleResetPassword}
+          onFinish={handlePasswordReset}
           autoComplete="off"
         >
           <Form.Item
@@ -191,12 +217,17 @@ const LoginScreen: React.FC = () => {
                       new Error("New password cannot be the same as the old password.")
                     );
                   }
-                  // Add password complexity validation if needed
+                  if (!validatePassword(value)) {
+                    return Promise.reject(
+                      new Error(
+                        "Password must have at least 1 lowercase, 1 uppercase, 1 digit, 1 special character, and 8 characters minimum."
+                      )
+                    );
+                  }
                   return Promise.resolve();
                 },
               },
             ]}
-            hasFeedback
           >
             <Input.Password />
           </Form.Item>
@@ -204,18 +235,16 @@ const LoginScreen: React.FC = () => {
           <Form.Item
             label="Confirm Password"
             name="confirmPassword"
-            dependencies={["newPassword"]}
-            hasFeedback
             rules={[
               { required: true, message: "Please confirm your new password" },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("newPassword") === value) {
-                    return Promise.resolve();
+              {
+                validator: (_, value) => {
+                  if (value !== resetPasswordForm.getFieldValue("newPassword")) {
+                    return Promise.reject(new Error("Passwords do not match"));
                   }
-                  return Promise.reject(new Error("Passwords do not match"));
+                  return Promise.resolve();
                 },
-              }),
+              },
             ]}
           >
             <Input.Password />
@@ -235,6 +264,4 @@ const LoginScreen: React.FC = () => {
       </Modal>
     </Space>
   );
-};
-
-export default LoginScreen;
+}
