@@ -160,6 +160,14 @@ export default function HomePage() {
               {formatCurrency(getTotalOutstandingPayments())}
             </Text>
           </View>
+          <View className="mb-2 flex-row items-center justify-between">
+            <Text className="font-semibold text-white">
+              Total Savings
+            </Text>
+            <Text className="text-lg font-bold text-white">
+              {formatCurrency(profile?.savings ?? 0)}
+            </Text>
+          </View>
           <View className="mt-4 h-2 w-full rounded-full bg-blue-700">
             <View
               className="h-full rounded-full bg-white"

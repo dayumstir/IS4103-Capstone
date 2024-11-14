@@ -59,6 +59,7 @@ model Customer {
   wallet_balance  Float    @default(0)
   credit_score    Int      @default(0)
   forgot_password Boolean  @default(false)
+  savings         Float    @default(0)
 
   // Relationships
   emailVerificationTokens EmailVerificationToken[]

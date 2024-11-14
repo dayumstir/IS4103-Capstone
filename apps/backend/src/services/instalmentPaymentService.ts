@@ -142,6 +142,7 @@ export const editInstalmentPayment = async (
             const updatedTransaction =
                 await transactionRepository.updateTransaction(transaction_id, {
                     status: TransactionStatus.FULLY_PAID,
+                    fully_paid_date: new Date(),
                 });
             logger.info(
                 `Transaction ${transaction_id} status updated to FULLY_PAID`

@@ -150,6 +150,11 @@ export const makePayment = async (req: Request, res: Response, next: NextFunctio
             paid_date: new Date(),
         });
 
+        // Update customer savings
+        await customerService.updateCustomer(customer_id, {
+            savings: amount_discount_from_voucher + amount_deducted_from_cashback_wallet,
+        });
+
         res.status(200).json({ message: "Payment successful" });
     } catch (error) {
         logger.error("Error during makePayment:", error);
