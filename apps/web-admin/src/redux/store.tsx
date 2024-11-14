@@ -1,4 +1,4 @@
-// app/web-admin/src/redux/store.ts
+// apps/web-admin/src/redux/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
@@ -13,10 +13,10 @@ import { merchantApi } from "./services/merchantService";
 import { merchantPaymentApi } from "./services/merchantPaymentService";
 import { merchantSizeApi } from "./services/merchantSizeService";
 import { notificationApi } from "./services/notificationService";
+import { ratingApi } from "./services/ratingService";
 import { transactionApi } from "./services/transactionService";
 import { voucherApi } from "./services/voucherService";
 import { withdrawalFeeRateApi } from "./services/withdrawalFeeRateService";
-import { ratingApi } from "./services/ratingService";
 import { creditScoreApi } from "./services/creditScoreService";
 
 // Custom serializable check configuration
@@ -38,6 +38,7 @@ export const store = configureStore({
     [merchantPaymentApi.reducerPath]: merchantPaymentApi.reducer,
     [merchantSizeApi.reducerPath]: merchantSizeApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
+    [ratingApi.reducerPath]: ratingApi.reducer,
     [transactionApi.reducerPath]: transactionApi.reducer,
     [voucherApi.reducerPath]: voucherApi.reducer,
     [withdrawalFeeRateApi.reducerPath]: withdrawalFeeRateApi.reducer,
@@ -56,6 +57,7 @@ export const store = configureStore({
       merchantPaymentApi.middleware,
       merchantSizeApi.middleware,
       notificationApi.middleware,
+      ratingApi.middleware,
       transactionApi.middleware,
       voucherApi.middleware,
       withdrawalFeeRateApi.middleware,

@@ -23,7 +23,7 @@ export const customerAuthApi = createApi({
   }),
 
   endpoints: (builder) => ({
-    login: builder.mutation<string, LoginFormValues>({
+    login: builder.mutation<{ jwtToken: string, forgot_password: boolean}, LoginFormValues>({
       query: (body) => ({
         url: "/login",
         method: "POST",

@@ -1,6 +1,6 @@
 // src/repositories/customerRepository.ts
 import { prisma } from "./db";
-import { ICustomer } from "../interfaces/customerInterface";
+import { ICustomer } from "@repo/interfaces";
 
 // Create a new customer
 export const createCustomer = async (customerData: ICustomer) => {

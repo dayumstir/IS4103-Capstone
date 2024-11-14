@@ -13,7 +13,7 @@ import {
 } from "antd";
 import { PlusOutlined, UserOutlined, UploadOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { IAdmin } from "../../../backend/src/interfaces/adminInterface";
+import { IAdmin } from "@repo/interfaces";
 import { useAddAdminMutation } from "../redux/services/adminService";
 
 export default function AddAdminScreen() {

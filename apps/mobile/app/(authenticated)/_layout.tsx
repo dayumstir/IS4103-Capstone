@@ -53,6 +53,10 @@ export default function AuthenticatedLayout() {
         name="(tabs)"
         options={{ headerShown: false, title: "Back" }}
       />
+      <Stack.Screen 
+        name="notifications" 
+        options={{ headerTitle: "Notifications" }}
+      />
     </Stack>
   );
 }

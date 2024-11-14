@@ -1,19 +1,7 @@
-from flask import jsonify
-from sqlalchemy import text
 from models import Customer, InstalmentPayment, InstalmentPaymentStatus, CreditTier
 from sqlalchemy import func
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-
-# def retrieve_customer(db, customer_id):
-#     try:
-#         result = db.session.execute(text('SELECT * FROM "Customer" c WHERE c.customer_id = :customer_id'), 
-#                                      {'customer_id': customer_id})
-
-#         tables = [row[0] for row in result] 
-#         return jsonify({"tables": tables})
-#     except Exception as e:
-#         return str(e)
     
 def get_customer_credit_limit(customer_id):
     customer = Customer.query.get(customer_id)
@@ -41,7 +29,7 @@ def update_customer_credit_rating(db, customer_id, credit_score):
     customer = Customer.query.get(customer_id)
     customer.credit_score = credit_score
     db.session.commit()
-
+    
 def get_lowest_credit_tier(db):
     credit_tiers = CreditTier.query.all()
     if len(credit_tiers) == 0 :
@@ -51,7 +39,6 @@ def get_lowest_credit_tier(db):
         if credit_tier.credit_limit < lowest.credit_limit:
             lowest = credit_tier
     return lowest
-
 
 def get_most_recent_6_months_instalment_payments(db, customer_id):
     try:

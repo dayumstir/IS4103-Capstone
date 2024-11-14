@@ -12,7 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useGetAllCustomersQuery, useUpdateCustomerStatusMutation } from '../redux/services/customerService';
-import { ICustomer } from "../interfaces/customerInterface";
+import { ICustomer } from "@repo/interfaces";
 
 const { Search } = Input;
 
