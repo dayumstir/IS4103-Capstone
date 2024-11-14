@@ -11,6 +11,8 @@ export interface ICustomer {
     status: CustomerStatus;
     wallet_balance: number;
     credit_score: number;
+    forgot_password: boolean;
+    savings: number;
 }
 
 export enum CustomerStatus {

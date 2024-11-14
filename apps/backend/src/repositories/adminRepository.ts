@@ -1,4 +1,4 @@
-// app/backend/src/repositories/adminRepository.ts
+// apps/backend/src/repositories/adminRepository.ts
 import { prisma } from "./db";
 import { IAdmin } from "@repo/interfaces";
 

@@ -6,6 +6,7 @@ import {
     getCreditTier,
     editCreditTier,
     deleteCreditTier,
+    getCreditTierByScore,
 } from "../controllers/creditTierController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -13,6 +14,7 @@ const router = Router();
 
 router.post("/", authMiddleware, createCreditTier);
 router.get("/", authMiddleware, getAllCreditTiers);
+router.get("/:score", authMiddleware, getCreditTierByScore);
 router.get("/:credit_tier_id", authMiddleware, getCreditTier);
 router.put("/:credit_tier_id", authMiddleware, editCreditTier);
 router.delete("/:credit_tier_id", authMiddleware, deleteCreditTier);

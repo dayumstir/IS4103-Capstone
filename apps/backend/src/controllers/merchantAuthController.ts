@@ -1,4 +1,4 @@
-// Handles authentication-related actions
+// apps/backend/src/controllers/merchantAuthController.ts
 import { Request, Response, NextFunction } from "express";
 import * as merchantAuthService from "../services/merchantAuthService";
 import logger from "../utils/logger";
@@ -83,8 +83,8 @@ export const checkEmailNotInUse = async (req: Request, res: Response) => {
 // Merchant Login
 export const login = async (req: Request, res: Response) => {
     try {
-        const { id, token } = await merchantAuthService.login(req.body);
-        res.status(200).json({ id, token });
+        const { id, token, forgot_password } = await merchantAuthService.login(req.body);
+        res.status(200).json({ id, token, forgot_password });
     } catch (error: any) {
         res.status(400).json({ error: error.message });
     }

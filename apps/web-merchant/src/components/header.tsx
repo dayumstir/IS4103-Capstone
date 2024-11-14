@@ -1,5 +1,5 @@
-import { UserOutlined } from "@ant-design/icons";
-import { Avatar, Layout, Menu, message, Popover } from "antd";
+import { UserOutlined, BellOutlined } from "@ant-design/icons";
+import { Avatar, Badge, Layout, Menu, message, Popover } from "antd";
 import { Buffer } from "buffer";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,6 +8,7 @@ import { clearMerchant } from "../redux/features/profileSlice";
 import { useLogoutMutation } from "../redux/services/auth";
 import { RootState } from "../redux/store";
 import GlobalSearchBar from "./globalSearchBar";
+import { useGetMerchantNotificationsQuery } from "../redux/services/notification";
 
 const Header: React.FC = () => {
   const { Header } = Layout;
@@ -15,23 +16,23 @@ const Header: React.FC = () => {
     Home = "Home",
     BusinessManagement = "Business Management",
     QRCode = "View QR Code",
-    FinancialManagement = "Financial Management",
   }
 
   const items = [
     { label: HeaderTitles.Home, key: HeaderTitles.Home },
     { label: HeaderTitles.QRCode, key: HeaderTitles.QRCode },
     {
-      label: HeaderTitles.FinancialManagement,
-      key: HeaderTitles.FinancialManagement,
-    },
-    {
       label: HeaderTitles.BusinessManagement,
       key: HeaderTitles.BusinessManagement,
     },
   ];
+
   const navigate = useNavigate();
   const merchant = useSelector((state: RootState) => state.profile.merchant);
+  const { data: notifications } = useGetMerchantNotificationsQuery("");
+
+  const unreadNotifications =
+    notifications?.filter((notification) => !notification.is_read) || [];
 
   const navigateToScreen = (key: string) => {
     if (key == HeaderTitles.Home) {
@@ -40,8 +41,6 @@ const Header: React.FC = () => {
       navigate("/business-management/issues");
     } else if (key == HeaderTitles.QRCode) {
       navigate("/qrcode");
-    } else if (key == HeaderTitles.FinancialManagement) {
-      navigate("/financial-management/transactions");
     }
   };
 
@@ -113,25 +112,35 @@ const Header: React.FC = () => {
         onClick={(menuInfo) => navigateToScreen(menuInfo.key)}
       />
       <GlobalSearchBar />
-      <Popover
-        placement="bottomRight"
-        content={popoverContent}
-        arrow={false}
-        trigger={"click"}
-      >
-        {profilePictureDisplay ? (
-          <img
-            src={profilePictureDisplay}
-            alt="avatar1"
-            className="group h-10 w-10 rounded-full object-cover transition-transform duration-300 ease-in-out hover:scale-110 hover:shadow-lg"
+      <div className="flex items-center gap-8">
+        <Badge count={unreadNotifications.length} size="small">
+          <BellOutlined
+            className="cursor-pointer text-2xl text-gray-500"
+            onClick={() => navigate("/notifications")}
           />
-        ) : (
-          <Avatar
-            icon={<UserOutlined />}
-            className="group transition-transform duration-300 ease-in-out hover:scale-110 hover:shadow-lg"
-          />
-        )}
-      </Popover>
+        </Badge>
+        <Popover
+          placement="bottomRight"
+          content={popoverContent}
+          arrow={false}
+          trigger={"click"}
+        >
+          {profilePictureDisplay ? (
+            <img
+              src={profilePictureDisplay}
+              alt="avatar1"
+              className="group h-10 w-10 rounded-full object-cover transition-transform duration-300 ease-in-out hover:scale-110 hover:shadow-lg"
+            />
+          ) : (
+            <>
+              <Avatar
+                icon={<UserOutlined />}
+                className="group transition-transform duration-300 ease-in-out hover:scale-110 hover:shadow-lg"
+              />
+            </>
+          )}
+        </Popover>
+      </div>
     </Header>
   );
 };
