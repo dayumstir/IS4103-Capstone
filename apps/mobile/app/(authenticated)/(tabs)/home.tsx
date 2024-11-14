@@ -1,3 +1,6 @@
+// apps/mobile/app/(authenticated)/(tabs)/home/index.tsx
+
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   Text,
@@ -7,11 +10,10 @@ import {
   Image,
 } from "react-native";
 import { addDays, addMonths, addWeeks, addYears, format } from "date-fns";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { formatCurrency } from "../../../utils/formatCurrency";
 import { useGetProfileQuery } from "../../../redux/services/customerService";
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setProfile } from "../../../redux/features/customerSlice";
 import { Ionicons } from "@expo/vector-icons";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../redux/services/instalmentPaymentService";
@@ -21,6 +23,9 @@ import { useGetCustomerTransactionsQuery } from "../../../redux/services/transac
 import { Buffer } from "buffer";
 import { BarChart } from "react-native-gifted-charts";
 import { Picker } from "@ant-design/react-native";
+
+// Import the notification API
+import { useGetCustomerNotificationsQuery } from "../../../redux/services/notificationService";
 
 const roundToNiceNumber = (value: number): number => {
   const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
@@ -34,10 +39,9 @@ const roundToNiceNumber = (value: number): number => {
 
 export default function HomePage() {
   const dispatch = useDispatch();
+  const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
-  const [timeFrame, setTimeFrame] = useState<"week" | "month" | "year">(
-    "month",
-  );
+  const [timeFrame, setTimeFrame] = useState<"week" | "month" | "year">("month");
   const [timeFrameVisible, setTimeFrameVisible] = useState(false);
 
   // Fetch the profile using the API call
@@ -66,6 +70,18 @@ export default function HomePage() {
     refetch: refetchTransactions,
   } = useGetCustomerTransactionsQuery({});
 
+  // Fetch customer notifications
+  const {
+    data: notifications,
+    isLoading: isNotificationsLoading,
+    refetch: refetchNotifications,
+  } = useGetCustomerNotificationsQuery("");
+
+  // Count unread notifications
+  const unreadNotificationsCount = notifications
+    ? notifications.filter((notification) => !notification.is_read).length
+    : 0;
+
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -73,6 +89,7 @@ export default function HomePage() {
         refetchProfile(),
         refetchInstalmentPayments(),
         refetchTransactions(),
+        refetchNotifications(),
       ]);
     } catch (error) {
       console.error("Error refreshing data:", error);
@@ -108,8 +125,20 @@ export default function HomePage() {
     >
       <View className="m-4 flex-row items-center justify-between">
         <Text className="text-4xl font-bold">Home</Text>
-        <TouchableOpacity className="p-2">
-          <Ionicons name="notifications-outline" size={24} color="black" />
+        <TouchableOpacity
+          className="relative p-2"
+          onPress={() => router.push("/notifications")}
+        >
+          <Ionicons name="notifications-outline" size={28} color="black" />
+          {unreadNotificationsCount > 0 && (
+            <View
+              className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-red-500"
+            >
+              <Text className="text-xs font-bold text-white">
+                {unreadNotificationsCount}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 

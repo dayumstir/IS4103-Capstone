@@ -60,6 +60,18 @@ export const getMerchantNotifications = async (
     return notifications;
 };
 
+export const getCustomerNotifications = async (
+    customerId: string,
+    searchQuery: string
+) => {
+    logger.info(`Searching for notifications with query: ${searchQuery}`);
+    const notifications = await notificationRepository.getCustomerNotifications(
+        customerId,
+        searchQuery
+    );
+    return notifications;
+};
+
 export const updateNotification = async (notificationData: INotification) => {
     logger.info("Executing updateNotification...");
     const notification =

@@ -12,6 +12,7 @@ import { customerAuthApi } from "./services/customerAuthService";
 import { instalmentPaymentApi } from "./services/instalmentPaymentService";
 import { issueApi } from "./services/issueService";
 import { merchantApi } from "./services/merchantService";
+import { notificationApi } from "./services/notificationService";
 import { paymentApi } from "./services/paymentService";
 import { transactionApi } from "./services/transactionService";
 import { voucherApi } from "./services/voucherService";
@@ -33,6 +34,7 @@ export const store = configureStore({
     [instalmentPaymentApi.reducerPath]: instalmentPaymentApi.reducer,
     [issueApi.reducerPath]: issueApi.reducer,
     [merchantApi.reducerPath]: merchantApi.reducer,
+    [notificationApi.reducerPath]: notificationApi.reducer,
     [paymentApi.reducerPath]: paymentApi.reducer,
     [transactionApi.reducerPath]: transactionApi.reducer,
     [voucherApi.reducerPath]: voucherApi.reducer,
@@ -46,6 +48,7 @@ export const store = configureStore({
       instalmentPaymentApi.middleware,
       issueApi.middleware,
       merchantApi.middleware,
+      notificationApi.middleware,
       paymentApi.middleware,
       transactionApi.middleware,
       voucherApi.middleware,
