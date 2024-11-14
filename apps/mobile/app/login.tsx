@@ -1,7 +1,12 @@
-// A screen component for login functionality, handling user input for authentication
-
+// apps/mobile/app/login.tsx
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/features/customerAuthSlice";
 import { router } from "expo-router";
@@ -11,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLoginMutation } from "../redux/services/customerAuthService";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Button } from "@ant-design/react-native";
+import Toast from "react-native-toast-message";
 
 // Define your Zod schema
 const loginSchema = z.object({
@@ -26,7 +32,7 @@ export type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const dispatch = useDispatch();
-  const [loginMutation, { isLoading, error }] = useLoginMutation();
+  const [loginMutation, { isLoading }] = useLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
   const [customErrorMessage, setCustomErrorMessage] = useState<string | null>(
     null,
@@ -45,12 +51,26 @@ export default function Login() {
     try {
       const result = await loginMutation(data).unwrap();
       dispatch(login(result));
-      // Delete the history to prevent user from swiping back to the login page
-      router.replace("/home");
+
+      if (result.forgot_password) {
+        Toast.show({
+          type: "info",
+          text1: "Login successful",
+          text2: "Please reset your password",
+        });
+
+        router.replace({
+          pathname: "/resetPassword",
+          params: { oldPassword: data.password },
+        });
+      } else {
+        // Navigate to home page
+        router.replace("/home");
+      }
     } catch (err: any) {
       console.error(err);
       // Set the error message in local state to be displayed
-      setCustomErrorMessage("An error occurred. Please try again.");
+      setCustomErrorMessage("Invalid email or password. Please try again.");
     }
   };
 
@@ -79,6 +99,7 @@ export default function Login() {
               value={value}
               placeholder="Email"
               autoCapitalize="none"
+              keyboardType="email-address"
             />
             {errors.email && (
               <Text className="mt-1 text-red-500">{errors.email.message}</Text>
@@ -147,7 +168,10 @@ export default function Login() {
       </View>
 
       <View className="mt-2 flex flex-row items-center justify-center gap-1">
-        <TouchableOpacity onPress={() => router.replace("/forgetPassword")} className="mt-4">
+        <TouchableOpacity
+          onPress={() => router.push("/forgetPassword")}
+          className="mt-4"
+        >
           <Text className="text-blue-500 underline">Forgot Password?</Text>
         </TouchableOpacity>
       </View>
