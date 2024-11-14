@@ -44,7 +44,7 @@ export default function InstalmentPaymentDetails() {
   const { profile } = useSelector((state: RootState) => state.customer);
   const router = useRouter();
 
-  /// Fetch the instalment payment by ID
+  // Fetch the instalment payment by ID
   const {
     data: instalmentPayment,
     isLoading,
@@ -109,10 +109,13 @@ export default function InstalmentPaymentDetails() {
   const isPastDue = isAfter(new Date(), new Date(instalmentPayment.due_date));
 
   // Retrieve the interest rate from the instalment plan
-  const interestRate = instalmentPayment.transaction.instalment_plan.interest_rate || 0;
+  const interestRate =
+    instalmentPayment.transaction.instalment_plan.interest_rate || 0;
 
   // Calculate the late payment fee
-  const latePaymentFee = isPastDue ? (instalmentPayment.amount_due * interestRate) / 100 : 0;
+  const latePaymentFee = isPastDue
+    ? (instalmentPayment.amount_due * interestRate) / 100
+    : 0;
 
   // Calculate voucher discount
   let voucherDiscount = 0;
@@ -133,14 +136,15 @@ export default function InstalmentPaymentDetails() {
   // Find applicable cashback wallet
   const applicableCashbackWallet = cashbackWallets?.find(
     (wallet) =>
-      wallet.merchant_id === instalmentPayment.transaction.merchant.merchant_id
+      wallet.merchant_id ===
+      instalmentPayment.transaction.merchant.merchant_id,
   );
 
   // Only calculate maxCashbackUsable if a cashback wallet is selected
   const maxCashbackUsable = selectedCashbackWallet
     ? Math.min(
         selectedCashbackWallet.wallet_balance,
-        instalmentPayment.amount_due - voucherDiscount
+        instalmentPayment.amount_due - voucherDiscount,
       )
     : 0;
 
@@ -209,6 +213,7 @@ export default function InstalmentPaymentDetails() {
           text1: "Insufficient Wallet Balance",
           text2: "You do not have enough balance in your wallet.",
         });
+        setIsConfirmationVisible(false);
         return;
       }
 
@@ -233,6 +238,7 @@ export default function InstalmentPaymentDetails() {
       router.back();
     } catch (error) {
       console.error("Payment failed:", error);
+      setIsConfirmationVisible(false);
       Toast.show({
         type: "error",
         text1: "Payment failed",
@@ -345,7 +351,7 @@ export default function InstalmentPaymentDetails() {
                   name="alert-circle-outline"
                   size={20}
                   color={
-                    instalmentPayment.late_payment_amount_due > 0
+                    latePaymentFee > 0
                       ? "#ef4444"
                       : "#3b82f6"
                   }
@@ -356,11 +362,11 @@ export default function InstalmentPaymentDetails() {
                     Late Payment Fee
                   </Text>
                   <Text
-                    className={`font-medium ${instalmentPayment.late_payment_amount_due > 0 ? "text-red-500" : ""}`}
+                    className={`font-medium ${latePaymentFee > 0 ? "text-red-500" : ""}`}
                   >
-                    {instalmentPayment.late_payment_amount_due > 0
+                    {latePaymentFee > 0
                       ? formatCurrency(
-                          instalmentPayment.late_payment_amount_due,
+                        latePaymentFee,
                         )
                       : "N/A"}
                   </Text>
@@ -581,14 +587,14 @@ export default function InstalmentPaymentDetails() {
         <TouchableWithoutFeedback onPress={() => setVoucherModalVisible(false)}>
           <BlurView intensity={10} tint="dark" style={{ flex: 1 }} />
         </TouchableWithoutFeedback>
-        <View className="absolute bottom-0 left-0 right-0 max-h-3/4 rounded-t-xl bg-white p-4">
+        <View className="absolute bottom-0 left-0 right-0 h-4/5 rounded-t-xl bg-white p-4">
           <Text className="mb-4 text-xl font-bold">Select a Voucher</Text>
           {isVouchersLoading ? (
             <ActivityIndicator size="large" />
           ) : vouchersError ? (
             <Text>Error loading vouchers. Please try again later.</Text>
           ) : usableVouchers && usableVouchers.length > 0 ? (
-            <ScrollView>
+            <ScrollView className="mb-4">
               {usableVouchers.map((voucherAssigned, index) => (
                 <TouchableOpacity
                   key={voucherAssigned.voucher_assigned_id}
@@ -596,9 +602,7 @@ export default function InstalmentPaymentDetails() {
                     setSelectedVoucher(voucherAssigned);
                     setVoucherModalVisible(false);
                   }}
-                  className={`${
-                    index === 0 ? "mt-4" : ""
-                  } ${index === usableVouchers.length - 1 ? "" : "mb-4"}`}
+                  className="mb-4"
                 >
                   {/* VoucherAssignedCard code directly included here */}
                   <View className="w-full rounded-lg border border-gray-300 bg-white p-4">
