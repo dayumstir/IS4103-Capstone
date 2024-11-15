@@ -37,15 +37,15 @@ dotenv.config();
 
 const app = express();
 
-// ====== Middleware setup ======
-app.use(cors());
-
 // Stripe Webhook (raw body parser required by Stripe)
 app.post(
     "/webhook/stripe",
     express.raw({ type: "application/json" }),
     handleStripeWebhook
 );
+
+// ====== Middleware setup ======
+app.use(cors());
 
 // JSON and URL-encoded parsers
 app.use(express.json({ limit: "10mb" }));
