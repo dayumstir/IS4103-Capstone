@@ -1,4 +1,4 @@
-// Defines routes related to merchant actions
+// src/routes/merchantRoutes.ts
 import { Router } from "express";
 import {
     getMerchantProfile,
@@ -52,7 +52,7 @@ authRouter.post("/check-email-status", checkEmailNotInUse);
 
 authRouter.post("/login", login);
 authRouter.post("/logout", authMiddleware, logout);
-authRouter.post("/:id/reset-password", resetPassword);
+authRouter.post("/:id/reset-password", authMiddleware, resetPassword);
 authRouter.post("/forget-password", forgetPassword);
 
 export default merchantRouter;

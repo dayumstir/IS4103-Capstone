@@ -1,4 +1,4 @@
-import { ICustomer } from "./customerInterface";
+import { ICustomer } from "@repo/interfaces";
 import { IInstalmentPlan } from "./instalmentPlanInterface";
 
 export interface ICreditTier {
@@ -6,6 +6,7 @@ export interface ICreditTier {
     name: string;
     min_credit_score: number;
     max_credit_score: number;
+    credit_limit: number;
 
     instalment_plans: IInstalmentPlan[];
     customers: ICustomer[];

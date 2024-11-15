@@ -169,7 +169,7 @@ export default function RatingsScreen() {
       >
         {ratingDetails ? (
           <>
-            <Descriptions bordered column={1} title="Rating Details">
+            <Descriptions bordered column={1}>
               <Descriptions.Item label="Rating ID">
                 {ratingDetails.rating_id}
               </Descriptions.Item>

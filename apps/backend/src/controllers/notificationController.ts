@@ -4,51 +4,110 @@ import * as notificationService from "../services/notificationService";
 
 // Create Notification
 export const createNotification = async (req: Request, res: Response) => {
-  try {
-    const customerMerchantFK = req.body.customer_id || req.body.merchant_id;
-    if (!customerMerchantFK) {
-      return res
-        .status(400)
-        .json({ error: "At least one of Merchant or Customer ID is required" });
+    try {
+        const customerMerchantFK = req.body.customer_id || req.body.merchant_id;
+        if (!customerMerchantFK) {
+            return res.status(400).json({
+                error: "At least one of Merchant or Customer ID is required",
+            });
+        }
+        const notification = await notificationService.createNotification(
+            req.body
+        );
+        res.status(201).json(notification);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
     }
-    const notification = await notificationService.createNotification(req.body);
-    res.status(201).json(notification);
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
 };
 
 // Get Notifications
 export const getNotifications = async (req: Request, res: Response) => {
-  const { search } = req.query;
-  try {
-    const searchTerm = typeof search === "string" ? search : "";
+    const { search } = req.query;
+    try {
+        const searchTerm = typeof search === "string" ? search : "";
 
-    let notifications;
-    if (search) {
-      notifications = await notificationService.searchNotifications(searchTerm);
-    } else {
-      notifications = await notificationService.getNotifications(req.body);
+        let notifications;
+        if (search) {
+            notifications =
+                await notificationService.searchNotifications(searchTerm);
+        } else {
+            notifications = await notificationService.getNotifications();
+        }
+        res.status(200).json(notifications);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
     }
-    res.status(201).json(notifications);
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
 };
 
 // Get Notification
 export const getNotification = async (req: Request, res: Response) => {
-  try {
-    const notificationId =
-      req.params.notification_id || req.body.notification_id;
+    try {
+        const notificationId =
+            req.params.notification_id || req.body.notification_id;
 
-    if (!notificationId) {
-      return res.status(400).json({ error: "Notification ID is required" });
+        if (!notificationId) {
+            return res
+                .status(400)
+                .json({ error: "Notification ID is required" });
+        }
+        const notification =
+            await notificationService.getNotificationById(notificationId);
+        res.status(200).json(notification);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
     }
-    const notification =
-      await notificationService.getNotificationById(notificationId);
-    res.status(201).json(notification);
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
+};
+
+// Get Merchant Notifications
+export const getMerchantNotifications = async (req: Request, res: Response) => {
+    try {
+        const merchantId = req.merchant_id;
+        if (!merchantId) {
+            return res.status(400).json({ error: "Merchant ID is required" });
+        }
+
+        const { search } = req.query;
+
+        const notifications =
+            await notificationService.getMerchantNotifications(
+                merchantId,
+                search as string
+            );
+        res.status(200).json(notifications);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+// Get Customer Notifications
+export const getCustomerNotifications = async (req: Request, res: Response) => {
+    try {
+        const customerId = req.customer_id;
+        if (!customerId) {
+            return res.status(400).json({ error: "Customer ID is required" });
+        }
+
+        const { search } = req.query;
+
+        const notifications =
+            await notificationService.getCustomerNotifications(
+                customerId,
+                search as string
+            );
+        res.status(200).json(notifications);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+// Update Notification
+export const updateNotification = async (req: Request, res: Response) => {
+    try {
+        const notification = await notificationService.updateNotification(
+            req.body
+        );
+        res.status(200).json(notification);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
 };

@@ -1,7 +1,7 @@
-// app/backend/src/services/adminService.ts
-import nodemailer from "nodemailer";
+// apps/backend/src/services/adminService.ts
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 
 import * as adminRepository from "../repositories/adminRepository";
 import logger from "../utils/logger";
@@ -78,7 +78,8 @@ export const add = async (adminData: IAdmin) => {
           role: UserType.ADMIN, 
           admin_id: newAdmin.admin_id, 
           email: newAdmin.email,
-          admin_type: newAdmin.admin_type  
+          admin_type: newAdmin.admin_type,
+          forgot_password: newAdmin.forgot_password,
       },
       process.env.JWT_SECRET!,
       { expiresIn: "1h" }

@@ -36,3 +36,9 @@ yarn-error.log*
 
 # turbo
 .turbo
+
+# credit service venv
+apps/credit-service/venv
+__pycache__/
+*.pyc
+*.pyo

@@ -1,5 +1,5 @@
 // src/services/customerService.ts
-import { ICustomer } from "../interfaces/customerInterface";
+import { ICustomer } from "@repo/interfaces";
 import * as customerRepository from "../repositories/customerRepository";
 import logger from "../utils/logger";
 import { NotFoundError, BadRequestError } from "../utils/error";

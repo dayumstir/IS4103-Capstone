@@ -9,6 +9,7 @@ import profileReducer from "./features/profileSlice";
 import { transactionApi } from "./services/transaction";
 import { merchantPaymentApi } from "./services/merchantPayment";
 import { instalmentPaymentApi } from "./services/instalmentPayment";
+import { notificationApi } from "./services/notification";
 
 const customSerializableCheck = {
   isSerializable: () => true,
@@ -25,6 +26,7 @@ export const store = configureStore({
     [transactionApi.reducerPath]: transactionApi.reducer,
     [merchantPaymentApi.reducerPath]: merchantPaymentApi.reducer,
     [instalmentPaymentApi.reducerPath]: instalmentPaymentApi.reducer,
+    [notificationApi.reducerPath]: notificationApi.reducer,
     profile: profileReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -37,6 +39,7 @@ export const store = configureStore({
       transactionApi.middleware,
       merchantPaymentApi.middleware,
       instalmentPaymentApi.middleware,
+      notificationApi.middleware,
     ),
 });
 

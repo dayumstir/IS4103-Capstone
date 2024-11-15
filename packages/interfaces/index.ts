@@ -43,4 +43,7 @@ export type { IMerchantSize } from "./merchantSizeInterface";
 
 export type { IWithdrawalFeeRate } from "./withdrawalFeeRateInterface";
 
-export { IRating } from "./ratingInterface";
+export type { INotification } from "./notificationInterface";
+export { NotificationPriority } from "./notificationInterface";
+
+export type { IRating } from "./ratingInterface";

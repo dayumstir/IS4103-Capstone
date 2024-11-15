@@ -32,6 +32,7 @@ model Admin {
   address         String
   date_of_birth   DateTime
   admin_type      AdminType
+  forgot_password Boolean   @default(false)
 
   notifications   Notification[]
   issues          Issue[]
@@ -57,6 +58,8 @@ model Customer {
   status          Status
   wallet_balance  Float    @default(0)
   credit_score    Int      @default(0)
+  forgot_password Boolean  @default(false)
+  savings         Float    @default(0)
 
   // Relationships
   emailVerificationTokens EmailVerificationToken[]
@@ -126,6 +129,7 @@ model Merchant {
   profile_picture Bytes? @db.ByteA
   cashback        Float
   wallet_balance  Float  @default(0)
+  forgot_password Boolean @default(false)
 
   // Relationships
   emailVerificationTokens MerchantEmailVerificationToken[]
@@ -190,19 +194,19 @@ model Issue {
   create_time DateTime      @default(now())
   updated_at  DateTime      @updatedAt
 
-  merchant_id    String? // Optional foreign key to Merchant
-  customer_id    String? // Optional foreign key to Customer
-  admin_id       String? // Optional foreign key to Admin
-  transaction_id String? // Optional foreign key to Transaction
+  merchant_id         String? // Optional foreign key to Merchant
+  customer_id         String? // Optional foreign key to Customer
+  admin_id            String? // Optional foreign key to Admin
+  transaction_id      String? // Optional foreign key to Transaction
   merchant_payment_id String? // Optional foreign key to Merchant Payment
 
   // Relations
-  merchant      Merchant?      @relation(fields: [merchant_id], references: [merchant_id])
-  customer      Customer?      @relation(fields: [customer_id], references: [customer_id])
-  admin         Admin?         @relation(fields: [admin_id], references: [admin_id])
-  transaction   Transaction?   @relation(fields: [transaction_id], references: [transaction_id])
-  merchantPayment   MerchantPayment?   @relation(fields: [merchant_payment_id], references: [merchant_payment_id])
-  notifications Notification[]
+  merchant        Merchant?        @relation(fields: [merchant_id], references: [merchant_id])
+  customer        Customer?        @relation(fields: [customer_id], references: [customer_id])
+  admin           Admin?           @relation(fields: [admin_id], references: [admin_id])
+  transaction     Transaction?     @relation(fields: [transaction_id], references: [transaction_id])
+  merchantPayment MerchantPayment? @relation(fields: [merchant_payment_id], references: [merchant_payment_id])
+  notifications   Notification[]
 }
 
 // Payments, Wallet and Terms Management Module
@@ -211,6 +215,7 @@ model CreditTier {
   name             String @unique
   min_credit_score Int
   max_credit_score Int
+  credit_limit     Int
 
   // Relationships
   instalment_plans InstalmentPlan[]
@@ -295,7 +300,7 @@ model Transaction {
 
   notifications Notification[]
 
-  rating    Rating? 
+  rating Rating?
 }
 
 model InstalmentPlan {
@@ -432,6 +437,7 @@ model Notification {
   description     String
   create_time     DateTime             @default(now())
   priority        NotificationPriority
+  is_read         Boolean              @default(false)
 
   merchant_id    String? // Optional foreign key to Merchant
   customer_id    String? // Optional foreign key to Customer
@@ -456,6 +462,6 @@ model Rating {
   createdAt DateTime @default(now())
 
   // Relationships
-  transaction_id String?   @unique
+  transaction_id String?      @unique
   transaction    Transaction? @relation(fields: [transaction_id], references: [transaction_id])
 }

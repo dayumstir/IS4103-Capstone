@@ -1,4 +1,4 @@
-// app/web-admin/src/redux/services/adminService.ts
+// apps/web-admin/src/redux/services/adminService.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { IAdmin } from "@repo/interfaces";
 
@@ -66,11 +66,11 @@ export const adminApi = createApi({
     }),
 
     // Update admin status (Activate/Deactivate)
-    updateStatus: builder.mutation<string, { updatedAdminId: string; admin_type: "DEACTIVATED" | "ACTIVATE" }>({
-      query: ({ updatedAdminId, admin_type }) => ({
+    updateStatus: builder.mutation<string, { admin_id: string; admin_type: "DEACTIVATED" | "ACTIVATE" }>({
+      query: ({ admin_id, admin_type }) => ({
         url: admin_type === "DEACTIVATED" ? "/deactivate-admin" : "/activate-admin",
         method: "PUT",
-        body: { admin_id: updatedAdminId },
+        body: admin_id,
       }),
       invalidatesTags: ["AdminProfile"],
     }),  

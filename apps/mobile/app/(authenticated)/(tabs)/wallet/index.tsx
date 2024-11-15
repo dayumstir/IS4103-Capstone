@@ -219,6 +219,14 @@ export default function WalletPage() {
                 {formatCurrency(profile?.wallet_balance ?? 0)}
               </Text>
             </View>
+            <View>
+              <Text className="text-sm font-semibold text-white">
+                Total Savings
+              </Text>
+              <Text className="text-2xl font-bold text-white">
+                {formatCurrency(profile?.savings ?? 0)}
+              </Text>
+            </View>
           </View>
           <View className="flex-row items-center justify-between">
             <View>
