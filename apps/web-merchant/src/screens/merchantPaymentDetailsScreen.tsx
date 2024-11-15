@@ -10,16 +10,13 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-  TransactionStatus,
-  transactionStatusColorMap,
-} from "@repo/interfaces/transactionInterface";
 import CreateIssueModal from "../components/createIssueModal";
 import { SortOrder } from "antd/es/table/interface";
 import { IssueStatus, statusColorMap } from "@repo/interfaces/issueInterface";
 import { useGetMerchantPaymentQuery } from "../redux/services/merchantPayment";
 import { PaymentStatus } from "@repo/interfaces/merchantPaymentInterface";
 import { merchantPaymentStatusColorMap } from "@repo/interfaces/merchantPaymentInterface";
+import { Buffer } from "buffer";
 
 const MerchantPaymentDetailsScreen: React.FC = () => {
   const { merchantPaymentId } = useParams<{ merchantPaymentId: string }>();
@@ -241,7 +238,13 @@ const MerchantPaymentDetailsScreen: React.FC = () => {
         )}
         <p className="mt-10 text-base font-semibold">Evidence</p>
         {merchantPayment && merchantPayment.evidence ? (
-          merchantPayment.evidence
+          <img
+            src={`data:image/jpeg;base64,${Buffer.from(
+              merchantPayment.evidence as Buffer,
+            ).toString("base64")}`}
+            alt="Payment Evidence"
+            style={{ width: "300px" }}
+          />
         ) : (
           <p style={{ color: "#9d9d9d" }}>No evidence yet</p>
         )}

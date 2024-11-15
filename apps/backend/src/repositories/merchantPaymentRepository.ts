@@ -9,7 +9,7 @@ import {
 // Create Merchant Payment
 export const createMerchantPayment = async (
     merchant_id: string,
-    paymentData: Omit<IMerchantPayment, "merchant">
+    paymentData: Omit<IMerchantPayment, "merchant" | "issues">
 ) => {
     const payment = await prisma.merchantPayment.create({
         data: { ...paymentData, merchant_id },
@@ -64,8 +64,11 @@ export const getMerchantPayments = async (search: string) => {
     return payments;
 };
 
-export const getMerchantPaymentsByFilter = async (paymentFilter: IMerchantPaymentFilter) => {
-    const { sorting, create_from, create_to, search_term, ...filter } = paymentFilter;
+export const getMerchantPaymentsByFilter = async (
+    paymentFilter: IMerchantPaymentFilter
+) => {
+    const { sorting, create_from, create_to, search_term, ...filter } =
+        paymentFilter;
 
     let parsedAmount: number | undefined;
 
@@ -81,15 +84,24 @@ export const getMerchantPaymentsByFilter = async (paymentFilter: IMerchantPaymen
     return prisma.merchantPayment.findMany({
         where: {
             ...filter,
-            AND: [{ created_at: { lte: create_to } }, { created_at: { gte: create_from } }],
+            AND: [
+                { created_at: { lte: create_to } },
+                { created_at: { gte: create_from } },
+            ],
             ...(search_term && {
                 OR: [
-                    { total_amount_from_transactions: { equals: parsedAmount } },
+                    {
+                        total_amount_from_transactions: {
+                            equals: parsedAmount,
+                        },
+                    },
                     { final_payment_amount: { equals: parsedAmount } },
                 ],
             }),
         },
-        orderBy: sorting ? { [sorting.sortBy]: sorting.sortDirection } : { created_at: "desc" },
+        orderBy: sorting
+            ? { [sorting.sortBy]: sorting.sortDirection }
+            : { created_at: "desc" },
     });
 };
 
@@ -122,7 +134,17 @@ export const updateMerchantPayment = async (
         data: {
             ...paymentData,
             evidence: {
-                set: paymentData.evidence ? Buffer.from(paymentData.evidence) : undefined,
+                set: paymentData.evidence
+                    ? Buffer.from(paymentData.evidence)
+                    : undefined,
+            },
+            issues: {
+                set: paymentData.issues
+                    ? paymentData.issues.map((issue) => ({
+                          issue_id: issue.issue_id,
+                          status: issue.status,
+                      }))
+                    : undefined,
             },
         },
     });
