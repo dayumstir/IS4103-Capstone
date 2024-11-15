@@ -224,6 +224,7 @@ export default function InstalmentPaymentDetails() {
         amount_deducted_from_wallet: amountFromWallet,
         cashback_wallet_id: selectedCashbackWallet?.cashback_wallet_id,
         amount_deducted_from_cashback_wallet: adjustedCashbackAmount,
+        late_payment_amount_due: latePaymentFee,
       }).unwrap();
 
       Toast.show({
@@ -443,47 +444,103 @@ export default function InstalmentPaymentDetails() {
         {/* ===== Payment Breakdown ===== */}
         <View className="mb-4 rounded-xl bg-white p-8">
           <Text className="mb-2 text-xl font-bold">Payment Breakdown</Text>
-          <View className="mb-2 flex-row justify-between">
-            <Text className="text-base">Instalment Amount:</Text>
-            <Text className="text-base">
-              {formatCurrency(instalmentPayment.amount_due)}
-            </Text>
-          </View>
-          {latePaymentFee > 0 && (
-            <View className="mb-2 flex-row justify-between">
-              <Text className="text-base">Late Payment Fee ({interestRate}%):</Text>
-              <Text className="text-base text-red-600">
-                +{formatCurrency(latePaymentFee)}
-              </Text>
-            </View>
+
+          {instalmentPayment.status === "PAID" ? (
+            // Display payment breakdown for paid instalments
+            <>
+              <View className="mb-2 flex-row justify-between">
+                <Text className="text-base">Instalment Amount:</Text>
+                <Text className="text-base">
+                  {formatCurrency(instalmentPayment.amount_due ?? 0)}
+                </Text>
+              </View>
+
+              {(instalmentPayment.amount_discount_from_voucher ?? 0) > 0 && (
+                <View className="mb-2 flex-row justify-between">
+                  <Text className="text-base">Voucher Discount:</Text>
+                  <Text className="text-base text-green-600">
+                    -{formatCurrency(instalmentPayment.amount_discount_from_voucher ?? 0)}
+                  </Text>
+                </View>
+              )}
+
+              {(instalmentPayment.amount_deducted_from_cashback_wallet ?? 0) > 0 && (
+                <View className="mb-2 flex-row justify-between">
+                  <Text className="text-base">Cashback Applied:</Text>
+                  <Text className="text-base text-green-600">
+                    -{formatCurrency(instalmentPayment.amount_deducted_from_cashback_wallet ?? 0)}
+                  </Text>
+                </View>
+              )}
+
+              <View className="mb-2 flex-row justify-between">
+                <Text className="text-base">Late Payment Fee:</Text>
+                <Text className="text-base">
+                  {instalmentPayment.late_payment_amount_due
+                    ? formatCurrency(instalmentPayment.late_payment_amount_due)
+                    : "N/A"}
+                </Text>
+              </View>
+
+              <View className="mt-2 border-t border-gray-200" />
+              <View className="flex-row justify-between">
+                <Text className="text-lg font-semibold">Total Paid:</Text>
+                <Text className="text-lg font-semibold">
+                  {formatCurrency(instalmentPayment.amount_deducted_from_wallet ?? 0)}
+                </Text>
+              </View>
+            </>
+          ) : (
+            // Display payment details for unpaid instalments
+            <>
+              <View className="mb-2 flex-row justify-between">
+                <Text className="text-base">Instalment Amount:</Text>
+                <Text className="text-base">
+                  {formatCurrency(instalmentPayment.amount_due ?? 0)}
+                </Text>
+              </View>
+
+              {latePaymentFee > 0 && (
+                <View className="mb-2 flex-row justify-between">
+                  <Text className="text-base">Late Payment Fee ({interestRate}%):</Text>
+                  <Text className="text-base text-red-600">
+                    +{formatCurrency(latePaymentFee)}
+                  </Text>
+                </View>
+              )}
+
+              {voucherDiscount > 0 && (
+                <View className="mb-2 flex-row justify-between">
+                  <Text className="text-base">Voucher Discount:</Text>
+                  <Text className="text-base text-green-600">
+                    -{formatCurrency(voucherDiscount)}
+                  </Text>
+                </View>
+              )}
+
+              {adjustedCashbackAmount > 0 && (
+                <View className="mb-2 flex-row justify-between">
+                  <Text className="text-base">Cashback Applied:</Text>
+                  <Text className="text-base text-green-600">
+                    -{formatCurrency(adjustedCashbackAmount)}
+                  </Text>
+                </View>
+              )}
+
+              <View className="my-2 border-t border-gray-200" />
+              <View className="flex-row justify-between">
+                <Text className="text-lg font-semibold">Total Payable:</Text>
+                <Text className="text-lg font-semibold">
+                  {formatCurrency(amountFromWallet)}
+                </Text>
+              </View>
+            </>
           )}
-          {voucherDiscount > 0 && (
-            <View className="mb-2 flex-row justify-between">
-              <Text className="text-base">Voucher Discount:</Text>
-              <Text className="text-base text-green-600">
-                -{formatCurrency(voucherDiscount)}
-              </Text>
-            </View>
-          )}
-          {adjustedCashbackAmount > 0 && (
-            <View className="mb-2 flex-row justify-between">
-              <Text className="text-base">Cashback Applied:</Text>
-              <Text className="text-base text-green-600">
-                -{formatCurrency(adjustedCashbackAmount)}
-              </Text>
-            </View>
-          )}
-          <View className="my-2 border-t border-gray-200" />
-          <View className="flex-row justify-between">
-            <Text className="text-lg font-semibold">Total Payable:</Text>
-            <Text className="text-lg font-semibold">
-              {formatCurrency(amountFromWallet)}
-            </Text>
-          </View>
         </View>
 
+
         {/* ===== Voucher Button (visible only when no voucher is selected) ===== */}
-        {!selectedVoucher && (
+        {instalmentPayment.status === "UNPAID" && !selectedVoucher && (
           <View className="mb-4">
             <Button type="ghost" onPress={() => setVoucherModalVisible(true)}>
               <Text className="font-semibold text-blue-500">Use Voucher</Text>
@@ -519,7 +576,7 @@ export default function InstalmentPaymentDetails() {
         )}
 
         {/* ===== Cashback Button ===== */}
-        {!selectedCashbackWallet && (
+        {instalmentPayment.status === "UNPAID" && !selectedCashbackWallet && (
           <View className="mb-4">
             <Button
               type="ghost"
@@ -734,7 +791,7 @@ export default function InstalmentPaymentDetails() {
                         const num = parseFloat(val);
                         return (
                           !isNaN(num) &&
-                          num >= 0 &&
+                          num > 0 &&
                           num <= maxCashbackUsable
                         );
                       },
@@ -803,11 +860,11 @@ export default function InstalmentPaymentDetails() {
                         type="primary"
                         onPress={() => {
                           if (cashbackAmountError) {
-                            Toast.show({
-                              type: "error",
-                              text1: "Invalid Amount",
-                              text2: cashbackAmountError,
-                            });
+                            // Toast.show({
+                            //   type: "error",
+                            //   text1: "Invalid Amount",
+                            //   text2: cashbackAmountError,
+                            // });
                             return;
                           }
                           setSelectedCashbackWallet(applicableCashbackWallet);
