@@ -170,6 +170,33 @@ model MerchantEmailVerificationToken {
   @@index([merchant_id])
 }
 
+// Common Infrastructure Module
+enum NotificationPriority {
+  HIGH
+  LOW
+}
+
+model Notification {
+  notification_id String               @id @default(cuid())
+  title           String
+  description     String
+  priority        NotificationPriority
+  create_time     DateTime             @default(now())
+  is_read         Boolean              @default(false)
+
+  merchant_id    String? // Optional foreign key to Merchant
+  customer_id    String? // Optional foreign key to Customer
+  admin_id       String? // Optional foreign key to Admin
+  transaction_id String? // Optional foreign key to Transaction
+  issue_id       String? // Optional foreign key to Issue
+
+  merchant    Merchant?    @relation(fields: [merchant_id], references: [merchant_id])
+  customer    Customer?    @relation(fields: [customer_id], references: [customer_id])
+  admin       Admin?       @relation(fields: [admin_id], references: [admin_id])
+  transaction Transaction? @relation(fields: [transaction_id], references: [transaction_id])
+  issues      Issue?       @relation(fields: [issue_id], references: [issue_id])
+}
+
 enum IssueStatus {
   PENDING_OUTCOME
   RESOLVED
@@ -423,34 +450,6 @@ model VoucherAssigned {
   customer_id           String
   instalment_payment    InstalmentPayment?
   instalment_payment_id String?
-}
-
-//Notifications
-enum NotificationPriority {
-  HIGH
-  LOW
-}
-
-model Notification {
-  notification_id String               @id @default(cuid())
-  title           String
-  description     String
-  create_time     DateTime             @default(now())
-  priority        NotificationPriority
-  is_read         Boolean              @default(false)
-
-  merchant_id    String? // Optional foreign key to Merchant
-  customer_id    String? // Optional foreign key to Customer
-  admin_id       String? // Optional foreign key to Admin
-  transaction_id String? // Optional foreign key to Transaction
-  issue_id       String? // Optional foreign key to Issue
-
-  // Relations
-  merchant    Merchant?    @relation(fields: [merchant_id], references: [merchant_id])
-  customer    Customer?    @relation(fields: [customer_id], references: [customer_id])
-  admin       Admin?       @relation(fields: [admin_id], references: [admin_id])
-  transaction Transaction? @relation(fields: [transaction_id], references: [transaction_id])
-  issues      Issue?       @relation(fields: [issue_id], references: [issue_id])
 }
 
 model Rating {
