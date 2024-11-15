@@ -39,6 +39,7 @@ yarn-error.log*
 
 # credit service venv
 apps/credit-service/venv
+apps/credit-service/src/venv
 __pycache__/
 *.pyc
 *.pyo

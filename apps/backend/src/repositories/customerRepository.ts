@@ -33,11 +33,18 @@ export const findCustomerByContactNumber = async (contact_number: string) => {
 // Update customer in database
 export const updateCustomer = async (
     customer_id: string,
-    updateData: Partial<ICustomer>
+    updateData: Partial<Omit<ICustomer, 'savings'>> & { savings?: number }
 ) => {
+    const { savings, ...otherData } = updateData;
+
     return prisma.customer.update({
         where: { customer_id: customer_id },
-        data: updateData,
+        data: {
+            ...otherData,
+            ...(savings !== undefined && {
+                savings: { increment: savings },
+            }),
+        },
     });
 };
 
@@ -111,4 +118,28 @@ export const topUpWallet = async (customer_id: string, amount: number) => {
             },
         },
     });
+};
+
+// Get the customer's credit tier
+export const getCustomerCreditTier = async (customer_id: string) => {
+    const customer = await prisma.customer.findUnique({
+        where: { customer_id: customer_id },
+    });
+
+    if (!customer) {
+        throw new Error("Customer not found");
+    }
+
+    const creditTier = await prisma.creditTier.findFirst({
+        where: {
+            min_credit_score: { lte: customer.credit_score },
+            max_credit_score: { gte: customer.credit_score },
+        },
+    });
+
+    if (!creditTier) {
+        throw new Error("No credit tier found for the customer's credit score");
+    }
+
+    return creditTier;
 };

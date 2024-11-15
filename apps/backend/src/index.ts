@@ -1,4 +1,4 @@
-// app/backend/src/index.ts
+// apps/backend/src/index.ts
 import dotenv from "dotenv";
 import app from "./app";
 import logger from "./utils/logger";

@@ -1,6 +1,5 @@
 import { EyeOutlined, LoadingOutlined, StopOutlined } from "@ant-design/icons";
 import {
-  Breadcrumb,
   Button,
   Card,
   Empty,
@@ -127,7 +126,9 @@ const IssueScreen: React.FC = () => {
       key: "category",
       render: (category: IssueCategory) => (
         <div className="truncate" style={{ maxWidth: "200px" }}>
-          {category}
+          {category === IssueCategory.MERCHANT_PAYMENT
+            ? "MERCHANT PAYMENT"
+            : category}
         </div>
       ),
       filters: [
@@ -138,6 +139,10 @@ const IssueScreen: React.FC = () => {
         {
           text: IssueCategory.TRANSACTION,
           value: IssueCategory.TRANSACTION,
+        },
+        {
+          text: "MERCHANT PAYMENT",
+          value: IssueCategory.MERCHANT_PAYMENT,
         },
         {
           text: IssueCategory.OTHERS,

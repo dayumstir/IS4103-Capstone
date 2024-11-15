@@ -1,5 +1,4 @@
 // apps/mobile/app/(authenticated)/(tabs)/home/index.tsx
-
 import React, { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -12,10 +11,13 @@ import {
 import { addDays, addMonths, addWeeks, addYears, format } from "date-fns";
 import { useRouter } from "expo-router";
 import { formatCurrency } from "../../../utils/formatCurrency";
-import { useGetProfileQuery } from "../../../redux/services/customerService";
-import { useDispatch, useSelector } from "react-redux";
+import {
+  useGetCustomerCreditTierQuery,
+  useGetProfileQuery,
+} from "../../../redux/services/customerService";
+import { useDispatch } from "react-redux";
 import { setProfile } from "../../../redux/features/customerSlice";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../redux/services/instalmentPaymentService";
 import { ActivityIndicator } from "@ant-design/react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -26,7 +28,9 @@ import { Picker } from "@ant-design/react-native";
 
 // Import the notification API
 import { useGetCustomerNotificationsQuery } from "../../../redux/services/notificationService";
+import { useGetFirstCreditRatingMutation } from "../../../redux/services/creditScoreService";
 
+// Determine graph y-axis ticks
 const roundToNiceNumber = (value: number): number => {
   const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
   const normalized = value / magnitude;
@@ -41,7 +45,9 @@ export default function HomePage() {
   const dispatch = useDispatch();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
-  const [timeFrame, setTimeFrame] = useState<"week" | "month" | "year">("month");
+  const [timeFrame, setTimeFrame] = useState<"week" | "month" | "year">(
+    "month",
+  );
   const [timeFrameVisible, setTimeFrameVisible] = useState(false);
 
   // Fetch the profile using the API call
@@ -51,16 +57,27 @@ export default function HomePage() {
     refetch: refetchProfile,
   } = useGetProfileQuery();
 
+  const [getFirstCreditRating] = useGetFirstCreditRatingMutation();
+
   // Update Redux store when profile data is fetched
   useEffect(() => {
-    if (profile && !isLoading) {
-      dispatch(setProfile(profile));
-    }
-  }, [profile, isLoading, dispatch]);
+    const calculateCreditScore = async () => {
+      // Get first credit rating if credit score == 0 (i.e. first login)
+      if (profile?.credit_score === 0) {
+        const formData = new FormData();
+        formData.append("customer_id", profile?.customer_id ?? "");
+        await getFirstCreditRating(formData);
+      }
+      if (profile && !isLoading) {
+        dispatch(setProfile(profile));
+      }
+    };
+
+    calculateCreditScore();
+  }, [profile, isLoading, refetchProfile]);
 
   const {
     data: outstandingInstalmentPayments,
-    isLoading: isInstalmentPaymentsLoading,
     refetch: refetchInstalmentPayments,
   } = useGetCustomerOutstandingInstalmentPaymentsQuery();
 
@@ -98,24 +115,13 @@ export default function HomePage() {
     }
   };
 
-  const getTotalOutstandingPayments = () => {
-    let total = 0;
-    outstandingInstalmentPayments?.forEach((payment) => {
-      total += payment.amount_due;
-    });
-    return total;
-  };
+  const { data: creditTier } = useGetCustomerCreditTierQuery();
 
-  const getProgressValue = () => {
-    if (getTotalOutstandingPayments() === 0) {
-      return 1;
-    }
-
-    return Math.min(
-      1,
-      (profile?.wallet_balance ?? 0) / getTotalOutstandingPayments(),
-    );
-  };
+  const totalOutstandingPayments =
+    outstandingInstalmentPayments?.reduce(
+      (acc, curr) => acc + curr.amount_due,
+      0,
+    ) ?? 0;
 
   return (
     <ScrollView
@@ -131,9 +137,7 @@ export default function HomePage() {
         >
           <Ionicons name="notifications-outline" size={28} color="black" />
           {unreadNotificationsCount > 0 && (
-            <View
-              className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-red-500"
-            >
+            <View className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-red-500">
               <Text className="text-xs font-bold text-white">
                 {unreadNotificationsCount}
               </Text>
@@ -174,40 +178,86 @@ export default function HomePage() {
             </View>
           </View>
         </View>
-        <View>
-          <View className="mb-2 flex-row items-center justify-between">
-            <Text className="font-semibold text-white">Wallet Balance</Text>
-            <Text className="text-lg font-bold text-white">
+        <View className="flex flex-row flex-wrap gap-4">
+          <TouchableOpacity
+            className="w-[47%] rounded-lg bg-white/10 p-4"
+            onPress={() => router.push("/wallet")}
+          >
+            <Ionicons
+              name="wallet-outline"
+              size={24}
+              color="white"
+              className="mb-2"
+            />
+            <Text className="text-sm font-medium text-white/80">
+              Wallet Balance
+            </Text>
+            <Text className="text-xl font-bold text-white">
               {formatCurrency(profile?.wallet_balance ?? 0)}
             </Text>
-          </View>
-          <View className="mb-2 flex-row items-center justify-between">
-            <Text className="font-semibold text-white">
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="w-[47%] rounded-lg bg-white/10 p-4"
+            onPress={() => router.push("/payments")}
+          >
+            <Ionicons
+              name="card-outline"
+              size={24}
+              color="white"
+              className="mb-2"
+            />
+            <Text className="text-sm font-medium text-white/80">
               Outstanding Payments
             </Text>
-            <Text className="text-lg font-bold text-white">
-              {formatCurrency(getTotalOutstandingPayments())}
+            <Text className="text-xl font-bold text-white">
+              {formatCurrency(totalOutstandingPayments)}
             </Text>
-          </View>
-          <View className="mb-2 flex-row items-center justify-between">
-            <Text className="font-semibold text-white">
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="w-[47%] rounded-lg bg-white/10 p-4"
+            onPress={() => router.push("/wallet")}
+          >
+            <MaterialCommunityIcons
+              name="piggy-bank-outline"
+              size={24}
+              color="white"
+              className="mb-2"
+            />
+            <Text className="text-sm font-medium text-white/80">
               Total Savings
             </Text>
-            <Text className="text-lg font-bold text-white">
+            <Text className="text-xl font-bold text-white">
               {formatCurrency(profile?.savings ?? 0)}
             </Text>
-          </View>
-          <View className="mt-4 h-2 w-full rounded-full bg-blue-700">
-            <View
-              className="h-full rounded-full bg-white"
-              style={{
-                width: `${getProgressValue() * 100}%`,
-              }}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="w-[47%] rounded-lg bg-white/10 p-4"
+            onPress={() => router.push("/account")}
+          >
+            <Ionicons
+              name="cash-outline"
+              size={24}
+              color="white"
+              className="mb-2"
             />
-          </View>
-          <Text className="mt-2 text-center font-medium text-white">
-            {`${(getProgressValue() * 100).toFixed(1)}% of payments covered`}
-          </Text>
+            <Text className="text-sm font-medium text-white/80">
+              Credit Available
+            </Text>
+            <Text
+              className={`text-xl font-bold ${
+                (creditTier?.credit_limit ?? 1) - totalOutstandingPayments < 500
+                  ? "text-orange-300"
+                  : "text-white"
+              }`}
+            >
+              {formatCurrency(
+                (creditTier?.credit_limit ?? 1) - totalOutstandingPayments,
+              )}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
 

@@ -156,11 +156,12 @@ export default function MerchantPaymentsScreen() {
   }) => {
     // Calculate fees
     const transaction_fee_percentage =
-      withdrawalInfo?.withdrawalFeeRate?.percentage_transaction_fee || 0;
+      (withdrawalInfo?.withdrawalFeeRate?.percentage_transaction_fee || 0) /
+      100;
     const transaction_fees =
       values.total_amount_from_transactions * transaction_fee_percentage;
     const withdrawal_fee_percentage =
-      withdrawalInfo?.withdrawalFeeRate?.percentage_withdrawal_fee || 0;
+      (withdrawalInfo?.withdrawalFeeRate?.percentage_withdrawal_fee || 0) / 100;
     const withdrawal_fee =
       values.total_amount_from_transactions * withdrawal_fee_percentage;
     const final_payment_amount =
@@ -194,24 +195,6 @@ export default function MerchantPaymentsScreen() {
     }
   };
 
-  const calculateWithdrawalFeeRate = () => {
-    if (!merchant) {
-      return 0.05; // default highest withdrawal fee rate
-    }
-
-    if (monthlyRevenue >= 25000) {
-      if (merchant.wallet_balance >= 200000) return 0.028;
-      if (merchant.wallet_balance >= 100000) return 0.03;
-      if (merchant.wallet_balance >= 50000) return 0.035;
-    } else {
-      if (merchant.wallet_balance >= 50000) return 0.028;
-      if (merchant.wallet_balance >= 25000) return 0.03;
-      if (merchant.wallet_balance >= 5000) return 0.035;
-    }
-
-    return 0.05;
-  };
-
   const { search, filteredMerchantPayments } = location.state || {};
   const [merchantPayments, setMerchantPayments] = useState<IMerchantPayment[]>(
     filteredMerchantPayments || [],
@@ -227,8 +210,7 @@ export default function MerchantPaymentsScreen() {
       sortDirection: sortDirection.DESC,
     },
   });
-  const [getMerchantPaymentsMutation, { isLoading }] =
-    useGetMerchantPaymentsMutation();
+  const [getMerchantPaymentsMutation] = useGetMerchantPaymentsMutation();
 
   const fetchFilteredMerchantPayments = async () => {
     try {

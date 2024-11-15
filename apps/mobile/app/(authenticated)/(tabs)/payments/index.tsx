@@ -1,5 +1,5 @@
 // app/mobile/app/(authenticated)/(tabs)/payments/index.tsx
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ScrollView,
   View,
@@ -19,6 +19,9 @@ import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../re
 import { useGetProfileQuery } from "../../../../redux/services/customerService";
 import { formatCurrency } from "../../../../utils/formatCurrency";
 import { format } from "date-fns";
+
+// Import the notification API
+import { useGetCustomerNotificationsQuery } from "../../../../redux/services/notificationService";
 
 export default function PaymentsPage() {
   const [isInstalmentsExpanded, setIsInstalmentsExpanded] = useState(true);
@@ -46,6 +49,18 @@ export default function PaymentsPage() {
     refetch: refetchInstalmentPayments,
   } = useGetCustomerOutstandingInstalmentPaymentsQuery();
 
+  // Fetch customer notifications
+  const {
+    data: notifications,
+    isLoading: isNotificationsLoading,
+    refetch: refetchNotifications,
+  } = useGetCustomerNotificationsQuery("");
+
+  // Count unread notifications
+  const unreadNotificationsCount = notifications
+    ? notifications.filter((notification) => !notification.is_read).length
+    : 0;
+
   // Calculate total outstanding payments
   const totalOutstanding =
     outstandingInstalmentPayments?.reduce(
@@ -58,6 +73,7 @@ export default function PaymentsPage() {
       refetchProfile();
       refetchTransactions();
       refetchInstalmentPayments();
+      refetchNotifications();
     }
   }, [isFocused]);
 
@@ -68,7 +84,7 @@ export default function PaymentsPage() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    Promise.all([refetchTransactions(), refetchInstalmentPayments()])
+    Promise.all([refetchTransactions(), refetchInstalmentPayments(), refetchNotifications()])
       .then(() => setRefreshing(false))
       .catch((error) => {
         console.error("Error refreshing data:", error);
@@ -86,8 +102,20 @@ export default function PaymentsPage() {
     >
       <View className="m-4 flex-row items-center justify-between">
         <Text className="text-4xl font-bold">Payments</Text>
-        <TouchableOpacity className="p-2">
-          <Ionicons name="notifications-outline" size={24} color="black" />
+        <TouchableOpacity
+          className="relative p-2"
+          onPress={() => router.push("/notifications")}
+        >
+          <Ionicons name="notifications-outline" size={28} color="black" />
+          {unreadNotificationsCount > 0 && (
+            <View
+              className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-red-500"
+            >
+              <Text className="text-xs font-bold text-white">
+                {unreadNotificationsCount}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 

@@ -13,7 +13,8 @@ import { useGetTransactionByIdQuery } from "../../../../redux/services/transacti
 import { formatCurrency } from "../../../../utils/formatCurrency";
 import { format } from "date-fns";
 import { Button } from "@ant-design/react-native";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function TransactionDetails() {
   const { transactionId } = useLocalSearchParams<{ transactionId: string }>();
@@ -31,6 +32,13 @@ export default function TransactionDetails() {
     setRefreshing(true);
     refetch().then(() => setRefreshing(false));
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      // Refetch the transaction data whenever the screen comes into focus
+      refetch();
+    }, [refetch])
+  );
 
   const getProgressValue = () => {
     if (!transaction?.instalment_plan) return 1;

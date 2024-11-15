@@ -1,5 +1,6 @@
 // payments/allTransactions.tsx
-import { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -50,6 +51,13 @@ export default function AllTransactions() {
     setRefreshing(true);
     refetch().then(() => setRefreshing(false));
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      // Refetch the transaction data whenever the screen comes into focus
+      refetch();
+    }, [refetch])
+  );
 
   const transactionList = () => {
     // While user is typing / fetching / loading

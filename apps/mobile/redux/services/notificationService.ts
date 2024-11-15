@@ -20,7 +20,7 @@ export const notificationApi = createApi({
   
   tagTypes: ["NotificationList"],
   endpoints: (builder) => ({
-    // Get customer notifications
+    // Fetch customer notifications
     getCustomerNotifications: builder.query<INotification[], string>({
       query: (searchTerm) => ({
         url: "/customer",
@@ -30,7 +30,7 @@ export const notificationApi = createApi({
       providesTags: ["NotificationList"],
     }),
 
-    // Get notification by id
+    // Fetch a specific notification by ID
     getNotification: builder.query<INotification, string>({
       query: (id) => ({
         url: `/${id}`,
@@ -38,10 +38,10 @@ export const notificationApi = createApi({
       }),
     }),
 
-    // Update notification
+    // Update a notification
     updateNotification: builder.mutation<INotification, Partial<INotification>>({
       query: (notification) => ({
-        url: `/${notification.notification_id}`,
+        url: `/`,
         method: "PUT",
         body: notification,
       }),

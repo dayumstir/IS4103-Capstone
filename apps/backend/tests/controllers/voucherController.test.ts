@@ -1,4 +1,4 @@
-// app/backend/tests/controllers/voucherController.test.ts
+// apps/backend/tests/controllers/voucherController.test.ts
 import { Request, Response, NextFunction } from "express";
 import * as voucherController from "../../src/controllers/voucherController";
 import * as voucherService from "../../src/services/voucherService";
