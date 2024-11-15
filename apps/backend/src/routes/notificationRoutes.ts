@@ -16,9 +16,9 @@ router.use(authMiddleware);
 
 router.post("/add", createNotification);
 router.post("/list", getNotifications);
-router.get("/:notification_id", getNotification);
-router.get("/merchant", getMerchantNotifications);
-router.get("/customer", getCustomerNotifications);
-router.put("/:notification_id", updateNotification);
+router.get("/merchant", getMerchantNotifications); // Specific route comes first
+router.get("/customer", getCustomerNotifications); // Specific route comes first
+router.get("/:notification_id", getNotification); // Parametric route comes last
+router.put("/", updateNotification);
 
 export default router;
