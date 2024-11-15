@@ -10,8 +10,9 @@ import {
   Tag,
 } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
+import { format } from "date-fns";
 import { useGetRatingsQuery, useGetRatingQuery } from "../redux/services/ratingService";
-import { IRating, ITransaction } from "@repo/interfaces";
+import { IRating, TransactionResult } from "@repo/interfaces";
 
 const { Search } = Input;
 
@@ -39,7 +40,7 @@ export default function RatingsScreen() {
     setSelectedRatingId(null);
   };
 
-  const renderTransactionDetails = (transaction: ITransaction) => (
+  const renderTransactionDetails = (transaction: TransactionResult) => (
     <Descriptions bordered column={1} title="Transaction Details">
       <Descriptions.Item label="Transaction ID">
         {transaction.transaction_id}
@@ -48,7 +49,7 @@ export default function RatingsScreen() {
         SGD {transaction.amount.toFixed(2)}
       </Descriptions.Item>
       <Descriptions.Item label="Date of Transaction">
-        {new Date(transaction.date_of_transaction).toLocaleString()}
+        {format(new Date(transaction.date_of_transaction), "d MMM yyyy, h:mm:ss a")}
       </Descriptions.Item>
       <Descriptions.Item label="Status">
         <Tag
@@ -65,15 +66,15 @@ export default function RatingsScreen() {
       <Descriptions.Item label="Cashback Percentage">
         {transaction.cashback_percentage}%
       </Descriptions.Item>
-      <Descriptions.Item label="Merchant ID">
-        {transaction.merchant_id}
+      <Descriptions.Item label="Merchant Name">
+        {transaction.merchant.name}
       </Descriptions.Item>
-      <Descriptions.Item label="Customer ID">
-        {transaction.customer_id}
+      <Descriptions.Item label="Customer Name">
+        {transaction.customer.name}
       </Descriptions.Item>
       {transaction.fully_paid_date && (
         <Descriptions.Item label="Fully Paid Date">
-          {new Date(transaction.fully_paid_date).toLocaleString()}
+          {format(new Date(transaction.fully_paid_date), "d MMM yyyy, h:mm:ss a")}
         </Descriptions.Item>
       )}
     </Descriptions>
@@ -120,9 +121,9 @@ export default function RatingsScreen() {
     },
     {
       title: "Created At",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (date: Date) => new Date(date).toLocaleString(),
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: Date) => format(new Date(date), "d MMM yyyy, h:mm:ss a"),
     },
     {
       title: "Action",
@@ -193,7 +194,7 @@ export default function RatingsScreen() {
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Created At">
-                {new Date(ratingDetails.created_at).toLocaleString()}
+                {format(new Date(ratingDetails.createdAt), "d MMM yyyy, h:mm:ss a")}
               </Descriptions.Item>
             </Descriptions>
 
