@@ -105,3 +105,22 @@ export const getInstalmentPlans = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+// Get the customer's credit tier
+export const getCustomerCreditTier = async (req: Request, res: Response) => {
+    logger.info("Executing getCustomerCreditTier...");
+    try {
+        const customerId = req.customer_id;
+
+        if (!customerId) {
+            return res.status(400).json({ error: "customer_id is required" });
+        }
+
+        const creditTier =
+            await customerService.getCustomerCreditTier(customerId);
+        res.status(200).json(creditTier);
+    } catch (error: any) {
+        logger.error("An error occurred:", error);
+        res.status(400).json({ error: error.message });
+    }
+};

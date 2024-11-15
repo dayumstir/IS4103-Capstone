@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store";
-import { ICustomer, IInstalmentPlan } from "@repo/interfaces";
+import { ICreditTier, ICustomer, IInstalmentPlan } from "@repo/interfaces";
 import { API_URL } from "../../config/apiConfig";
 
 // Define the base URL for customer API interactions
@@ -42,6 +42,11 @@ export const customerApi = createApi({
       query: () => "/instalment-plans",
       providesTags: ["InstalmentPlans"],
     }),
+
+    // Get customer credit tier
+    getCustomerCreditTier: builder.query<ICreditTier, void>({
+      query: () => "/credit-tier",
+    }),
   }),
 });
 
@@ -49,4 +54,5 @@ export const {
   useGetProfileQuery,
   useEditProfileMutation,
   useGetInstalmentPlansQuery,
+  useGetCustomerCreditTierQuery,
 } = customerApi;

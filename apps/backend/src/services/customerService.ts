@@ -2,7 +2,7 @@
 import { ICustomer } from "@repo/interfaces";
 import * as customerRepository from "../repositories/customerRepository";
 import logger from "../utils/logger";
-import { NotFoundError, BadRequestError } from "../utils/error";
+import { NotFoundError } from "../utils/error";
 
 export const getCustomerById = async (customer_id: string) => {
     logger.info("Executing getCustomerById...");
@@ -53,7 +53,10 @@ export const getAllCustomers = async () => {
 
 // Update the customer's wallet balance
 export const topUpWallet = async (customer_id: string, amount: number) => {
-    logger.info(`Topping up wallet balance for customer: ${customer_id}`, customer_id);
+    logger.info(
+        `Topping up wallet balance for customer: ${customer_id}`,
+        customer_id
+    );
     const customer = await customerRepository.topUpWallet(customer_id, amount);
     if (!customer) {
         throw new NotFoundError("Customer not found");
@@ -74,7 +77,10 @@ export const searchCustomers = async (searchQuery: string) => {
 };
 
 // Update the customer's profile picture in the database
-export const updateProfilePicture = async (customerId: string, profilePictureBuffer: Buffer) => {
+export const updateProfilePicture = async (
+    customerId: string,
+    profilePictureBuffer: Buffer
+) => {
     logger.info("Updating profile picture for customer:", customerId);
 
     // Update the profile picture in the database
@@ -93,4 +99,12 @@ export const getInstalmentPlans = async (customerId: string) => {
         return [];
     }
     return instalmentPlans;
+};
+
+// Get the customer's credit tier
+export const getCustomerCreditTier = async (customerId: string) => {
+    logger.info("Getting credit tier for customer:", customerId);
+    const creditTier =
+        await customerRepository.getCustomerCreditTier(customerId);
+    return creditTier;
 };

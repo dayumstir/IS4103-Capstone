@@ -1,5 +1,12 @@
 import { Buffer } from "buffer";
-import { Text, View, Image, Linking, TouchableOpacity } from "react-native";
+import {
+  Text,
+  View,
+  Image,
+  Linking,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
 import { ActivityIndicator, Button } from "@ant-design/react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../../redux/features/customerAuthSlice";
@@ -9,21 +16,82 @@ import { ScrollView } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { RootState } from "../../../../redux/store";
+import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
+import { formatCurrency } from "../../../../utils/formatCurrency";
+import { useGetCustomerCreditTierQuery } from "../../../../redux/services/customerService";
+import { useState } from "react";
+import * as DocumentPicker from "expo-document-picker";
+import Toast from "react-native-toast-message";
 
 export default function AccountPage() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
 
   const profile = useSelector((state: RootState) => state.customer.profile);
 
-  // Logout handler
+  const { data: outstandingInstalmentPayments, refetch: refetchInstallments } =
+    useGetCustomerOutstandingInstalmentPaymentsQuery();
+  const totalCreditUsed =
+    outstandingInstalmentPayments?.reduce(
+      (acc, curr) => acc + curr.amount_due,
+      0,
+    ) ?? 0;
+
+  const { data: creditTier, refetch: refetchCreditTier } =
+    useGetCustomerCreditTierQuery();
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([refetchCreditTier(), refetchInstallments()]);
+    setRefreshing(false);
+  };
+
   const handleLogout = () => {
     dispatch(logout());
     router.replace("/login");
   };
 
+  const handleUploadCreditHistory = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "application/pdf",
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled) {
+        return;
+      }
+
+      // TODO: Implement API call to upload file
+      // const formData = new FormData();
+      // formData.append('file', {
+      //   uri: result.assets[0].uri,
+      //   type: 'application/pdf',
+      //   name: result.assets[0].name,
+      // });
+      // await uploadCreditHistoryMutation(formData);
+
+      Toast.show({
+        type: "success",
+        text1: "File selected successfully",
+        text2: result.assets[0].name,
+      });
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Error selecting file",
+        text2: "Please try again",
+      });
+    }
+  };
+
   return (
-    <ScrollView>
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       {/* ===== Profile Details ===== */}
       <View className="m-4 flex gap-4 rounded-lg bg-white p-8">
         <Text className="mb-4 text-2xl font-bold">Profile Details</Text>
@@ -73,7 +141,9 @@ export default function AccountPage() {
                 color="#3b82f6"
                 className="mr-2"
               />
-              <Text className="font-semibold text-blue-500">Edit Profile</Text>
+              <Text className="my-auto font-semibold text-blue-500">
+                Edit Profile
+              </Text>
             </Button>
           </>
         ) : (
@@ -85,9 +155,14 @@ export default function AccountPage() {
       <View className="mx-4 flex gap-4 rounded-lg bg-white p-8">
         <Text className="mb-4 text-2xl font-bold">Credit Rating</Text>
 
-        <Text className="text-center text-4xl font-bold text-black">
-          {profile?.credit_score}
-        </Text>
+        {/* ===== Credit Score ===== */}
+        <View className="items-center gap-2">
+          <Text className="text-gray-600">Credit Score</Text>
+          <Text className="text-5xl font-bold text-black">
+            {profile?.credit_score}
+          </Text>
+        </View>
+
         <TouchableOpacity
           className="mx-auto flex flex-row items-center gap-2"
           onPress={() =>
@@ -110,6 +185,49 @@ export default function AccountPage() {
           />
           <Text className="my-auto font-semibold text-white">
             View Eligible Plans
+          </Text>
+        </Button>
+
+        <View className="my-2 h-0.5 w-full rounded-full bg-gray-200" />
+
+        {/* ===== Credit Limit ===== */}
+        <View className="items-center gap-2">
+          <Text className="mb-2 text-gray-600">Credit Limit</Text>
+          <Text className="text-4xl font-bold text-black">
+            {formatCurrency(creditTier?.credit_limit ?? 1)}
+          </Text>
+
+          <View className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+            <View
+              className="h-full bg-blue-500"
+              style={{
+                width: `${((totalCreditUsed ?? 0) / (creditTier?.credit_limit ?? 1)) * 100}%`,
+              }}
+            />
+          </View>
+
+          <View className="flex w-full flex-row justify-between">
+            <Text className="text-sm text-gray-600">
+              {formatCurrency(totalCreditUsed)} Used
+            </Text>
+            <Text className="text-sm text-gray-600">
+              {formatCurrency(
+                (creditTier?.credit_limit ?? 1) - (totalCreditUsed ?? 0),
+              )}{" "}
+              Available
+            </Text>
+          </View>
+        </View>
+
+        <Button type="ghost" onPress={handleUploadCreditHistory}>
+          <AntDesign
+            name="pdffile1"
+            size={20}
+            color="#3b82f6"
+            className="mr-2"
+          />
+          <Text className="my-auto font-semibold text-blue-500">
+            Upload Credit History (PDF)
           </Text>
         </Button>
       </View>
