@@ -20,6 +20,7 @@ interface MakePaymentRequest {
     amount_deducted_from_wallet: number;
     cashback_wallet_id?: string;
     amount_deducted_from_cashback_wallet?: number;
+    late_payment_amount_due?: number;
 }
 
 // Define the payment API service

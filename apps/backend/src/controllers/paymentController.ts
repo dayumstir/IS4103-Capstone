@@ -107,6 +107,7 @@ export const makePayment = async (req: Request, res: Response, next: NextFunctio
         amount_deducted_from_wallet = 0,
         cashback_wallet_id,
         amount_deducted_from_cashback_wallet = 0,
+        late_payment_amount_due = 0,
     } = req.body;
 
     try {
@@ -146,6 +147,7 @@ export const makePayment = async (req: Request, res: Response, next: NextFunctio
             amount_deducted_from_wallet,
             cashback_wallet_id,
             amount_deducted_from_cashback_wallet,
+            late_payment_amount_due,
             status: InstalmentPaymentStatus.PAID,
             paid_date: new Date(),
         });

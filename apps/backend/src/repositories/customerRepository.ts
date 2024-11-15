@@ -33,11 +33,18 @@ export const findCustomerByContactNumber = async (contact_number: string) => {
 // Update customer in database
 export const updateCustomer = async (
     customer_id: string,
-    updateData: Partial<ICustomer>
+    updateData: Partial<Omit<ICustomer, 'savings'>> & { savings?: number }
 ) => {
+    const { savings, ...otherData } = updateData;
+
     return prisma.customer.update({
         where: { customer_id: customer_id },
-        data: updateData,
+        data: {
+            ...otherData,
+            ...(savings !== undefined && {
+                savings: { increment: savings },
+            }),
+        },
     });
 };
 
