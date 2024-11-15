@@ -82,7 +82,7 @@ const NotificationsScreen = () => {
     return notifications.reduce((acc, notification) => {
       const formattedCreateTime = new Date(notification.create_time)
         .toISOString()
-        .slice(0, 19);
+        .slice(0, 16);
       // Find an existing group with the same title, description, and create time
       const existingGroup = acc.find(
         (item) =>
@@ -357,7 +357,7 @@ const NotificationsScreen = () => {
           {/* Display the Issue ID as a link if present */}
           {currentNotification?.issue_id && (
             <Descriptions.Item label="Issue ID" span={2}>
-              <Link to={`/issue/${currentNotification.issue_id}`}>
+              <Link to={`/business-management/issues`}>
                 {currentNotification.issue_id}
               </Link>
             </Descriptions.Item>
@@ -366,7 +366,7 @@ const NotificationsScreen = () => {
           {/* Display the Transaction ID as a link if present */}
           {currentNotification?.transaction_id && (
             <Descriptions.Item label="Transaction ID" span={2}>
-              <Link to={`/transaction/${currentNotification.transaction_id}`}>
+              <Link to={`/business-management/transactions`}>
                 {currentNotification.transaction_id}
               </Link>
             </Descriptions.Item>
@@ -382,7 +382,7 @@ const NotificationsScreen = () => {
                   <div key={customerId}>
                     {customer?.email ? (
                       <>
-                        <Tag>Customer</Tag> {customer.email}
+                        {customer.email}
                       </>
                     ) : (
                       <span>Unknown Customer</span>
@@ -404,7 +404,7 @@ const NotificationsScreen = () => {
                   <div key={merchantId}>
                     {merchant?.email ? (
                       <>
-                        <Tag>Merchant</Tag> {merchant.email}
+                        {merchant.email}
                       </>
                     ) : (
                       <span>Unknown Merchant</span>
