@@ -303,6 +303,22 @@ export default function TransactionDetails() {
           </View>
         )}
 
+        {/* ===== Add Rating Button ===== */}
+        <View className="my-4">
+          <Button
+            type="primary"
+            disabled={!!transaction.rating} // Disabled if a rating already exists
+            onPress={() =>
+              router.push({
+                pathname: "/payments/rating",
+                params: { transactionId },
+              })
+            }
+          >
+            <Text className="font-semibold text-white">{transaction.rating ? "Rating Added" : "Add Rating"}</Text>
+          </Button>
+        </View>
+
         {/* ===== Raise Issue Button ===== */}
         <View className="mt-4">
           <Button
@@ -318,22 +334,6 @@ export default function TransactionDetails() {
             }}
           >
             <Text className="font-semibold text-white">Raise an Issue</Text>
-          </Button>
-        </View>
-
-        {/* ===== Add Rating Button ===== */}
-        <View className="my-4">
-          <Button
-            type="primary"
-            disabled={!!transaction.rating} // Disabled if a rating already exists
-            onPress={() =>
-              router.push({
-                pathname: "/payments/rating",
-                params: { transactionId },
-              })
-            }
-          >
-            <Text className="font-semibold text-white">{transaction.rating ? "Rating Already Added" : "Add Rating"}</Text>
           </Button>
         </View>
       </View>

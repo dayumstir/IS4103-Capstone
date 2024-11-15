@@ -66,7 +66,7 @@ export default function RatingScreen() {
       });
 
       reset();
-      router.replace(`/payments/${transactionId}`);
+      router.back();
     } catch (error) {
       console.error("Error creating rating:", error);
       Toast.show({
@@ -179,7 +179,7 @@ export default function RatingScreen() {
             type="ghost"
             onPress={() => {
               reset();
-              router.replace(`/payments/${transactionId}`);
+              router.back();
             }}
           >
             <Text className="font-semibold text-blue-500">Cancel</Text>
