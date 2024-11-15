@@ -99,7 +99,7 @@ export default function ProfileScreen() {
           <Button
             type="primary"
             style={{ marginTop: 16 }}
-            onClick={() => navigate("/admin/editprofile")}
+            onClick={() => navigate("/editprofile")}
           >
             Edit Profile
           </Button>
