@@ -27,7 +27,7 @@ export const creditScoreApi = createApi({
       query: (body) => ({
         method: "POST",
         body: body,
-        url: "/get-first-credit-rating",
+        url: "/get-admin-credit-rating",
       }),
     }),
     updateCreditScore: builder.mutation<
