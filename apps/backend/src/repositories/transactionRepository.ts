@@ -105,12 +105,16 @@ export const createTransaction = async (transactionData: ITransaction) => {
         },
     });
 
-    // Add transaction amount to merchant's wallet balance
+    // Add transaction amount to merchant's wallet balance (minus cashback)
     await prisma.merchant.update({
         where: { merchant_id: transactionData.merchant_id },
         data: {
             wallet_balance: {
-                increment: transactionData.amount,
+                increment:
+                    transactionData.amount -
+                    (transactionData.amount *
+                        transactionData.cashback_percentage) /
+                        100,
             },
         },
     });

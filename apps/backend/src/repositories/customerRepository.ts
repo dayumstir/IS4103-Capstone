@@ -112,3 +112,27 @@ export const topUpWallet = async (customer_id: string, amount: number) => {
         },
     });
 };
+
+// Get the customer's credit tier
+export const getCustomerCreditTier = async (customer_id: string) => {
+    const customer = await prisma.customer.findUnique({
+        where: { customer_id: customer_id },
+    });
+
+    if (!customer) {
+        throw new Error("Customer not found");
+    }
+
+    const creditTier = await prisma.creditTier.findFirst({
+        where: {
+            min_credit_score: { lte: customer.credit_score },
+            max_credit_score: { gte: customer.credit_score },
+        },
+    });
+
+    if (!creditTier) {
+        throw new Error("No credit tier found for the customer's credit score");
+    }
+
+    return creditTier;
+};

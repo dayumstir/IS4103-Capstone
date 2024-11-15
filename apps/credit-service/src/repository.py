@@ -27,7 +27,7 @@ def get_customer_outstanding_balance(customer_id):
     
 def update_customer_credit_rating(db, customer_id, credit_score):
     customer = Customer.query.get(customer_id)
-    customer.credit_score = credit_score
+    customer.credit_score = int(credit_score)
     db.session.commit()
     
 def get_lowest_credit_tier(db):

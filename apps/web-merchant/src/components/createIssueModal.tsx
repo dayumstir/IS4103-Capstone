@@ -224,7 +224,11 @@ const CreateIssueModal = ({
             // onSearch={onSearch}
             options={Object.values(IssueCategory).map((category) => ({
               value: category,
-              label: (merchantPaymentId && "PAYMENT") || category,
+              label:
+                (merchantPaymentId && "PAYMENT") ||
+                (category === IssueCategory.MERCHANT_PAYMENT &&
+                  "MERCHANT PAYMENT") ||
+                category,
             }))}
           />
         </Form.Item>

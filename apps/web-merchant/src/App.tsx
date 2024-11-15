@@ -61,7 +61,7 @@ const App = () => {
               element={<MerchantPaymentsScreen />}
             />
             <Route
-              path="/financial-management/merchant-payments/:merchantPaymentId"
+              path="/business-management/merchant-payments/:merchantPaymentId"
               element={<MerchantPaymentDetailsScreen />}
             />
           </Route>
