@@ -43,15 +43,24 @@ export default function MerchantSizeScreen() {
       dataIndex: "monthly_revenue_min",
       key: "monthly_revenue_min",
       width: 1,
-      render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
+      render: (text: string) => {
+        // Convert the value to a number and format it to 2 decimal places
+        const formattedText = parseFloat(text).toFixed(2);
+        return <div className="whitespace-nowrap">{formattedText}</div>;
+      },
     },
     {
       title: <div className="whitespace-nowrap">Monthly Revenue Max ($)</div>,
       dataIndex: "monthly_revenue_max",
       key: "monthly_revenue_max",
       width: 1,
-      render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
+      render: (text: string) => {
+        // Convert the value to a number and format it to 2 decimal places
+        const formattedText = parseFloat(text).toFixed(2);
+        return <div className="whitespace-nowrap">{formattedText}</div>;
+      },
     },
+    
     {
       title: "Actions",
       key: "actions",
@@ -225,7 +234,7 @@ export default function MerchantSizeScreen() {
             },
           ]}
         >
-          <InputNumber className="w-full" step={1} precision={0} />
+          <InputNumber className="w-full" step={1} precision={2} />
         </Form.Item>
 
         <Form.Item
@@ -254,7 +263,7 @@ export default function MerchantSizeScreen() {
             }),
           ]}
         >
-          <InputNumber className="w-full" step={1} precision={0} />
+          <InputNumber className="w-full" step={1} precision={2} />
         </Form.Item>
       </div>
 

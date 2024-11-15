@@ -62,7 +62,11 @@ export default function WithdrawalFeeRateScreen() {
       dataIndex: "wallet_balance_min",
       key: "wallet_balance_min",
       width: 1,
-      render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
+      render: (text: string) => {
+        // Convert text to a number and format it to 2 decimal places
+        const formattedText = parseFloat(text).toFixed(2);
+        return <div className="whitespace-nowrap">{formattedText}</div>;
+      },
       sorter: (a: IWithdrawalFeeRate, b: IWithdrawalFeeRate) => a.wallet_balance_min - b.wallet_balance_min,
     },
     {
@@ -70,7 +74,11 @@ export default function WithdrawalFeeRateScreen() {
       dataIndex: "wallet_balance_max",
       key: "wallet_balance_max",
       width: 1,
-      render: (text: string) => <div className="whitespace-nowrap">{text}</div>,
+      render: (text: string) => {
+        // Convert text to a number and format it to 2 decimal places
+        const formattedText = parseFloat(text).toFixed(2);
+        return <div className="whitespace-nowrap">{formattedText}</div>;
+      },
       sorter: (a: IWithdrawalFeeRate, b: IWithdrawalFeeRate) => a.wallet_balance_max - b.wallet_balance_max,
     },
     {
@@ -269,7 +277,7 @@ export default function WithdrawalFeeRateScreen() {
             },
           ]}
         >
-          <InputNumber className="w-full" step={1} precision={0} />
+          <InputNumber className="w-full" step={1} precision={2} />
         </Form.Item>
 
         <Form.Item
@@ -296,7 +304,7 @@ export default function WithdrawalFeeRateScreen() {
             }),
           ]}
         >
-          <InputNumber className="w-full" step={1} precision={0} />
+          <InputNumber className="w-full" step={1} precision={2} />
         </Form.Item>
 
         <Form.Item
