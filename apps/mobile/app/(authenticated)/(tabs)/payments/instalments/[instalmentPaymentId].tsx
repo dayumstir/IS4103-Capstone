@@ -224,6 +224,7 @@ export default function InstalmentPaymentDetails() {
         amount_deducted_from_wallet: amountFromWallet,
         cashback_wallet_id: selectedCashbackWallet?.cashback_wallet_id,
         amount_deducted_from_cashback_wallet: adjustedCashbackAmount,
+        late_payment_amount_due: latePaymentFee,
       }).unwrap();
 
       Toast.show({
