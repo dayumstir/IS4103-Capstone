@@ -17,9 +17,22 @@ export const notificationApi = createApi({
       return headers;
     },
   }),
-  
+
   tagTypes: ["NotificationList"],
   endpoints: (builder) => ({
+    // Create Notification
+    createNotification: builder.mutation<
+      INotification,
+      Omit<INotification, "notification_id">
+    >({
+      query: (notification) => ({
+        url: "/notification/add",
+        method: "POST",
+        body: notification,
+      }),
+      invalidatesTags: ["Notification"],
+    }),
+    // Get customer notifications
     // Fetch customer notifications
     getCustomerNotifications: builder.query<INotification[], string>({
       query: (searchTerm) => ({
@@ -52,6 +65,7 @@ export const notificationApi = createApi({
 
 // Export hooks for usage in functional components
 export const {
+  useCreateNotificationMutation,
   useGetCustomerNotificationsQuery,
   useGetNotificationQuery,
   useUpdateNotificationMutation,
