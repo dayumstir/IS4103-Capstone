@@ -32,9 +32,6 @@ import { errorHandler } from "./middlewares/errorHandler";
 import logger from "./utils/logger";
 import { handleStripeWebhook } from "./controllers/webhookController";
 
-// Load environment variables at the start
-dotenv.config();
-
 const app = express();
 
 // Stripe Webhook (raw body parser required by Stripe)

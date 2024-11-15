@@ -55,6 +55,7 @@ export default function ConfirmationScreen() {
       if (customer?.contact_number) {
         await sendPhoneNumberOTPMutation({
           contact_number: customer.contact_number,
+          email: customer.email,
         }).unwrap();
       }
 

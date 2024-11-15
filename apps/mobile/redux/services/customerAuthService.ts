@@ -55,7 +55,7 @@ export const customerAuthApi = createApi({
       }),
     }),
 
-    sendPhoneNumberOTP: builder.mutation<string, { contact_number: string }>({
+    sendPhoneNumberOTP: builder.mutation<string, { contact_number: string, email: string }>({
       query: (body) => ({
         url: "/send-phone-number-otp",
         method: "POST",
