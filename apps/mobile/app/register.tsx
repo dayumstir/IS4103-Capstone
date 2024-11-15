@@ -19,6 +19,7 @@ import { useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { format, setMonth } from "date-fns";
 import { Button, DatePicker } from "@ant-design/react-native";
+import { useGetFirstCreditRatingMutation } from "../redux/services/creditScoreService";
 
 // Define your Zod schema
 const registerSchema = z.object({
@@ -56,22 +57,18 @@ export default function Register() {
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
   });
+  const [getFirstCreditRating] = useGetFirstCreditRatingMutation();
 
   // Form submit handler
   const onSubmit = async (data: RegisterFormValues) => {
-    // TODO: Use default profile picture and credit score
-    const registrationData = {
-      ...data,
-      profile_picture: "Picture of Green",
-      status: "Active",
-      credit_score: 3,
-    };
-
     try {
       const result = await registerMutation(data).unwrap();
 
       // Sore customer data in redux
       dispatch(setCustomer(result));
+
+      // Get first credit rating
+      await getFirstCreditRating().unwrap();
 
       router.replace("/confirmation");
     } catch (err: any) {

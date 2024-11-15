@@ -22,6 +22,7 @@ import { useGetCustomerCreditTierQuery } from "../../../../redux/services/custom
 import { useState } from "react";
 import * as DocumentPicker from "expo-document-picker";
 import Toast from "react-native-toast-message";
+import { useGetFirstCreditRatingMutation } from "../../../../redux/services/creditScoreService";
 
 export default function AccountPage() {
   const dispatch = useDispatch();
@@ -40,6 +41,8 @@ export default function AccountPage() {
 
   const { data: creditTier, refetch: refetchCreditTier } =
     useGetCustomerCreditTierQuery();
+
+  const [getFirstCreditRating] = useGetFirstCreditRatingMutation();
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -64,14 +67,12 @@ export default function AccountPage() {
         return;
       }
 
-      // TODO: Implement API call to upload file
-      // const formData = new FormData();
-      // formData.append('file', {
-      //   uri: result.assets[0].uri,
-      //   type: 'application/pdf',
-      //   name: result.assets[0].name,
-      // });
-      // await uploadCreditHistoryMutation(formData);
+      const formData = new FormData();
+      const fileUri = result.assets[0].uri;
+      const response = await fetch(fileUri);
+      const blob = await response.blob();
+      formData.append("file", blob, result.assets[0].name);
+      await getFirstCreditRating(formData);
 
       Toast.show({
         type: "success",
