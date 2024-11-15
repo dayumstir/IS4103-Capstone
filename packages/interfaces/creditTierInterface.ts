@@ -10,3 +10,25 @@ export interface ICreditTier {
 
     instalment_plans: IInstalmentPlan[];
 }
+
+export interface GetFirstCreditRatingResult {
+    credit_score: number;
+}
+
+export interface UpdateCreditRatingResult {
+    credit_score: number;
+}
+export interface UploadCCIResult {
+    message: string;
+    error: string;
+}
+
+export type UpdateCreditScoreFromFrontend = {
+    paymentHistory: string;
+    creditUtilisationRatio: string;
+};
+
+export type UpdateCreditScoreToBackend = {
+    creditUtilisationRatio: number;
+    paymentHistory: number[];
+};

@@ -25,9 +25,24 @@ export const getAllCreditTiers = async (req: Request, res: Response) => {
 // Get Credit Tier
 export const getCreditTier = async (req: Request, res: Response) => {
     try {
-        const creditTier = await creditTierService.getCreditTierById(
-            req.params.credit_tier_id
-        );
+        const creditTier = await creditTierService.getCreditTierById(req.params.credit_tier_id);
+        res.status(200).json(creditTier);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+// Get Credit Tier by score
+export const getCreditTierByScore = async (req: Request, res: Response) => {
+    try {
+        const creditScore = parseInt(req.query.score as string, 10);
+
+        // Validate if the credit score is a valid number
+        if (isNaN(creditScore)) {
+            return res.status(400).json({ error: "Invalid credit score" });
+        }
+
+        const creditTier = await creditTierService.getCreditTierByScore(creditScore);
         res.status(200).json(creditTier);
     } catch (error: any) {
         res.status(400).json({ error: error.message });

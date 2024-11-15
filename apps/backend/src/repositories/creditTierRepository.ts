@@ -34,6 +34,18 @@ export const findCreditTierById = async (credit_tier_id: string) => {
     });
 };
 
+// Find credit tier by id (unique attribute) in db
+export const findCreditTierByScore = async (credit_score: number) => {
+    console.log(credit_score);
+    console.log("hello");
+    return prisma.creditTier.findMany({
+        where: {
+            min_credit_score: { lte: credit_score },
+            max_credit_score: { gte: credit_score },
+        },
+    });
+};
+
 // Update credit tier in db
 export const updateCreditTier = async (
     credit_tier_id: string,
