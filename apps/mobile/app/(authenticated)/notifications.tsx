@@ -1,5 +1,4 @@
 // apps/mobile/app/notifications.tsx
-
 import React, { useState } from "react";
 import {
   View,
@@ -14,41 +13,40 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import Toast from "react-native-toast-message";
+import { format } from "date-fns";
 import {
   useGetCustomerNotificationsQuery,
   useGetNotificationQuery,
   useUpdateNotificationMutation,
 } from "../../redux/services/notificationService";
-import { format } from "date-fns";
-import Toast from "react-native-toast-message";
-import { BlurView } from "expo-blur";
-
-enum NotificationPriority {
-  HIGH = "HIGH",
-  LOW = "LOW",
-}
+import { NotificationPriority } from "@repo/interfaces";
 
 export default function NotificationsScreen() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [selectedNotificationId, setSelectedNotificationId] = useState("");
-  const [isNotificationModalVisible, setIsNotificationModalVisible] =
-    useState(false);
+  const [isNotificationModalVisible, setIsNotificationModalVisible] = useState(false);
 
+  // Fetch customer notifications
   const {
     data: notifications,
     isLoading,
     refetch,
   } = useGetCustomerNotificationsQuery(searchTerm);
 
+  // Fetch selected notification details
   const { data: notification, isLoading: isNotificationLoading } =
     useGetNotificationQuery(selectedNotificationId, {
       skip: !selectedNotificationId,
     });
 
+  // Update notification as read
   const [updateNotification] = useUpdateNotificationMutation();
 
+  // Refresh notifications
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -64,13 +62,14 @@ export default function NotificationsScreen() {
     setSearchTerm(text);
   };
 
+  // Handle notification details modal
   const handleViewNotificationDetails = async (notificationId: string) => {
     setSelectedNotificationId(notificationId);
     setIsNotificationModalVisible(true);
 
-    // Mark notification as read
+    // Mark notification as read if unread
     const notificationToUpdate = notifications?.find(
-      (n) => n.notification_id === notificationId,
+      (n) => n.notification_id === notificationId
     );
 
     if (notificationToUpdate && !notificationToUpdate.is_read) {
@@ -85,6 +84,7 @@ export default function NotificationsScreen() {
     }
   };
 
+  // Mark all notifications as read
   const handleMarkAllAsRead = async () => {
     const unreadNotifications =
       notifications?.filter((notification) => !notification.is_read) || [];
@@ -95,8 +95,8 @@ export default function NotificationsScreen() {
           updateNotification({
             notification_id: notification.notification_id,
             is_read: true,
-          }).unwrap(),
-        ),
+          }).unwrap()
+        )
       );
       Toast.show({
         type: "success",
@@ -109,6 +109,16 @@ export default function NotificationsScreen() {
         text1: "Error marking notifications as read",
       });
     }
+  };
+
+  const handleModalClose = () => {
+    setIsNotificationModalVisible(false);
+    setSelectedNotificationId("");
+  };
+
+  const handleNavigate = (path: string) => {
+    handleModalClose();
+    router.push(path);
   };
 
   return (
@@ -167,30 +177,17 @@ export default function NotificationsScreen() {
               } p-4`}
             >
               <View className="flex-row items-center justify-between">
-                <View className="flex-1 pr-2">
-                  <Text
-                    className={`text-lg font-semibold ${
-                      !notification.is_read ? "text-blue-700" : "text-gray-800"
-                    }`}
-                  >
-                    {notification.title}
-                  </Text>
-                </View>
-                {/* Priority Indicator */}
+                <Text
+                  className={`text-lg font-semibold ${
+                    !notification.is_read ? "text-blue-700" : "text-gray-800"
+                  }`}
+                >
+                  {notification.title}
+                </Text>
                 {notification.priority === NotificationPriority.HIGH ? (
-                  <View className="flex-row items-center">
-                    <Ionicons name="alert-circle" size={20} color="#ef4444" />
-                    <Text className="ml-1 text-red-600">High Priority</Text>
-                  </View>
+                  <Ionicons name="alert-circle" size={20} color="#ef4444" />
                 ) : (
-                  <View className="flex-row items-center">
-                    <Ionicons
-                      name="information-circle"
-                      size={20}
-                      color="#3b82f6"
-                    />
-                    <Text className="ml-1 text-blue-600">Low Priority</Text>
-                  </View>
+                  <Ionicons name="information-circle" size={20} color="#3b82f6" />
                 )}
               </View>
               <Text className="mt-1 text-sm text-gray-600">
@@ -199,7 +196,7 @@ export default function NotificationsScreen() {
               <Text className="mt-1 text-xs text-gray-500">
                 {format(
                   new Date(notification.create_time),
-                  "d MMM yyyy, h:mm a",
+                  "d MMM yyyy, h:mm a"
                 )}
               </Text>
             </TouchableOpacity>
@@ -214,111 +211,57 @@ export default function NotificationsScreen() {
       {/* Notification Details Modal */}
       <Modal
         visible={isNotificationModalVisible}
-        animationType="fade"
+        animationType="slide"
         transparent={true}
-        onRequestClose={() => setIsNotificationModalVisible(false)}
+        onRequestClose={handleModalClose}
       >
-        <View style={{ flex: 1 }}>
-          <TouchableWithoutFeedback
-            onPress={() => setIsNotificationModalVisible(false)}
+        <TouchableWithoutFeedback onPress={handleModalClose}>
+          <BlurView
+            intensity={50}
+            tint="dark"
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-            <BlurView
-              intensity={40}
-              tint="dark"
-              style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-            >
-              <View className="w-11/12 max-h-3/4 rounded-lg bg-white p-6">
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-xl font-bold">Notification Details</Text>
-                  <TouchableOpacity
-                    onPress={() => setIsNotificationModalVisible(false)}
-                  >
-                    <Ionicons name="close" size={24} color="black" />
-                  </TouchableOpacity>
-                </View>
-                {isNotificationLoading ? (
-                  <ActivityIndicator size="large" className="mt-4" />
-                ) : notification ? (
-                  <ScrollView className="mt-4">
-                    <View className="flex-row items-center">
-                      {/* Priority Indicator */}
-                      {notification.priority === NotificationPriority.HIGH ? (
-                        <View className="flex-row items-center">
-                          <Ionicons name="alert-circle" size={20} color="#ef4444" />
-                          <Text className="ml-1 text-red-600">High Priority</Text>
-                        </View>
-                      ) : (
-                        <View className="flex-row items-center">
-                          <Ionicons
-                            name="information-circle"
-                            size={20}
-                            color="#3b82f6"
-                          />
-                          <Text className="ml-1 text-blue-600">Low Priority</Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text className="mt-2 mb-2 text-lg font-semibold">
-                      {notification.title}
-                    </Text>
-                    <Text className="text-base text-gray-700">
-                      {notification.description}
-                    </Text>
-                    <Text className="mt-4 text-sm text-gray-500">
-                      {format(
-                        new Date(notification.create_time),
-                        "d MMM yyyy, h:mm a",
-                      )}
-                    </Text>
-                    {/* Related Transaction or Issue */}
-                    {notification.transaction_id && (
-                      <TouchableOpacity
-                        onPress={() => {
-                          setIsNotificationModalVisible(false);
-                          router.push(
-                            `/payments/${notification.transaction_id}`,
-                          );
-                        }}
-                        className="mt-4 flex-row items-center"
-                      >
-                        <Text className="text-blue-500">View Transaction Details</Text>
-                        <Ionicons
-                          name="chevron-forward"
-                          size={16}
-                          color="#3b82f6"
-                          style={{ marginLeft: 4 }}
-                        />
-                      </TouchableOpacity>
-                    )}
-                    {notification.issue_id && (
-                      <TouchableOpacity
-                        onPress={() => {
-                          setIsNotificationModalVisible(false);
-                          router.push(`/account/issue/${notification.issue_id}`);
-                        }}
-                        className="mt-4 flex-row items-center"
-                      >
-                        <Text className="text-blue-500">View Issue Details</Text>
-                        <Ionicons
-                          name="chevron-forward"
-                          size={16}
-                          color="#3b82f6"
-                          style={{ marginLeft: 4 }}
-                        />
-                      </TouchableOpacity>
-                    )}
-                  </ScrollView>
-                ) : (
-                  <Text className="text-gray-500">Notification not found.</Text>
-                )}
+            <View className="w-11/12 max-h-3/4 rounded-lg bg-white p-6 shadow-lg">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-xl font-bold">Notification Details</Text>
+                <TouchableOpacity onPress={handleModalClose}>
+                  <Ionicons name="close" size={24} color="black" />
+                </TouchableOpacity>
               </View>
-            </BlurView>
-          </TouchableWithoutFeedback>
-        </View>
+              {isNotificationLoading ? (
+                <ActivityIndicator size="large" className="mt-4" />
+              ) : notification ? (
+                <ScrollView className="mt-4">
+                  <Text className="mb-2 text-lg font-semibold">
+                    {notification.title}
+                  </Text>
+                  <Text className="text-base text-gray-700">
+                    {notification.description}
+                  </Text>
+                  <Text className="mt-4 text-sm text-gray-500">
+                    {format(
+                      new Date(notification.create_time),
+                      "d MMM yyyy, h:mm a"
+                    )}
+                  </Text>
+                  {notification.issue_id && (
+                    <TouchableOpacity
+                      onPress={() =>
+                        handleNavigate(`account/issue/${notification.issue_id}`)
+                      }
+                      className="mt-4"
+                    >
+                      <Text className="text-blue-500">View Issue Details</Text>
+                    </TouchableOpacity>
+                  )}
+                </ScrollView>
+              ) : (
+                <Text className="text-gray-500">Notification not found.</Text>
+              )}
+            </View>
+          </BlurView>
+        </TouchableWithoutFeedback>
       </Modal>
-
-      {/* Include Toast component */}
-      <Toast />
     </View>
   );
 }

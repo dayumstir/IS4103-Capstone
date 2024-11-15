@@ -1,4 +1,4 @@
-// Defines routes related to notification actions
+// apps/backend/src/routes/notificationRoutes.ts
 import { Router } from "express";
 import {
     createNotification,
@@ -12,10 +12,13 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.post("/add", authMiddleware, createNotification);
-router.post("/list", authMiddleware, getNotifications);
-router.get("/merchant", authMiddleware, getMerchantNotifications);
-router.get("/customer", authMiddleware, getCustomerNotifications);
-router.get("/:notification_id", authMiddleware, getNotification);
-router.put("/:notification_id", authMiddleware, updateNotification);
+router.use(authMiddleware);
+
+router.post("/add", createNotification);
+router.post("/list", getNotifications);
+router.get("/merchant", getMerchantNotifications); // Specific route comes first
+router.get("/customer", getCustomerNotifications); // Specific route comes first
+router.get("/:notification_id", getNotification); // Parametric route comes last
+router.put("/", updateNotification);
+
 export default router;

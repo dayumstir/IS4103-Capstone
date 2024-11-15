@@ -1,7 +1,9 @@
+// packages/interfaces/notificationInterface.ts
 export enum NotificationPriority {
     HIGH = "HIGH",
     LOW = "LOW",
 }
+
 export interface INotification {
     notification_id: string;
     title: string;

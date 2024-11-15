@@ -1,6 +1,5 @@
 // apps/mobile/app/(authenticated)/(tabs)/home/index.tsx
-
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   Text,
