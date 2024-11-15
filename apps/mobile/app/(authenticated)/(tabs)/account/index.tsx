@@ -21,7 +21,7 @@ import {
   useGetCustomerCreditTierQuery,
   useGetProfileQuery,
 } from "../../../../redux/services/customerService";
-import { useState } from "react";
+import React, { useState } from "react";
 import * as DocumentPicker from "expo-document-picker";
 import Toast from "react-native-toast-message";
 import { useGetFirstCreditRatingMutation } from "../../../../redux/services/creditScoreService";

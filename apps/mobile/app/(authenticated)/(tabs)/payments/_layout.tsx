@@ -22,6 +22,10 @@ export default function PaymentsLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="rating"
+        options={{ headerTitle: "Create Rating" }}
+      />
     </Stack>
   );
 }
