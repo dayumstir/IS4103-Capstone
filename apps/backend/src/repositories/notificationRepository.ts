@@ -1,47 +1,48 @@
-// Handles database operations related to instalment plans
+// apps/backend/src/repositories/notificationRepository.ts
 import { prisma } from "./db";
 import { INotification } from "@repo/interfaces/notificationInterface";
+import { NotFoundError } from "../utils/error";
 
-// Create a new notification in db
+// Create Notification
 export const createNotification = async (notificationData: INotification) => {
-    return prisma.notification.create({ data: notificationData });
+    return await prisma.notification.create({
+        data: notificationData,
+    });
 };
 
+// Get All Notifications
 export const getNotifications = async () => {
-    return prisma.notification.findMany({
+    return await prisma.notification.findMany({
         orderBy: {
             create_time: "desc",
         },
     });
 };
 
+// Get Notification by ID
 export const findNotificationById = async (notification_id: string) => {
-    return prisma.notification.findUnique({
+    const notification = await prisma.notification.findUnique({
         where: { notification_id },
         include: {
             transaction: true,
             issues: true,
         },
     });
+
+    if (!notification) {
+        throw new NotFoundError("Notification not found");
+    }
+
+    return notification;
 };
 
 // Search Notifications
 export const listAllNotificationsWithSearch = async (search: string) => {
-    return prisma.notification.findMany({
+    return await prisma.notification.findMany({
         where: {
             OR: [
-                {
-                    title: {
-                        contains: search,
-                        mode: "insensitive",
-                    },
-                },
-                {
-                    description: {
-                        contains: search,
-                        mode: "insensitive",
-                    },
-                },
+                { title: { contains: search, mode: "insensitive" } },
+                { description: { contains: search, mode: "insensitive" } },
             ],
         },
         select: {
@@ -59,11 +60,12 @@ export const listAllNotificationsWithSearch = async (search: string) => {
     });
 };
 
+// Get Merchant Notifications
 export const getMerchantNotifications = async (
     merchantId: string,
     searchQuery: string
 ) => {
-    return prisma.notification.findMany({
+    return await prisma.notification.findMany({
         where: {
             merchant_id: merchantId,
             OR: [
@@ -77,11 +79,12 @@ export const getMerchantNotifications = async (
     });
 };
 
+// Get Customer Notifications
 export const getCustomerNotifications = async (
     customerId: string,
     searchQuery: string
 ) => {
-    return prisma.notification.findMany({
+    return await prisma.notification.findMany({
         where: {
             customer_id: customerId,
             OR: [
@@ -97,8 +100,14 @@ export const getCustomerNotifications = async (
 
 // Update Notification
 export const updateNotification = async (notificationData: INotification) => {
-    return prisma.notification.update({
+    const notification = await prisma.notification.update({
         where: { notification_id: notificationData.notification_id },
         data: notificationData,
     });
+
+    if (!notification) {
+        throw new NotFoundError("Notification not found");
+    }
+
+    return notification;
 };

@@ -40,7 +40,20 @@ export default function IssuesLayout() {
       />
       <Stack.Screen
         name="[issueId]"
-        options={{ headerTitle: "Issue Details" }}
+        options={{ 
+          headerTitle: "Issue Details",
+          headerLeft: () => (
+            <TouchableOpacity
+              className="flex-row gap-1"
+              onPress={() => {
+                router.back();
+              }}
+            >
+              <Ionicons name="chevron-back" size={24} color="#3b82f6" />
+              <Text className="text-xl text-blue-500">Back</Text>
+            </TouchableOpacity>
+          ),
+        }}
       />
       <Stack.Screen name="imageViewer" options={{ headerTitle: "Image" }} />
     </Stack>

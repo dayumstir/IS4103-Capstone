@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Text, View, TouchableOpacity } from "react-native";
+import { Text, View, TouchableOpacity, Alert } from "react-native";
 import { useCameraPermissions } from "expo-camera";
 import { useDispatch, useSelector } from "react-redux";
 import { setPaymentStage } from "../../redux/features/paymentStageSlice";
@@ -15,9 +15,16 @@ import ScanQrCodeScreen from "../../components/scan/scanQrCodeScreen";
 import VerifyPurchaseScreen from "../../components/scan/verifyPurchaseScreen";
 import TransactionCompleteScreen from "../../components/scan/transactionCompleteScreen";
 import { useGetMerchantByIdQuery } from "../../redux/services/merchantService";
-import { useGetInstalmentPlansQuery } from "../../redux/services/customerService";
+import {
+  useGetCustomerCreditTierQuery,
+  useGetInstalmentPlansQuery,
+} from "../../redux/services/customerService";
 import SelectInstalmentPlanScreen from "../../components/scan/selectInstalmentPlanScreen";
+<<<<<<< HEAD
 import { useCreateNotificationMutation } from "../../redux/services/notificationService";
+=======
+import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../redux/services/instalmentPaymentService";
+>>>>>>> e9d592fb521525949a3354cf4d6a5391424a5621
 
 export default function ScanScreen() {
   const [status, requestPermission] = useCameraPermissions();
@@ -55,6 +62,16 @@ export default function ScanScreen() {
     error: instalmentPlansError,
   } = useGetInstalmentPlansQuery();
   const [error, setError] = useState<string | null>(null);
+
+  const { data: outstandingInstalmentPayments } =
+    useGetCustomerOutstandingInstalmentPaymentsQuery();
+  const totalCreditUsed =
+    outstandingInstalmentPayments?.reduce(
+      (acc, curr) => acc + curr.amount_due,
+      0,
+    ) ?? 0;
+
+  const { data: creditTier } = useGetCustomerCreditTierQuery();
 
   useEffect(() => {
     if (merchant) {
@@ -111,7 +128,7 @@ export default function ScanScreen() {
         return;
       }
 
-      // Sanitize the merchant ID, price and reference number
+      // Sanitize merchant ID, price and reference number
       const merchantId = rawMerchantId.trim();
       const price = parseFloat(rawPrice.trim());
       const referenceNo = rawReferenceNo.trim();
@@ -119,6 +136,15 @@ export default function ScanScreen() {
       if (merchantId === "" || isNaN(price) || price <= 0) {
         setError("Invalid QR code");
         dispatch(setPaymentStage("Error"));
+        return;
+      }
+
+      // Check if customer has enough credit
+      if (totalCreditUsed + price > (creditTier?.credit_limit ?? 0)) {
+        Alert.alert(
+          "Insufficient credit",
+          "\nYou do not have enough credit to make this purchase.\n\nPlease pay your outstanding payments to increase your available credit.",
+        );
         return;
       }
 

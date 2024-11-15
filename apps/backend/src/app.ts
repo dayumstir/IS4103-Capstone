@@ -1,4 +1,4 @@
-// app/backend/src/app.ts
+// apps/backend/src/app.ts
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
@@ -18,27 +18,21 @@ import instalmentPlanRoutes from "./routes/instalmentPlanRoutes";
 import instalmentPaymentRoutes from "./routes/instalmentPaymentRoutes";
 import issueRoutes from "./routes/issueRoutes";
 import merchantRoutes from "./routes/merchantRoutes";
-import paymentRoutes from "./routes/paymentRoutes";
-import transactionRoutes from "./routes/transactionRoutes";
-import voucherRoutes from "./routes/voucherRoutes";
-import notificationRoutes from "./routes/notificationRoutes";
-import withdrawalFeeRateRoutes from "./routes/withdrawalFeeRateRoutes";
 import merchantPaymentRoutes from "./routes/merchantPaymentRoutes";
 import merchantSizeRoutes from "./routes/merchantSizeRoutes";
+import notificationRoutes from "./routes/notificationRoutes";
+import paymentRoutes from "./routes/paymentRoutes";
 import ratingRoutes from "./routes/ratingRoutes";
+import transactionRoutes from "./routes/transactionRoutes";
+import voucherRoutes from "./routes/voucherRoutes";
+import withdrawalFeeRateRoutes from "./routes/withdrawalFeeRateRoutes";
 
 // Import middleware and utilities
 import { errorHandler } from "./middlewares/errorHandler";
 import logger from "./utils/logger";
 import { handleStripeWebhook } from "./controllers/webhookController";
 
-// Load environment variables at the start
-dotenv.config();
-
 const app = express();
-
-// ====== Middleware setup ======
-app.use(cors());
 
 // Stripe Webhook (raw body parser required by Stripe)
 app.post(
@@ -46,6 +40,9 @@ app.post(
     express.raw({ type: "application/json" }),
     handleStripeWebhook
 );
+
+// ====== Middleware setup ======
+app.use(cors());
 
 // JSON and URL-encoded parsers
 app.use(express.json({ limit: "10mb" }));
@@ -71,14 +68,14 @@ app.use("/instalmentPlan", instalmentPlanRoutes);
 app.use("/instalmentPayment", instalmentPaymentRoutes);
 app.use("/issue", issueRoutes);
 app.use("/merchant", merchantRoutes);
-app.use("/payment", paymentRoutes);
-app.use("/transaction", transactionRoutes);
-app.use("/voucher", voucherRoutes);
-app.use("/notification", notificationRoutes);
-app.use("/withdrawalFeeRate", withdrawalFeeRateRoutes);
 app.use("/merchantPayment", merchantPaymentRoutes);
 app.use("/merchantSize", merchantSizeRoutes);
+app.use("/notification", notificationRoutes);
+app.use("/payment", paymentRoutes);
 app.use("/rating", ratingRoutes);
+app.use("/transaction", transactionRoutes);
+app.use("/voucher", voucherRoutes);
+app.use("/withdrawalFeeRate", withdrawalFeeRateRoutes);
 
 // Health check route
 app.get("/", (req, res) => {

@@ -1,14 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import {
-  INotification,
-  NotificationPriority,
-} from "@repo/interfaces/notificationInterface";
+import { INotification } from "@repo/interfaces/notificationInterface";
 
 export const notificationApi = createApi({
   reducerPath: "notificationApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000/",
-    prepareHeaders: (headers, { getState }) => {
+    baseUrl: "http://localhost:3000",
+    prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
@@ -19,10 +16,7 @@ export const notificationApi = createApi({
   tagTypes: ["Notification"],
   endpoints: (builder) => ({
     // Create Notification
-    createNotification: builder.mutation<
-      INotification,
-      Omit<INotification, "notification_id">
-    >({
+    createNotification: builder.mutation<INotification, Omit<INotification, "notification_id">>({
       query: (notification) => ({
         url: "/notification/add",
         method: "POST",

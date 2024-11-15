@@ -31,6 +31,9 @@ import { useGetProfileQuery } from "../../../../redux/services/customerService";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
 import { formatCurrency } from "../../../../utils/formatCurrency";
 
+// Import the notification API
+import { useGetCustomerNotificationsQuery } from "../../../../redux/services/notificationService";
+
 // Define validation schema
 const topUpSchema = z.object({
   amount: z
@@ -56,6 +59,18 @@ export default function WalletPage() {
   const { control, handleSubmit, reset, formState: { errors } } = useForm<TopUpFormValues>({
     resolver: zodResolver(topUpSchema),
   });
+
+  // Fetch customer notifications
+  const {
+    data: notifications,
+    isLoading: isNotificationsLoading,
+    refetch: refetchNotifications,
+  } = useGetCustomerNotificationsQuery("");
+
+  // Count unread notifications
+  const unreadNotificationsCount = notifications
+    ? notifications.filter((notification) => !notification.is_read).length
+    : 0;
 
   // Fetch payment history and outstanding instalments
   const {
@@ -177,7 +192,7 @@ export default function WalletPage() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    Promise.all([refetchPaymentHistory(), refetchInstalmentPayments()])
+    Promise.all([refetchPaymentHistory(), refetchInstalmentPayments(), refetchNotifications()])
       .then(() => setRefreshing(false))
       .catch((error) => {
         console.error("Error refreshing data:", error);
@@ -193,11 +208,23 @@ export default function WalletPage() {
         }
       >
         <View className="m-4 flex-row items-center justify-between">
-          <Text className="text-4xl font-bold">Wallet</Text>
-          <TouchableOpacity className="p-2">
-            <Ionicons name="notifications-outline" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
+        <Text className="text-4xl font-bold">Wallet</Text>
+        <TouchableOpacity
+          className="relative p-2"
+          onPress={() => router.push("/notifications")}
+        >
+          <Ionicons name="notifications-outline" size={28} color="black" />
+          {unreadNotificationsCount > 0 && (
+            <View
+              className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-red-500"
+            >
+              <Text className="text-xs font-bold text-white">
+                {unreadNotificationsCount}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
 
         {/* ===== Wallet Balance & Outstanding Payments ===== */}
         <LinearGradient

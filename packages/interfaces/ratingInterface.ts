@@ -1,5 +1,5 @@
 // packages/interfaces/ratingInterface.ts
-import { ITransaction } from "./transactionInterface";
+import { TransactionResult } from "./transactionInterface";
 
 export interface IRating {
   rating_id: string;
@@ -7,8 +7,8 @@ export interface IRating {
   description: string;
   rating: string;
 
-  created_at: Date;
+  createdAt: Date;
 
   transaction_id?: string;
-  transaction?: ITransaction;
+  transaction?: TransactionResult;
 }

@@ -1,4 +1,4 @@
-// Need to use the React-specific entry point to import createApi
+// apps/web-merchant/src/redux/services/notification.ts
 import { createApi } from "@reduxjs/toolkit/query/react";
 import BaseQueryWithAuthCheck from "../utils.tsx/baseQuery";
 import { INotification } from "@repo/interfaces";
@@ -19,7 +19,7 @@ export const notificationApi = createApi({
       providesTags: ["NotificationList"],
     }),
 
-    // Get notification by id
+    // Get notification by ID
     getNotification: builder.query<INotification, string>({
       query: (id) => ({
         url: `/${id}`,
@@ -30,7 +30,7 @@ export const notificationApi = createApi({
     // Update notification
     updateNotification: builder.mutation<INotification, INotification>({
       query: (notification) => ({
-        url: `/${notification.notification_id}`,
+        url: "/",
         method: "PUT",
         body: notification,
       }),
