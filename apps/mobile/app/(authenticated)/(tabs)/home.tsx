@@ -1,5 +1,5 @@
 // apps/mobile/app/(authenticated)/(tabs)/home/index.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   Text,
@@ -28,7 +28,10 @@ import { Picker } from "@ant-design/react-native";
 
 // Import the notification API
 import { useGetCustomerNotificationsQuery } from "../../../redux/services/notificationService";
-import { useGetFirstCreditRatingMutation } from "../../../redux/services/creditScoreService";
+import {
+  useGetFirstCreditRatingMutation,
+  useUpdateCreditRatingMutation,
+} from "../../../redux/services/creditScoreService";
 
 // Determine graph y-axis ticks
 const roundToNiceNumber = (value: number): number => {
@@ -58,23 +61,7 @@ export default function HomePage() {
   } = useGetProfileQuery();
 
   const [getFirstCreditRating] = useGetFirstCreditRatingMutation();
-
-  // Update Redux store when profile data is fetched
-  useEffect(() => {
-    const calculateCreditScore = async () => {
-      // Get first credit rating if credit score == 0 (i.e. first login)
-      if (profile?.credit_score === 0) {
-        const formData = new FormData();
-        formData.append("customer_id", profile?.customer_id ?? "");
-        await getFirstCreditRating(formData);
-      }
-      if (profile && !isLoading) {
-        dispatch(setProfile(profile));
-      }
-    };
-
-    calculateCreditScore();
-  }, [profile, isLoading, refetchProfile]);
+  const [updateCreditRating] = useUpdateCreditRatingMutation();
 
   const {
     data: outstandingInstalmentPayments,
@@ -98,6 +85,28 @@ export default function HomePage() {
   const unreadNotificationsCount = notifications
     ? notifications.filter((notification) => !notification.is_read).length
     : 0;
+
+  // When profile data is fetched
+  useEffect(() => {
+    const calculateCreditScore = async () => {
+      if (profile) {
+        // Get first credit rating if credit score == 0 (i.e. first login)
+        if (profile.credit_score === 0) {
+          const formData = new FormData();
+          formData.append("customer_id", profile.customer_id ?? "");
+          await getFirstCreditRating(formData);
+        }
+        // Update credit rating on every subsequent login
+        if (profile.credit_score !== 0) {
+          await updateCreditRating({ customer_id: profile.customer_id ?? "" });
+        }
+        // Update Redux store
+        dispatch(setProfile(profile));
+      }
+    };
+
+    calculateCreditScore();
+  }, [profile, isLoading, refetchProfile]);
 
   const onRefresh = async () => {
     setRefreshing(true);
