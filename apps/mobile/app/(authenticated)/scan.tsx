@@ -20,11 +20,8 @@ import {
   useGetInstalmentPlansQuery,
 } from "../../redux/services/customerService";
 import SelectInstalmentPlanScreen from "../../components/scan/selectInstalmentPlanScreen";
-<<<<<<< HEAD
 import { useCreateNotificationMutation } from "../../redux/services/notificationService";
-=======
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../redux/services/instalmentPaymentService";
->>>>>>> e9d592fb521525949a3354cf4d6a5391424a5621
 
 export default function ScanScreen() {
   const [status, requestPermission] = useCameraPermissions();
