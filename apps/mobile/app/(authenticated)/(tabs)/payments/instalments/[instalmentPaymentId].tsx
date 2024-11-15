@@ -483,7 +483,7 @@ export default function InstalmentPaymentDetails() {
         </View>
 
         {/* ===== Voucher Button (visible only when no voucher is selected) ===== */}
-        {!selectedVoucher && (
+        {instalmentPayment.status === "UNPAID" && !selectedVoucher && (
           <View className="mb-4">
             <Button type="ghost" onPress={() => setVoucherModalVisible(true)}>
               <Text className="font-semibold text-blue-500">Use Voucher</Text>
@@ -519,7 +519,7 @@ export default function InstalmentPaymentDetails() {
         )}
 
         {/* ===== Cashback Button ===== */}
-        {!selectedCashbackWallet && (
+        {instalmentPayment.status === "UNPAID" && !selectedCashbackWallet && (
           <View className="mb-4">
             <Button
               type="ghost"
