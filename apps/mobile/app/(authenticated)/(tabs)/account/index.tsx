@@ -8,17 +8,19 @@ import {
   RefreshControl,
 } from "react-native";
 import { ActivityIndicator, Button } from "@ant-design/react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { logout } from "../../../../redux/features/customerAuthSlice";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import { ScrollView } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { RootState } from "../../../../redux/store";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../../../redux/services/instalmentPaymentService";
 import { formatCurrency } from "../../../../utils/formatCurrency";
-import { useGetCustomerCreditTierQuery } from "../../../../redux/services/customerService";
+import {
+  useGetCustomerCreditTierQuery,
+  useGetProfileQuery,
+} from "../../../../redux/services/customerService";
 import { useState } from "react";
 import * as DocumentPicker from "expo-document-picker";
 import Toast from "react-native-toast-message";
@@ -29,9 +31,9 @@ export default function AccountPage() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
-  const profile = useSelector((state: RootState) => state.customer.profile);
+  const { data: profile, refetch: refetchProfile } = useGetProfileQuery();
 
-  const { data: outstandingInstalmentPayments, refetch: refetchInstallments } =
+  const { data: outstandingInstalmentPayments, refetch: refetchInstalments } =
     useGetCustomerOutstandingInstalmentPaymentsQuery();
   const totalCreditUsed =
     outstandingInstalmentPayments?.reduce(
@@ -43,10 +45,16 @@ export default function AccountPage() {
     useGetCustomerCreditTierQuery();
 
   const [getFirstCreditRating] = useGetFirstCreditRatingMutation();
+  const [creditScoreIsCalculating, setCreditScoreIsCalculating] =
+    useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([refetchCreditTier(), refetchInstallments()]);
+    await Promise.all([
+      refetchProfile(),
+      refetchCreditTier(),
+      refetchInstalments(),
+    ]);
     setRefreshing(false);
   };
 
@@ -69,16 +77,23 @@ export default function AccountPage() {
 
       const formData = new FormData();
       const fileUri = result.assets[0].uri;
-      const response = await fetch(fileUri);
-      const blob = await response.blob();
-      formData.append("file", blob, result.assets[0].name);
-      await getFirstCreditRating(formData);
+      formData.append("file", {
+        uri: fileUri,
+        type: "application/pdf",
+        name: result.assets[0].name,
+      } as any);
+      formData.append("customer_id", profile?.customer_id ?? "");
 
       Toast.show({
         type: "success",
         text1: "File selected successfully",
         text2: result.assets[0].name,
       });
+
+      setCreditScoreIsCalculating(true);
+      await getFirstCreditRating(formData);
+      refetchProfile();
+      setCreditScoreIsCalculating(false);
     } catch (error) {
       Toast.show({
         type: "error",
@@ -161,7 +176,11 @@ export default function AccountPage() {
         <View className="items-center gap-2">
           <Text className="text-gray-600">Credit Score</Text>
           <Text className="text-5xl font-bold text-black">
-            {profile?.credit_score}
+            {creditScoreIsCalculating ? (
+              <ActivityIndicator size="large" />
+            ) : (
+              profile?.credit_score
+            )}
           </Text>
         </View>
 

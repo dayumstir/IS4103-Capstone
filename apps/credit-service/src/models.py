@@ -80,9 +80,6 @@ class Customer(db.Model):
 
     # Relationships
     transactions = db.relationship('Transaction', back_populates='customer', lazy='dynamic')  # Relationship with Transaction
-    credit_tier_id = db.Column(String, ForeignKey('CreditTier.credit_tier_id'), nullable=False)
-    credit_tier = relationship("CreditTier", back_populates="customers")
-
 
     def __repr__(self):
         return f'<Customer {self.name} - Email: {self.email}>'
@@ -95,6 +92,3 @@ class CreditTier(db.Model):
     min_credit_score = db.Column(Integer, nullable=False)
     max_credit_score = db.Column(Integer, nullable=False)
     credit_limit = db.Column(Integer, nullable=False)
-
-    # Relationships
-    customers = relationship("Customer", back_populates="credit_tier")

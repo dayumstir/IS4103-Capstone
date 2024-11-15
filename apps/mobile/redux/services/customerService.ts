@@ -25,6 +25,7 @@ export const customerApi = createApi({
     getProfile: builder.query<ICustomer, void>({
       query: () => "/profile", // API endpoint for fetching profile
       providesTags: ["CustomerProfile"],
+      keepUnusedDataFor: 0,
     }),
 
     // Edit profile API call

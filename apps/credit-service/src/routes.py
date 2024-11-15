@@ -51,8 +51,14 @@ def upload_cci():
 def get_first_credit_rating():
     credit_rating = 0
     try:
+        data = request.form
+        customer_id = data.get("customer_id")
+        if customer_id == "" or customer_id is None:
+            return jsonify({"error": "customer_id is required"}), 401
+
         payment_history = []
         credit_utilisation_ratio = 0
+
         # Check if user past payment history is provided
         if len(request.files)==0:
             containsCCI = False
@@ -75,6 +81,7 @@ def get_first_credit_rating():
             X = preprocess(credit_utilisation_ratio, payment_history)
             credit_rating = predict(X)[0]
 
+        update_customer_credit_rating(db, customer_id, credit_rating)
        
         return jsonify({"credit_score": int(credit_rating)}), 200
     except Exception as e:

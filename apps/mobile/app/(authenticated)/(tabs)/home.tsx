@@ -29,7 +29,9 @@ import { Picker } from "@ant-design/react-native";
 
 // Import the notification API
 import { useGetCustomerNotificationsQuery } from "../../../redux/services/notificationService";
+import { useGetFirstCreditRatingMutation } from "../../../redux/services/creditScoreService";
 
+// Determine graph y-axis ticks
 const roundToNiceNumber = (value: number): number => {
   const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
   const normalized = value / magnitude;
@@ -56,16 +58,27 @@ export default function HomePage() {
     refetch: refetchProfile,
   } = useGetProfileQuery();
 
+  const [getFirstCreditRating] = useGetFirstCreditRatingMutation();
+
   // Update Redux store when profile data is fetched
   useEffect(() => {
-    if (profile && !isLoading) {
-      dispatch(setProfile(profile));
-    }
-  }, [profile, isLoading, dispatch]);
+    const calculateCreditScore = async () => {
+      // Get first credit rating if credit score == 0 (i.e. first login)
+      if (profile?.credit_score === 0) {
+        const formData = new FormData();
+        formData.append("customer_id", profile?.customer_id ?? "");
+        await getFirstCreditRating(formData);
+      }
+      if (profile && !isLoading) {
+        dispatch(setProfile(profile));
+      }
+    };
+
+    calculateCreditScore();
+  }, [profile, isLoading, refetchProfile]);
 
   const {
     data: outstandingInstalmentPayments,
-    isLoading: isInstalmentPaymentsLoading,
     refetch: refetchInstalmentPayments,
   } = useGetCustomerOutstandingInstalmentPaymentsQuery();
 

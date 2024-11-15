@@ -67,9 +67,6 @@ export default function Register() {
       // Sore customer data in redux
       dispatch(setCustomer(result));
 
-      // Get first credit rating
-      await getFirstCreditRating().unwrap();
-
       router.replace("/confirmation");
     } catch (err: any) {
       console.error(err);
