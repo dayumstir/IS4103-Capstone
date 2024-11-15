@@ -57,6 +57,7 @@ export default function AccountPage() {
       const result = await DocumentPicker.getDocumentAsync({
         type: "application/pdf",
         copyToCacheDirectory: true,
+        multiple: false,
       });
 
       if (result.canceled) {
