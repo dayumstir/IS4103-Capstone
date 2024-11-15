@@ -8,6 +8,7 @@ import {
   Input,
   message,
   Spin,
+  Tag,
 } from "antd";
 import { RangePickerProps } from "antd/es/date-picker";
 import { useEffect, useState } from "react";
@@ -24,6 +25,12 @@ import {
 } from "../../../../packages/interfaces/transactionInterface";
 import { useGetIssuesMutation } from "../redux/services/issue";
 import { useGetTransactionsByFilterMutation } from "../redux/services/transaction";
+import { IMerchantPayment } from "@repo/interfaces";
+import {
+  IMerchantPaymentFilter,
+  PaymentStatus,
+} from "@repo/interfaces/merchantPaymentInterface";
+import { useGetMerchantPaymentsMutation } from "../redux/services/merchantPayment";
 
 interface GlobalSearchDrawerProps {
   merchantId: string;
@@ -33,6 +40,7 @@ interface GlobalSearchDrawerProps {
   setPrevSearchTerm: (searchTerm: string) => void;
   prevIssues?: IssueResult[];
   prevTransactions?: TransactionResult[];
+  prevMerchantPayments?: IMerchantPayment[];
 }
 
 const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
@@ -42,6 +50,7 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
   prevSearchTerm,
   prevIssues,
   prevTransactions,
+  prevMerchantPayments,
 }) => {
   const navigate = useNavigate();
   const { Search } = Input;
@@ -49,7 +58,11 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
 
   const [showIssues, setShowIssues] = useState(true);
   const [showTransactions, setShowTransactions] = useState(true);
+  const [showMerchantPayments, setShowMerchantPayments] = useState(true);
   const [issues, setIssues] = useState<IssueResult[] | undefined>(prevIssues);
+  const [merchantPayments, setMerchantPayments] = useState<
+    IMerchantPayment[] | undefined
+  >(prevMerchantPayments);
   const [transactions, setTransactions] = useState<
     TransactionResult[] | undefined
   >(prevTransactions);
@@ -71,9 +84,20 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
       },
     },
   );
+  const [merchantPaymentFilter, setMerchantPaymentFilter] =
+    useState<IMerchantPaymentFilter>({
+      merchant_id: merchantId,
+      search_term: searchTerm,
+      sorting: {
+        sortBy: "created_at",
+        sortDirection: sortDirection.DESC,
+      },
+    });
   const [getIssues, { isLoading: isLoadingIssues }] = useGetIssuesMutation();
   const [getTransactions, { isLoading: isLoadingTransactions }] =
     useGetTransactionsByFilterMutation();
+  const [getMerchantPayments, { isLoading: isLoadingMerchantPayments }] =
+    useGetMerchantPaymentsMutation();
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -86,6 +110,10 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
         search_term: searchTerm,
       }));
       setTransactionFilter((currentFilter) => ({
+        ...currentFilter,
+        search_term: searchTerm,
+      }));
+      setMerchantPaymentFilter((currentFilter) => ({
         ...currentFilter,
         search_term: searchTerm,
       }));
@@ -110,6 +138,12 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
           setTransactions(transactions);
         })
         .catch(() => message.error("Unable to get transactions"));
+      getMerchantPayments(merchantPaymentFilter)
+        .unwrap()
+        .then((merchantPayments) => {
+          setMerchantPayments(merchantPayments);
+        })
+        .catch(() => message.error("Unable to get merchant payments"));
     } else {
       setIssues([]);
       setTransactions([]);
@@ -126,6 +160,11 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
         create_to: createTo,
       }));
       setTransactionFilter((currentFilter) => ({
+        ...currentFilter,
+        create_from: createFrom,
+        create_to: createTo,
+      }));
+      setMerchantPaymentFilter((currentFilter) => ({
         ...currentFilter,
         create_from: createFrom,
         create_to: createTo,
@@ -181,6 +220,18 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
                   Transactions
                 </Checkbox>
               )}
+              {merchantPayments && merchantPayments.length > 0 && (
+                <Checkbox
+                  onChange={(e) => {
+                    e.target.checked
+                      ? setShowMerchantPayments(true)
+                      : setShowMerchantPayments(false);
+                  }}
+                  defaultChecked={true}
+                >
+                  Merchant Payments
+                </Checkbox>
+              )}
             </div>
           </div>
         </div>
@@ -190,7 +241,9 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
           className="flex-1 overflow-y-auto px-2"
           style={{ maxHeight: "calc(85vh)" }}
         >
-          {isLoadingIssues && isLoadingTransactions ? (
+          {isLoadingIssues &&
+          isLoadingTransactions &&
+          isLoadingMerchantPayments ? (
             <div className="flex h-full items-center justify-center">
               <Spin />
             </div>
@@ -267,7 +320,7 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
                       icon={<ArrowRightOutlined />}
                       size="small"
                       onClick={() => {
-                        navigate("/financial-management/transactions", {
+                        navigate("/business-management/transactions", {
                           state: {
                             search: searchTerm,
                             filteredTransactions: transactions,
@@ -284,7 +337,7 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
                       hoverable
                       onClick={() => {
                         navigate(
-                          `/financial-management/transactions/${transaction.transaction_id}`,
+                          `/business-management/transactions/${transaction.transaction_id}`,
                         );
                         setIsGlobalSearchDrawerOpen(false);
                         setSearchTerm("");
@@ -369,10 +422,98 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
                   ))}
                 </>
               )}
+              {showMerchantPayments &&
+                merchantPayments &&
+                merchantPayments.length > 0 && (
+                  <>
+                    <div className="sticky top-0 z-10 flex items-center justify-between bg-white pb-2">
+                      <h3 className="font-semibold">Merchant Payments</h3>
+                      <Button
+                        icon={<ArrowRightOutlined />}
+                        size="small"
+                        onClick={() => {
+                          navigate("/business-management/merchant-payments", {
+                            state: {
+                              search: searchTerm,
+                              filteredMerchantPayments: merchantPayments,
+                            },
+                          });
+                          setIsGlobalSearchDrawerOpen(false);
+                          setSearchTerm("");
+                        }}
+                      />
+                    </div>
+                    {merchantPayments?.map((merchantPayment) => (
+                      <Card
+                        key={merchantPayment.merchant_payment_id}
+                        hoverable
+                        onClick={() => {
+                          navigate(
+                            `/business-management/issues/${merchantPayment.merchant_payment_id}`,
+                          );
+                          setIsGlobalSearchDrawerOpen(false);
+                          setSearchTerm("");
+                        }}
+                        className="my-1"
+                      >
+                        <div className="">
+                          <div className="flex">
+                            <p className="w-1/3 font-bold">
+                              Requested Withdrawal:
+                            </p>
+                            <Highlighter
+                              highlightClassName={highlightedColour}
+                              searchWords={[searchTerm]}
+                              autoEscape={true}
+                              textToHighlight={merchantPayment.total_amount_from_transactions.toString()}
+                              className="line-clamp-1 flex-1"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex">
+                          <p className="w-1/3 font-bold">Final Payment:</p>
+                          <Highlighter
+                            highlightClassName={highlightedColour}
+                            searchWords={[searchTerm]}
+                            autoEscape={true}
+                            textToHighlight={`SGD ${merchantPayment.final_payment_amount.toString()}`}
+                            className="line-clamp-1 flex-1"
+                          />
+                        </div>
+                        <div className="flex">
+                          <p className="w-1/3 font-bold">Status:</p>
+                          <Tag
+                            color={
+                              merchantPayment.status === PaymentStatus.PAID
+                                ? "green"
+                                : "gold"
+                            }
+                          >
+                            {merchantPayment.status ==
+                              PaymentStatus.PENDING_PAYMENT &&
+                              "PENDING PAYMENT"}
+                            {merchantPayment.status == PaymentStatus.PAID &&
+                              "PAID"}
+                          </Tag>
+                        </div>
+                        <div className="flex">
+                          <p className="w-1/3 font-bold">Created At:</p>
+                          <p className="flex-1 text-gray-500">
+                            {merchantPayment?.created_at
+                              ? `${new Date(merchantPayment.created_at).toDateString()}, ${new Date(merchantPayment.created_at).toLocaleTimeString()}`
+                              : "No Date Available"}
+                          </p>
+                        </div>
+                      </Card>
+                    ))}
+                  </>
+                )}
               {issues &&
                 issues.length == 0 &&
                 transactions &&
-                transactions.length == 0 && (
+                transactions.length == 0 &&
+                merchantPayments &&
+                merchantPayments.length == 0 && (
                   <div className="flex h-full items-center justify-center">
                     <p style={{ color: "#9d9d9d" }}>No search results</p>
                   </div>
