@@ -82,7 +82,7 @@ const NotificationsScreen = () => {
     return notifications.reduce((acc, notification) => {
       const formattedCreateTime = new Date(notification.create_time)
         .toISOString()
-        .slice(0, 19);
+        .slice(0, 16);
       // Find an existing group with the same title, description, and create time
       const existingGroup = acc.find(
         (item) =>
@@ -150,32 +150,30 @@ const NotificationsScreen = () => {
     const { customer_ids = [], merchant_ids = [], ...restValues } = values;
 
     try {
-      // Create notifications for each selected customer
+      // Create a notification for each selected customer
       const customerNotifications = customer_ids.map((customer_id) => ({
         ...restValues,
         customer_id,
-        merchant_id: null, // Ensure only customer is set
+        merchant_id: null, // Only set the customer ID, merchant is null
       }));
 
-      // Create notifications for each selected merchant
+      // Create a notification for each selected merchant
       const merchantNotifications = merchant_ids.map((merchant_id) => ({
         ...restValues,
         merchant_id,
-        customer_id: null, // Ensure only merchant is set
+        customer_id: null, // Only set the merchant ID, customer is null
       }));
 
-      // Combine customer and merchant notifications
+      // Combine customer and merchant notifications into a single array
       const allNotifications = [
         ...customerNotifications,
         ...merchantNotifications,
       ];
 
-      // Create all notifications
-      await Promise.all(
-        allNotifications.map((notification) =>
-          createNotification(notification).unwrap(),
-        ),
-      );
+      // Send each notification to the server individually
+      for (const notification of allNotifications) {
+        await createNotification(notification).unwrap();
+      }
 
       message.success("Notifications have been created successfully.");
       setCreateModalVisible(false);
@@ -338,7 +336,15 @@ const NotificationsScreen = () => {
             {currentNotification?.description}
           </Descriptions.Item>
           <Descriptions.Item label="Priority" span={2}>
-            {currentNotification?.priority}
+            <Tag
+              color={
+                currentNotification?.priority === "HIGH"
+                  ? "volcano"
+                  : "geekblue"
+              }
+            >
+              {currentNotification?.priority}
+            </Tag>
           </Descriptions.Item>
           <Descriptions.Item label="Time Created">
             {currentNotification?.create_time &&
@@ -347,6 +353,25 @@ const NotificationsScreen = () => {
             {currentNotification?.create_time &&
               new Date(currentNotification?.create_time).toLocaleTimeString()}
           </Descriptions.Item>
+
+          {/* Display the Issue ID as a link if present */}
+          {currentNotification?.issue_id && (
+            <Descriptions.Item label="Issue ID" span={2}>
+              <Link to={`/business-management/issues`}>
+                {currentNotification.issue_id}
+              </Link>
+            </Descriptions.Item>
+          )}
+
+          {/* Display the Transaction ID as a link if present */}
+          {currentNotification?.transaction_id && (
+            <Descriptions.Item label="Transaction ID" span={2}>
+              <Link to={`/business-management/transactions`}>
+                {currentNotification.transaction_id}
+              </Link>
+            </Descriptions.Item>
+          )}
+
           {currentNotification?.customer_ids?.length > 0 && (
             <Descriptions.Item label="Customers" span={2}>
               {currentNotification.customer_ids.map((customerId) => {
@@ -357,7 +382,7 @@ const NotificationsScreen = () => {
                   <div key={customerId}>
                     {customer?.email ? (
                       <>
-                        <Tag>Customer</Tag> {customer.email}
+                        {customer.email}
                       </>
                     ) : (
                       <span>Unknown Customer</span>
@@ -379,7 +404,7 @@ const NotificationsScreen = () => {
                   <div key={merchantId}>
                     {merchant?.email ? (
                       <>
-                        <Tag>Merchant</Tag> {merchant.email}
+                        {merchant.email}
                       </>
                     ) : (
                       <span>Unknown Merchant</span>

@@ -13,6 +13,8 @@ def update_credit_rating():
     try:
         data = request.get_json()
         customer_id = data.get("customer_id")
+        if customer_id == "" or customer_id is None:
+            return jsonify({"error": "customer_id is required"}), 401
 
         payment_history = get_payment_history(db, customer_id) # Most recent 6 months
         credit_utilisation_ratio = get_credit_utilisation_ratio(customer_id)
@@ -114,13 +116,11 @@ def get_admin_credit_rating():
             credit_rating = predict(X)
             credit_tier = get_lowest_credit_tier(db)
             credit_rating = min(credit_rating[0],credit_tier.max_credit_score)
-
         else:
             for file in request.files.values():
                 payment_history,  credit_utilisation_ratio = extract_payment_history_and_credit_utilisation_ratio_from_report(file) # Most recent 6 months
             X = preprocess(credit_utilisation_ratio, payment_history)
             credit_rating = predict(X)[0]
-
         return jsonify({"credit_score": int(credit_rating)}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

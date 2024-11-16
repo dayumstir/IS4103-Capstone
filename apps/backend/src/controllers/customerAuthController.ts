@@ -41,10 +41,10 @@ export const confirmEmail = async (req: Request, res: Response) => {
 // Customer Sign Up: Send OTP to contact number
 export const sendPhoneNumberOTP = async (req: Request, res: Response) => {
     logger.info('Executing sendPhoneNumberOTP...');
-    const { contact_number } = req.body;
+    const { contact_number, email } = req.body;
 
     try {
-        await customerAuthService.sendPhoneNumberOTP(contact_number);
+        await customerAuthService.sendPhoneNumberOTP(contact_number, email);
         res.status(200).json({ message: "OTP sent to phone." });
     } catch (error: any) {
         logger.error('An error occurred:', error);

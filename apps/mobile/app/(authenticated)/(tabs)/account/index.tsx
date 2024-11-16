@@ -21,7 +21,7 @@ import {
   useGetCustomerCreditTierQuery,
   useGetProfileQuery,
 } from "../../../../redux/services/customerService";
-import { useState } from "react";
+import React, { useState } from "react";
 import * as DocumentPicker from "expo-document-picker";
 import Toast from "react-native-toast-message";
 import { useGetFirstCreditRatingMutation } from "../../../../redux/services/creditScoreService";
@@ -240,17 +240,19 @@ export default function AccountPage() {
           </View>
         </View>
 
-        <Button type="ghost" onPress={handleUploadCreditHistory}>
-          <AntDesign
-            name="pdffile1"
-            size={20}
-            color="#3b82f6"
-            className="mr-2"
-          />
-          <Text className="my-auto font-semibold text-blue-500">
-            Upload Credit History (PDF)
-          </Text>
-        </Button>
+        {profile?.credit_score === 300 && ( // default credit score for new users
+          <Button type="ghost" onPress={handleUploadCreditHistory}>
+            <AntDesign
+              name="pdffile1"
+              size={20}
+              color="#3b82f6"
+              className="mr-2"
+            />
+            <Text className="my-auto font-semibold text-blue-500">
+              Upload Credit History (PDF)
+            </Text>
+          </Button>
+        )}
       </View>
 
       {/* ===== Account Services ===== */}
