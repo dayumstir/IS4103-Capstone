@@ -47,19 +47,21 @@ enum Status {
 }
 
 model Customer {
-  customer_id     String   @id @default(cuid())
-  name            String
-  profile_picture Bytes    @db.ByteA
-  email           String   @unique
-  password        String
-  contact_number  String
-  address         String
-  date_of_birth   DateTime
-  status          Status
-  wallet_balance  Float    @default(0)
-  credit_score    Int      @default(0)
-  forgot_password Boolean  @default(false)
-  savings         Float    @default(0)
+  customer_id              String   @id @default(cuid())
+  name                     String
+  profile_picture          Bytes    @db.ByteA
+  email                    String   @unique
+  password                 String
+  contact_number           String
+  address                  String
+  date_of_birth            DateTime
+  status                   Status
+  credit_score_history     String?
+  credit_utilisation_ratio Float?
+  wallet_balance           Float    @default(0)
+  credit_score             Int      @default(0)
+  forgot_password          Boolean  @default(false)
+  savings                  Float    @default(0)
 
   // Relationships
   emailVerificationTokens EmailVerificationToken[]

@@ -15,6 +15,10 @@ def get_customer_credit_limit(customer_id):
         raise Exception("Customer credit score does not belong to any credit tier in database")
     return credit_tiers[0].credit_limit
 
+def get_credit_score_history(customer_id):
+    customer = Customer.query.get(customer_id)
+    return customer.credit_score_history
+
 def get_customer_outstanding_balance(customer_id):
     today = datetime.now()
     outstanding_balance = InstalmentPayment.query.with_entities(func.sum(InstalmentPayment.amount_due)).filter(
@@ -22,6 +26,8 @@ def get_customer_outstanding_balance(customer_id):
         InstalmentPayment.due_date <= today,
         InstalmentPayment.transaction.has(customer_id=customer_id)
     ).scalar()
+    if outstanding_balance is None:
+        return 0
     return outstanding_balance
 
     
@@ -29,6 +35,20 @@ def update_customer_credit_rating(db, customer_id, credit_score):
     customer = Customer.query.get(customer_id)
     customer.credit_score = int(credit_score)
     db.session.commit()
+
+def update_customer_credit_rating_history(db, customer_id, credit_score_history):
+    customer = Customer.query.get(customer_id)
+    customer.credit_score_history = credit_score_history
+    db.session.commit()
+
+def update_customer_credit_utilisation_ratio(db, customer_id, credit_utilisation_ratio):
+    customer = Customer.query.get(customer_id)
+    customer.credit_utilisation_ratio = credit_utilisation_ratio
+    db.session.commit()
+
+def get_first_customer_credit_utilisation_ratio(customer_id):
+    customer = Customer.query.get(customer_id)
+    return customer.credit_utilisation_ratio
     
 def get_lowest_credit_tier(db):
     credit_tiers = CreditTier.query.all()
@@ -44,7 +64,6 @@ def get_most_recent_6_months_instalment_payments(db, customer_id):
     try:
         customer = Customer.query.get(customer_id)
         instalment_payments = []
-        
         six_months_ago = datetime.now() - relativedelta(months=6)
         
         for transaction in customer.transactions:
@@ -54,7 +73,6 @@ def get_most_recent_6_months_instalment_payments(db, customer_id):
                 if payment.due_date >= six_months_ago
             ]
             instalment_payments.extend(recent_payments)
-        
         return serialise(instalment_payments)
     except Exception as e:
         return str(e)

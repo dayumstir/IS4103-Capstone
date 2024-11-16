@@ -449,7 +449,7 @@ const GlobalSearchDrawer: React.FC<GlobalSearchDrawerProps> = ({
                         hoverable
                         onClick={() => {
                           navigate(
-                            `/business-management/issues/${merchantPayment.merchant_payment_id}`,
+                            `/business-management/merchant-payments/${merchantPayment.merchant_payment_id}`,
                           );
                           setIsGlobalSearchDrawerOpen(false);
                           setSearchTerm("");
