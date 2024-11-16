@@ -1,12 +1,6 @@
 // apps/mobile/app/login.tsx
 import { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/features/customerAuthSlice";
 import { router } from "expo-router";

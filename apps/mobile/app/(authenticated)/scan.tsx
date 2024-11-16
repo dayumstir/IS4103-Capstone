@@ -185,16 +185,6 @@ export default function ScanScreen() {
 
     try {
       const transaction = await createTransaction(newTransaction).unwrap();
-      const notificationPayload = {
-        title: "New Transaction",
-        description: `New transaction ${transaction.transaction_id} has been created for $"${transaction.amount}".`,
-        merchant_id: transaction.merchant.merchant_id || null,
-        transaction_id: transaction.transaction_id,
-        priority: "LOW",
-      };
-
-      const notificationResponse =
-        await createNotification(notificationPayload).unwrap();
       setTransaction(transaction);
       dispatch(setPaymentStage("Transaction Complete"));
     } catch (err) {
