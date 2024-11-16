@@ -28,7 +28,8 @@ def get_customer_outstanding_balance(customer_id):
     ).scalar()
     if outstanding_balance is None:
         return 0
-    return outstanding_balance
+    else:
+        return outstanding_balance
 
     
 def update_customer_credit_rating(db, customer_id, credit_score):

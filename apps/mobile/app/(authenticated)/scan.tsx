@@ -22,6 +22,7 @@ import {
 import SelectInstalmentPlanScreen from "../../components/scan/selectInstalmentPlanScreen";
 import { useCreateNotificationMutation } from "../../redux/services/notificationService";
 import { useGetCustomerOutstandingInstalmentPaymentsQuery } from "../../redux/services/instalmentPaymentService";
+import Toast from "react-native-toast-message";
 
 export default function ScanScreen() {
   const [status, requestPermission] = useCameraPermissions();
@@ -138,10 +139,16 @@ export default function ScanScreen() {
 
       // Check if customer has enough credit
       if (totalCreditUsed + price > (creditTier?.credit_limit ?? 0)) {
-        Alert.alert(
-          "Insufficient credit",
-          "\nYou do not have enough credit to make this purchase.\n\nPlease pay your outstanding payments to increase your available credit.",
-        );
+        Toast.show({
+          type: "error",
+          text1: "Insufficient credit",
+          text2:
+            "You do not have enough credit to make this purchase.\n\nPlease pay your outstanding payments to increase your available credit.",
+        });
+        // Alert.alert(
+        //   "Insufficient credit",
+        //   "\nYou do not have enough credit to make this purchase.\n\nPlease pay your outstanding payments to increase your available credit.",
+        // );
         return;
       }
 
@@ -185,16 +192,6 @@ export default function ScanScreen() {
 
     try {
       const transaction = await createTransaction(newTransaction).unwrap();
-      const notificationPayload = {
-        title: "New Transaction",
-        description: `New transaction ${transaction.transaction_id} has been created for $"${transaction.amount}".`,
-        merchant_id: transaction.merchant.merchant_id || null,
-        transaction_id: transaction.transaction_id,
-        priority: "LOW",
-      };
-
-      const notificationResponse =
-        await createNotification(notificationPayload).unwrap();
       setTransaction(transaction);
       dispatch(setPaymentStage("Transaction Complete"));
     } catch (err) {
