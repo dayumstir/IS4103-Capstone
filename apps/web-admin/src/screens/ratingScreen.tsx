@@ -10,10 +10,10 @@ import {
   Tag,
 } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
+import { format } from "date-fns";
 import { useGetRatingsQuery, useGetRatingQuery } from "../redux/services/ratingService";
-import { IRating, ITransaction } from "@repo/interfaces";
-
-const { Search } = Input;
+import { IRating, TransactionResult } from "@repo/interfaces";
+import debounce from "lodash/debounce"; // Install lodash if not already added: `npm install lodash`
 
 export default function RatingsScreen() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,9 +25,10 @@ export default function RatingsScreen() {
     skip: !selectedRatingId,
   });
 
-  const handleSearch = (value: string) => {
+  // Debounced search handler
+  const handleSearchChange = debounce((value: string) => {
     setSearchTerm(value);
-  };
+  }, 300); // Adjust debounce delay as needed
 
   const handleViewRatingDetails = (ratingId: string) => {
     setSelectedRatingId(ratingId);
@@ -39,44 +40,46 @@ export default function RatingsScreen() {
     setSelectedRatingId(null);
   };
 
-  const renderTransactionDetails = (transaction: ITransaction) => (
-    <Descriptions bordered column={1} title="Transaction Details">
-      <Descriptions.Item label="Transaction ID">
-        {transaction.transaction_id}
-      </Descriptions.Item>
-      <Descriptions.Item label="Amount">
-        SGD {transaction.amount.toFixed(2)}
-      </Descriptions.Item>
-      <Descriptions.Item label="Date of Transaction">
-        {new Date(transaction.date_of_transaction).toLocaleString()}
-      </Descriptions.Item>
-      <Descriptions.Item label="Status">
-        <Tag
-          color={
-            transaction.status === "FULLY_PAID" ? "green" : "orange"
-          }
-        >
-          {transaction.status.replace("_", " ")}
-        </Tag>
-      </Descriptions.Item>
-      <Descriptions.Item label="Reference No">
-        {transaction.reference_no}
-      </Descriptions.Item>
-      <Descriptions.Item label="Cashback Percentage">
-        {transaction.cashback_percentage}%
-      </Descriptions.Item>
-      <Descriptions.Item label="Merchant ID">
-        {transaction.merchant_id}
-      </Descriptions.Item>
-      <Descriptions.Item label="Customer ID">
-        {transaction.customer_id}
-      </Descriptions.Item>
-      {transaction.fully_paid_date && (
-        <Descriptions.Item label="Fully Paid Date">
-          {new Date(transaction.fully_paid_date).toLocaleString()}
+  const renderTransactionDetails = (transaction: TransactionResult) => (
+    <div style={{ paddingTop: "16px" }}> {/* Extra spacing added here */}
+      <Descriptions bordered column={1} title="Transaction Details">
+        <Descriptions.Item label="Transaction ID">
+          {transaction.transaction_id}
         </Descriptions.Item>
-      )}
-    </Descriptions>
+        <Descriptions.Item label="Amount">
+          SGD {transaction.amount.toFixed(2)}
+        </Descriptions.Item>
+        <Descriptions.Item label="Date of Transaction">
+          {format(new Date(transaction.date_of_transaction), "d MMM yyyy, h:mm:ss a")}
+        </Descriptions.Item>
+        <Descriptions.Item label="Status">
+          <Tag
+            color={
+              transaction.status === "FULLY_PAID" ? "green" : "orange"
+            }
+          >
+            {transaction.status.replace("_", " ")}
+          </Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label="Reference No">
+          {transaction.reference_no}
+        </Descriptions.Item>
+        <Descriptions.Item label="Cashback Percentage">
+          {transaction.cashback_percentage}%
+        </Descriptions.Item>
+        <Descriptions.Item label="Merchant Name">
+          {transaction.merchant.name}
+        </Descriptions.Item>
+        <Descriptions.Item label="Customer Name">
+          {transaction.customer.name}
+        </Descriptions.Item>
+        {transaction.fully_paid_date && (
+          <Descriptions.Item label="Fully Paid Date">
+            {format(new Date(transaction.fully_paid_date), "d MMM yyyy, h:mm:ss a")}
+          </Descriptions.Item>
+        )}
+      </Descriptions>
+    </div>
   );
 
   const columns = [
@@ -120,9 +123,9 @@ export default function RatingsScreen() {
     },
     {
       title: "Created At",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (date: Date) => new Date(date).toLocaleString(),
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: Date) => format(new Date(date), "d MMM yyyy, h:mm:ss a"),
     },
     {
       title: "Action",
@@ -141,9 +144,10 @@ export default function RatingsScreen() {
   return (
     <div className="w-full px-8 py-4">
       <Card className="mb-8 border border-gray-300" title="Ratings Management">
-        <Search
+        {/* Input component with onChange for real-time search */}
+        <Input
           placeholder="Search ratings"
-          onSearch={handleSearch}
+          onChange={(e) => handleSearchChange(e.target.value)}
           style={{ marginBottom: 16 }}
         />
 
@@ -169,33 +173,35 @@ export default function RatingsScreen() {
       >
         {ratingDetails ? (
           <>
-            <Descriptions bordered column={1}>
-              <Descriptions.Item label="Rating ID">
-                {ratingDetails.rating_id}
-              </Descriptions.Item>
-              <Descriptions.Item label="Title">
-                {ratingDetails.title}
-              </Descriptions.Item>
-              <Descriptions.Item label="Description">
-                {ratingDetails.description}
-              </Descriptions.Item>
-              <Descriptions.Item label="Rating">
-                <Tag
-                  color={
-                    parseFloat(ratingDetails.rating) >= 4
-                      ? "green"
-                      : parseFloat(ratingDetails.rating) >= 2
-                      ? "gold"
-                      : "red"
-                  }
-                >
-                  {ratingDetails.rating} / 5
-                </Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Created At">
-                {new Date(ratingDetails.created_at).toLocaleString()}
-              </Descriptions.Item>
-            </Descriptions>
+            <div style={{ paddingBottom: "16px" }}> {/* Extra spacing added here */}
+              <Descriptions bordered column={1}>
+                <Descriptions.Item label="Rating ID">
+                  {ratingDetails.rating_id}
+                </Descriptions.Item>
+                <Descriptions.Item label="Title">
+                  {ratingDetails.title}
+                </Descriptions.Item>
+                <Descriptions.Item label="Description">
+                  {ratingDetails.description}
+                </Descriptions.Item>
+                <Descriptions.Item label="Rating">
+                  <Tag
+                    color={
+                      parseFloat(ratingDetails.rating) >= 4
+                        ? "green"
+                        : parseFloat(ratingDetails.rating) >= 2
+                        ? "gold"
+                        : "red"
+                    }
+                  >
+                    {ratingDetails.rating} / 5
+                  </Tag>
+                </Descriptions.Item>
+                <Descriptions.Item label="Created At">
+                  {format(new Date(ratingDetails.createdAt), "d MMM yyyy, h:mm:ss a")}
+                </Descriptions.Item>
+              </Descriptions>
+            </div>
 
             {ratingDetails.transaction && renderTransactionDetails(ratingDetails.transaction)}
           </>

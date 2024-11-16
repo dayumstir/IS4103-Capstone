@@ -175,7 +175,7 @@ export const confirmEmail = async (token: string) => {
 };
 
 // Step 4: Send OTP to contact number
-export const sendPhoneNumberOTP = async (contact_number: string) => {
+export const sendPhoneNumberOTP = async (contact_number: string, email: string) => {
     logger.info("Executing sendPhoneNumberOTP...");
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit OTP
@@ -183,7 +183,7 @@ export const sendPhoneNumberOTP = async (contact_number: string) => {
 
     // Retrieve customer based on contact number
     const customer =
-        await customerRepository.findCustomerByContactNumber(contact_number);
+        await customerRepository.findCustomerByEmail(email);
     if (!customer) {
         throw new Error("Customer does not exist");
     }
