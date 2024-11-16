@@ -50,16 +50,7 @@ export default function CashbackWalletDetails() {
       </View>
 
       {/* ===== Recent Cashback Wallet History ===== */}
-      <View className="mb-4 rounded-lg bg-white p-8">
-        <Text className="mb-2 text-xl font-bold">Recent Wallet History</Text>
-        {/* Placeholder for now */}
-        <View className="items-center gap-2 px-8 py-4">
-          <Text className="text-center font-medium leading-6 text-gray-500">
-            No recent history available.
-          </Text>
-          <Text className="text-center text-4xl">😊</Text>
-        </View>
-      </View>
+
     </View>
   );
 }

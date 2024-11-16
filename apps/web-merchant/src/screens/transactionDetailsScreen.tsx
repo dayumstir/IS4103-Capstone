@@ -7,11 +7,6 @@ import {
   Table,
   TableProps,
   Tag,
-  Modal,
-  Form,
-  Input,
-  Select,
-  message,
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -20,15 +15,12 @@ import {
   transactionStatusColorMap,
 } from "../../../../packages/interfaces/transactionInterface";
 import { useGetTransactionQuery } from "../redux/services/transaction";
-import { useCreateRatingMutation } from "../redux/services/rating";
 import CreateIssueModal from "../components/createIssueModal";
 import { SortOrder } from "antd/es/table/interface";
 import {
   IssueStatus,
   statusColorMap,
 } from "../../../../packages/interfaces/issueInterface";
-
-const { Option } = Select;
 
 const TransactionDetailsScreen: React.FC = () => {
   const { transactionId } = useParams<{ transactionId: string }>();
@@ -38,47 +30,16 @@ const TransactionDetailsScreen: React.FC = () => {
   );
 
   const [isCreateIssueModalOpen, setIsCreateIssueModalOpen] = useState(false);
-  const [isCreateRatingModalOpen, setIsCreateRatingModalOpen] = useState(false);
-  const [createRating, { isLoading: isCreatingRating }] = useCreateRatingMutation();
-
-  const [form] = Form.useForm();
 
   useEffect(() => {
     refetch();
-  }, [isCreateIssueModalOpen, isCreateRatingModalOpen, refetch]);
+  }, [isCreateIssueModalOpen, refetch]);
 
   if (!transaction) {
     return null;
   }
 
   const basePath = location.pathname.replace(`/${transactionId}`, "");
-
-  interface CreateRatingFormValues {
-    title: string;
-    description: string;
-    rating: number;
-  }
-
-  const handleCreateRating = async (values: CreateRatingFormValues) => {
-    try {
-      const response = await createRating({
-        ...values,
-        transaction_id: transaction.transaction_id,
-        rating: String(values.rating),
-      }).unwrap(); // Ensure this unwraps the result
-  
-      if (response) { // Check explicitly for a valid response
-        message.success("Rating created successfully!");
-        form.resetFields(); // Reset the form fields
-        setIsCreateRatingModalOpen(false); // Close the modal
-        refetch(); // Refresh the transaction details
-      }
-    } catch (error) {
-      console.error("Create Rating Error:", error); // Log the error for debugging
-      message.error("Failed to create rating. Please try again.");
-    }
-  };
-  
 
   const items: DescriptionsProps["items"] = [
     {
@@ -89,7 +50,11 @@ const TransactionDetailsScreen: React.FC = () => {
     {
       key: "2",
       label: "Date of Transaction",
-      children: `${new Date(transaction?.date_of_transaction).toDateString()}, ${new Date(transaction?.date_of_transaction).toLocaleTimeString()}`,
+      children: `${new Date(
+        transaction?.date_of_transaction
+      ).toDateString()}, ${new Date(
+        transaction?.date_of_transaction
+      ).toLocaleTimeString()}`,
     },
     {
       key: "3",
@@ -164,25 +129,6 @@ const TransactionDetailsScreen: React.FC = () => {
     },
   ];
 
-  const issueItems: { key: string; item: DescriptionsProps["items"] }[] =
-    transaction && transaction.issues && transaction.issues.length > 0
-      ? transaction.issues.map((issue, index) => ({
-          key: issue.issue_id, // Use the issue_id as the key
-          item: [
-            {
-              key: `${issue.issue_id}-${index}-title`,
-              label: "Title",
-              children: issue.title,
-            },
-            {
-              key: `${issue.issue_id}-${index}-description`,
-              label: "Description",
-              children: issue.description,
-            },
-          ] as DescriptionsProps["items"],
-        }))
-      : [];
-
   interface IssueTableInterface {
     issue_id: string;
     create_time: Date;
@@ -190,6 +136,7 @@ const TransactionDetailsScreen: React.FC = () => {
     description: string;
     status: IssueStatus;
   }
+
   const issueColumns: TableProps<IssueTableInterface>["columns"] = [
     {
       title: "Date",
@@ -204,7 +151,9 @@ const TransactionDetailsScreen: React.FC = () => {
       key: "create_time",
       render: (create_time: Date) => (
         <div>
-          {`${new Date(create_time).toDateString()}, ${new Date(create_time).toLocaleTimeString()}`}
+          {`${new Date(create_time).toDateString()}, ${new Date(
+            create_time
+          ).toLocaleTimeString()}`}
         </div>
       ),
       className: "w-1/5",
@@ -246,9 +195,9 @@ const TransactionDetailsScreen: React.FC = () => {
       key: "status",
       render: (status: IssueStatus) => (
         <Tag color={statusColorMap[status] || "default"} key={status}>
-          {status == IssueStatus.PENDING_OUTCOME && "PENDING"}
-          {status == IssueStatus.RESOLVED && "RESOLVED"}
-          {status == IssueStatus.CANCELLED && "CANCELLED"}
+          {status === IssueStatus.PENDING_OUTCOME && "PENDING"}
+          {status === IssueStatus.RESOLVED && "RESOLVED"}
+          {status === IssueStatus.CANCELLED && "CANCELLED"}
         </Tag>
       ),
       filters: [
@@ -268,7 +217,6 @@ const TransactionDetailsScreen: React.FC = () => {
       onFilter: (value, record) => record.status === value,
       className: "w-1/5",
     },
-
     {
       title: "",
       dataIndex: "issue_id",
@@ -284,8 +232,6 @@ const TransactionDetailsScreen: React.FC = () => {
       className: "w-1/5",
     },
   ];
-
-  const isRatingExists = Boolean(transaction.rating); 
 
   return (
     <div>
@@ -308,16 +254,8 @@ const TransactionDetailsScreen: React.FC = () => {
             <Button
               type="primary"
               onClick={() => setIsCreateIssueModalOpen(true)}
-              className="mr-2"
             >
               Raise an Issue
-            </Button>
-            <Button
-              type="primary"
-              onClick={() => setIsCreateRatingModalOpen(true)}
-              disabled={isRatingExists}
-            >
-              Create Rating
             </Button>
           </div>
         </div>
@@ -334,16 +272,16 @@ const TransactionDetailsScreen: React.FC = () => {
             color={transactionStatusColorMap[transaction.status] || "default"}
             key={transaction.status}
           >
-            {transaction.status == TransactionStatus.IN_PROGRESS &&
+            {transaction.status === TransactionStatus.IN_PROGRESS &&
               "IN PROGRESS"}
-            {transaction.status == TransactionStatus.FULLY_PAID && "FULLY PAID"}
+            {transaction.status === TransactionStatus.FULLY_PAID && "FULLY PAID"}
           </Tag>
         )}
         <p className="mt-10 text-base font-semibold">Customer</p>
         <Descriptions items={customerItems} />
         <p className="mt-10 text-base font-semibold">Instalment Plan</p>
         <Descriptions items={instalmentPlanItems} />
-        {issueItems.length > 0 && (
+        {transaction.issues && transaction.issues.length > 0 && (
           <>
             <p className="mt-10 text-base font-semibold">Issues</p>
             <Table<IssueTableInterface>
@@ -353,66 +291,6 @@ const TransactionDetailsScreen: React.FC = () => {
           </>
         )}
       </Card>
-
-      {/* Create Rating Modal */}
-      <Modal
-        title="Create Rating"
-        open={isCreateRatingModalOpen}
-        onCancel={() => {
-          setIsCreateRatingModalOpen(false);
-          form.resetFields();
-        }}
-        footer={null}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleCreateRating}
-          initialValues={{ title: "", description: "", rating: 3 }}
-        >
-          <Form.Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: "Please enter a title" }]}
-          >
-            <Input placeholder="Enter rating title" />
-          </Form.Item>
-
-          <Form.Item
-            label="Description"
-            name="description"
-            rules={[
-              { required: true, message: "Please enter a description" },
-            ]}
-          >
-            <Input.TextArea rows={4} placeholder="Enter rating description" />
-          </Form.Item>
-
-          <Form.Item
-            label="Rating"
-            name="rating"
-            rules={[{ required: true, message: "Please select a rating" }]}
-          >
-            <Select>
-              {[1, 2, 3, 4, 5].map((num) => (
-                <Option key={num} value={num}>
-                  {num}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={isCreatingRating}
-            >
-              Submit Rating
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   );
 };

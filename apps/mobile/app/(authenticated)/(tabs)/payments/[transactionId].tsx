@@ -1,4 +1,3 @@
-// payments/[transactionId].tsx
 import {
   View,
   Text,
@@ -48,9 +47,24 @@ export default function TransactionDetails() {
     return paidInstalments / transaction.instalment_plan.number_of_instalments;
   };
 
-  if (isLoading) return <ActivityIndicator size="large" />;
-  if (error) return <Text>Error: Please try again later</Text>;
-  if (!transaction) return <Text>No transaction found</Text>;
+  if (isLoading)
+    return (
+      <View className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  if (error)
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text>Error: Please try again later</Text>
+      </View>
+    );
+  if (!transaction)
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text>No transaction found</Text>
+      </View>
+    );
 
   return (
     <ScrollView
@@ -98,7 +112,7 @@ export default function TransactionDetails() {
                   name="wallet-outline"
                   size={20}
                   color="#3b82f6"
-                  className="mr-4"
+                  style={{ marginRight: 8 }}
                 />
                 <View>
                   <Text className="text-sm text-gray-500">Amount</Text>
@@ -114,7 +128,7 @@ export default function TransactionDetails() {
                   name="storefront-outline"
                   size={20}
                   color="#3b82f6"
-                  className="mr-4"
+                  style={{ marginRight: 8 }}
                 />
                 <View className="flex-1">
                   <Text className="text-sm text-gray-500">Merchant</Text>
@@ -134,7 +148,7 @@ export default function TransactionDetails() {
                   name="trending-up-outline"
                   size={20}
                   color="#3b82f6"
-                  className="mr-4"
+                  style={{ marginRight: 8 }}
                 />
                 <View>
                   <Text className="text-sm text-gray-500">Cashback</Text>
@@ -150,7 +164,7 @@ export default function TransactionDetails() {
                   name="calendar-outline"
                   size={20}
                   color="#3b82f6"
-                  className="mr-4"
+                  style={{ marginRight: 8 }}
                 />
                 <View>
                   <Text className="text-sm text-gray-500">Date</Text>
@@ -169,7 +183,7 @@ export default function TransactionDetails() {
                   name="flag-outline"
                   size={20}
                   color="#3b82f6"
-                  className="mr-4"
+                  style={{ marginRight: 8 }}
                 />
                 <View>
                   <Text className="text-sm text-gray-500">Status</Text>
@@ -187,7 +201,7 @@ export default function TransactionDetails() {
                   name="time-outline"
                   size={20}
                   color="#3b82f6"
-                  className="mr-4"
+                  style={{ marginRight: 8 }}
                 />
                 <View>
                   <Text className="text-sm text-gray-500">Fully Paid Date</Text>
@@ -247,10 +261,14 @@ export default function TransactionDetails() {
                     {formatCurrency(payment.amount_due)}
                   </Text>
                   <View
-                    className={`mt-1 rounded px-2 py-1 ${isPaid ? "bg-green-100" : "bg-yellow-100"}`}
+                    className={`mt-1 rounded px-2 py-1 ${
+                      isPaid ? "bg-green-100" : "bg-yellow-100"
+                    }`}
                   >
                     <Text
-                      className={`text-xs font-medium ${isPaid ? "text-green-600" : "text-yellow-600"}`}
+                      className={`text-xs font-medium ${
+                        isPaid ? "text-green-600" : "text-yellow-600"
+                      }`}
                     >
                       {payment.status}
                     </Text>
@@ -303,21 +321,40 @@ export default function TransactionDetails() {
           </View>
         )}
 
-        {/* ===== Add Rating Button ===== */}
-        <View className="my-4">
-          <Button
-            type="primary"
-            disabled={!!transaction.rating} // Disabled if a rating already exists
-            onPress={() =>
-              router.push({
-                pathname: "/payments/rating",
-                params: { transactionId },
-              })
-            }
-          >
-            <Text className="font-semibold text-white">{transaction.rating ? "Rating Added" : "Add Rating"}</Text>
-          </Button>
-        </View>
+        {/* ===== Rating Details or Add Rating Button ===== */}
+        {transaction.rating ? (
+          // Show Rating Details
+          <View className="my-4 rounded-xl bg-white p-8">
+            <Text className="mb-4 text-xl font-bold">Your Rating</Text>
+            <View className="mb-2">
+              <Text className="text-gray-500">Title</Text>
+              <Text className="font-medium">{transaction.rating.title}</Text>
+            </View>
+            <View className="mb-2">
+              <Text className="text-gray-500">Description</Text>
+              <Text className="font-medium">{transaction.rating.description}</Text>
+            </View>
+            <View className="mb-2">
+              <Text className="text-gray-500">Rating</Text>
+              <Text className="font-medium">{transaction.rating.rating} / 5</Text>
+            </View>
+          </View>
+        ) : (
+          // Show Add Rating Button
+          <View className="my-4">
+            <Button
+              type="primary"
+              onPress={() =>
+                router.push({
+                  pathname: "/payments/rating",
+                  params: { transactionId },
+                })
+              }
+            >
+              <Text className="font-semibold text-white">Add Rating</Text>
+            </Button>
+          </View>
+        )}
 
         {/* ===== Raise Issue Button ===== */}
         <View className="mt-4">
