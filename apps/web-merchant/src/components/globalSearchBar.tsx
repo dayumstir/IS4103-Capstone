@@ -247,7 +247,7 @@ const GlobalSearchBar: React.FC = () => {
           hoverable
           onClick={() => {
             navigate(
-              `/business-management/issues/${transaction.transaction_id}`,
+              `/business-management/transactions/${transaction.transaction_id}`,
             );
             setIsOpen(false);
             setSearchTerm("");
@@ -360,7 +360,7 @@ const GlobalSearchBar: React.FC = () => {
           hoverable
           onClick={() => {
             navigate(
-              `/business-management/issues/${merchantPayment.merchant_payment_id}`,
+              `/business-management/merchant-payments/${merchantPayment.merchant_payment_id}`,
             );
             setIsOpen(false);
             setSearchTerm("");
