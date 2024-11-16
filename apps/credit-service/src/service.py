@@ -8,10 +8,10 @@ from dateutil.relativedelta import relativedelta
 import lightgbm as lgb
 import fitz 
 import re
-from repository import get_most_recent_6_months_instalment_payments, update_customer_credit_rating, get_customer_credit_limit, get_customer_outstanding_balance
+from repository import get_most_recent_6_months_instalment_payments, update_customer_credit_rating, get_customer_credit_limit, get_customer_outstanding_balance, get_credit_score_history
 import pdfplumber
 import random
-[0.33090824]
+
 def predict(X):
     # Load the trained LightGBM model
     model = lgb.Booster(model_file='../best_lgb_model.txt') 
@@ -224,6 +224,20 @@ def get_payment_history(db, customer_id):
         if current_month in monthly_status:
             status_list[month_diff] = monthly_status[current_month]
 
+    # if there is less than 6 payment status, append this to the most recent 6-n payment status from credit report
+    if len(status_list) < 6:
+        
+        credit_score_history = get_credit_score_history(customer_id)
+        credit_score_history_list = credit_score_history.split(",")
+        if len(credit_score_history_list) != 6:
+            raise Exception("credit score history length is not 6")
+        credit_score_history_int = []
+        for credit_score in credit_score_history_list:
+            credit_score_history_int.append(int(credit_score))
+        
+        credit_score_history_int = credit_score_history_int[-(6-len(status_list)):]
+        credit_score_history_int.extend(status_list)
+        status_list = credit_score_history_int
     return status_list
 
 

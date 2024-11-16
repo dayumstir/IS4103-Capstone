@@ -77,6 +77,7 @@ class Customer(db.Model):
     status = db.Column(Enum(CustomerStatus), nullable=False)  # Assuming Status is an enum
     wallet_balance = db.Column(db.Float, default=0)  # Wallet balance, default is 0
     credit_score = db.Column(db.Integer, default=0)  # Credit score, default is 0
+    credit_score_history = db.Column(db.String, nullable=False) # Credit score history
 
     # Relationships
     transactions = db.relationship('Transaction', back_populates='customer', lazy='dynamic')  # Relationship with Transaction
