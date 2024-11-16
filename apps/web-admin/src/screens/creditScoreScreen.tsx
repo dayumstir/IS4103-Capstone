@@ -321,8 +321,8 @@ export default function CreditScoreScreen() {
             {/* Second Dragger with Button */}
             <div>
               <h3 className="text-l font-semibold">Update Credit Score</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-8">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-2 space-y-8">
                   <Form
                     name="basic"
                     labelCol={{ span: 10 }}
