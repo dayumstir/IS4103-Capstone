@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 import lightgbm as lgb
 import fitz 
 import re
-from repository import get_most_recent_6_months_instalment_payments, update_customer_credit_rating, get_customer_credit_limit, get_customer_outstanding_balance, get_credit_score_history
+from repository import get_most_recent_6_months_instalment_payments, update_customer_credit_rating, get_customer_credit_limit, get_customer_outstanding_balance, get_credit_score_history, get_first_customer_credit_utilisation_ratio
 import pdfplumber
 import random
 
@@ -174,7 +174,7 @@ def get_credit_utilisation_ratio(customer_id):
 
     return outstanding_balance/credit_limit
 
-def get_payment_history(db, customer_id):
+def get_payment_history_and_credit_utilisation_ratio(db, customer_id):
     instalment_payments = get_most_recent_6_months_instalment_payments(db, customer_id)
     monthly_status = defaultdict(lambda: -2)  # Default to -2: no payment for the month
     earliest_date = datetime.now()
@@ -210,6 +210,11 @@ def get_payment_history(db, customer_id):
     start_date =  earliest_date # For example, the last year
     total_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month) + 1
 
+    credit_utilisation_ratio = get_credit_utilisation_ratio(customer_id)
+    if len(instalment_payments) == 0:
+        total_months = 0
+        credit_utilisation_ratio = get_first_customer_credit_utilisation_ratio(customer_id)
+
     # Initialize the status list with the default value
     status_list = [-2] * total_months
 
@@ -234,11 +239,10 @@ def get_payment_history(db, customer_id):
         credit_score_history_int = []
         for credit_score in credit_score_history_list:
             credit_score_history_int.append(int(credit_score))
-        
         credit_score_history_int = credit_score_history_int[-(6-len(status_list)):]
         credit_score_history_int.extend(status_list)
         status_list = credit_score_history_int
-    return status_list
+    return status_list, credit_utilisation_ratio
 
 
 

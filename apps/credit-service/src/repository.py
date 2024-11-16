@@ -40,6 +40,15 @@ def update_customer_credit_rating_history(db, customer_id, credit_score_history)
     customer = Customer.query.get(customer_id)
     customer.credit_score_history = credit_score_history
     db.session.commit()
+
+def update_customer_credit_utilisation_ratio(db, customer_id, credit_utilisation_ratio):
+    customer = Customer.query.get(customer_id)
+    customer.credit_utilisation_ratio = credit_utilisation_ratio
+    db.session.commit()
+
+def get_first_customer_credit_utilisation_ratio(customer_id):
+    customer = Customer.query.get(customer_id)
+    return customer.credit_utilisation_ratio
     
 def get_lowest_credit_tier(db):
     credit_tiers = CreditTier.query.all()
