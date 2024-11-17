@@ -18,24 +18,29 @@ When submitting a pull request, please use the following template for consistenc
 
 ```md
 ## Description
+
 Please include a summary of the changes and the problem this PR solves.
 
 ## Related Issue
-- Link to any issue this PR addresses.
+
+-   Link to any issue this PR addresses.
 
 ## Type of Change
-- [ ] Bug Fix
-- [ ] Feature
-- [ ] Refactor
-- [ ] Documentation Update
+
+-   [ ] Bug Fix
+-   [ ] Feature
+-   [ ] Refactor
+-   [ ] Documentation Update
 
 ## Checklist before requesting a review
-- [ ] Build is clean without errors (Check for regression)
-- [ ] Unit tests have been added
-- [ ] Necessary documentation/comments have been added
+
+-   [ ] Build is clean without errors (Check for regression)
+-   [ ] Unit tests have been added
+-   [ ] Necessary documentation/comments have been added
 
 ## Additional Information
-- Anything else you'd like to mention.
+
+-   Anything else you'd like to mention.
 ```
 
 ---
@@ -50,6 +55,12 @@ In the root folder of the project, run the following command to install all nece
 npm install
 ```
 
+In the /src folder of the /credit-service directory, run the following command:
+
+```bash
+pip install -r requirements.txt
+```
+
 #### 2a. Run Backend Server
 
 Navigate to the /backend directory and run the backend server using the command below::
@@ -61,7 +72,15 @@ npm run dev
 Once the server is running, you can access it at:
 [http://localhost:3000)](http://localhost:3000)
 
-#### 2b. Run Customer-Facing Mobile App
+#### 2b. Run Credit Service
+
+Navigate to the /credit-service directory and run the credit service using the command below:
+
+```bash
+python3 main.py
+```
+
+#### 2c. Run Customer-Facing Mobile App
 
 Navigate to the /mobile directory and run the following command:
 
@@ -79,7 +98,7 @@ npm run ios
 npm run android
 ```
 
-#### 2c. Run Admin Web Portal
+#### 2d. Run Admin Web Portal
 
 Navigate to the /web-admin directory and run:
 
@@ -90,7 +109,7 @@ npm run dev
 Once the server is running, you can access it at:
 [http://localhost:5173)](http://localhost:5173)
 
-#### 2d. Run Merchant Web Portal
+#### 2e. Run Merchant Web Portal
 
 Navigate to the /web-merchant directory and run:
 
@@ -101,7 +120,7 @@ npm run dev
 Once the server is running, you can access it at:
 [http://localhost:5173)](http://localhost:5173)
 
-#### 2e. Run Prisma Client
+#### 2f. Run Prisma Client
 
 Navigate to the /database directory and run:
 
@@ -116,31 +135,37 @@ To safely exit any running service and avoid port conflicts, use: Control + C
 ### Technologies Used
 
 #### Database - AWS RDS
-- **Amazon Relational Database Service (RDS)** is a fully managed relational database service that supports various database engines.  
-- [Learn more about AWS RDS](https://aws.amazon.com/rds/)
+
+-   **Amazon Relational Database Service (RDS)** is a fully managed relational database service that supports various database engines.
+-   [Learn more about AWS RDS](https://aws.amazon.com/rds/)
 
 #### Backend - Express
-- **Express** is a minimal and flexible Node.js web application framework, providing robust features for building web and mobile applications.  
-- [Learn more about Express](https://expressjs.com/)
+
+-   **Express** is a minimal and flexible Node.js web application framework, providing robust features for building web and mobile applications.
+-   [Learn more about Express](https://expressjs.com/)
 
 #### Frontend - React Native
-- **React Native** is a popular framework for building mobile applications using React and JavaScript. It enables code-sharing between iOS and Android platforms.  
-- [Learn more about React Native](https://reactnative.dev/)
+
+-   **React Native** is a popular framework for building mobile applications using React and JavaScript. It enables code-sharing between iOS and Android platforms.
+-   [Learn more about React Native](https://reactnative.dev/)
 
 #### ORM - Prisma
-- **Prisma** is an open-source ORM that simplifies database access, with support for typesafety and autocompletion in TypeScript.  
-- [Learn more about Prisma](https://www.prisma.io/)
+
+-   **Prisma** is an open-source ORM that simplifies database access, with support for typesafety and autocompletion in TypeScript.
+-   [Learn more about Prisma](https://www.prisma.io/)
 
 #### Language - TypeScript
-- **TypeScript** is a statically typed superset of JavaScript that adds types, making development more predictable and reducing bugs.  
-- [Learn more about TypeScript](https://www.typescriptlang.org/)
+
+-   **TypeScript** is a statically typed superset of JavaScript that adds types, making development more predictable and reducing bugs.
+-   [Learn more about TypeScript](https://www.typescriptlang.org/)
 
 ---
 
 ### Documentation
-- [Google Drive](https://drive.google.com/drive/folders/1jgmVts8W849sHCS-REjpDbGd2jwD_tdQ)
-- [Miro Board](https://miro.com/app/board/uXjVKs6oD_c=/)
-- [Figma Board](https://www.figma.com/files/team/1409532474326341599/all-projects?fuid=986181946351646567)
+
+-   [Google Drive](https://drive.google.com/drive/folders/1jgmVts8W849sHCS-REjpDbGd2jwD_tdQ)
+-   [Miro Board](https://miro.com/app/board/uXjVKs6oD_c=/)
+-   [Figma Board](https://www.figma.com/files/team/1409532474326341599/all-projects?fuid=986181946351646567)
 
 ---
 
@@ -162,10 +187,10 @@ This Turborepo includes the following packages/apps:
 
 ### Apps and Packages
 
-- `native`: a [react-native](https://reactnative.dev/) app built with [expo](https://docs.expo.dev/)
-- `web`: a [Next.js](https://nextjs.org/) app built with [react-native-web](https://necolas.github.io/react-native-web/)
-- `@repo/ui`: a stub [react-native](https://reactnative.dev/) component library shared by both `web` and `native` applications
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+-   `native`: a [react-native](https://reactnative.dev/) app built with [expo](https://docs.expo.dev/)
+-   `web`: a [Next.js](https://nextjs.org/) app built with [react-native-web](https://necolas.github.io/react-native-web/)
+-   `@repo/ui`: a stub [react-native](https://reactnative.dev/) component library shared by both `web` and `native` applications
+-   `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
@@ -173,6 +198,6 @@ Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
 This Turborepo has some additional tools already setup for you:
 
-- [Expo](https://docs.expo.dev/) for native development
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [Prettier](https://prettier.io) for code formatting
+-   [Expo](https://docs.expo.dev/) for native development
+-   [TypeScript](https://www.typescriptlang.org/) for static type checking
+-   [Prettier](https://prettier.io) for code formatting

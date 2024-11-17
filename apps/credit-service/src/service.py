@@ -14,7 +14,7 @@ import random
 
 def predict(X):
     # Load the trained LightGBM model
-    model = lgb.Booster(model_file='../best_lgb_model.txt') 
+    model = lgb.Booster(model_file='../lgb_model_v3.txt') 
     default_likelihood = model.predict(X)
     credit_rating = (1-default_likelihood) * 1000
     return credit_rating
